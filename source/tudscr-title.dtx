@@ -264,7 +264,9 @@
         \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
-        \Ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+        \tud@if@strequal{\titlepagestyle}{empty}%
+          {\thispagestyle{empty.tudheadings}}%
+          {}%
       }{}%
 %    \end{macrocode}
 % Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
@@ -578,13 +580,13 @@
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
+            \tud@if@strblank{\datetext}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\tud@date@print\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
             \ifx\@defensedate\@empty\else%
-              \ifxblank{\defensedatetext}{}{%
+              \tud@if@strblank{\defensedatetext}{}{%
                 \defensedatetext\tud@title@delimiter%
               }%
               {\usekomafont{date}{\@defensedate\par}}%
@@ -735,7 +737,9 @@
 \newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
-    \Ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}%
+      {}%
+      {\renewcommand*\tud@title@fontcolor{HKS41}}%
   \fi%
   \par%
   \ifx\tud@title@pagenumber\relax\else%
@@ -1058,7 +1062,9 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \tud@if@strblank{\dateofbirthtext}%
+          {}%
+          {\dateofbirthtext\tud@title@delimiter}%
         \@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
@@ -1068,15 +1074,17 @@
       \fi%
     \fi%
     \def\@tempc##1{%
-      \Ifstr{\csuse{@##1}}{}{}{%
+      \expandafter\ifx\csname @##1\endcsname\@empty\else%
         \if@titlepage%
           \tud@newline@title%
-          \Ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \tud@if@strblank{\csuse{##1name}}%
+            {}%
+            {\csuse{##1name}\tud@title@delimiter}%
           \csuse{@##1}%
         \else%
           \tud@title@wrn{##1}%
         \fi%
-      }%
+      \fi%
     }%
     \@tempc{course}%
     \@tempc{discipline}%

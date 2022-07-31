@@ -438,8 +438,8 @@
   \newcommand*\tud@trace@lbl@created@list{}%
   \newcommand*\tud@trace@lbl@missing@list{}%
   \@tempswafalse%
-  \Ifstr{#2}{created}{\@tempswatrue}{}%
-  \Ifstr{#2}{all}{\@tempswatrue}{}%
+  \tud@if@strequal{#2}{created}{\@tempswatrue}{}%
+  \tud@if@strequal{#2}{all}{\@tempswatrue}{}%
   \if@tempswa%
     \renewcommand*\tud@trace@lbl@created@add[1]{%
       \typeout{%
@@ -458,8 +458,8 @@
     }%
   \fi%
   \@tempswafalse%
-  \Ifstr{#2}{missing}{\@tempswatrue}{}%
-  \Ifstr{#2}{all}{\@tempswatrue}{}%
+  \tud@if@strequal{#2}{missing}{\@tempswatrue}{}%
+  \tud@if@strequal{#2}{all}{\@tempswatrue}{}%
   \if@tempswa%
     \renewcommand*\tud@trace@lbl@missing@add[1]{%
       \typeout{%
@@ -630,7 +630,7 @@
 % vorgestellt und hier übernommen.
 %    \begin{macrocode}
   \newcommand*\autorefname[1][current]{%
-    \Ifstr{#1}{current}{%
+    \tud@if@strequal{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
       \auto@refname\HyPsd@@autorefname{#1}%
@@ -921,7 +921,7 @@
 \tud@newif\if@tud@obsolete
 \NewDocumentEnvironment{Obsolete}{momoog}{%
   \@tud@obsoletetrue%
-  \ifxblank{#1}{%
+  \tud@if@strblank{#1}{%
 %    \end{macrocode}
 % Ohne Versionsnummer erfolgt die Ausgabe ohne Label. Für den Eintrag wird auch 
 % keine Änderungsnotiz erzeugt.
@@ -1433,7 +1433,9 @@
 \newcommand*\tud@bdl@curr{}
 \newcommand*\tud@bdl@dflt{tudscr}
 \let\tud@bdl@curr\tud@bdl@dflt
-\newcommand*\tud@if@bdl[2]{\Ifstr{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}}
+\newcommand*\tud@if@bdl[2]{%
+  \tud@if@strequal{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@bdl
 % \end{macro}^^A \tud@bdl@dflt
@@ -2029,7 +2031,7 @@
 % des zweiten obligatorischen Argumentes ausgeführt. Es ist zu beachten, dass
 % dieser \emph{expandiert} wird!
 %    \begin{macrocode}
-      \ifxblank{#2}{%
+      \tud@if@strblank{#2}{%
         \let\tud@reserved\endgroup%
       }{%
         \protected@edef\tud@reserved{\noexpand\endgroup#3}%
@@ -2220,8 +2222,7 @@
 % nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
 %    \begin{macrocode}
 \NewDocumentCommand\tud@lbl@get@@dflt{mmmmr==}{%
-  \edef\tud@reserved{\expandafter\detokenize\expandafter{\tud@bdl@dflt}}%
-  \Ifstr{\tud@reserved}{#2}{}{%
+  \tud@if@strequal{#2}{\tud@bdl@dflt}{}{%
 %    \end{macrocode}
 % Dabei erfolgt der Aufruf logischerweise mit dem richtigen Bundlepräfix. 
 %    \begin{macrocode}
@@ -2333,7 +2334,7 @@
       \IfValueTF{#2}{%
         \tud@attr@get\@tempb{#2}%
         \IfValueTF{#1}{%
-          \ifxblank{#1}{%
+          \tud@if@strblank{#1}{%
             \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
           }{%
             \edef\@tempa{#1:\@tempb:#2}%
@@ -2541,7 +2542,9 @@
 %</class>
     \if@tud@index\else%
       \IfValueT{#5}{%
-        \ifxblank{#5}{}{\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
+        \tud@if@strblank{#5}%
+          {}%
+          {\addto@hook\tud@toks@{<http://www.ctan.org/pkg/#5>}}%
       }%
       \IfValueT{#6}{\addto@hook\tud@toks@{'#6'}}%
     \fi%
@@ -2564,9 +2567,9 @@
 %    \begin{macrocode}
   \if@tud@index\else%
     \IfValueT{#4}{%
-      \ifxblank{#4}{}{%
+      \tud@if@strblank{#4}{}{%
         \tud@trace@bdl@add{#4}%
-        \Ifstr{#6}{none}{}{%
+        \tud@if@strequal{#6}{none}{}{%
           \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
             \ClassWarning{tudscrmanual}{%
               No existing label \tud@lbl@tmp\space for #4%
@@ -2696,13 +2699,15 @@
             as well as 'none' \IfValueT{#5}{or 'url' }are valid%
           }%
         }%
-        \Ifstr{#6}{auto}{\def\@tempb{ in \autoref{#1}}}{%
-        \Ifstr{#6}{page}{\def\@tempb{ \vpageref{#1}}}{%
-        \Ifstr{#6}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
-        \Ifstr{#6}{full}{\def\@tempb{ in \fullref{#1}}}{%
-        \Ifstr{#6}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}%
+        \tud@if@strequal{#6}{auto} {\def\@tempb{ in \autoref{#1}}}{%
+        \tud@if@strequal{#6}{page} {\def\@tempb{ \vpageref{#1}}}{%
+        \tud@if@strequal{#6}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
+        \tud@if@strequal{#6}{full} {\def\@tempb{ in \fullref{#1}}}{%
+        \tud@if@strequal{#6}{none} {\let\@tempa\@tempc\let\@tempb\relax}{}}}}}%
         \IfValueT{#5}{%
-          \Ifstr{#6}{url}{\def\@tempa{\href{#5}{\@tempc}}\let\@tempb\relax}{}%
+          \tud@if@strequal{#6}{url}%
+            {\def\@tempa{\href{#5}{\@tempc}}\let\@tempb\relax}%
+            {}%
         }%
       }%
     }{%
@@ -2720,8 +2725,10 @@
 %    \begin{macrocode}
       \let\@tempb\relax%
       \IfValueT{#6}{%
-        \Ifstr{#6}{none}{\let\@tempa\@tempc}{%
-%<package>        \Ifstr{#6}{manual}{\def\@tempa{\tudhyperref{#1}{\@tempc}}}{%
+        \tud@if@strequal{#6}{none}{\let\@tempa\@tempc}{%
+%<*package>
+        \tud@if@strequal{#6}{manual}{\def\@tempa{\tudhyperref{#1}{\@tempc}}}{%
+%</package>
           \def\@tempb{%
 %<*class> 
             \ClassWarning{tudscrmanual}%
@@ -3343,8 +3350,10 @@
 %    \begin{macrocode}
     \@tempswafalse%
     \IfBooleanT{#1}{\@tempswatrue}%
-    \IfValueT{#9}{\Ifstr{#9}{declare}{\@tempswatrue}{}}%
-    \IfValueT{#9}{\Ifstr{#9}{default}{\@tempswatrue}{}}%
+    \IfValueT{#9}{%
+      \tud@if@strequal{#9}{declare}{\@tempswatrue}{}%
+      \tud@if@strequal{#9}{default}{\@tempswatrue}{}%
+    }%
 %    \end{macrocode}
 % In diesem Fall werden die Ergänzungen für Schlüssel und Formatierung ggf. um 
 % die speziellen Schlüsselwerte für das Element ergänzt.
@@ -3578,7 +3587,7 @@
 %</class>
     \IfValueT{#5}{%
 %<*class>
-      \Ifstr{#5}{declare}{%
+      \tud@if@strequal{#5}{declare}{%
         \appto\tud@lbl@tmp{-declare}%
         \appto\tud@idx@fmt{|declare}%
       }{%
@@ -3778,7 +3787,7 @@
 % die Sternversion von \cs{tudhyperdef} genutzt, um das Label auf die Höhe der 
 % Überschrift zu setzen.
 %    \begin{macrocode}
-  \ifblank{#1}{%
+  \tud@if@strblank{#1}{%
     \def\tud@reserved{\tudhyperdef*{idx:main}}%
   }{%
     \def\tud@reserved{\tudhyperdef*{idx:#1}}%
@@ -3806,7 +3815,7 @@
 %    \end{macrocode}
 % Die Ausgabe des gewünschten Index und des leeren des Prologs.
 %    \begin{macrocode}
-  \ifblank{#1}{\printindex}{\printindex[{#1}]}%
+  \tud@if@strblank{#1}{\printindex}{\printindex[{#1}]}%
   \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
 %<class>  \let\tud@indexprologue\@empty%
 }
@@ -4171,7 +4180,7 @@
 % im dritten Argument gegebenen Markup-Befehl. Dies wird für Anmerkungen zu 
 % expliziten Schlüssel-Wert-Paaren bei Optionen oder Parametern genutzt. 
 %    \begin{macrocode}
-      \ifxblank{#4}{}{%
+      \tud@if@strblank{#4}{}{%
 %    \end{macrocode}
 % Hierfür wird die zuvor erhaltene Formatierung des Markup-Befehls des dritten
 % Argumentes an den Haupteintrag \cs{tud@idx@val} mit der zusätzlichen
@@ -4205,7 +4214,7 @@
 % Änderungsliste vermerkt, ob es sich bei dem Markup-Befehl respektive dessen 
 % Untereintrag um eine \emph{neue} bzw. eine \emph{obsolete} Variante handelt.
 %    \begin{macrocode}
-      \ifxblank{#5}{%
+      \tud@if@strblank{#5}{%
         \if@tud@obsolete%
           \appto\tud@idx@fmt{: \emph{entf\"allt}}%
         \else%
@@ -4678,9 +4687,9 @@
 }
 \newcommand*\Term@@Table[1]{%
   \Term{#1}'none' & % 
-  \Ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
+  \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
   \selectlanguage{english}\vspace*{\@tempdimc}%
-  \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
+  \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Term@@Table
@@ -5053,10 +5062,10 @@
 % sortieren zu können.
 %    \begin{macrocode}
 \newcommand*\tud@tut@append[1]{%
-  \Ifstr{#1}{preamble}{%
+  \tud@if@strequal{#1}{preamble}{%
     \tud@tut@readtostream{\tud@tut@temp.tex}{\tud@write@a}%
   }{%
-    \Ifstr{#1}{trunk}{%
+    \tud@if@strequal{#1}{trunk}{%
       \tud@tut@readtostream{\tud@tut@temp.tex}{\tud@write@b}%
     }{%
       \tud@tut@readtostream{\tud@tut@temp.tex}{#1}%
@@ -5086,7 +5095,7 @@
   \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
   \maketitle%
-  \ifblank{#1}{}{%
+  \tud@if@strblank{#1}{}{%
     \noindent%
     \begin{abstract}%
     \noindent#1%
@@ -5676,7 +5685,7 @@
 % vor dem eigentlichen Typen verwendet werden muss.
 %    \begin{macrocode}
     \def\@tempa not##1##2##3##4\@nil{%
-      \Ifstr{##1##2##3}{not}{%
+      \tud@if@strequal{##1##2##3}{not}{%
         \IfArgIsEmpty{##4}{}{%
           \listeadd\tud@todo@type@neg{##4}%
           \@tud@todotrue%

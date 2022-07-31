@@ -460,33 +460,33 @@
     \sbox\z@{#2}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \tud@lowerstring{\@tempa}{#2}%
-    \Ifstr{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
+    \tud@strlowercase\@tempa{#2}%
+    \tud@if@strequal{#1}{thesis}{\protected@xdef\@@thesis{#2}}{}%
     \protected@edef\@tempa{%
       \endgroup%
       \def\noexpand\@tempa{\@tempa}%
     }%
   \@tempa%
-  \Ifstr{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
-  \Ifstr{\@tempa}{diploma}{\tud@thesis@@do{#1}{\diplomathesisname}}{%
-  \Ifstr{\@tempa}{master}{\tud@thesis@@do{#1}{\masterthesisname}}{%
-  \Ifstr{\@tempa}{bachelor}{\tud@thesis@@do{#1}{\bachelorthesisname}}{%
-  \Ifstr{\@tempa}{student}{\tud@thesis@@do{#1}{\studentthesisname}}{%
-  \Ifstr{\@tempa}{evidence}{\tud@thesis@@do{#1}{\studentresearchname}}{%
-  \Ifstr{\@tempa}{project}{\tud@thesis@@do{#1}{\projectpapername}}{%
-  \Ifstr{\@tempa}{seminar}{\tud@thesis@@do{#1}{\seminarpapername}}{%
-  \Ifstr{\@tempa}{term}{\tud@thesis@@do{#1}{\termpapername}}{%
-  \Ifstr{\@tempa}{research}{\tud@thesis@@do{#1}{\researchname}}{%
-  \Ifstr{\@tempa}{log}{\tud@thesis@@do{#1}{\logname}}{%
-  \Ifstr{\@tempa}{report}{\tud@thesis@@do{#1}{\reportname}}{%
-  \Ifstr{\@tempa}{internship}{\tud@thesis@@do{#1}{\internshipname}}{%
+  \tud@if@strequal{\@tempa}{diss}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \tud@if@strequal{\@tempa}{doctoral}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \tud@if@strequal{\@tempa}{phd}{\tud@thesis@@do{#1}{\dissertationname}}{%
+  \tud@if@strequal{\@tempa}{diploma}{\tud@thesis@@do{#1}{\diplomathesisname}}{%
+  \tud@if@strequal{\@tempa}{master}{\tud@thesis@@do{#1}{\masterthesisname}}{%
+  \tud@if@strequal{\@tempa}{bachelor}{\tud@thesis@@do{#1}{\bachelorthesisname}}{%
+  \tud@if@strequal{\@tempa}{student}{\tud@thesis@@do{#1}{\studentthesisname}}{%
+  \tud@if@strequal{\@tempa}{evidence}{\tud@thesis@@do{#1}{\studentresearchname}}{%
+  \tud@if@strequal{\@tempa}{project}{\tud@thesis@@do{#1}{\projectpapername}}{%
+  \tud@if@strequal{\@tempa}{seminar}{\tud@thesis@@do{#1}{\seminarpapername}}{%
+  \tud@if@strequal{\@tempa}{term}{\tud@thesis@@do{#1}{\termpapername}}{%
+  \tud@if@strequal{\@tempa}{research}{\tud@thesis@@do{#1}{\researchname}}{%
+  \tud@if@strequal{\@tempa}{log}{\tud@thesis@@do{#1}{\logname}}{%
+  \tud@if@strequal{\@tempa}{report}{\tud@thesis@@do{#1}{\reportname}}{%
+  \tud@if@strequal{\@tempa}{internship}{\tud@thesis@@do{#1}{\internshipname}}{%
     \csdef{@#1}{#2}%
   }}}}}}}}}}}}}}}%
 }
 \newcommand*\tud@thesis@@do[2]{%
-  \Ifstr{#1}{subject}{%
+  \tud@if@strequal{#1}{subject}{%
     \ifx\@thesis\@empty\else%
       \ClassWarning{\TUD@Class@Name}{%
         Field `thesis' is overwritten by `subject'%
@@ -528,7 +528,7 @@
 \newcommand*\@graduationabbreviation{}
 \newcommand*\graduation[2][]{%
   \gdef\@graduationabbreviation{}%
-  \ifxblank{#1}{}{\gdef\@graduationabbreviation{(#1)}}%
+  \tud@if@strblank{#1}{}{\gdef\@graduationabbreviation{(#1)}}%
   \gdef\@graduation{#2}%
 }
 %    \end{macrocode}
@@ -751,7 +751,7 @@
   \ifx\today#2\relax%
     \gdef#1{#2}%
   \else%
-    \ifxblank{#2}%
+    \tud@if@strblank{#2}%
       {\gdef#1{}}%
       {\gdef#1{\printdate{#2}}}%
   \fi%
@@ -1139,16 +1139,16 @@
 \newcommand*\tud@multiple@fields@preset[3]{%
   \def\@tempa##1{%
     \edef\@tempc{\csuse{##1}}%
-    \Ifstr{#2}{*}{%
+    \if\detokenize{#2*}\relax%
       \csdef{@##1}{}%
-    }{%
+    \else%
       \begingroup%
         \protected@expandtwoargs\in@{\@tempc}{\csuse{#1}}%
         \ifin@%
           \ifcsvoid{@##1}{\@tempc{#2}}{}%
         \fi%
       \endgroup%
-    }%
+    \fi%
   }%
   \letcs\@tempb{tud@split#1@list}%
   \let\and\relax%

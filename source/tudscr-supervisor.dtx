@@ -146,11 +146,9 @@
 % gespeichert.
 %    \begin{macrocode}
   \def\@tempb##1{%
-    \expandafter\ifx\csname @##1\endcsname\@empty\else%
-      \expandafter\appto\expandafter\@tempa\expandafter{%
-        \expandafter,\csname ##1name\endcsname%
-      }%
-    \fi%
+    \tud@if@strempty{\csname @##1\endcsname}{}{%
+      \eappto\@tempa{,\expandafter\noexpand\csname ##1name\endcsname}%
+    }%
   }%
   \def\@tempa{%
     \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
@@ -307,10 +305,10 @@
 % oberen Teil.
 %    \begin{macrocode}
   \def\tud@multiple@fields@output##1{%
-    \Ifstr{\tud@multiple@fields@style}{table}{%
+    \tud@if@strequal{\tud@multiple@fields@style}{table}{%
       \def\and{%
         \tabularnewline%
-        \Ifstr{\csuse{##1othername}}{}{}{%
+        \tud@if@strempty{\csuse{##1othername}}{}{%
           \csuse{##1othername}\tud@title@delimiter%
         }%
         & \def\and{\tabularnewline &}%

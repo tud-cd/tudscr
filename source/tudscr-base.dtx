@@ -374,64 +374,131 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@preamble
 %
-% \subsubsection{Robuster Test auf leeres Argument}
+% \subsubsection{Strings}
+% \minisec{Expandierte Tests}
 %
-% \begin{macro}{\ifxblank}
-% Hiermit kann ein Argument geprüft werden, ob dieses blank ist (leer oder
-% Leerzeichen). In seiner Syntax ist er identisch zu \cs{ifblank}, allerdings
-% expandiert er im Gegensatz zu diesem das gegebene Argument.
+% \begin{macro}{\tud@if@strequal}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strstart}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strempty}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strblank}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Hiermit wird geprüft, ob ein String gleich, leer oder blank (Leerzeichen)
+% ist, wobei die gegebene Argumente expandiert werden. In ihrer Syntax sind 
+% sie identisch zu den aus aus \pkg{etoolbox} stammenden und unterlagerten
+% Befehlen \cs{ifstrequal}, \cs{ifstrempty} und \cs{ifblank}. Der Befehl 
+% \cs{tud@if@strstart} nutzt \cs{Ifstrstart} von \KOMAScript.
 %    \begin{macrocode}
-\newcommand*\ifxblank{\Ifstr{}}
+\newcommand*\tud@if@strequal[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifstrequal{#1}{#2}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strstart[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Ifstrstart{\noexpand\detokenize{#1}}{\noexpand\detokenize{#2}}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strempty{\tud@if@strequal{}}
+\newcommand*\tud@if@strblank[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifblank{#1}%
+    }%
+  \tud@res@a%
+}
 %    \end{macrocode}
-% \end{macro}^^A \ifxblank
+% \end{macro}^^A \tud@if@strblank
+% \end{macro}^^A \tud@if@strempty
+% \end{macro}^^A \tud@if@strstart
+% \end{macro}^^A \tud@if@strequal
 %
-% \subsubsection{Test auf booleschen Ausdruck in Form eines Strings}
+% \minisec{Test auf booleschen Ausdruck in Form eines Strings}
 %
-% \begin{macro}{\Ifstrbool}
+% \begin{macro}{\tud@if@strbool}
 % \changes{v2.03}{2015/01/09}{neu}^^A
 % Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
 % Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
 % interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
 % \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
 % kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
-%
-% \cs{Ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
+% \newline
+% \cs{tud@if@strbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
 %    \begin{macrocode}
-\newcommand*\Ifstrbool[4]{%
-  \Ifstr{#1}{true}{#2}{%
-    \Ifstr{#1}{on}{#2}{%
-      \Ifstr{#1}{yes}{#2}{%
-        \Ifstr{#1}{false}{#3}{%
-          \Ifstr{#1}{no}{#3}{%
-            \Ifstr{#1}{off}{#3}{%
-              #4%
-            }%
-          }%
-        }%
+\newcommand*\tud@if@strbool[4]{%
+  \TUD@set@ifkey{strbool}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa#2\else#3\fi%
+  \else%
+    #4
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@strbool
+%
+% \minisec{Erzwungene Kleinschreibung von Strings}
+%
+% \begin{macro}{\tud@strlowercase}
+% Dieses Makro expandiert das zweite Argument, setzt es in Minuskeln und
+% speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
+% wird zum Beispiel benötigt, um bestimmte Werte bei Schlüssel-Wert-Paaren,
+% Schlüsselwörtern in einigen Feldern oder auch Einheiten bei Längenangaben
+% sicher erkennen zu können. Die Syntax lautet:
+% \newline
+% \cs{tud@strlowercase}\marg{Zielmakro}\marg{String} benutzt.
+%    \begin{macrocode}
+\newcommand*\tud@strlowercase[2]{%
+  \protected@edef#1{%
+    \lowercase{\def\noexpand#1{#2}}%
+  }#1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@strlowercase
+%
+% \minisec{Ausgabe einer Länge als Strings}
+%
+% \begin{macro}{\tud@strlength}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Die direkte Verwendung von \cs{the} auf ein \cs{skip}-Register hat zur Folge, 
+% dass die Einheit \val{pt} mit die Charactercodes \val{12} zurückgegeben 
+% werden, was bei der Weiterverarbeitung unter Umständen Probleme bereitet. 
+% Dieses Makro löst das Problem.
+%    \begin{macrocode}
+\newcommand*\tud@strlength[2]{%
+  \begingroup%
+    \def\tud@res@c{\glueexpr#2\relax}%
+    \edef\tud@res@a{\strip@pt\dimexpr\tud@res@c\relax pt}%
+    \edef\tud@res@b{\strip@pt\dimexpr\gluestretch\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@plus\space\tud@res@b%
+        \ifcase\gluestretchorder\tud@res@c pt\or fil\or fill\or filll\fi%
       }%
+    \fi%
+    \edef\tud@res@b{\strip@pt\dimexpr\glueshrink\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@minus\space\tud@res@b%
+        \ifcase\glueshrinkorder\tud@res@c pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
     }%
-  }%
+  \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \Ifstrbool
-%
-% \subsubsection{Erzwungene Kleinschreibung von Strings}
-%
-% Um angegebene Werte bei Schlüssel-Wert-Paaren oder Schlüsselwörter in
-% bestimmten Feldern mit Sicherheit erkennen zu können, werden diese zwingend 
-% in Kleinbuchstaben geschieben.
-% \begin{macro}{\tud@lowerstring}
-% Das Makro wird mit \cs{tud@lowerstring}\marg{Zielmakro}\marg{String} benutzt.
-% \ToDo{geht das eleganter als mit \cs{expandafter}?}[v2.07]
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{#2}%
-  \lowercase\expandafter{%
-    \expandafter\def\expandafter #1\expandafter{#1}%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
+% \end{macro}^^A \tud@strlength
 %
 % \subsubsection{Test auf eine verwendbare Sprache}
 %
@@ -554,14 +621,14 @@
 % Varianten getestet. Zunächst die Standardvariante in Kleinschreibung\dots
 %    \begin{macrocode}
     \@tud@res@swatrue%
-    \tud@lowerstring\tud@res@a{#1#2.fd}%
+    \tud@strlowercase\tud@res@a{#1#2.fd}%
     \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
 %    \end{macrocode}
 % \dots gefolgt von der Variante mit Kleinschreibung der Kodierung und dem 
 % Namen der Schrift wie angegeben\dots
 %    \begin{macrocode}
     \if@tud@res@swa%
-      \tud@lowerstring\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@a{#1}%
       \edef\tud@res@a{\tud@res@a#2.fd}%
       \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
     \fi%
@@ -887,7 +954,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@ifkey[3]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#3}%
+    \tud@strlowercase\tud@res@a{#3}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
@@ -905,7 +972,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@numkey[4]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#4}%
+    \tud@strlowercase\tud@res@a{#4}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
@@ -930,7 +997,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@dimenkey[3]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#3}%
+    \tud@strlowercase\tud@res@a{#3}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
@@ -1023,7 +1090,7 @@
   \booltrue{#1@locked}%
 }
 \newcommand*\tud@bool@set[2]{%
-  \Ifstrbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
+  \tud@if@strbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
     \PackageError{tudscrbase}{%
       `#2' is not a valid boolean expression%
     }{%
@@ -1070,7 +1137,7 @@
 % Dieser Befehl prüft, ob eine Familie für den Paramter definiert wurde.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@checkfamily[2]{%
-  \ifxblank{#1}{%
+  \tud@if@strblank{#1}{%
     \PackageError{tudscrbase}{%
       No family for \@backslashchar#2 defined%
     }{%
@@ -1197,7 +1264,7 @@
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
   \expandafter\kv@set@family@handler\expandafter{#1}{%
-    \Ifstr{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
+    \tud@if@strequal{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1229,13 +1296,13 @@
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@default[2][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@default}%
-  \ifxblank{#2}{%
+  \tud@if@strblank{#2}{%
     \def\@tempa{\let\tud@reserved\relax}%
   }{%
     \def\@tempa{\def\tud@reserved{#2=\kv@value}}%
   }%
   \appto\@tempa{%
-    \Ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
+    \tud@if@strequal{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
     \Ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
     \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
     \ifx\tud@reserved\relax%

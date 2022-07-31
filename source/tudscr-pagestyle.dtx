@@ -327,7 +327,9 @@
           \fi%
         }{%
           \def\@tempc{\color{HKS41}}%
-          \Ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
+          \tud@if@strequal{\tud@pagecolor}{HKS41}%
+            {\def\@tempc{\color{HKS41!60}}}%
+            {}%
         }%
         \ifx\@tempc\relax\else%
           \@tempc\rule{\layerwidth}{\layerheight}%
@@ -354,7 +356,9 @@
             \fi%
           }{%
             \def\@tempc{\color{HKS41}}%
-            \Ifstr{\tud@pagecolor}{HKS41}{\def\@tempc{\color{HKS41!60}}}{}%
+            \tud@if@strequal{\tud@pagecolor}{HKS41}%
+              {\def\@tempc{\color{HKS41!60}}}%
+              {}%
           }%
           \ifx\@tempc\relax\else%
             \tud@ddc@check%
@@ -790,7 +794,7 @@
 % für farbige Titel- und Teileseiten\dots
 %    \begin{macrocode}
     \tud@locked@bool@preset{@tud@head@widebar}{true}%
-    \Ifstr{\tud@pagecolor}{HKS41}{%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}{%
       \renewcommand*\tud@head@logocolor{white}%
       \renewcommand*\tud@head@fontcolor{white}%
       \renewcommand*\tud@foot@logocolor{white}%
@@ -833,7 +837,9 @@
 % damit Seitenzahl und Kolumnentitel gegebenenfalls angepasst werden.
 %    \begin{macrocode}
   \let\tud@dim@line\tud@dim@thinline%
-  \Ifstr{\tud@head@fontcolor}{white}{\let\tud@dim@line\tud@dim@heavyline}{}%
+  \tud@if@strequal{\tud@head@fontcolor}{white}%
+    {\let\tud@dim@line\tud@dim@heavyline}%
+    {}%
   \global\let\tud@foot@fontcolor\tud@foot@fontcolor%
 }
 %    \end{macrocode}
@@ -876,7 +882,7 @@
 % gesetzt werden soll, wenn ein weiteres Feld nachfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@head@text@add[3][{, }]{%
-  \ifxblank{#3}{}{%
+  \tud@if@strblank{#3}{}{%
     \edef\tud@head@text@delimiter{\expandonce\tud@head@text@buffer}%
     \def\tud@head@text@buffer{#1}%
     \edef\@tempa{%
@@ -935,7 +941,7 @@
 % die zusätzliche Zeile in die Liste expandiert.
 %    \begin{macrocode}
     \listeadd\tud@head@text@list{\expandonce\tud@head@text@line}%
-    \ifxblank{\@extraheadline}{}{%
+    \tud@if@strblank{\@extraheadline}{}{%
       \listadd\tud@head@text@list{\tud@head@font@light\@extraheadline}%
     }%
     \gdef\tud@head@text@wrn##1{%
@@ -994,7 +1000,7 @@
 %    \begin{macrocode}
     \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
       \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
-        \Ifstr{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
+        \tud@if@strequal{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
     \fi%
   }%
@@ -1810,7 +1816,7 @@
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
 %    \begin{macrocode}
   \else%
-    \tud@lowerstring\tud@res@a{#1}%
+    \tud@strlowercase\tud@res@a{#1}%
     \Ifdimen{\tud@res@a}{\TUDoptions{extrabottommargin=#1}}{}%
   \fi%
 }
@@ -2258,17 +2264,17 @@
 % Wurde im optionalen Argument für zusätzliche Schrifteinstellungen ein Stern 
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
-  \if\detokenize{*#1}\relax\else%
+  \if\detokenize{#1*}\relax\else%
     \renewcommand*\tud@footcontent@fontface{#1}%
   \fi%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
-  \if\detokenize{*#2}\relax\else%
+  \if\detokenize{#2*}\relax\else%
     \renewcommand*\tud@footcontent@left{#2}%
   \fi%
-  \if\detokenize{*#3}\relax\else%
+  \if\detokenize{#3*}\relax\else%
     \renewcommand*\tud@footcontent@right{#3}%
   \fi%
 }
@@ -2303,7 +2309,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@newline@poster{}
 \newcommand*\tud@footcontent@@left[1]{%
-  \ifxblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
+  \tud@if@strblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
   Technische Universit\"at Dresden%
   \tud@foot@line@write{faculty}%
   \tud@foot@line@write{department}%
@@ -2343,7 +2349,7 @@
     \let\@tempa\@author%
   }%
   \ifx\@tempa\@empty\else%
-    \ifxblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
+    \tud@if@strblank{#1}{}{{\tud@head@font@@bold#1\newline}}%
 %    \end{macrocode}
 % Das Makro zum Aufteilen der Autorenangaben wird für die hier benötigte Form 
 % definiert. Die Ausgabe aller nicht \emph{lokal} angegebenen Felder wird
@@ -2379,7 +2385,7 @@
     \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
   }%
   \ifx\@contactperson\@empty\else%
-    \ifxblank{#2}{}{{\tud@head@font@@bold#2\newline}}%
+    \tud@if@strblank{#2}{}{{\tud@head@font@@bold#2\newline}}%
     \renewcommand*\tud@split@contactperson@do[2]{%
       \tud@multiple@fields@store{@contactperson}{##1}%
       \tud@multiple@fields@preset{@contactperson}{*}{##1}%
@@ -2642,7 +2648,7 @@
 \newcommand*\tud@envir@ps{tudheadings}
 \newcommand*\tud@envir@selectps{%
   \expandafter\pagestyle\expandafter{\tud@envir@ps}%
-  \Ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
+  \tud@if@strequal{\GetRealPageStyle{\tud@envir@ps}}{empty}{%
     \renewcommand*\titlepagestyle{empty}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty}%
@@ -2650,7 +2656,7 @@
 %</book|report>
     \renewcommand*\indexpagestyle{empty}%
   }{}%
-  \Ifstr{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
+  \tud@if@strequal{\GetRealPageStyle{\tud@envir@ps}}{empty.tudheadings}{%
     \renewcommand*\titlepagestyle{empty.tudheadings}%
 %<*book|report>
     \renewcommand*\partpagestyle{empty.tudheadings}%
@@ -2727,10 +2733,11 @@
 % werden, wobei einer der \pgs{tudheadings}-Seitenstile verwendet wird.
 %    \begin{macrocode}
   \TUD@parameter@def{pagestyle}{%
-    \tud@if@tudheadings{#1}{\renewcommand*\tud@envir@ps{#1}}{%
-      \Ifstr{#1}{empty}{\renewcommand*\tud@envir@ps{empty.tudheadings}}{%
-      \Ifstr{#1}{plain}{\renewcommand*\tud@envir@ps{plain.tudheadings}}{%
-      \Ifstr{#1}{headings}{\renewcommand*\tud@envir@ps{tudheadings}}{%
+    \tud@if@tudheadings{#1}{\def\tud@envir@ps{#1}}{%
+      \def\tud@envir@ps{tudheadings}%
+      \tud@if@strequal{#1}{empty}{\def\tud@envir@ps{empty.tudheadings}}{%
+      \tud@if@strequal{#1}{plain}{\def\tud@envir@ps{plain.tudheadings}}{%
+      \tud@if@strequal{#1}{headings}{}{%
         \TUD@parameter@error{pagestyle}{%
           headings, plain, empty or any tudheadings page style type%
         }%
