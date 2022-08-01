@@ -393,9 +393,6 @@
 % Layers nicht vollständig genutzt, um bei einem farbigen Fußbereich einen 
 % gewissen Abstand vom Inhalt zur Kante zu erhalten.
 %    \begin{macrocode}
-      \TUD@deprecated@lengthcs[%
-        \global\@tud@footlogo@option@settrue%
-      ]{footlogoheight}%
       \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
 %    \end{macrocode}
 % Im Bedarfsfall werden die Boxen vor der Ausgabe durch die einzelnen 
@@ -415,9 +412,6 @@
     \ModifyLayer[%
       addvoffset=-\tud@dim@ddcdiff+\ht\strutbox,%
       contents={%
-        \TUD@deprecated@lengthcs[%
-          \global\@tud@footlogo@option@settrue%
-        ]{footlogoheight}%
         \tud@setdim\@tempdima{\layerheight-\dp\strutbox}%
         \tud@ddc@check%
         \ifcase\@tempb\relax% \tud@ddc@foot@num=false
@@ -717,6 +711,7 @@
   \DeclarePageStyleAlias{headings}{tudheadings}%
   \def\sls@currentheadings{tudheadings}%
   \def\sls@currentplain{plain.tudheadings}%
+  \TUD@deprecated@length\footlogoheight%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@ps@onselect
@@ -1816,8 +1811,10 @@
 % Außerdem kann mit der Option \opt{extrabottommargin} gesetzt werden.
 %    \begin{macrocode}
   \else%
-    \tud@strlowercase\tud@res@a{#1}%
-    \Ifdimen{\tud@res@a}{\TUDoptions{extrabottommargin=#1}}{}%
+    \TUD@set@dimkey{cdfoot}{\@tempa}{#1}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \TUDoptions{extrabottommargin=#1}%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
@@ -1875,11 +1872,6 @@
 % \end{macro}^^A \if@tud@foot@colored
 % \end{option}^^A cdfoot
 %
-% \iffalse
-%</class&option>
-%<*class>
-% \fi
-%
 % \subsubsection{Optionales \DDC-Logo oder Drittlogos}
 %
 % \begin{option}{footlogoheight}
@@ -1892,23 +1884,20 @@
 % festzulegen. Dabei wird der gewünschte Wert in \cs{tud@footlogoheight@dim} 
 % abgelegt. 
 %    \begin{macrocode}
-%<*option>
 \newcommand*\tud@footlogoheight@dim{}
 \let\tud@footlogoheight@dim\relax
 \TUD@key{footlogoheight}{%
-  \TUD@set@dimenkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
+  \TUD@set@dimkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \tud@length@setabsolute\tud@footlogoheight@dim%
     \global\@tud@footlogo@option@settrue%
   \fi%
 }
-%</option>
 %    \end{macrocode}
 % Da sich mit der Version~v2.03 die Standardhöhe des \DDC-Logos im Fußbereich 
 % geändert hat, wird dieser Wert abhängig von der Einstellung für die Option 
 % \opt{tudscrver} nach der Abarbeitung der Optionen am Ende der Klasse gesetzt.
 %    \begin{macrocode}
-%<*body>
 \AtEndOfClass{%
   \ifdefvoid{\tud@footlogoheight@dim}{%
     \tud@if@v@lower{2.03}{%
@@ -1918,13 +1907,12 @@
     }%
   }{}%
 }
-%</body>
 %    \end{macrocode}
 % \end{macro}^^A \tud@footlogoheight@dim
 % \end{option}^^A footlogoheight
 %
 % \iffalse
-%</class>
+%</class&option>
 %<*class&body>
 % \fi
 %

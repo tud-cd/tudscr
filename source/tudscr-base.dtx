@@ -500,6 +500,27 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@strlength
 %
+% \minisec{Entfernen aller Leerzeichen in Strings}
+%
+% \begin{macro}{\tud@remove@spaces@within}
+% Hiermit können in einem gegebenen String \emph{alle} Leerzeichen enthaltenen 
+% entfernt werden. Dies wird verwendet, um für \cs{TUD@set@gluekey} sowie 
+% \cs{TUD@set@dimkey} eine Warnung auszugeben, falls das übergebene Argument 
+% fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
+% werden sollen.
+%    \begin{macrocode}
+\newcommand*\tud@remove@spaces@within[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{\noexpand\zap@space#1\space\noexpand\@empty}%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@spaces@within
+%
 % \subsubsection{Test auf eine verwendbare Sprache}
 %
 % \begin{macro}{\iflanguageloaded}
@@ -989,23 +1010,319 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@bool@numkey
 % \end{macro}^^A \TUD@set@numkey
-% \begin{macro}{\TUD@set@dimenkey}
-% \changes{v2.05}{2016/06/15}{neu}^^A
-% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
-% Mit \cs{TUD@set@dimenkey} wird der übergebene Längenwert im spezifiezierten 
-% Makro gespeichert.
+% \begin{macro}{\TUD@set@gluekey}
+% \changes{v2.06o}{2022/08/01}{neu}^^A
+% \begin{macro}{\tud@normalize@gluekey}
+% \changes{v2.06o}{2022/08/01}{neu}^^A
+% \begin{macro}{\tud@normalize@@gluekey}
+% \changes{v2.06o}{2022/08/01}{neu}^^A
+% \begin{macro}{\tud@validate@gluekey}
+% \changes{v2.06o}{2022/08/01}{neu}^^A
+% Mit \cs{TUD@set@gluekey} und \cs{TUD@set@dimkey} wird der übergebene Wert
+% entweder als Skip (Länge mit Kleister) oder Dimension (Länge ohne Kleister)
+% im spezifizierten Makro gespeichert, wobei auf eine gültige Eingabe geprüft 
+% wird.
+%
+% Wurde ein Argument übergeben, dass in einen String expandiert, ist einiger
+% Aufwand notwendig, da das zugrunde liegende \cs{FamilySetLength} einen Fehler
+% wirft, wenn eine Längenangabe mit falscher Einheit übergeben wird. Das 
+% optionale Argument gibt die gewünschte Längeneinheit an, falls diese im 
+% Argument nicht spezifiert wurde.
 %    \begin{macrocode}
-\newcommand*\TUD@set@dimenkey[3]{%
+\newcommand*\TUD@set@gluekey[4][pt]{%
   \begingroup%
-    \tud@strlowercase\tud@res@a{#3}%
-    \edef\tud@res@a{%
+    \tud@strlowercase\tud@res@a{#4}%
+%    \end{macrocode}
+% Es wird geprüft, ob das Argument zu einem String expandiert. Ist dies der
+% Fall, wird die vermeintliche Längenangabe mit \cs{tud@normalize@gluekey} 
+% normalisiert, wobei das Resultat in das Makro im ersten Argument des Befehls
+% zurückgeschrieben wird. Sollte das Normalisieren nicht gelingen, wird ein
+% leerer Wert zurückgegeben. 
+%    \begin{macrocode}
+    \edef\tud@res@b{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@c{\detokenize\expandafter{\@backslashchar}}%
+    \@expandtwoargs\in@{\tud@res@c}{\tud@res@b}%
+    \ifin@\else%
+      \tud@normalize@gluekey\tud@res@a{#1}%
+    \fi%
+%    \end{macrocode}
+% Konnte eine Längenangabe interpretiert werden, wird für ein falsch 
+% formatiertes Argument mit \cs{tud@validate@gluekey} ggf. eine Warnung
+% ausgegeben und anschließend der gültige Wert gesetzt.
+%    \begin{macrocode}
+    \protected@edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\FamilySetUseLengthMacro{TUD}{#1}{#2}}{\tud@res@a}%
+      \ifx\tud@res@a\@empty%
+        \noexpand\FamilyKeyStateUnknownValue%
+      \else%
+        \unexpanded{\tud@validate@gluekey{#2}}{\tud@res@a}{#4}%
+        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      \fi%
     }%
   \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@set@dimenkey
+% Das Makro \cs{tud@normalize@gluekey} erhält im ersten Argument den zu
+% interpretierenden String und im zweiten die ggf. zu setzende Einheit. Dieser
+% String wird in den Basiswert und möglichen Kleister aufgetrennt, wobei
+% hierbei auch eine vertauschte und eigentlich fehlerhafte Angabe von Kleister
+% in der Form |... minus ... plus ...| verarbeitet wird.
+%    \begin{macrocode}
+\newcommand*\tud@normalize@gluekey[2]{%
+  \begingroup%
+    \edef\tud@res@c{#1}%
+    \def\tud@res@a##1plus##2plus##3\@nil{%
+      \let\tud@res@a\@empty%
+      \tud@res@b##1minusminus\@nil%
+      \tud@res@b##2minusminus\@nil%
+    }%
+%    \end{macrocode}
+% Die vier Token \marg{Grundwert}\marg{negativ}\marg{positiv}\marg{negativ} 
+% werden in \cs{tud@res@a} geschrieben, wobei der zweite Token mit negativem
+% Kleister gesetzt ist, falls dieser \emph{vor} dem positiven angegeben wurde.
+%    \begin{macrocode}
+    \def\tud@res@b##1minus##2minus##3\@nil{%
+      \eappto\tud@res@a{{\trim@spaces{##1}}{\trim@spaces{##2}}}%
+    }%
+    \expandafter\tud@res@a\tud@res@c plusplus\@nil%
+%    \end{macrocode}
+% Hier wird dementsprechend \cs{tud@res@a} auf drei Token reduziert und so
+% definiert, dass auf den Grundwert erst der positive und danach der negative 
+% Kleister folgt.
+%    \begin{macrocode}
+    \def\tud@res@b##1##2##3##4{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{{##1}{##3}{##4}}%
+      }{%
+        \def\tud@res@a{{##1}{##3}{##2}}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a%
+%    \end{macrocode}
+% Jeder der drei Token wird nun mit \cs{tud@normalize@@gluekey} geprüft, ob 
+% es sich tatsächlich um eine Dimensionsangabe oder zumindest einen Zahlenwert 
+% handelt. Für letzteren Fall wird die übergebene Einheit angehangen. Kann ein
+% Token nicht als Dimensionsangabe interpretiert werden~-- das übergebene Makro 
+% wird zu \cs{relax} gesetzt~-- wird der Prozess abgebrochen.
+%    \begin{macrocode}
+    \edef\tud@res@b{%
+      \unexpanded{\@tfor\tud@res@b:=}\tud@res@a%
+    }%
+    \let\tud@res@c\@empty%
+    \@tud@res@swatrue%
+    \tud@res@b\do{%
+      \tud@normalize@@gluekey\tud@res@a{\tud@res@b}{#2}%
+      \ifx\tud@res@a\relax%
+        \@tud@res@swafalse%
+        \@break@tfor%
+      \else%
+        \eappto\tud@res@c{{\tud@res@a}}%
+      \fi%
+    }%
+%    \end{macrocode}
+% Nach dem Durchlauf enthält \cs{tud@res@c} alle drei zuvor extrahierten Token, 
+% die ggf. um eine Einheit ergänzt wurden, falls diese gegeben waren. Der erste 
+% Token erhält folgend eine Sonderbehandlung. Wenn dieser leer ist, wird er auf 
+% alle Fälle gesetzt, da es sonst zu Problemen bei der Wertzuweisung an ein 
+% Längenregister gibt.
+%    \begin{macrocode}
+    \let\tud@res@a\@empty%
+    \if@tud@res@swa%
+      \def\tud@res@b##1##2##3{%
+        \IfArgIsEmpty{##1}{\def\tud@res@b{0#2}}{\def\tud@res@b{##1}}%
+        \Ifdimen{\tud@res@b}{%
+          \edef\tud@res@a{%
+            \tud@res@b%
+            \IfArgIsEmpty{##2}{}{\space\@plus\space##2}%
+            \IfArgIsEmpty{##3}{}{\space\@minus\space##3}%
+          }%
+        }{}%
+      }%
+      \expandafter\tud@res@b\tud@res@c%
+    \fi%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@c%
+}
+%    \end{macrocode}
+% Diese Makro behandelt die einzelnen extrahierten Token. Dabei müssen zuerst 
+% die Vorzeichen beachtet werden, welches erst in \cs{tud@res@b} gesichert und 
+% anschließend von \cs{tud@res@a} entfernt wird.
+%    \begin{macrocode}
+\newcommand*\tud@normalize@@gluekey[3]{%
+  \begingroup%
+    \edef\tud@res@a{#2}%
+    \@tud@res@swafalse%
+    \expandafter\if\expandafter\@car\tud@res@a\relax\@nil+\@tud@res@swatrue\fi%
+    \expandafter\if\expandafter\@car\tud@res@a\relax\@nil-\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \protected@edef\tud@res@b{\expandafter\@car\tud@res@a\relax\@nil}%
+      \protected@edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
+    \else%
+      \let\tud@res@b\@empty%
+    \fi%
+%    \end{macrocode}
+% Danach wird mit \cs{Ifdimen} geprüft, ob die Angabe tatsächlich eine Länge
+% ist. Hier kommt zum Tragen, das \cs{Ifdimen} auch wahr ist, wenn lediglich 
+% eine gültige Einheit ohne Maßzahl (\cs{Ifdimen}|{pt}|) angegeben wird.
+% Für Werte ohne Dimensionsangabe wird gegebenenfalls einfach das optionale
+% Argument als intendierte angenommen. Sollte es sich bei dem Argument nicht um
+% einen String sondern um eine \TeX"~Primitive oder ein geschütztes Makro
+% handeln, wird kein \val{true}-Zweig durchlaufen.
+%    \begin{macrocode}
+    \@tud@res@swatrue%
+    \Ifdimen{\tud@res@a}{}{%
+      \Ifdimen{\tud@res@a#3}{%
+        \appto\tud@res@a{#3}%
+      }{%
+        \@tud@res@swafalse%
+      }%
+    }%
+%    \end{macrocode}
+% Wertangaben ohne Betrag werden ignoriert.
+%    \begin{macrocode}
+    \if@tud@res@swa%
+      \Ifisdimension{\tud@res@a}{}{%
+        \let\tud@res@a\@empty%
+        \let\tud@res@b\@empty%
+      }%
+    \else%
+%    \end{macrocode}
+% Sollte keine gültige Dimension angegeben worden sein, wird nun geprüft, ob es 
+% sich um eine dehnbare Länge handelt. Diese \emph{muss} mit einer Maßzahl 
+% genutzt werden. Fehlt diese, wird \val{1} angenommen. Außerdem ist zu 
+% beachten, dass es insgesamt drei Abstufungen der dehnbaren Ausdrücke 
+% existieren.
+%    \begin{macrocode}
+      \def\tud@res@c##1fil##2fil##3\@nil{%
+        \IfArgIsEmpty{##1}{\def\tud@res@a{1}}{\def\tud@res@a{##1}}%
+        \Ifdimen{\tud@res@a pt}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+        \if@tud@res@swa%
+          \appto\tud@res@a{fil##2}%
+          \tud@if@strequal{##2}{}{}{%
+            \tud@if@strequal{##2}{l}{}{%
+              \tud@if@strequal{##2}{ll}{}{\@tud@res@swafalse}%
+            }%
+          }%
+        \fi%
+      }%
+      \expandafter\tud@res@c\tud@res@a filfil\@nil%
+    \fi%
+%    \end{macrocode}
+% Das Vorzeichen nicht vergessen!
+%    \begin{macrocode}
+    \edef\tud@res@c{%
+      \endgroup%
+      \if@tud@res@swa%
+        \unexpanded{\def#1}{\tud@res@b\tud@res@a}%
+      \else%
+        \unexpanded{\let#1\relax}%
+      \fi%
+    }%
+  \tud@res@c%
+}
+%    \end{macrocode}
+% Mit diesem Makro wird ganz am Ende des Interpretationsprozesses das Ergebnis 
+% mit dem angegbenen Argument verglichen und eine Warnung erzeugt, falls die 
+% Formatierung des Argumentes es notwendig machte, dieses zu interpretieren.
+%    \begin{macrocode}
+\newcommand*\tud@validate@gluekey[3]{%
+  \begingroup%
+%    \end{macrocode}
+% Unterschiede bei Leerzeichen sollen keine Warnung erzeugen.
+%    \begin{macrocode}
+    \protected@edef\tud@res@a{#2}%
+    \protected@edef\tud@res@b{#3}%
+    \tud@remove@spaces@within\tud@res@a%
+    \tud@remove@spaces@within\tud@res@b%
+    \ifx\tud@res@a\tud@res@b%
+      \aftergroup\@gobble%
+    \else%
+      \aftergroup\@firstofone%
+    \fi%
+  \endgroup{%
+    \PackageWarning{tudscrbase}{%
+      The length `#3'\MessageBreak%
+      seems to be wrong formatted. Assuming, you meant\MessageBreak%
+      `#1=#2'%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@validate@gluekey
+% \end{macro}^^A \tud@normalize@@gluekey
+% \end{macro}^^A \tud@normalize@gluekey
+% \end{macro}^^A \TUD@set@gluekey
+% \begin{macro}{\TUD@set@dimkey}
+% \changes{v2.05}{2016/06/15}{neu}^^A
+% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
+% Zur Angabe von Dimensionen wird auf \cs{TUD@set@gluekey} zurückgegriffen 
+% und anschließend geprüft, ob das Argument für \cs{dimen} genutzt werden kann.
+%    \begin{macrocode}
+\newcommand*\TUD@set@dimkey[4][pt]{%
+  \begingroup%
+    \TUD@set@gluekey[{#1}]{#2}{\tud@res@a}{#4}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+%    \end{macrocode}
+% Das Ergebnis der Wertzuweisung an \cs{TUD@set@gluekey} wurde im Makro
+% \cs{tud@res@a} gespeichert. Handelt es sich beim Argument um ein
+% \cs{skip}"~Register oder eine \cs{glueexpr}, kann nicht sichergestellt 
+% werden, dass diesem später doch noch Kleister hinzugefügt wird, weshalb diese
+% nicht akzeptiert werden.
+%    \begin{macrocode}
+      \@tud@res@swafalse%
+      \Ifisskip{\tud@res@a}{%
+        \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+        \def\tud@res@b{a \string\skip\space register}%
+        \@tud@res@swatrue%
+      }{%
+        \Ifisglueexpr{\tud@res@a}{%
+          \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+          \def\tud@res@b{a glue expression}%
+          \@tud@res@swatrue%
+        }{%
+%    \end{macrocode}
+% Ebenso wird direkt angegebener Kleister entfernt. Nicht über das Konstrukt 
+% mit \cs{@tempdima} und \cs{glueexpr} wundern. Ohne das Paket \pkg{calc} ist 
+% die Zuweisung von Kleister als String an ein \cs{dimen}-Register nicht ohne 
+% weiteres möglich. Die Verwendung \cs{glueexpr} dient quasi als Umschlag.
+%    \begin{macrocode}
+          \Ifisglue{\tud@res@a}{%
+            \Ifisdimension{\tud@res@a}{}{%
+              \setlength\@tempdima{\dimexpr\glueexpr\tud@res@a\relax\relax}%
+              \tud@strlength\tud@res@a{\@tempdima}%
+              \def\tud@res@b{something containing glue}%
+              \@tud@res@swatrue%
+            }%
+          }{}%
+        }%
+      }%
+%    \end{macrocode}
+% Sollte einer der zuvor beschriebenen Fälle aufgetreten sein, wird eine 
+% Warnung ausgegeben.
+%    \begin{macrocode}
+      \if@tud@res@swa%
+        \PackageWarning{tudscrbase}{%
+          Using option `#2' with\MessageBreak%
+          \tud@res@b\space(#4)\MessageBreak%
+          is not recommended. You should consider to use\MessageBreak%
+          an expression for a dimen instead. Setting\MessageBreak%
+          `#2=\tud@res@a'%
+        }%
+      \fi%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      }%
+    \else%
+      \def\tud@res@a{\endgroup\FamilyKeyStateUnknownValue}%
+    \fi%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@set@dimkey
 % \begin{macro}{\TUD@unknown@keyval}
 % Dieser Befehl wird lediglich pro forma definiert. An diesen kann eine Liste 
 % möglicher Wertzuweisungen übergeben werden, welche durch \KOMAScript{} 

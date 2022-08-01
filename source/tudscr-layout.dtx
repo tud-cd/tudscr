@@ -556,13 +556,13 @@
 % die des Titelkopfes (\opt{titlepage}|=|\val{false}) verschoben.
 %    \begin{macrocode}
 %<*book|report|article>
-\newcommand*\tud@pageheadingsvskip@dim{0pt}
-\TUD@key{pageheadingsvskip}{%
-  \TUD@set@dimenkey{pageheadingsvskip}{\tud@pageheadingsvskip@dim}{#1}%
-}
 \newcommand*\tud@headingsvskip@dim{0pt}
 \TUD@key{headingsvskip}{%
-  \TUD@set@dimenkey{headingsvskip}{\tud@headingsvskip@dim}{#1}%
+  \TUD@set@dimkey{headingsvskip}{\tud@headingsvskip@dim}{#1}%
+}
+\newcommand*\tud@pageheadingsvskip@dim{\tud@headingsvskip@dim}
+\TUD@key{pageheadingsvskip}{%
+  \TUD@set@dimkey{pageheadingsvskip}{\tud@pageheadingsvskip@dim}{#1}%
 }
 %</book|report|article>
 %    \end{macrocode}
@@ -1469,6 +1469,9 @@
 % und die vertikalen Abstände neu definiert.
 %    \begin{macrocode}
 %<*book|report>
+\AddtoDoHook{heading/preinit/part}{
+  \TUD@deprecated@length\pageheadingsvskip%
+}
 \newcommand*\tud@partheadstartvskip{%
   \renewcommand*\tud@part@fontcolor{}% false/true
   \ifcase\tud@cd@part@num\relax\or\or% litecolor
@@ -1484,7 +1487,6 @@
   \fi%
   \tud@cd@specialpage@set{part}%
   \tud@cd@headstart@vskip%
-  \TUD@deprecated@lengthcs{pageheadingsvskip}%
   \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
 }
 %</book|report>
@@ -1577,6 +1579,13 @@
 % den Benutzer verschoben werden. Außerdem werden die benötigten Farben für die
 % jeweils gewählte Option ausgewählt.
 %    \begin{macrocode}
+\AddtoDoHook{heading/preinit/chapter}{
+  \if@tud@chapterpage%
+    \TUD@deprecated@length\pageheadingsvskip%
+  \else%
+    \TUD@deprecated@length\headingsvskip%
+  \fi%
+}
 \newcommand*\tud@chapterheadstartvskip{%
   \renewcommand*\tud@chapter@fontcolor{}%
   \ifcase\tud@cd@chapter@num\relax\or\else% *color
@@ -1584,10 +1593,8 @@
   \fi%
   \tud@cd@headstart@vskip%
   \if@tud@chapterpage%
-    \TUD@deprecated@lengthcs{pageheadingsvskip}%
     \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
   \else%
-    \TUD@deprecated@lengthcs{headingsvskip}%
     \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \fi%
 }
