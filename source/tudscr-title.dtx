@@ -184,7 +184,7 @@
 %<*book|report|article>
 \newkomafont{thesis}{%
   \usekomafont{title}%
-  \tud@thesis@fontsize%
+  \tud@subtitle@fontsizecmd%
 }
 %</book|report|article>
 \newkomafont{titlepage}{%
@@ -478,6 +478,7 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
+    \vspace*{-\baselineskip}%
     \tud@cd@headstart@vskip%
     \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
     \tud@cd@vphantom%
@@ -502,8 +503,7 @@
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
-        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
-        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
       \fi%
       \vskip\glueexpr\bigskipamount*2\relax%
 %    \end{macrocode}
@@ -794,6 +794,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
+  \vspace*{-\baselineskip}%
   \tud@cd@headstart@vskip%
 %<*book|report|article>
   \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
@@ -825,15 +826,14 @@
 %    \begin{macrocode}
     {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
-      \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
 %<*book|report|article>
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
 %    \end{macrocode}
@@ -863,12 +863,10 @@
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
 %</book|report|article>
     \ifnum\col@number>\@ne\relax%
-      \ifdefvoid{\multicolsep}{}{%
-        \Ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
-      }%
+      \tud@if@lengthregister{\multicolsep}{\vspace{-\multicolsep}}{}%
     \fi%
 %    \end{macrocode}
 % Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
@@ -896,20 +894,16 @@
 \newcommand*\tud@maketitle@head{%
   \setbox\z@\vbox{%
     \ifx\@titlehead\@empty\else%
-      {\usekomafont{titlehead}{%
-        \begin{minipage}[t]{\textwidth}%
-          \@titlehead\tud@sec@strut%
-        \end{minipage}%
-      }}%
+      \begin{minipage}[t]{\textwidth}%
+        \usekomafont{titlehead}{\@titlehead\strut\par}%
+      \end{minipage}%
     \fi%
 %<*book|report|article>
     \tud@thesis@tosubject%
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
-      {\usekomafont{subject}{%
-        \@subject\tud@sec@strut%
-      }}%
+      {\usekomafont{subject}{\tud@sec@format[partnumber]{\@subject}}}%
     \fi%
   }%
 %    \end{macrocode}
@@ -925,7 +919,7 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@maketitle@inpage
+% \end{macro}^^A \tud@maketitle@head
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
@@ -935,7 +929,7 @@
 % der Titelseite soll sichergestellt werden, dass der Inhalt selbst nicht in
 % Majuskeln gesetzt wird.
 %    \begin{macrocode}
-\newcommand*\tud@title@format[1]{%
+\newcommand*\tud@title@format[2][]{%
   \begingroup%
     \let\\\newline%
 %    \end{macrocode}
@@ -949,10 +943,10 @@
     \let\tud@thanks\relax%
     \def\thanks##1{\gdef\tud@thanks{##1}}%
     \let\footnote\thanks%
-    \sbox\z@{#1}%
+    \sbox\z@{#2}%
     \let\thanks\@gobble%
     \let\footnote\@gobble%
-    \tud@sec@format{#1}%
+    \tud@sec@format[{#1}]{#2}%
     \edef\tud@res@a{%
       \endgroup%
       \ifx\tud@thanks\relax\else%

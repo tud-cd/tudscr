@@ -456,7 +456,7 @@
 % entsprechenden \pgs{scrheadings}-Ebenen verwendet. 
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -487,7 +487,7 @@
 % Fußzeilenebenen des Seitenstils \pgs{plain.scrheadings} hinzugefügt.
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{plain.tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -517,7 +517,7 @@
 % lediglich aus dem Kopf besteht und einen lerren Seitenfuß hat.
 %    \begin{macrocode}
   \DeclareNewPageStyleByLayers[%
-    onselect=\tud@ps@onselect,onbackground=\tud@ps@onbackground%
+    onbackground=\tud@ps@onbackground%
   ]{empty.tudheadings}{%
     tudheadings.head.back,%
     tudheadings.head.content,%
@@ -566,6 +566,40 @@
 % \end{layerpagestyle}^^A empty.tudheadings
 % \end{layerpagestyle}^^A plain.tudheadings
 % \end{layerpagestyle}^^A tudheadings
+% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
+% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
+% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
+% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
+% Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
+% weshalb auf die Verwendung verzichtet wird. Das automatische Umschalten soll 
+% dennoch ermöglicht werden, weshalb hierfür der Haken \val{onselect} verwendet 
+% wird, der für jeden Seitenstil bei der Initialisierung aufgerufen wird.
+%    \begin{macrocode}
+  \AddToLayerPageStyleOptions{@everystyle@}{%
+    onselect={%
+      \tud@if@tudheadings{\currentpagestyle}{%
+        \DeclarePageStyleAlias{plain}{plain.tudheadings}%
+        \DeclarePageStyleAlias{headings}{tudheadings}%
+        \def\sls@currentheadings{tudheadings}%
+        \def\sls@currentplain{plain.tudheadings}%
+        \TUD@deprecated@length\footlogoheight%
+%    \end{macrocode}
+% Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
+% Schrift verwendet.
+%    \begin{macrocode}
+        \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
+        \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
+      }{%
+%    \end{macrocode}
+% Handelt es sich nicht um einen \pgs{tudheadings} Seitenstil, werden die 
+% Schriften für Seitenzahl und Kolumnentitel zurückgesetzt.
+%    \begin{macrocode}
+        \tud@komafont@unset{pagenumber}%
+        \tud@komafont@unset{pagefoot}%
+      }%
+    }%
+  }%
+%    \end{macrocode}
 % Damit ist die Deklaration der Seitenstile mit \pkg{scrlayer-scrpage} beendet.
 %    \begin{macrocode}
 }
@@ -675,6 +709,7 @@
   \cslet{ps@empty.tudheadings}{\ps@empty}%
   \providecommand*\currentpagestyle{plain}%
   \providecommand*\BeforeSelectAnyPageStyle[1]{}%
+  \providecommand*\tud@BeforeSelectAnyPageStyle[1]{}%
   \providecommand*\GetRealPageStyle[1]{#1}%
 %    \end{macrocode}
 % Außerdem wird die angepasste Definition von \cs{pagestyle} verwendet. 
@@ -693,28 +728,6 @@
 % \end{macro}^^A \ps@empty.tudheadings
 % \end{macro}^^A \ps@plain.tudheadings
 % \end{macro}^^A \ps@tudheadings
-% \begin{macro}{\tud@ps@onselect}
-% \changes{v2.03}{2015/01/09}{neu}^^A
-% Der Befehl wird bei der Initialisierung der Seitenstile aufgerufen.
-%    \begin{macrocode}
-\newcommand*\tud@ps@onselect{%
-%    \end{macrocode}
-% Normalerweise werden durch \pkg{scrlayer-scrpage} bei der Umschaltung auf 
-% einen mit dem Befehl \cs{newpairofpagestyles}\marg{Seitenstil} definierten 
-% Seitenstil, die Seitenstile \pgs{headings} und \pgs{plain} als Aliase für 
-% \pgs{\meta{Seitenstil}} und \pgs{plain.\meta{Seitenstil}} festgelegt. 
-% Allerdings definiert dieser Befehl zusätzliche Ebenen für Kopf- und Fußzeile, 
-% weshalb auf die Verwendung verzichtet wird. Das automatische Umschalten soll 
-% dennoch ermöglicht werden.
-%    \begin{macrocode}
-  \DeclarePageStyleAlias{plain}{plain.tudheadings}%
-  \DeclarePageStyleAlias{headings}{tudheadings}%
-  \def\sls@currentheadings{tudheadings}%
-  \def\sls@currentplain{plain.tudheadings}%
-  \TUD@deprecated@length\footlogoheight%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@ps@onselect
 %
 % \subsubsection{Gestaltungsvarianten für Kopf- und Fußzeile}
 %
@@ -1029,7 +1042,7 @@
     \dimexpr(\tud@dim@barheight+\tud@dim@line*2-\totalheight)/2\relax%
   }[%
     \dimexpr\tud@dim@barheight-\depth\relax%
-  ][\dimexpr\glueexpr#1\relax\relax]{#2\vphantom{gjpqy\"A\"O\"U}}%
+  ][\dimexpr\glueexpr#1\relax\relax]{#2\vphantom{\tud@font@phantomglyphs}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@head@text@write
@@ -1534,10 +1547,14 @@
 % den Boxen in der richtigen Größe neu zu setzen.
 %    \begin{macrocode}
     \tud@headlogo@set%
-    \@tud@footlogo@option@settrue%
+    \global\@tud@footlogo@option@settrue%
     \tud@footlogo@option@set%
     \global\@tud@mainlogo@setfalse%
   \fi%
+}
+\AtBeginDocument{%
+  \@tud@mainlogo@settrue%
+  \tud@mainlogo@set%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@mainlogo@wrn
@@ -1872,20 +1889,26 @@
 % \end{macro}^^A \if@tud@foot@colored
 % \end{option}^^A cdfoot
 %
+% \iffalse
+%</class&option>
+%<*class>
+% \fi
+%
 % \subsubsection{Optionales \DDC-Logo oder Drittlogos}
 %
 % \begin{option}{footlogoheight}
 % \changes{v2.05}{2016/06/16}{neu}^^A
 % \begin{macro}{\tud@footlogoheight@dim}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@footlogoheight@set}
 % Für den Anwender besteht mit der Option \opt{footlogoheight} die Möglichkeit, 
 % die Höhe aller Logos im Fußbereich~-- also eventuell das \DDC-Logo sowie
 % vom Anwender mit dem Befehl \cs{footlogo} angegebene Logos~-- zentral
 % festzulegen. Dabei wird der gewünschte Wert in \cs{tud@footlogoheight@dim} 
-% abgelegt. 
+% abgelegt. Ist dieser \val{0pt}, wird die Höhe des Loogs der \TnUD genutzt.
 %    \begin{macrocode}
-\newcommand*\tud@footlogoheight@dim{}
-\let\tud@footlogoheight@dim\relax
+%<*option>
+\newcommand*\tud@footlogoheight@dim{0pt}
 \TUD@key{footlogoheight}{%
   \TUD@set@dimkey{footlogoheight}{\tud@footlogoheight@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1893,26 +1916,30 @@
     \global\@tud@footlogo@option@settrue%
   \fi%
 }
+%</option>
 %    \end{macrocode}
 % Da sich mit der Version~v2.03 die Standardhöhe des \DDC-Logos im Fußbereich 
 % geändert hat, wird dieser Wert abhängig von der Einstellung für die Option 
-% \opt{tudscrver} nach der Abarbeitung der Optionen am Ende der Klasse gesetzt.
+% \opt{tudscrver} gesetzt.
 %    \begin{macrocode}
-\AtEndOfClass{%
-  \ifdefvoid{\tud@footlogoheight@dim}{%
+%<*body>
+\newcommand*\tud@footlogoheight@set{%
+  \ifdim\dimexpr\tud@footlogoheight@dim\relax=\z@\relax%
     \tud@if@v@lower{2.03}{%
       \def\tud@footlogoheight@dim{\tud@dim@topmargin*3/5}%
     }{%
       \def\tud@footlogoheight@dim{\tud@dim@mainlogoheight}%
     }%
-  }{}%
+  \fi%
 }
+%</body>
 %    \end{macrocode}
+% \end{macro}^^A \tud@footlogoheight@set
 % \end{macro}^^A \tud@footlogoheight@dim
 % \end{option}^^A footlogoheight
 %
 % \iffalse
-%</class&option>
+%</class>
 %<*class&body>
 % \fi
 %
@@ -1961,6 +1988,7 @@
 % gesetzt wurde, bei der Ausgabe des dazugehörigen Layers.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@option@set{%
+  \tud@footlogoheight@set%
   \if@tud@footlogo@option@set%
     \tud@footlogo@ddc@set{black}{DDC-22}%
     \tud@footlogo@ddc@set{HKS41}{DDC-25}%
@@ -1980,6 +2008,7 @@
       \tud@footlogo@ddc@set{option}{DDC-28}%
     \fi%
     \global\@tud@footlogo@option@setfalse%
+    \global\@tud@footlogo@cmd@settrue%
   \fi%
 }
 %    \end{macrocode}
@@ -2181,11 +2210,11 @@
 % \begin{macro}{\tud@footcontent@@do}
 % \changes{v2.04}{2015/04/21}{neu}^^A
 % \changes{v2.05}{2016/04/17}{Stern im Argument erhält aktuellen Inhalt}^^A
-% \begin{macro}{\tud@footcontent@usefont}
+% \begin{macro}{\tud@footcontent@font@use}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@footcontent@fontsize}
+% \begin{macro}{\tud@footcontent@font@size}
 % \changes{v2.06}{2018/08/01}{neu}^^A
-% \begin{macro}{\tud@footcontent@fontface}
+% \begin{macro}{\tud@footcontent@font@face}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \changes{v2.05}{2015/07/21}{Bugfix für die Schriftgröße und den Durchschuss 
 %   bei einer entsprechenden Anpassung der Schriftart \val{tudheadings}}^^A
@@ -2202,10 +2231,10 @@
 %    \end{macrocode}
 % Dieser Befehl wird zur Formatierung der Schrift im Fußbereich definiert.
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@usefont[1]{%
+\newcommand*\tud@footcontent@font@use[1]{%
   \usekomafont{tudheadings}{%
-    \tud@footcontent@fontsize%
-    \tud@footcontent@fontface%
+    \tud@footcontent@font@size%
+    \tud@footcontent@font@face%
     \selectfont%
     #1%
   }%
@@ -2215,22 +2244,23 @@
 % diesen Makros gesichert, weshalb diese vorher alloziert werden. Anschließend
 % erfolgt die Definition des Befehls.
 %    \begin{macrocode}
-\newcommand*\tud@footcontent@fontsize{}
-\newcommand*\tud@footcontent@fontface{}
+\newcommand*\tud@footcontent@font@size{}
+\newcommand*\tud@footcontent@font@face{}
 \newcommand*\tud@footcontent@left{}
-\newcommand*\tud@footcontent@right{\@nil}
+\newcommand*\tud@footcontent@right{}
+\let\tud@footcontent@right\@nnil
 %    \end{macrocode}
 % Die Sternversion ändert die Schriftgröße vom Inhalt nicht. Die Normalversion
 % nutzt die Schriftgröße der Kopfzeile mit einem passenden Durchschuss.
 %    \begin{macrocode}
 \newcommand*\footcontent{%
   \kernel@ifstar{%
-    \renewcommand*\tud@footcontent@fontsize{}%
+    \renewcommand*\tud@footcontent@font@size{}%
     \tud@footcontent@do%
   }{%
-    \renewcommand*\tud@footcontent@fontsize{%
-      \tud@setdim\@tempdima{\tud@head@fontsize\p@}%
-      \fontsize{\@tempdima}{1.25\@tempdima}%
+    \renewcommand*\tud@footcontent@font@size{%
+      \tud@setdim\tud@res@glue{\tud@head@fontsize\p@}%
+      \fontsize{\tud@res@glue}{\dimexpr1\tud@res@glue*5/4\relax}%
     }%
     \tud@footcontent@do%
   }%
@@ -2253,7 +2283,7 @@
 % verwendet, bleibt die bisherige Definition bestehen.
 %    \begin{macrocode}
   \if\detokenize{#1*}\relax\else%
-    \renewcommand*\tud@footcontent@fontface{#1}%
+    \renewcommand*\tud@footcontent@font@face{#1}%
   \fi%
 %    \end{macrocode}
 % Wurde in einem der Argumente für den linken und/oder rechten Inhalt ein Stern 
@@ -2269,9 +2299,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@footcontent@right
 % \end{macro}^^A \tud@footcontent@left
-% \end{macro}^^A \tud@footcontent@fontface
-% \end{macro}^^A \tud@footcontent@fontsize
-% \end{macro}^^A \tud@footcontent@usefont
+% \end{macro}^^A \tud@footcontent@font@face
+% \end{macro}^^A \tud@footcontent@font@size
+% \end{macro}^^A \tud@footcontent@font@use
 % \end{macro}^^A \tud@footcontent@@do
 % \end{macro}^^A \tud@footcontent@do
 % \end{KOMAfont}^^A tudheadings
@@ -2322,10 +2352,10 @@
         \nobreakspace(\@discipline)%
       \fi%
     \fi%
+    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
     \ifx\@telephone\@empty\else\newline\@telephone\fi%
     \ifx\@telefax\@empty\else\newline\@telefax\fi%
-    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
   }%
 %    \end{macrocode}
 % Wurde kein Autor angegeben, wird in diesem Fall die normalerweise erzeugte 
@@ -2367,10 +2397,10 @@
 % Die Ausgabe der Kontaktperson(en) erfolgt analog zu der Autorenausgabe.
 %    \begin{macrocode}
   \def\tud@newline@poster{%
+    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
     \ifx\@office\@empty\else\newline\@office\fi%
     \ifx\@telephone\@empty\else\newline\@telephone\fi%
     \ifx\@telefax\@empty\else\newline\@telefax\fi%
-    \ifx\@emailaddress\@empty\else\newline\@emailaddress\fi%
   }%
   \ifx\@contactperson\@empty\else%
     \tud@if@strblank{#2}{}{{\tud@head@font@@bold#2\newline}}%
@@ -2406,6 +2436,7 @@
 %
 % \begin{macro}{\tud@footcontent@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@footcontent@@use}
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
 % verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
@@ -2416,8 +2447,7 @@
 \newcommand*\tud@footcontent@use[2]{%
   \@tempswafalse%
   \ifx\tud@footcontent@left\@empty%
-    \def\@tempa{\@nil}%
-    \ifx\@tempa\tud@footcontent@right\else%
+    \ifx\tud@footcontent@right\@nnil\else%
       \ifx\tud@footcontent@right\@empty\else%
         \@tempswatrue%
       \fi%
@@ -2442,32 +2472,9 @@
       \linespread{1}%
       \vss%
       \hbox to #2{%
-        \tud@footcontent@usefont{%
-%    \end{macrocode}
-% Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
-% der Inhalt über die komplette Breite des Textbereiches ausgegeben.
-%    \begin{macrocode}
-          \def\@tempa{\@nil}%
-          \ifx\@tempa\tud@footcontent@right\relax%
-            \vtop{%
-              \hsize=\dimexpr\glueexpr#2-\@tempdimc\relax\relax%
-              \strut\ignorespaces\tud@footcontent@left\strut%
-            }%
-%    \end{macrocode}
-% Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
-% der Abstand \cs{columnsep} eingefügt wird.
-%    \begin{macrocode}
-          \else%
-            \vtop{%
-              \hsize=\dimexpr\glueexpr(#2-\columnsep)/2\relax\relax%
-              \strut\ignorespaces\tud@footcontent@left\strut%
-            }%
-            \hspace{\columnsep}%
-            \vtop{%
-              \hsize=\dimexpr\glueexpr(#2-\columnsep)/2-\@tempdimc\relax\relax%
-              \strut\ignorespaces\tud@footcontent@right\strut%
-            }%
-          \fi%
+        \tud@footcontent@font@use{%
+          \tud@setglue\tud@res@glue{#2}%
+          \tud@footcontent@@use{\tud@res@glue}%
           \hss%
         }%
       }%
@@ -2490,6 +2497,33 @@
   \fi%
 }
 %    \end{macrocode}
+% Wurde das optionale Argument nach dem obligatorischen nicht genutzt, so wird 
+% der Inhalt über die komplette Breite des Textbereiches ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@footcontent@@use[1]{%
+  \ifx\tud@footcontent@right\@nnil%
+    \vtop{%
+      \hsize=\dimexpr\glueexpr#1-\@tempdimc\relax\relax%
+      \strut\ignorespaces\tud@footcontent@left\strut%
+    }%
+%    \end{macrocode}
+% Im zweispaltigen modus werden zwei vertikale Boxen erzeugt, zwischen denen
+% der Abstand \cs{columnsep} eingefügt wird.
+%    \begin{macrocode}
+  \else%
+    \vtop{%
+      \hsize=\dimexpr\glueexpr(#1-\columnsep)/2\relax\relax%
+      \strut\ignorespaces\tud@footcontent@left\strut%
+    }%
+    \hspace{\columnsep}%
+    \vtop{%
+      \hsize=\dimexpr\glueexpr(#1-\columnsep)/2-\@tempdimc\relax\relax%
+      \strut\ignorespaces\tud@footcontent@right\strut%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@footcontent@@use
 % \end{macro}^^A \tud@footcontent@use
 %
 % \subsection{Umgebungsparameter für die neuen Seitenstile}

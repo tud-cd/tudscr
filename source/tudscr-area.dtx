@@ -1063,10 +1063,13 @@
       \tud@res@a%
     \fi%
     \tud@if@strequal{#2}{newgeometry}{%
-      \eappto\Gm@restore@org{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
 %    \end{macrocode}
 % Wird der Befehl verwendet, wenn eigentlich \pkg{typearea} aktiv ist, so 
 % werden lediglich die Einstellungen zu \prm{paper} und \prm{layout} beachtet. 
@@ -1193,12 +1196,16 @@
     }%
     \expandafter\@tempb\@tempa paper\@nil%
     \@tempswafalse%
-    \tud@if@strequal{\@tempa}{seascape}{\@tempswatrue}{}%
-    \tud@if@strequal{\@tempa}{landscape}{\@tempswatrue}{}%
-    \tud@if@strequal{\@tempa}{portrait}{\@tempswatrue}{}%
-    \tud@if@strequal{\@tempa}{letter}{\@tempswatrue}{}%
-    \tud@if@strequal{\@tempa}{executive}{\@tempswatrue}{}%
-    \tud@if@strequal{\@tempa}{legal}{\@tempswatrue}{}%
+    \TUD@set@numkey{paper}{@tempc}{%
+      {seascape}{0},{landscape}{0},{portrait}{0},%
+      {letter}{0},{executive}{0},{legal}{0}%
+    }{\@tempa}%
+    \@tempswafalse%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \ifcase\@tempc\relax%
+        \@tempswatrue%
+      \fi%
+    \fi%
     \if@tempswa\else%
       \ifx\@tempa\@empty\else%
         \def\@tempb##1##2\@nil{%
@@ -1369,10 +1376,13 @@
 %    \begin{macrocode}
       \edef\@tempa{#1}%
       \tud@cs@store{Gm@restore@org}%
-      \eappto\Gm@restore@org{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
       \tud@cs@restore{Gm@restore@org}%
@@ -1556,6 +1566,15 @@
             footskip=\the\footskip%
           }%
         \fi%
+      \fi%
+%    \end{macrocode}
+% Die Einstellungen für zweiseitigen respektive zweispaltigen Satz.
+%    \begin{macrocode}
+      \if@twoside%
+        \appto\tud@cdgeometry@hmargin{,twoside}%
+      \fi%
+      \if@twocolumn%
+        \appto\tud@cdgeometry@hmargin{,twocolumn}%
       \fi%
 %    \end{macrocode}
 % Es wird die Höhendifferenz zwischen TUD-Kopf und Standardkopfzeile für den
@@ -1970,12 +1989,12 @@
 % Alle gesammelten Warnungen von \pkg{typearea} werden dem initialisierten
 % Satzspiegel hinzugefügt.
 %    \begin{macrocode}
-    \def\tud@res@b##1{%
-      \eappto\Gm@restore@@init@typearea{%
-        \noexpand\PackageWarningNoLine{typearea}{##1}%
-      }%
+    \def\do##1{%
+      \apptocmd\Gm@restore@@init@typearea{%
+        ##1%
+      }{}{\tud@patch@wrn{Gm@restore@@init@typearea}}%
     }%
-    \forlistloop\tud@res@b{\tud@res@a}%
+    \dolistloop{\tud@res@a}%
 %    \end{macrocode}
 % Hier werden die temporär geäanderten Einstellungen zurückgesetzt.
 %    \begin{macrocode}
@@ -2078,14 +2097,8 @@
 %    \begin{macrocode}
         \tud@setdim\tud@dim@areavskip{\z@}%
 %    \end{macrocode}
-% Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
-% Schrift verwendet.
-%    \begin{macrocode}
-        \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
-        \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
-%    \end{macrocode}
-% Dies ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
-% Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
+% Das ist der Zweig, wenn kein \pgs{tudheadings}-Seitenstil geladen werden 
+% soll. Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
 % zurückgesetzt.
 %    \begin{macrocode}
       }{%
@@ -2105,11 +2118,6 @@
             \tud@addtodim\tud@dim@areavskip{-\headheight-\tud@dim@headsep}%
           \fi%
         \fi%
-%    \end{macrocode}
-% Die Schriften für Seitenzahl und Kolumnentitel werden zurückgesetzt.
-%    \begin{macrocode}
-        \tud@komafont@unset{pagenumber}%
-        \tud@komafont@unset{pagefoot}%
       }%
 %    \end{macrocode}
 % Die Länge \cs{tud@dim@areavskip} wird vorsichtshalber global gesetzt.
@@ -2250,16 +2258,22 @@
   \renewcommand*\PackageWarningNoLine[2]{%
     \@tud@res@swatrue%
     \tud@if@strequal{##1}{typearea}{%
-      \tud@if@strstart{##2}{Bad type area settings!}{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
+        Bad type area settings!%
+      }{\@tud@res@swafalse}{}%
       \tud@if@strstart{##2}{%
         Maybe no optimal type area settings!%
       }{\@tud@res@swafalse}{}%
-      \tud@if@strstart{##2}{Very low DIV value!}{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
+        Very low DIV value!%
+      }{\@tud@res@swafalse}{}%
     }{}%
     \if@tud@res@swa%
       \tud@cs@use{PackageWarningNoLine}{##1}{##2}%
     \else%
-      \IfArgIsEmpty{#1}{}{\listeadd#1{##2}}%
+      \IfArgIsEmpty{#1}{}{%
+        \listeadd#1{\noexpand\tud@cs@use{PackageWarningNoLine}{##1}{##2}}%
+      }%
     \fi%
   }%
 }
