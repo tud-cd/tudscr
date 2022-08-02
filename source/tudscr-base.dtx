@@ -116,12 +116,13 @@
 %</load>
 %    \end{macrocode}
 %
-% \subsection{Notwendige Pakete für \TUDScript}
-%
 % \iffalse
 %<*package&base>
 % \fi
 %
+% \subsection{Notwendige Pakete für \TUDScript}
+%
+% \changes{v2.06f}{2020/01/14}{Anpassungen für \pkg{scrbase} \val{v3.28}}^^A
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
@@ -885,8 +886,12 @@
 % Zuerst ein paar Makros zur einfacheren Verwendung.
 %    \begin{macrocode}
 \DefineFamily{TUD}
-\newcommand*\TUDProcessOptions{\FamilyProcessOptions{TUD}}
-\newcommand*\TUDExecuteOptions{\FamilyExecuteOptions{TUD}}
+\newcommand*\TUDProcessOptions[1][.\@currname.\@currext]{%
+  \FamilyProcessOptions[{#1}]{TUD}%
+}
+\newcommand*\TUDExecuteOptions[1][.\@currname.\@currext]{%
+  \FamilyExecuteOptions[{#1}]{TUD}%
+}
 \newcommand*\TUDoptions{\FamilyOptions{TUD}}
 \newcommand*\TUDoption{\FamilyOption{TUD}}
 %    \end{macrocode}
@@ -1331,6 +1336,9 @@
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
+%
+% \subsubsection{Voreinstellungen für abhängige Optionen}
+%
 % \begin{macro}{\tud@locked@newnum}
 % \begin{macro}{\tud@locked@num@preset}
 % \begin{macro}{\tud@locked@num@set}
@@ -1338,7 +1346,8 @@
 % definieren, für das mit \cs{tud@locked@num@preset}\marg{Name}\marg{Definition}
 % eine Voreinstellung definiert werden kann, solange der Wert nicht mit
 % \cs{tud@locked@num@set}\marg{Name}\marg{Definition} explizit überschrieben
-% wurde.
+% wurde. Damit ist es möglich, Voreinstellungen abhängig von anderen Optionen 
+% zu realisieren.
 %    \begin{macrocode}
 \newcommand*\tud@locked@newnum[2]{%
   \expandafter\newcommand\expandafter*\csname #1\endcsname{#2}%
@@ -1623,12 +1632,14 @@
     \Ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
     \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
     \ifx\tud@reserved\relax%
-      \PackageError{tudscrbase}{%
-        Unknown default value `\kv@value'%
-      }{%
-        If `\kv@value' is a language, you haven't loaded it. \MessageBreak%
-        Otherwise, there's no handler for the given value. \MessageBreak%
-        You should specify a certian key (<key>=\kv@value).%
+      \tud@if@strblank{\kv@value}{}{%
+        \PackageError{tudscrbase}{%
+          Unknown default value `\kv@value'%
+        }{%
+          If `\kv@value' is a language, you haven't loaded it. \MessageBreak%
+          Otherwise, there's no handler for the given value. \MessageBreak%
+          You should specify a certian key (<key>=\kv@value).%
+        }%
       }%
     \fi%
   }%
@@ -1642,19 +1653,20 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@handler@default
-% \begin{macro}{\TUD@parameter@error}
-% Das Makro \cs{TUD@parameter@error}\marg{Parameter}\marg{Werteliste} gibt für
+% \begin{macro}{\TUD@parameter@err}
+% Das Makro \cs{TUD@parameter@err}\marg{Parameter}\marg{Werteliste} gibt für
 % den Fall einer ungültigen Wertzuweisung an einen bestimmten \meta{Parameter}
 % einen Fehler mit einem entsprechenden Hinweis auf gültige Werte innerhalb von
 % \meta{Werteliste} aus.
 %    \begin{macrocode}
-\newcommand*\TUD@parameter@error[2]{%
+\newcommand*\TUD@parameter@err[2]{%
   \PackageError{tudscrbase}{Unsupported value for parameter `#1'}{%
     `#1' can only be used with values:\MessageBreak#2%
+    \MessageBreak Please choose a valid one.%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@parameter@error
+% \end{macro}^^A \TUD@parameter@err
 %
 % \subsection{Ausführung von paketspezifischem Quellcode}
 %
@@ -1662,11 +1674,16 @@
 % Ladezustand eines Paketes auszuführen.
 % \begin{macro}{\TUD@UnwindPackage}
 % \changes{v2.05}{2015/10/28}{neu}^^A
+% \changes{v2.06o}{2022/08/02}{Sternversion}^^A
 % Dieser Befehl dient zur Ausführung von Quelltext, falls ein Paket bis zum 
 % Ende der Dokumentpräambel nicht geladen wurde. Im ersten obligatorischen
-% Argument wird das Paket angegeben, im zweiten der Quellcode.
+% Argument wird das Paket angegeben, im zweiten der Quellcode. Die Sternversion 
+% führt den Quellcode auch nach dem Laden des Paketes aus.
 %    \begin{macrocode}
-\newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
+\NewDocumentCommand\TUD@UnwindPackage{s m m}{%
+  \IfBooleanT{#1}{\AfterPackage*{#2}{#3}}%
+  \AtEndPreamble{\@ifpackageloaded{#2}{}{#3}}%
+}
 \@onlypreamble\TUD@UnwindPackage
 %    \end{macrocode}
 % \end{macro}^^A \TUD@UnwindPackage

@@ -542,7 +542,7 @@
 % die gewählte Kompatibilitäsversion getestet werden.
 %    \begin{macrocode}
 \DeclareOption*{}
-\FamilyProcessOptions[.comp]{TUD}\relax
+\TUDProcessOptions[.comp]\relax
 %    \end{macrocode}
 % Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
 % der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
@@ -581,15 +581,11 @@
 \KOMAoptions{headings=small}
 \TUDoptions{cdfoot=true}
 %</package&tutorial>
+%<*class&!inherit|package>
 \TUDExecuteOptions{%
-%<*package>
-%<*fixfonts>
+%<*package&fixfonts>
   headings=heavy%
-%</fixfonts>
-%<*tutorial>
-  ToDo=true%
-%</tutorial>
-%</package>
+%</package&fixfonts>
 %<*class&!inherit>
 %<*book|report|article>
   cd=true,tudbookmarks=true%
@@ -599,6 +595,7 @@
 %</poster>
 %</class&!inherit>
 }
+%</class&!inherit|package>
 %    \end{macrocode}
 %
 % \subsection{Durchreichen von Optionen und Standardoptionen}
@@ -667,7 +664,7 @@
 % Verwendung in der Präambel angemerkt.
 %    \begin{macrocode}
 \newcommand*\TUD@key@toolate[1]{%
-  \csedef{tud@key@#1@error}{%
+  \csedef{tud@key@toolate@@#1}{%
 %<*class>
     \noexpand\ClassError{\noexpand\TUD@Class@Name}%
 %</class>
@@ -676,7 +673,7 @@
 %</package&fonts>
     {Option `#1' too late}{%
       Option `#1' can only be set\space%
-      \ifcsname \@currname.\@currext-h@@k\endcsname%
+      \ifcsdef{\@currname.\@currext-h@@k}{%
         as optional \MessageBreak argument while loading\space%
 %<*class>
         class `\noexpand\TUD@Class@Name'%
@@ -684,15 +681,15 @@
 %<*package&fonts>
         package `tudscrfonts'%
 %</package&fonts>
-      \else%
-        in the preamble
-      \fi%
+      }{%
+        in the preamble%
+      }%
       \MessageBreak but you have tried to set it up later.%
     }%
   }%
-  \TUD@key{#1}[]%
+  \TUD@key[]{#1}[]%
   {%
-    \csuse{tud@key@#1@error}
+    \csuse{tud@key@toolate@@#1}%
     \FamilyKeyStateProcessed%
   }%
 }
