@@ -1683,9 +1683,8 @@
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head@num=false
       \ifdefvoid{\tud@headlogo@filename}{}{%
-        \protected@edef\tud@headlogo@filename{%
-          \expandafter\trim@spaces\expandafter{\tud@headlogo@filename}%
-        }%
+        \protected@edef\tud@headlogo@filename{\tud@headlogo@filename}%
+        \trim@spaces@in\tud@headlogo@filename%
         \protected@edef\@tempb{%
           \noexpand\@tempc{\tud@headlogo@filename}{\tud@headlogo@fileoptions}%
         }%
@@ -2111,7 +2110,8 @@
 %    \begin{macrocode}
         \let\@tempa\relax%
         \@for\@tempb:=\tud@footlogo@filenames\do{%
-          \edef\@tempb{\expandafter\trim@spaces\expandafter{\@tempb}}%
+          \protected@edef\@tempb{\@tempb}%
+          \trim@spaces@in{\@tempb}%
           \@tempa%
           \ifx\@tempb\@empty\else%
             \expandafter\tud@footlogo@cmd@@set\expandafter{\@tempb}{#1}%
@@ -2361,7 +2361,7 @@
 % Wurde kein Autor angegeben, wird in diesem Fall die normalerweise erzeugte 
 % Warnung bei der Verwendung des Feldes \cs{@author} unterdrückt.
 %    \begin{macrocode}
-  \ifpatchable{\@author}{\@latex@warning@no@line}{%
+  \tud@if@field@unset{\@author}{%
     \let\@tempa\@empty%
   }{%
     \let\@tempa\@author%
