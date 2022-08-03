@@ -857,7 +857,7 @@
     {\tud@sec@@@format{#1}[]}%
 }
 \newcommand*\tud@sec@@@format{}
-\def\tud@sec@@@format#1[#2]{%
+\def\tud@sec@@@format#1[#2]#3{%
   \begingroup%
     \IfArgIsEmpty{#2}%
       {\let\tud@res@a\@firstofone}%
@@ -866,8 +866,9 @@
       \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
     }%
   \endgroup%
-  \@firstofone%
+  \tud@sec@@@@format{#3}%
 }
+\newcommand*\tud@sec@@@@format[1]{#1}
 %    \end{macrocode}
 % Für die alten Schriften hat der Befehl eine erweiterte Funktionalität, wenn 
 % die Schriftfamilie \DIN aktiv ist, welche für Überschriften einzusetzen ist.
@@ -876,21 +877,7 @@
 % der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
-  \newcommand*\tud@sec@uppercase{\MakeUppercase}%
-  \AfterPackage*{textcase}{%
-    \renewcommand*\tud@sec@uppercase{\MakeTextUppercase}%
-  }%
-  \def\tud@sec@@@format#1[#2]{%
-    \begingroup%
-      \IfArgIsEmpty{#2}%
-        {\let\tud@res@a\@firstofone}%
-        {\def\tud@res@a{\usekomafont{#2}}}%
-      \tud@res@a{%
-        \nobreak#1\nobreak\vphantom{\textsuperscript{\tud@font@phantomglyphs}}%
-      }%
-      \tud@ifdin{\aftergroup\tud@sec@uppercase}{\aftergroup\@firstofone}%
-    \endgroup%
-  }%
+  \def\tud@sec@@@@format#1{\tud@ifdin{\MakeUppercase{#1}}{#1}}%
 \fi
 %<package&fixfonts>}
 %    \end{macrocode}
@@ -1671,6 +1658,20 @@
 %</book|report>
   \tud@sec@subtitle{#1}%
 }
+%    \end{macrocode}
+% Beim Aufruf von \cs{partlineswithprefixformat} nutzt \KOMAScript im dritten 
+% Argument intern \cs{usekomafont}|{part}|. Für die Verwendung von \DIN in der 
+% Überschrift wird das besagte Argument allerdings via \cs{tud@sec@format} mit 
+% \cs{MakeUppercase} ummantelt. Der daraus letztendlich resultierende Aufruf 
+% |\MakeUppercase{\usekomafont{part}{...#3...}}| führt zu einem Fehler. Der
+% nachfolgende Patch behebt das Problem.
+%    \begin{macrocode}
+\if@tud@cdoldfont@active
+  \patchcmd\tud@partlineswithprefixformat
+    {#2\tud@sec@format[{#1}]{#3}}
+    {#2\tud@sec@format[{#1}]{}\addtokomafont{#1}{\tud@sec@format}#3}
+    {}{\tud@patch@wrn{tud@partlineswithprefixformat}}
+\fi
 %    \end{macrocode}
 % \end{macro}^^A \tud@partformat
 % \end{macro}^^A \tud@partlineswithprefixformat

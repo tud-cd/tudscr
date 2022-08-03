@@ -2867,16 +2867,7 @@
 \undef\Markup@Format
 \newcommand*\Markup@Suffix{}
 \NewDocumentCommand\Markup@SetFormat{omod()}{%
-%    \end{macrocode}
-% Außerdem ist noch eine weitere Besonderheit zu beachten. Sollte gerade eine
-% Überschrift gesetzt werden, wird das Hauptargument nicht formatiert sondern 
-% lediglich mit \cs{tud@sec@format} ausgegeben.
-%    \begin{macrocode}
-  \def\Markup@Format##1{%
-    \def\tud@res@a{#2}%
-    \tud@ifdin{\let\tud@res@a\tud@sec@format}{}%
-    \begingroup\tud@res@a{\IfValueT{#1}{#1}##1}\endgroup%
-  }%
+  \def\Markup@Format##1{\begingroup#2{\IfValueT{#1}{#1}##1}\endgroup}%
   \IfValueT{#3}{\def\Markup@Suffix{\suffix{#3}}}%
 %<*class>
   \IfValueT{#4}{\renewcommand*\Markup@Declare[1]{#4\Markup@Suffix}}%
@@ -2912,50 +2903,6 @@
 % \end{macro}^^A \Markup@ClearFormat
 % \end{macro}^^A \Markup@SetFormat
 % \end{macro}^^A \Markup@CheckFormat
-% \begin{macro}{\tud@nonchangecase}
-% \changes{v2.05}{2015/11/20}{neu}^^A
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% Die \TUDScript-Hauptklassen definieren in Ergänzung zum Paket \pkg{textcase} 
-% den internen Befehl \cs{tud@x@textcase@uclcnotmath}, womit die Definition von 
-% Makros ermöglicht wird, welche von \cs{MakeTextUppercase} nicht beachtet
-% werden sollen. Hierfür werden \emph{alle} Markup-Befehle der Liste zum
-% Ignorieren hinzugefügt. Damit aber bei der eigentlichen Ausgabe alles in
-% Majuskeln erscheint, wird für diesen Fall \cs{Markup@Format} genutzt.
-%    \begin{macrocode}
-\ifundef{\tud@x@textcase@uclcnotmath}{}{%
-  \NewDocumentCommand\tud@nonchangecase{m}{%
-    \DeclareExpandableDocumentCommand#1{sm}{%
-      \IfBooleanT{##1}{\noexpand\@tud@indextrue}%
-      \NoCaseChange{#1{##2}}%
-    }%
-  }
-  \apptocmd\tud@x@textcase@uclcnotmath{%
-    \tud@nonchangecase\Application%
-    \tud@nonchangecase\Distribution%
-    \tud@nonchangecase\Engine%
-    \tud@nonchangecase\File%
-    \tud@nonchangecase\Class%
-    \tud@nonchangecase\Package%
-    \tud@nonchangecase\Option%
-    \tud@nonchangecase\Environment%
-    \tud@nonchangecase\Macro%
-    \tud@nonchangecase\Length%
-    \tud@nonchangecase\Counter%
-%<*class>
-    \DeclareExpandableDocumentCommand\Key{smm}{%
-      \IfBooleanT{##1}{\noexpand\@tud@indextrue}%
-      \NoCaseChange{#1{##2}{##3}}%
-    }%
-    \tud@nonchangecase\Term%
-    \tud@nonchangecase\PageStyle%
-    \tud@nonchangecase\Font%
-    \tud@nonchangecase\Color%
-%</class>
-  }{}{\tud@patch@wrn{tud@x@textcase@uclcnotmath}}
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@textcase@uclcnotmath
-% \end{macro}^^A \tud@nonchangecase
 %
 % \subsection{Index}
 %
@@ -4289,11 +4236,9 @@
         \expandafter\def\csname\string\item\endcsname##1~%
       }{%
         \endgroup%
-        \let\@tempb\@firstofone%
-        \if@tud@cdoldfont@active\def\@tempb##1{\NoCaseChange{##1}}\fi%
-        \addsec[{##1}]{\TUDScript \@tempb{##1}}%
+        \addsec[{##1}]{\TUDScript ##1}%
         \tudhyperdef*{idx:changelog:##1}%
-        \def\@tempa{\indexname: \TUDScript \@tempb{##1}}%
+        \def\@tempa{\indexname: \TUDScript ##1}%
         \@mkboth{\@tempa}{\@tempa}%
       }%
     }{}{\tud@patch@wrn{theindex}}%
