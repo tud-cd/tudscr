@@ -42,9 +42,7 @@
 % \iffalse
 %</dtx>
 %<*package&identify>
-%<comp&base>\ProvidesPackage{tudscrcomp}[%
-%<comp&book>\ProvidesPackage{tudscrcomp-book}[%
-%<comp&poster>\ProvidesPackage{tudscrcomp-poster}[%
+%<comp>\ProvidesPackage{tudscrcomp}[%
 %<fixfonts>\ProvidesPackage{fix-tudscrfonts}[%
 %!TUD@Version
 %<comp>  package
@@ -1117,33 +1115,51 @@
 %
 % \iffalse
 %<*package&comp>
-%<*base>
+%<*identify>
 % \fi
 %
 % \subsection{Erkennen der geladenen Klasse}
 %
 % Damit je nach geladener Klasse die passenden Kompatibilitätseinstellungen und 
 % -befehle bereitgestellt werden können, wird auf die geladene Klasse geprüft.
-% Danach wird das dazu passende Paket geladen.
+% \begin{macro}{\tud@comp@on@main@class}
+% \begin{macro}{\tud@comp@on@poster@class}
 %    \begin{macrocode}
-\PassOptionsToPackage{oldcolors}{tudscrcolor}
+\@tud@res@swafalse%
+\newcommand*\tud@comp@on@main@class{\@gobble}
+\@tfor\tud@res@a:={tudscrbook}{tudscrreprt}{tudscrartcl}\do{%
+  \@ifclassloaded{\tud@res@a}{\@tud@res@swatrue}{}%
+  \if@tud@res@swa%
+    \renewcommand*\tud@comp@on@main@class{\@firstofone}%
+    \@break@tfor%
+  \fi%
+}%
+\newcommand*\tud@comp@on@poster@class{\@gobble}
 \@ifclassloaded{tudscrposter}{%
-  \RequirePackageWithOptions{tudscrcomp-poster}[\TUD@Version]%
-}{%
-  \RequirePackageWithOptions{tudscrcomp-book}[\TUD@Version]%
-}
+  \renewcommand*\tud@comp@on@poster@class{\@firstofone}%
+}{}%
 %    \end{macrocode}
+% \end{macro}^^A \tud@comp@on@poster@class
+% \end{macro}^^A \tud@comp@on@main@class
 %
 % \iffalse
-%</base>
-%<*!base>
-%<*body>
+%</identify>
+%<*option>
 % \fi
 %
 % \subsection{Gemeinsame Optionen und Befehle für alle Klassen}
 %
 % Zunächst werden alle Optionen und Befehle definiert, die unabhängig von der 
 % geladenen Klasse generell bereitgestellt werden.
+%
+%    \begin{macrocode}
+\PassOptionsToPackage{extended}{tudscrcolor}
+%    \end{macrocode}
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
 %
 % \begin{macro}{\einrichtung}
 % \begin{macro}{\fachrichtung}
@@ -1181,7 +1197,6 @@
 %
 % \iffalse
 %</body>
-%<*book>
 %<*option>
 % \fi
 %
@@ -1242,6 +1257,11 @@
 %<*body>
 % \fi
 %
+% Die folgenden Makros werden für die Hauptklassen definiert.
+%    \begin{macrocode}
+\tud@comp@on@main@class{%
+%    \end{macrocode}
+%
 % \begin{macro}{\submitdate}
 % \begin{macro}{\submittedon}
 % \begin{macro}{\supervisorII}
@@ -1252,7 +1272,7 @@
 %    \begin{macrocode}
 \newcommand*\submitdate{\date}
 \newcommand*\submittedon[1]{\gdef\datetext{#1}}
-\newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and #1}}
+\newcommand*\supervisorII[1]{\g@addto@macro\@supervisor{\and\space#1}}
 \newcommand*\supervisedby[1]{\gdef\supervisorname{#1}}
 \newcommand*\supervisedIIby[1]{\gdef\supervisorothername{#1}}
 %    \end{macrocode}
@@ -1328,6 +1348,10 @@
 % Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
 %    \begin{macrocode}
 \AtEndPreamble{%
+  \ifundef{\if@chapter}{%
+    \newif\if@chapter%
+    \ifundef{\chapter}{\@chapterfalse}{\@chaptertrue}%
+  }{}%
   \if@chapter%
     \pretocmd\tud@chapter@pre{%
       \tud@comp@chapterpage@set%
@@ -1335,6 +1359,15 @@
     \apptocmd\tud@chapter@app{%
       \tud@comp@chapterpage@unset%
     }{}{\tud@patch@wrn{tud@chapter@app}}%
+  \else%
+    \renewcommand*\tud@comp@chapterpage@wrn{%
+      \PackageWarning{tudscrcomp}{%
+        The command `\string\chapterpage'\space is not\MessageBreak%
+        active as the used document class does not provide\MessageBreak%
+        any chapters via `\string\chapter'%
+      }%
+      \global\let\tud@comp@chapterpage@wrn\relax%
+    }%
   \fi%
 }
 %    \end{macrocode}
@@ -1376,12 +1409,15 @@
 % \end{macro}^^A \glossaryname
 % \end{environment}^^A theglossary
 %
+% Das waren die Makros für die Hauptklassen.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+%
 %
 % \iffalse
 %</body>
-%</book>
-%<*poster>
-%<*body>
+%<*option>
 % \fi
 %
 % \subsection{Kompatibilität zu \cls{tudmathposter}}
@@ -1389,21 +1425,39 @@
 % Die hier bereitgestellten Optionen und Befehle werden durch die Klasse 
 % \cls{tudmathposter} bzw. \cls{tudposter} definiert.
 %
+% \begin{option}{loadpackages}
+% \changes{v2.06o}{2022/08/02}{neu}^^A
 % Die Klasse \cls{tudmathposter} lädt allerhand Pakete. Dies ist jedoch für den 
 % Anwender alles andere als vorteilhaft, da dadurch unter Umständen Konflikte
 % mit anderen Paketen entstehen oder der Nutzer im Zweifelsfall gar nicht weiß, 
-% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch werden 
-% aus Kompatibilitätsgründen einige Pakete geladen, um bestehende Dokumente 
-% trotz alledem nach der Portierung kompiliert werden können. Um den Nutzer die 
-% Möglichkeit zu geben, die Pakete selber ggf. mit Optionen zu laden, erfolgt 
-% die Anforderung der Pakete erst am ende der Präambel.
+% dass verwendete Befehle aus bestimmten Paketen entspringen. Dennoch wird aus
+% Kompatibilitätsgründen diese Option bereitgestellt, um die Pakete ggf. Ende
+% der Präambel zu laden.
 %    \begin{macrocode}
+\tud@comp@on@poster@class{%
+\tud@newif\if@tud@comp@loadpackages
+\TUD@key{loadpackages}[true]{%
+  \TUD@set@ifkey{loadpackages}{@tud@comp@loadpackages}{#1}%
+}
+\AtEndPreamble{\TUD@key@toolate{loadpackages}}
+}
+%    \end{macrocode}
+% \end{option}^^A loadpackages
+%
+% \iffalse
+%</option>
+%<*body>
+% \fi
+%
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
 \AtEndPreamble{%
-  \RequirePackage{amsmath}[2016/06/28]%
-  \RequirePackage{amsfonts}[2013/01/14]%
-  \RequirePackage{calc}[2014/10/28]%
-  \RequirePackage{textcomp}[2016/06/19]%
-  \RequirePackage{tabularx}[2016/02/03]%
+  \if@tud@comp@loadpackages%
+    \RequirePackage{calc}[2014/10/28]%
+    \RequirePackage{textcomp}[2016/06/19]%
+    \RequirePackage{tabularx}[2016/02/03]%
+  \fi%
+}
 }
 %    \end{macrocode}
 %
@@ -1417,6 +1471,7 @@
 % Mit der Option \opt{bluebg} kann der Hintergrund des Posters in \val{HKS41} 
 % gesetzt werden.
 %    \begin{macrocode}
+\tud@comp@on@poster@class{%
 \TUD@key{bluebg}[true]{%
   \TUD@set@ifkey{bluebg}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -1427,6 +1482,7 @@
     \fi%
   \fi%
 }
+}
 %    \end{macrocode}
 % \end{option}^^A bluebg
 %
@@ -1434,6 +1490,11 @@
 %</option>
 %<*body>
 % \fi
+%
+% Die folgenden Makros werden für die Posterklasse definiert.
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+%    \end{macrocode}
 %
 % \begin{layerpagestyle}{tudposter}
 % \changes{v2.05}{2016/07/26}{neu}^^A
@@ -1611,16 +1672,16 @@
 % Layout zentriert gesetzt werden. Eine Mischung von unterschiedlichen Stilen 
 % gleichartiger Ebenen ist aus sicht von Typographie und Layout eher fraglich.
 %    \begin{macrocode}
-\newcommand*\centersection[2][\@nil]{%
+\NewDocumentCommand\centersection{o m}{%
   \tud@comp@centersection{section}{#1}{#2}%
 }
-\newcommand*\centersubsection[2][\@nil]{%
+\NewDocumentCommand\centersubsection{o m}{%
   \tud@comp@centersection{subsection}{#1}{#2}%
 }
-\newcommand*\topcentersection[2][\@nil]{%
+\NewDocumentCommand\topcentersection{o m}{%
   \tud@comp@centersection{topsection}{#1}{#2}%
 }
-\newcommand*\topcentersubsection[2][\@nil]{%
+\NewDocumentCommand\topcentersubsection{o m}{%
   \tud@comp@centersection{topsubsection}{#1}{#2}%
 }
 %    \end{macrocode}
@@ -1631,11 +1692,11 @@
 \newcommand*\tud@comp@centersection[3]{%
   \tud@cs@store{raggedsection}%
   \let\raggedsection\centering%
-  \ifx#2\@nil\relax%
-    \csuse{#1}{#3}%
-  \else%
+  \IfValueTF{#2}{%
     \csuse{#1}[{#2}]{#3}%
-  \fi%
+  }{%
+    \csuse{#1}{#3}%
+  }
   \tud@cs@restore{raggedsection}%
 }
 %    \end{macrocode}
@@ -1721,7 +1782,6 @@
 % Außerdem wird eine Umgebung für farbige Tabellen sowie zwei Umschaltbefehle 
 % für die farbliche Ausprägung der Tabellenzeilen definiert.
 %    \begin{macrocode}
-\PassOptionsToPackage{table}{xcolor}
 \tud@newif\if@tud@comp@graytable
 \newcommand*\blautabelle{\@tud@comp@graytablefalse}
 \newcommand*\grautabelle{\@tud@comp@graytabletrue}
@@ -1738,54 +1798,98 @@
 % \end{macro}^^A \if@tud@comp@graytable
 % \end{environment}^^A farbtabellen
 %
+% Das waren die Makros für die Posterklassen.
+%    \begin{macrocode}
+}
+%    \end{macrocode}
+%
 % \iffalse
 %</body>
 %<*option>
 % \fi
 %
+% Zuletzt wir die Option für das Laden von \pkg{colortbl} durchgereicht.
+%    \begin{macrocode}
+\tud@comp@on@poster@class{%
+\PassOptionsToPackage{table}{xcolor}
+}
+%    \end{macrocode}
+%
+% \begin{option}{cropmargin}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% \begin{macro}{\tud@cropmargin@set}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
 % \begin{macro}{\schnittrand}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% Zu guter Letzt geht es an das Makro \cs{schnittrand}. Zur Intension dieses 
-% Befehls gab es auf \hrfn{https://github.com/tud-cd/tud-cd/issues/6}{GitHub}
-% bereits eine angeregte Diskussion. Deshalb wird das Makro als Wertzuweisung
-% für die Option \opt{bleedmargin} genutzt.
+% Nun geht es an das Makro \cs{schnittrand}. Zur Intension dieses Befehls gab
+% es im \GitHubRepo(tud-cd/tud-cd)<6> bereits eine angeregte Diskussion.
 % \ToDo{Für \cls{tudscrposter} übernehmen?}[v2.07]
 %    \begin{macrocode}
-\ifundef{\schnittrand}{}{%
-  \Ifisdimension{\schnittrand}{%
-    \edef\@tempa{%
-      paperwidth=\the\dimexpr\glueexpr\paperwidth+\schnittrand*2\relax\relax,%
-      paperheight=\the\dimexpr\glueexpr\paperheight+\schnittrand*2\relax\relax,%
-      layout=\the\paperwidth:\the\paperheight,%
-      layoutoffset=\the\dimexpr\glueexpr\schnittrand\relax\relax,%
-      showcrop%
+\tud@comp@on@poster@class{%
+\newcommand*\tud@cropmargin@set{}%
+\preto\tud@cdgeometry@@init{\tud@cropmargin@set}%
+\TUD@key{cropmargin}[5mm]{%
+  \TUD@set@dimkey[mm]{cropmargin}{\@tempa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \edef\tud@cropmargin@set{%
+      \noexpand\geometry{%
+        papersize={%
+          \the\dimexpr(\@tempa)*2+\paperwidth\relax,%
+          \the\dimexpr(\@tempa)*2+\paperheight\relax%
+        },%
+        layoutsize={\the\paperwidth,\the\paperheight},%
+        layoutoffset=\the\dimexpr\@tempa\relax,%
+        showcrop%
+      }%
     }%
-    \expandafter\geometry\expandafter{\@tempa}%
-  }{%
-    \PackageErrorNoLine{tudscrcomp}{%
-      Wrong definition for `\string\schnittrand'%
-    }{%
-      The definition of `\string\schnittrand' does not expand to\MessageBreak%
-      a valid dimension expression.%
-    }%
+  \fi%
+}
+%    \end{macrocode}
+% Da die Option direkt auf das Seitenlayout zugreift und mehrmalige Aufrufe 
+% sich beeinflussen würden, werden diese zum Ende der Präambel unterbunden.
+%    \begin{macrocode}
+\AtEndPreamble{\TUD@key@toolate{cropmargin}}%
+%    \end{macrocode}
+% Nachdem die passende Option definiert wurde, wird noch \cs{schnittrand} 
+% ausgewertet und verarbeitet. Dies geschieht zum spätestmöglichen Zeitpunkt, 
+% damit dieser Befehl irgendwo innerhalb der Präambel definiert werden kann.
+%    \begin{macrocode}
+\preto\tud@cdgeometry@init{%
+  \ifundef{\schnittrand}{}{%
+    \TUDoptions{cropmargin=\schnittrand}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+      \PackageErrorNoLine{tudscrcomp}{%
+        Wrong definition for `\string\schnittrand'%
+      }{%
+        The definition of `\string\schnittrand' does not expand\MessageBreak%
+        to a valid dimension expression.%
+      }%
+    \fi%
   }%
+}
 }
 %    \end{macrocode}
 % \end{macro}^^A \schnittrand
+% \end{macro}^^A \tud@cropmargin@set
+% \end{option}^^A cropmargin
+%
+% \begin{option}{tudmathfoot}
+% \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{option}{tudmathposterfoot}
+% \begin{option}{cdfoot}
+% \begin{macro}{\if@tud@mathfoot}
 % \changes{v2.05}{2016/04/17}{neu}^^A
-% \begin{macro}{\if@tud@mathposterfoot}
-% \changes{v2.05}{2016/04/17}{neu}^^A
-% Mit der Option \opt{tudmathposterfoot} kann die Darstellung des Fußes im 
-% Poster angepasst werden. Die Klasse \cls{tudmathposter} setzt den Fußbereich
-% in zwei asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen
-% zentriert und symmetrisch zum Satzspiegel platzieren.
+% Mit der Option \opt{tudmathfoot} kann die Darstellung des Fußes im Poster
+% angepasst werden. Die Klasse \cls{tudmathposter} setzt den Fußbereich in zwei
+% asymmetrischen Spalten, wohingegen die \TUDScript-Klassen diesen zentriert
+% und symmetrisch zum Satzspiegel platzieren.
 %    \begin{macrocode}
-\tud@newif\if@tud@mathposterfoot
-\TUD@key{tudmathposterfoot}[true]{%
-  \TUD@set@ifkey{tudmathposterfoot}{@tud@mathposterfoot}{#1}%
+\tud@comp@on@poster@class{%
+\tud@newif\if@tud@mathfoot
+\TUD@key{tudmathfoot}[true]{%
+  \TUD@set@ifkey{tudmathfoot}{@tud@mathfoot}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \if@tud@mathposterfoot%
+    \if@tud@mathfoot%
       \footcontent[\small]{%
         \tud@footcontent@@left{}%
       }[%
@@ -1800,26 +1904,30 @@
     \fi%
   \fi%
 }
+\TUD@key{tudmathposterfoot}[true]{\TUDoptions{tudmathfoot=#1}}%
 %    \end{macrocode}
 % Die Option \opt{cdfoot} wird um Werte für die Einstellung des Posterfußes
 % erweitert.
 %    \begin{macrocode}
-\TUD@key{cdfoot}[true]{%
+\TUD@key{cdfoot}{%
   \TUD@set@numkey{cdfoot}{@tempa}{%
-    {tudscrposter}{0},{tudscrposterfoot}{0},{cdposter}{0},{poster}{0},%
-    {tudmathposter}{1},{tudmathposterfoot}{1},{mathposter}{1},{tudposter}{1}%
+    {tudscrposter}{0},{tudscrposterfoot}{0},{cdposter}{0},{tudscr}{0},%
+    {tudmathposter}{1},{tudmathfoot}{1},{tudmathposterfoot}{1},{tudmath}{1}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \ifcase\@tempa\relax% tudscrposter
-      \TUDoptions{tudmathposterfoot=false}%
+      \TUDoptions{tudmathfoot=false}%
     \else% tudmathposter
-      \TUDoptions{tudmathposterfoot=true}%
+      \TUDoptions{tudmathfoot=true}%
     \fi%
   \fi%
 }
+}
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@mathposterfoot
+% \end{macro}^^A \if@tud@mathfoot
+% \end{option}^^A cdfoot
 % \end{option}^^A tudmathposterfoot
+% \end{option}^^A tudmathfoot
 %
 % \iffalse
 %</option>
@@ -1831,12 +1939,11 @@
 % \begin{macro}{\footcolumn}
 % \changes{v2.05}{2016/04/17}{neu}^^A
 % \begin{macro}{\tud@footcontent@use}
-% \begin{macro}{\tud@comp@mathposterwidth@dim}
-% \changes{v2.05}{2016/04/17}{neu}^^A
 % Mit diesen Befehlen lässt sich der Inhalt des Fußbereiches angepassen. Wird
 % in einem und/oder beiden Argumente von \cs{footcontent} ein Stern \val{*} 
 % verwendet, so bleibt der bisherige Inhalt erhalten.
 %    \begin{macrocode}
+\tud@comp@on@poster@class{%
 \newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
 \newcommand*\footcolumn[2]{%
   \Ifnumber{#1}{%
@@ -1850,14 +1957,14 @@
   }{}%
 }
 %    \end{macrocode}
-% Um die Option \opt{tudmathposterfoot} umzusetzen, muss für die Ausgabe des 
+% Um die Option \opt{tudmathfoot} umzusetzen, muss für die Ausgabe des 
 % Fußbereichs eine Anpassung des Makros \cs{tud@footcontent@use} erfolgen.
 % Normalerweise wird der Fußbereich in zwei gleichbreite Spalten über die
 % komplette Textbreite aufgeteilt. Dahingegen werden durch die Klasse 
 % \cls{tudmathposter} beide Fußspalten nicht über den kompletten Textbereich
 % verteilt, sondern es verbleibt etwas ungenutzter Platz rechts davon, welcher
 % für ein etwaiges Logo verwendet wird. Dieses Verhalten kann über die Option 
-% \opt{tudmathposterfoot} aktiviert werden und wird hier nachgebildet.
+% \opt{tudmathfoot} aktiviert werden und wird hier nachgebildet.
 %    \begin{macrocode}
 \patchcmd\tud@footcontent@use{%
   \tud@footcontent@@use{\tud@res@glue}%
@@ -1868,16 +1975,14 @@
     \tud@footcontent@@use{\@tud@res@glue}%
   \fi%
 }{}{\tud@patch@wrn{tud@footcontent@use}}
+}
 %    \end{macrocode}
-% \end{macro}^^A \tud@comp@mathposterwidth@dim
 % \end{macro}^^A \tud@footcontent@use
 % \end{macro}^^A \footcolumn
 % \end{macro}^^A \fusszeile
 %
 % \iffalse
 %</body>
-%</poster>
-%</!base>
 %</package&comp>
 % \fi
 %
@@ -2225,6 +2330,7 @@
 % Es werden einige Einstellungen für die Überschriften angepasst.
 %    \begin{macrocode}
 \tud@fixfonts@class@adapt{tudmathposter}{%
+  \ifunivers\PassOptionsToPackage{cdoldfont}{tudscrfonts}\fi%
   \def\raggedtitle{\tud@raggedright}%
   \renewcommand*\raggedpart{\tud@raggedright}%
   \renewcommand*\raggedsection{\tud@raggedright}%
@@ -2261,12 +2367,8 @@
     \huge%
   }%
   \renewcommand*\preprocesstitle[1]{\raggedtitle\tud@sec@format{#1}}%
-  \if@mathevorgabe%
-    \undef\sectionfont%
-    \undef\subsectionfont%
-  \fi%
-  \newcommand*\sectionfont{\bfseries\LARGE}%
-  \newcommand*\subsectionfont{\sectionfont\large}%
+  \def\sectionfont{\tud@sec@fontface\LARGE}%
+  \def\subsectionfont{\tud@sec@fontface\large}%
 %    \end{macrocode}
 % Für die Schriftstärke in der Kopfzeile muss der Seitenstil angepasst und  
 % anschließend nochmals akiviert werden.
@@ -2274,7 +2376,7 @@
   \patchcmd\ps@tudposter{%
     \textbf{\@einrichtung}%
   }{%
-    \textbf{\fontseries{b}\selectfont\@einrichtung}%
+    {\fontseries{b}\selectfont\@einrichtung}%
   }{}{\tud@patch@wrn{ps@tudposter}}%
   \pagestyle{tudposter}%
 }
@@ -2296,13 +2398,12 @@
 % unerwünscht, weshalb das Laden hiermit unterbunden wird.
 %    \begin{macrocode}
 \newcommand*\tud@x@tudfonts@prevent{%
-  \RequirePackage{amsmath}%
-  \RequirePackage{amsfonts}%
   \newif\if@tudfonts@nodin%
   \let\DeclareTudMathSizes\@gobblefour%
   \let\tud@x@tudfonts@prevent\relax%
 }
 \PreventPackageFromLoading[\tud@x@tudfonts@prevent]{tudfonts}
+\PreventPackageFromLoading{opensans}
 %    \end{macrocode}
 % \end{macro}^^A \if@tudfonts@nodin
 % \end{macro}^^A \tud@x@tudfonts@prevent
