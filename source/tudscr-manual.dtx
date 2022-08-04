@@ -41,7 +41,7 @@
 %
 % \iffalse
 %</dtx>
-%<package&identify>\ProvidesPackage{tudscrtutorial}[%
+%<package&identify>\ProvidesPackage{tudscrmanual}[%
 %<*package&identify>
 %!TUD@Version
 %</package&identify>
@@ -83,7 +83,7 @@
 %
 % \changes{v2.02}{2014/12/17}{Erstellung der \app{texindy}-Stildatei während
 %   der Kompilierung}^^A
-% \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
+% \changes{v2.02}{2014/11/18}{\pkg{tudscrmanual}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
 %
@@ -91,225 +91,16 @@
 % \section{Anwenderdokumentation und Leitfäden zu \TUDScript}
 %
 % Es werden die Klasse \cls{tudscrmanual} (auf Basis von \cls{tudscrreprt}) für 
-% die Anwenderdokumentation sowie das Paket \pkg{tudscrtutorial} für das Setzen
+% die Anwenderdokumentation sowie das Paket \pkg{tudscrmanual} für das Setzen
 % von einigen Anwenderleitfäden bzw. Tutorials erzeugt. Da es zwischen der
 % Klasse und dem Paket es eine große Menge an Überschneidungen gibt, basieren
 % diese auf der gleichen Quelldatei.
-% \iffalse
-%<*body|class&doc>
-% \fi
-%
-% \subsection{Notwendige Pakete und Befehle}
-%
-% Basis für die Handbuchklasse \cls{tudscrmanual} ist \cls{tudscrreprt}. 
-% Zusätzlich wird das Paket \pkg{tudscrtutorial} erstellt, um an das Handbuch
-% angelehnte Tutorials in einem Unterordner zu erstellen. Sowohl für die Klasse
-% als auch das Paket werden einige Pakete geladen, um Einstellungen vorzunehmen 
-% und nützliche Befehle zu definieren.
-%
-% Das Paket \pkg{xparse} erlaubt eine sehr freie Deklaration von Makros mit
-% nahezu beliebig arrangierbaren (optionalen) Argumenten.
-%    \begin{macrocode}
-%<*!doc>
-\PassOptionsToPackage{log-declarations=false}{xparse}
-\RequirePackage{xparse}[2013/12/31]
-%</!doc>
-%    \end{macrocode}
-% Bugfixes für unterschiedliche Pakete.
-%    \begin{macrocode}
-\RequirePackage{scrhack}[2014/02/27]
-%    \end{macrocode}
-% Die Sprachunterstützung für Klasse und Paket.
-%    \begin{macrocode}
-%<*!doc>
-\RequirePackage{babel}[2014/03/24]
-%</!doc>
-%    \end{macrocode}
-% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
-% für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
-% werden. Die Randnotizen werden auf dem linken~-- weil größeren~-- Seitenrand
-% gesetzt.
-%    \begin{macrocode}
-\PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2012/03/29]
-%<!doc>\reversemarginpar
-%    \end{macrocode}
-% Das Paket für intelligente Leerzeichen am Ende von Makros mit \cs{xspace}.
-%    \begin{macrocode}
-\RequirePackage{xspace}[2009/10/20]
-\xspaceaddexceptions{"=}
-%    \end{macrocode}
-% Für das Paket \pkg{geometry} erfolgen durch \TUDScript vielerlei Anpassungen. 
-% Um bei einer signifikanten Änderung des Paketes passend reagieren zu können, 
-% wird auf das aktuelle Paketdatum geprüft und für neue Versionen eine Warnung
-% erzeugt.
-% \ToDo{Kann raus, sobald \pkg{geometry} nicht mehr notwendig}[v2.07]
-%    \begin{macrocode}
-%<*!(doc|package)>
-\@ifpackagelater{geometry}{2018/04/17}{%
-  \ClassWarning{\TUD@Class@Name}{%
-    Package `geometry' was updated so some patches\MessageBreak%
-    are maybe outdated%
-  }%
-}{}%
-%</!(doc|package)>
-%    \end{macrocode}
-% \begin{macro}{\vTUDScript}
-% \begin{macro}{\vKOMAScript}
-% Diese Befehle geben in der Dokumentation die aktuelle Version von \TUDScript
-% sowie die mindestens notwendige Version von \KOMAScript{} aus.
-%    \begin{macrocode}
-\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
-\newcommand*\vKOMAScript{v\TUD@Version@KOMA}
-%    \end{macrocode}
-% \end{macro}^^A \vKOMAScript
-% \end{macro}^^A \vTUDScript
-% \begin{macro}{\tud@english}
-% Mit diesem Befehl wird der Inhalt des Arumentes mit englischen Trennmustern 
-% gesetzt, falls die Sprache geladen wurde.
-%    \begin{macrocode}
-\newcommand*\tud@english[1]{#1}
-\AtBeginDocument{%
-  \iflanguageloaded{english}{%
-    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  }{}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@english
-% Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
-% Verwendung von Systembefehlen auf der Kommandozeile unabhängig von der 
-% genutzten Engine. Sollte \app{lualatex} als Dokumentprozessor eingesetzt
-% werden, sind dennoch die \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und
-% \cs{pdf(@)shellescape} nötig, wofür das Paket \pkg{pdftexcmds} geladen wird.
-%    \begin{macrocode}
-\RequirePackage{shellesc}[2016/06/07]
-\RequirePackage{pdftexcmds}[2016/05/21]
-%    \end{macrocode}
 %
 % \iffalse
-%</body|class&doc>
-%<*!doc>
-%<*body>
-%<*class>
+%<*package&body>
 % \fi
 %
-% \begin{macro}{\tud@list@sort}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@list@@sort}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@templist}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\if@tud@list@sorted}
-% \changes{v2.02}{2014/07/25}{neu}^^A
-% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
-% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge in eine 
-% kommagetrennte Auflistung. Diese wird anschließend wieder in eine
-% \pkg{etoolbox}-Liste umgewandelt.
-%    \begin{macrocode}
-\newcommand*\tud@templist{}
-\let\tud@templist\relax
-\newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \let\tud@reserved#1%
-    \let\tud@templist\relax%
-    \forlistloop\tud@list@@sort{\tud@reserved}%
-    \let\tud@reserved\relax%
-    \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
-    \let#1\tud@reserved%
-  }%
-}
-%    \end{macrocode}
-% Hier erfolgt die eigentliche Sortierung der Liste.
-%    \begin{macrocode}
-\tud@newif\if@tud@list@sorted
-\newcommand*\tud@list@@sort[1]{%
-%    \end{macrocode}
-% Der erste Eintrag wird direkt der Liste hinzugefügt.
-%    \begin{macrocode}
-  \ifx\tud@templist\relax%
-    \def\tud@templist{#1}%
-%    \end{macrocode}
-% Weitere Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
-% Dabei wird die kommagetrennte Liste \cs{tud@templist} durchlaufen und
-% \cs{@tempb} als Hilfsmakro verwendet, in welches die aktuelle Liste innerhalb 
-% der \cs{@for}-Schleife stückweise expandiert wird. Wenn das aktuelle Element
-% an der dafür passenden Stelle eingesetzt wurde, wird \cs{if@tud@list@sorted} 
-% gesetzt.
-%    \begin{macrocode}
-  \else%
-    \@tud@list@sortedfalse%
-    \let\@tempb\@empty%
-    \@for\@tempa:=\tud@templist\do{%
-%    \end{macrocode}
-% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
-% angehangen.
-% \ToDo{\cs{expandafter}\cs{edef}\cs{expandafter} ist quatsch, oder?}[v2.07]
-%    \begin{macrocode}
-      \if@tud@list@sorted%
-        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-      \else%
-%    \end{macrocode}
-% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
-% durchlaufenenen Liste, so wird dieser davor eingefügt. Dabei muss der Fall, 
-% dass das Element der erste Eintrag in der temporären Liste \cs{@tempb} ist, 
-% eine Sonderbehandlung erfolgen. Anschließend wird \cs{@tud@list@sortedtrue} 
-% gesetzt.
-%    \begin{macrocode}
-        \expandafter\ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              #1,\@tempa%
-            }%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              \@tempb,#1,\@tempa%
-            }%
-          \fi%
-          \@tud@list@sortedtrue%
-        \else%
-%    \end{macrocode}
-% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
-% Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
-% Elementes wird abgedeckt.
-%    \begin{macrocode}
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-          \fi%
-        \fi%
-      \fi%
-    }%
-%    \end{macrocode}
-% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
-% dies hier am Ende der Liste.
-%    \begin{macrocode}
-    \if@tud@list@sorted\else%
-      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
-    \fi%
-%    \end{macrocode}
-% Die temporäre Liste \cs{@tempb} wird auf \cs{tud@templist} überschrieben.
-%    \begin{macrocode}
-    \let\tud@templist\@tempb%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@list@sorted
-% \end{macro}^^A \tud@templist
-% \end{macro}^^A \tud@list@@sort
-% \end{macro}^^A \tud@list@sort
-%
-% \iffalse
-%</class>
-%<*package>
-% \fi
-%
-% \subsection{Zusätzliche Pakete für das Paket \pkg{tudscrtutorial}}
+% \subsection{Zusätzliche Pakete für das Paket \pkg{tudscrmanual}}
 %
 % Mit dem Paket \pkg{scrwfile} lassen sich Probleme mit zu wenig verfügbaren 
 % Streams für das Schreiben externer Datein beheben. Hintergrund ist die
@@ -321,13 +112,12 @@
 %    \end{macrocode}
 %
 % \iffalse
-%</package>
-%</body>
+%</package&body>
 %<*option>
 % \fi
 %
 % \subsection{%
-%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrtutorial}%
+%   Optionen für die Ausgabe von \cls{tudscrmanual} und \pkg{tudscrmanual}%
 % }
 %
 % \begin{option}{final}
@@ -542,35 +332,13 @@
 %
 % \iffalse
 %</class>
-%</body>
-%</!doc>
-%<*body|class&doc>
 % \fi
 %
 % \subsection{Anpassungen für das Paket \pkg{hyperref} und Querverweise}
 %
-% Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
-% geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
-%    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
-\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
-%    \end{macrocode}
-% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
-% Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
-% Funktionalität definiert. 
-%    \begin{macrocode}
-\AfterAtEndOfPackage*{hyperref}{%
-  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
-  \hypersetup{colorlinks,linkcolor=blue}%
-%    \end{macrocode}
-% Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
-%
-% \iffalse
-%<*!doc>
-% \fi
-%
 % Die Bezeichner für die Abschnittsebenen werden umbenannt.
 %    \begin{macrocode}
+\AfterPackage*{hyperref}{%
   \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
   \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
   \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
@@ -651,11 +419,6 @@
 % \end{macro}^^A \auto@@refname
 % \end{macro}^^A \auto@refname
 % \end{macro}^^A \autorefname
-% Nun die Einstellungen für \cls{tudscrdoc}.
-%
-% \iffalse
-%</!doc>
-% \fi
 %
 % Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
 %    \begin{macrocode}
@@ -669,55 +432,18 @@
 % Zunächst die direkt innerhalb der Dokumentation verwendeten Befehle nebst 
 % dazugehöriger Warnung.
 %    \begin{macrocode}
-%<*!doc>
 %<*class>
   \ClassWarningNoLine{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarningNoLine{tudscrtutorial}%
+  \PackageWarningNoLine{tudscrmanual}%
 %</package>
   {%
     It is strongly recommended to load package `hyperref'. \MessageBreak%
     Nevertheless, essential commands are rudimentarily\MessageBreak%
     defined. At least the package `url' is loaded%
   }%
-%</!doc>
 %    \end{macrocode}
-% \begin{macro}{\hypersetup}
-% \begin{macro}{\href}
-% \begin{macro}{\phantomsection}
-% \begin{macro}{\pdfbookmark}
-% \begin{macro}{\currentpdfbookmark}
-% \begin{macro}{\subpdfbookmark}
-% \begin{macro}{\belowpdfbookmark}
-% \begin{macro}{\texorpdfstring}
-% \begin{macro}{\nolinkurl}
-% Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
-%    \begin{macrocode}
-  \providecommand*\hypersetup[1]{}%
-  \providecommand*\href[3][]{#3}%
-  \providecommand*\phantomsection{}%
-  \providecommand*\pdfbookmark[3][]{}%
-  \providecommand*\currentpdfbookmark[2]{}%
-  \providecommand*\subpdfbookmark[2]{}%
-  \providecommand*\belowpdfbookmark[2]{}%
-  \providecommand*\texorpdfstring[2]{#1}%
-  \RequirePackage{url}[2013/09/16]%
-  \providecommand*\nolinkurl[1]{\url{#1}}%
-%    \end{macrocode}
-% \end{macro}^^A \nolinkurl
-% \end{macro}^^A \texorpdfstring
-% \end{macro}^^A \belowpdfbookmark
-% \end{macro}^^A \subpdfbookmark
-% \end{macro}^^A \currentpdfbookmark
-% \end{macro}^^A \pdfbookmark
-% \end{macro}^^A \phantomsection
-% \end{macro}^^A \href
-% \end{macro}^^A \hypersetup
-%
-% \iffalse
-%<*!doc>
-% \fi
 %
 % \begin{macro}{\hyperpage}
 % \begin{macro}{\autoref}
@@ -779,48 +505,8 @@
 %</class>
   \providecommand*\tudhyperref[2]{#2}%
   \providecommand*\autorefname[1][]{??\xspace}%
-%    \end{macrocode}
-%
-% \iffalse
-%</!doc>
-% \fi
-%
-%    \begin{macrocode}
 }
 %    \end{macrocode}
-% \begin{macro}{\hrfn}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
-% Mit diesem Makro können Hyperlinks im Fließtext erzeugt werden, welche 
-% zusätzlich noch die dazugeörige URL als Fußnote anzeigen.
-%    \begin{macrocode}
-\newcommand*\hrfn[2]{%
-  \href{#1}{\trim@spaces{#2}}%
-  \footnote{%
-    \begingroup%
-%    \end{macrocode}
-% Die Gruppe wird verwendet, um Unterstriche zu entschärfen, die im Zweifel zu 
-% Fehlern führen können.
-%    \begin{macrocode}
-      \def\_{_}%
-      \edef\@tempa{#1}%
-      \strut\expandafter\url\expandafter{\@tempa}%
-    \endgroup%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \hrfn
-% \begin{macro}{\mailto}
-% Ein Makro zur Angabe einer verlinkten E"~Mail-Adresse.
-%    \begin{macrocode}
-\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
-%    \end{macrocode}
-% \end{macro}^^A \mailto
-%
-% \iffalse
-%</body|class&doc>
-%<*body>
-% \fi
 %
 % \begin{macro}{\fullref}
 % Verbesserte Referenzierungen auf Seiten.
@@ -831,9 +517,6 @@
 % \end{macro}^^A \fullref
 %
 % \iffalse
-%</body>
-%<*!doc>
-%<*body>
 %<*class>
 % \fi
 %
@@ -1286,10 +969,15 @@
 % \begin{macro}{\bsc}
 % \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
 %   \cs{DeclareRobustCommand}}^^A
-% Eine einfacher zu verwendende Kurzform.
+% \begin{macro}{\txb}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% Eine einfacher zu verwendende Kurzform für den Backslash sowie eine 
+% mikrotypografisch angepasste Version von \cs{textbar}.
 %    \begin{macrocode}
 \newrobustcmd*\bsc{\@backslashchar}
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
 %    \end{macrocode}
+% \end{macro}^^A \txb
 % \end{macro}^^A \bsc
 % \begin{macro}{\suffix}
 % \changes{v2.05}{2015/10/27}{neu}^^A
@@ -1342,7 +1030,7 @@
 % festgelegt. Ein Eintrag in den Index wird mit \cs{Process@Index} realisiert.
 % Für die Änderungsliste wird der Befehl \cs{Process@ChangedAt} genutzt, um die 
 % entsprechende Formatierung zu gewährleisten, wobei dies nur für die Klasse
-% \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrtutorial} gilt.
+% \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrmanual} gilt.
 %
 % \begin{macro}{\ProcessorKeyVal}
 % \changes{v2.05}{2015/11/01}{neu}^^A
@@ -1384,7 +1072,7 @@
   \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageError{tudscrtutorial}%
+  \PackageError{tudscrmanual}%
 %</package>
     {Wrong usage of optional argument for value}%
     {There are two optional arguments for a value given!}%
@@ -1411,7 +1099,7 @@
     \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-    \PackageError{tudscrtutorial}%
+    \PackageError{tudscrmanual}%
 %</package>
       {Nested environment `Bundle'}{%
       It is not possible to nest this environment, when\MessageBreak%
@@ -1448,7 +1136,7 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{sm}{#2}
 \NewDocumentCommand\Application{s m !d() !d<> !d||}{%
-  \Markup@SetFormat{\sbsfont}%
+  \Markup@SetFormat{\sbifont}%
   \IfValueTF{#4}{%
     \Process@Markup{\Application{#2}}(#3)<#4>%
   }{%
@@ -2687,13 +2375,7 @@
       \let\@tempb\relax%
       \IfValueT{#6}{%
         \def\@tempb{%
-%<*class>
-          \ClassWarning{tudscrmanual}%
-%</class>
-%<*package>
-          \PackageWarning{tudscrtutorial}%
-%</package>
-          {%
+          \ClassWarning{tudscrmanual}{%
             You've used the unknown cross-reference\MessageBreak%
             shorthand '#6'. Only 'auto', 'page' and 'full'\MessageBreak%
             as well as 'none' \IfValueT{#5}{or 'url' }are valid%
@@ -2734,7 +2416,7 @@
             \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-            \PackageWarning{tudscrtutorial}%
+            \PackageWarning{tudscrmanual}%
 %</package>
             {%
 %<*class>
@@ -2891,7 +2573,7 @@
     \ClassError{tudscrmanual}%
 %</class>
 %<*package>
-    \PackageError{tudscrtutorial}%
+    \PackageError{tudscrmanual}%
 %</package>
       {\string\Markup@SetFormat\space unused}%
       {It seems you have forgotten to use \string\Markup@SetFormat.}%
@@ -3198,8 +2880,8 @@
 % mit |"| maskiert.
 %    \begin{macrocode}
     \def#3{#5}%
-    \tud@replace#2{@}{"@}%
-    \tud@replace#3{@}{"@}%
+    \tud@replace@@in#2{@}{"@}%
+    \tud@replace@@in#3{@}{"@}%
 %    \end{macrocode}
 % In \cs{@idxbundle} wird ggf. das Paket oder die Klasse gespeichert, für die 
 % der aktuelle Eintrag erzeugt werden soll. Eine explizite Angabe wird in jedem 
@@ -3373,7 +3055,7 @@
   \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarning{tudscrtutorial}%
+  \PackageWarning{tudscrmanual}%
 %</package>
     {You should use `|see' instead of `|seealso'}%
   \tud@cleversee{\alsoname}%
@@ -3408,6 +3090,8 @@
 % \end{macro}^^A \tud@cleversee
 % \end{macro}^^A \cleverseealso
 % \end{macro}^^A \cleversee
+% \begin{macro}{\seesep}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
 % \begin{macro}{\seeref}
 % \changes{v2.05}{2015/11/02}{neu}^^A
 % \begin{macro}{\seeidx}
@@ -3415,15 +3099,17 @@
 % statt \cs{alsosee} genutzt werden. Das Makro \cs{seeidx} verweist auf die 
 % Seite eines Indexes.
 %    \begin{macrocode}
-%<*class>
+\newrobustcmd*\seesep{\txb}%
 \NewDocumentCommand\seeref{s m}{%
   \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
 }
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
+%<*class>
+\newrobustcmd*\seeidx[2]{\pageref{idx:#1}}
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \seeidx
 % \end{macro}^^A \seeref
+% \end{macro}^^A \seesep
 %
 % \subsubsection{Erstellen von Indexeinträgen}
 %
@@ -3460,7 +3146,7 @@
         \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-        \PackageWarning{tudscrtutorial}%
+        \PackageWarning{tudscrmanual}%
 %</package>
         {%
           You've used the starred version. No index entry\MessageBreak%
@@ -3756,7 +3442,7 @@
   \fi%
 %</class>
 %    \end{macrocode}
-% Fur das Paket \pkg{tudscrtutorial} erfolgt eine einfache Ausgabe der Indexe.
+% Fur das Paket \pkg{tudscrmanual} erfolgt eine einfache Ausgabe der Indexe.
 %    \begin{macrocode}
 %<package>  \indexprologue[\tud@idx@skip]{}%
 %    \end{macrocode}
@@ -4782,7 +4468,7 @@
   \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
-  \PackageWarning{tudscrtutorial}%
+  \PackageWarning{tudscrmanual}%
 %</package>
   {%
     File `#1' is missing!\MessageBreak%
@@ -5874,30 +5560,13 @@
 % \end{macro}^^A \tud@todo@type@use
 % \end{macro}^^A \ToDo
 %
-% \iffalse
-%</body>
-%</!doc>
-% \fi
-%
 % \subsection{Verschiedenes für die Dokumentationsklassen und -pakete}
 %
-% Sowohl für die Klasse \cls{tudscrmanual} als auch \cls{tudscrdoc} werden ein 
-% paar Befehle zur komfortablen Verwendung im Fließtext definiert. Außerdem 
-% erfolgen mittels einiger Pakete verschiedene Formateinstellungen.
+% Für die Klasse \cls{tudscrmanual} werden ein paar Befehle zur komfortablen 
+% Verwendung im Fließtext definiert. Außerdem erfolgen mittels einiger Pakete 
+% verschiedene Formateinstellungen.
 %
 % \subsubsection{Ergänzend geladene Pakete}
-%
-% Sprachabhängiges Setzen von Anführungszeichen. Das Laden des Paketes darf 
-% erst nach \pkg{inputenc} oder \pkg{inputenx} erfolgen.
-%    \begin{macrocode}
-%<*body|class&doc>
-\RequirePackage{csquotes}[2011/10/22]
-%</body|class&doc>
-%    \end{macrocode}
-%
-% \iffalse
-%<*body>
-% \fi
 %
 % Für den Fließtext werden Pfeile u.\,ä. durch \pkg{textcomp} bereitgestellt.
 %    \begin{macrocode}
@@ -5977,140 +5646,16 @@
 %
 % \iffalse
 %</class>
-%</body>
-%<*body|class&doc>
 % \fi
-%
-% \subsubsection{Gezieltes Ersetzen von Inhalten in Strings}
-%
-% \begin{macro}{\tud@replace}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle oder 
-% Labels die möglicherweise enthaltenen |@|"~Zeichen zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird \cs{@tempa} als ein durch \cs{@nil} abgegrenztes Makro mit 
-% zwei Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Mit diese beiden Argumente wird
-% das Makro \cs{@tempb} aufgerufen. 
-%    \begin{macrocode}
-    \toks@{\def\@tempa##1}%
-    \addto@hook@expandafter\toks@{\detokenize{#2}}%
-    \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} ist
-% |\def\@tempa#1|\meta{Zeichen}|#2\@nil{\@tempb{#1}{#2}}|
-% und definiert \cs{@tempa}.
-%    \begin{macrocode}
-    \the\toks@%
-%    \end{macrocode}
-% Nun wird \cs{@tempb} definiert. Dieses Makro fügt dem Zielmakro das erste
-% Argumente gefolgt von \meta{Ersatzzeichen} hinzu. Mit dem zweiten Argument
-% wird anschließend |\@tempa##2\@nil| so lange rekursiv aufgerufen, bis es
-% wirklich leer ist, wodurch das zweite Argument \meta{Zeichen} sukzessive 
-% durch das dritte Argument \meta{Ersatzzeichen} ersetzt wird.
-%    \begin{macrocode}
-    \def\@tempb##1##2{%
-      \IfArgIsEmpty{##2}{%
-        \appto#1{##1}%
-        \let\@tempc\relax%
-      }{%
-        \appto#1{##1#3}%
-        \def\@tempc{\@tempa##2\@nil}%
-      }%
-      \@tempc%
-    }%
-%    \end{macrocode}
-% Nachdem die beiden notwendigen Makros definiert wurden, erfolgt jetzt die 
-% eigentliche Ersetzung. Dafür wird der Inhalt des Zielmakros als Argument für 
-% \cs{@tempa} verwendet. Diesem wird das zu ersetzende Zeichen gefolgt von
-% \cs{@nil} hinzugefügt, um das Argument abschließend zu begrenzen.
-%    \begin{macrocode}
-    \toks@{\@tempa}%
-    \edef\@tempc{\expandafter\detokenize\expandafter{#1}}%
-    \addto@hook@expandafter\toks@{\@tempc}%
-    \addto@hook@expandafter\toks@{\detokenize{#2}\@nil}%
-%    \end{macrocode}
-% Der Inhalt von \cs{toks@} hat die Form |\@tempa#1|\meta{Zeichen}|\@nil|,
-% wobei der Inhalt von |#1| expandiert wird.
-%    \begin{macrocode}
-    \def#1{}%
-    \the\toks@%
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#1{#1}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace
-%
 %
 % \subsubsection{Zusätzliche Markup-Befehle}
 %
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\Forum}
-% \begin{macro}{\CTAN}
-% \changes{v2.05}{2015/11/22}{neu}^^A
-% \begin{macro}{\GitHubRepo}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\Download}
-% \changes{v2.05g}{2016/11/08}{neu}^^A
 % \begin{macro}{\notudscrartcl}
 % \begin{macro}{\scrguide}
 % \changes{v2.02}{2014/09/04}{neu}^^A
 % \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
 % Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
 %    \begin{macrocode}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-\newcommand*\TUDForum{%
-  \mbox{T\kern.05em U\kern.05em D-\LaTeX-Forum}\xspace%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{\def\TUDForum{TUD-LaTeX-Forum}}%
-}
-\NewDocumentCommand\Forum{!s !t' !O{\TUDForum} !d<>}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \def\@tempa{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  \edef\@tempa{{\@tempa\IfValueT{#4}{viewtopic.php?t=#4}}}%
-  \eaddto@hook\toks@{\@tempa}%
-  \IfBooleanF{#2}{\addto@hook\toks@{{#3}}}%
-  \the\toks@\xspace%
-}
-\NewDocumentCommand\CTAN{!s !o !g}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
-  \addto@hook\toks@{%
-    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
-  }%
-  \the\toks@\xspace%
-}
-\NewDocumentCommand\GitHubRepo{!s !t' !O{releases} !d<>}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \def\@tempa{https://github.com/tud-cd/tudscr/}%
-  \edef\@tempa{{\@tempa\IfValueTF{#4}{issues/#4}{#3}}}%
-  \eaddto@hook\toks@{\@tempa}%
-  \IfBooleanF{#2}{%
-    \addto@hook\toks@{{\tud@english{GitHub-Repository~\textcdsn{tudscr}}}}%
-  }%
-  \the\toks@\xspace%
-}
-%<*!doc>
-\newcommand*\Download[1]{%
-  https://github.com/tud-cd/tudscr/releases/download/#1%
-}
 \newcommand*\notudscrartcl{%
   F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese 
   Option nicht verf\"ugbar.%
@@ -6123,109 +5668,9 @@
   \addto@hook\toks@{{#2}}%
   \the\toks@\xspace%
 }
-%</!doc>
 %    \end{macrocode}
 % \end{macro}^^A \scrguide
 % \end{macro}^^A \notudscrartcl
-% \end{macro}^^A \Download
-% \end{macro}^^A \GitHubRepo
-% \end{macro}^^A \CTAN
-% \end{macro}^^A \Forum
-% \end{macro}^^A \Attention
-%
-% \begin{macro}{\CD}
-% \begin{macro}{\CDs}
-% \begin{macro}{\TUD}
-% \begin{macro}{\TnUD}
-% \begin{macro}{\TUDCD}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\TUDCDs}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\DDC}
-% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
-% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
-% dem \pkg{xspace}-Paket genutzt.
-%    \begin{macrocode}
-\newcommand*\CD{\tud@english{Corporate Design}\xspace}
-\newcommand*\CDs{\tud@english{Corporate Designs}\xspace}
-\newcommand*\TUD{Technische Universit\"at Dresden\xspace}
-\newcommand*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}
-\newcommand*\TUDCDs{\CDs der \TnUD}
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{\def\DDC{DRESDEN-concept}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \DDC
-% \end{macro}^^A \TUDCDs
-% \end{macro}^^A \TUDCD
-% \end{macro}^^A \TnUD
-% \end{macro}^^A \TUD
-% \end{macro}^^A \CDs
-% \end{macro}^^A \CD
-% \begin{macro}{\OpenSans}
-% \changes{v2.06}{2018/07/02}{neu}^^A
-% \begin{macro}{\tud@cdfont@texteb}
-% \changes{v2.06}{2018/08/31}{neu}^^A
-% \begin{macro}{\Univers}
-% \begin{macro}{\DIN}
-% Für die Nennung der Schriften spezielle Markos bereitgestellt.
-%    \begin{macrocode}
-\DeclareTextFontCommand\tud@cdfont@texteb{%
-  \fontfamily{\tud@cdfont@fam}\fontseries{\tud@cdfont@ebf}\selectfont%
-}
-\newrobustcmd*\OpenSans{%
-  \texorpdfstring{\tud@cdfont@texteb{Open~Sans}}{Open Sans}\xspace%
-}
-\newrobustcmd*\Univers{\texorpdfstring{\textcdbi{Univers}}{Univers}\xspace}
-\newrobustcmd*\DIN{\texorpdfstring{\textcdxi{DIN~Bold}}{DIN Bold}\xspace}
-%    \end{macrocode}
-% \end{macro}^^A \DIN
-% \end{macro}^^A \Univers
-% \end{macro}^^A \tud@cdfont@texteb
-% \end{macro}^^A \OpenSans
-% \begin{macro}{\@pnumwidth}
-% \begin{macro}{\@tocrmarg}
-% Für das Inhaltsverzeichnis werden die beiden Längen angepasst.
-%    \begin{macrocode}
-\renewcommand*\@pnumwidth{2.1em}%
-\renewcommand*\@tocrmarg{3.1em}%
-%    \end{macrocode}
-% \end{macro}^^A \@tocrmarg
-% \end{macro}^^A \@pnumwidth
-%
-% \iffalse
-%</body|class&doc>
-%<*body>
-% \fi
-%
-% \begin{macro}{\textsbn}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\sbnfont}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\textsbs}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{macro}{\sbsfont}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Für die Anwenderdokumentation werden weitere Auszeichnungsbefehle definiert.
-%    \begin{macrocode}
-\newcommand*\textsbn{}
-\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
-\DeclareTextFontCommand\textsbn{\sbnfont}
-\newcommand*\textsbs{}
-\newrobustcmd*\sbsfont{\sffamily\bfseries\slshape}
-\DeclareTextFontCommand\textsbs{\sbsfont}
-%    \end{macrocode}
-% \end{macro}^^A \sbsfont
-% \end{macro}^^A \textsbs
-% \end{macro}^^A \sbnfont
-% \end{macro}^^A \textsbn
 %
 % \iffalse
 %</body>
