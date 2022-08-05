@@ -114,6 +114,8 @@
 % Für die Titelseite werden~-- wie auch durch das Paket \pkg{hyperref}~-- die 
 % Fußnoten mit dem Befehl \cs{tud@x@hyperref@realfootnotes} auf den originalen 
 % Zustand zurückgesetzt.
+% \ToDo{nur als internen Befehl definieren, dazugehörige Option nötig?}[v2.07]
+% \ToDo{\cs{tud@x@hyperref@realfootnotes} prüfen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
 \newcommand*\tud@x@hyperref@realfootnotes{}
@@ -905,6 +907,7 @@
 %    \end{macrocode}
 % Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
 % angehangen.
+% \ToDo{\cs{expandafter}\cs{edef}\cs{expandafter} ist quatsch, oder?}[v2.07]
 %    \begin{macrocode}
       \if@tud@list@sorted%
         \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
@@ -1038,6 +1041,7 @@
 % \begin{macro}{\@pnumwidth}
 % \begin{macro}{\@tocrmarg}
 % Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
+% \ToDo{direkt in die Klassen übernehmen}[v2.07]
 %    \begin{macrocode}
 \renewcommand*\@pnumwidth{2.1em}
 \renewcommand*\@tocrmarg{3.1em}
@@ -1196,14 +1200,14 @@
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. 
 %    \begin{macrocode}
-\NewDocumentCommand\GitHubRepo{!s !t' !O{releases} !d<>}{%
+\NewDocumentCommand\GitHubRepo{!s !t' !O{releases} !D(){tud-cd/tudscr} !d<>}{%
   \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
   \IfBooleanT{#2}{\toks@{\url}}%
-  \def\@tempa{https://github.com/tud-cd/tudscr/}%
-  \edef\@tempa{{\@tempa\IfValueTF{#4}{issues/#4}{#3}}}%
-  \eaddto@hook\toks@{\@tempa}%
+  \def\@tempa{https://github.com/#4/}%
+  \edef\@tempa{{\@tempa\IfValueTF{#5}{issues/#5}{#3}}}%
+  \addto@hook@expandafter\toks@{\@tempa}%
   \IfBooleanF{#2}{%
-    \addto@hook\toks@{{\tud@english{GitHub-Repository~\textsbn{tudscr}}}}%
+    \addto@hook\toks@{{\tud@english{GitHub-Repository~\textsbn{#4}}}}%
   }%
   \the\toks@\xspace%
 }
@@ -1243,7 +1247,7 @@
   \IfBooleanT{#2}{\toks@{\url}}%
   \def\@tempa{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
   \edef\@tempa{{\@tempa\IfValueT{#4}{viewtopic.php?t=#4}}}%
-  \eaddto@hook\toks@{\@tempa}%
+  \addto@hook@expandafter\toks@{\@tempa}%
   \IfBooleanF{#2}{\addto@hook\toks@{{#3}}}%
   \the\toks@\xspace%
 }

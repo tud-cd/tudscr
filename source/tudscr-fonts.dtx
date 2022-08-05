@@ -202,6 +202,7 @@
 % wird geprüft, ob diesem mit den entsprechenden Optionen das Bereitstellen der 
 % Mathematikschriften überlassen wurde. In diesem Fall wird eine entsprechende 
 % Warnung an \cs{tud@cdmath@wrn} angehängt.
+% \ToDo{\cs{IfPackageAtLeastTF} oder ganz raus}[v2.07]
 %    \begin{macrocode}
 \tud@newif\if@tud@x@fontspec@enabled
 \PassOptionsToPackage{no-math}{fontspec}
@@ -246,6 +247,7 @@
 % Bei der Nutzung des Pakets \pkg{unicode-math} kann es ebenfalls zu Problemen 
 % mit den mathematischen Schriften kommen, weshalb auch hier eine Warnung an
 % \cs{tud@cdmath@wrn} angehängt wird.
+% \ToDo{Paket \pkg{unicode-math} zumindest rudimentär unterstützen?}[v2.07]
 %    \begin{macrocode}
 \AfterPackage*{unicode-math}{%
   \appto\tud@cdmath@wrn{%
@@ -268,6 +270,9 @@
 % \changes{v2.04}{2015/04/24}{Erkennung des Paketes \pkg{mweights}}^^A
 % Das Paket \pkg{mweights} wird geladen, um unterschiedliche Schriftschnitte
 % für beispielsweise die TypeWriter-Schriften nutzen zu können.
+% \ToDo{Paket \pkg{mweights} wurde in Kernel integriert}[v2.07]%
+% \ToDo{an neues NFSS anpassen, \cs{DeclareFontSeriesDefault} nutzen}[v2.07]%
+% \ToDo{ist \cs{IfFontSeriesContextTF} irgendwo nötig?}[v2.07]%
 %    \begin{macrocode}
 \TUD@RecommendPackage{mweights}[2017/03/30]%
 \tud@newif\if@tud@x@mweights@enabled
@@ -1483,6 +1488,7 @@
 % \begin{macro}{\tud@cdfont@declare@textsymb}
 % \changes{v2.06g}{2020/06/18}{neu}^^A
 % Die Definition der Textsymbole für die \val{TS1}-Kodierung.
+% \ToDo{weitere Symbole (\cs{textohm} etc.) der Open Sans hinzufügen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@declare@textsymb{%
   \tud@cdfont@declare@symb{textleftarrow}{TS1}{iwona}{24}%
@@ -1626,6 +1632,7 @@
 % Auswahl der Schriften des \CDs verwendet. Dabei erfolgt die Definition der 
 % Schriften selbst mit \cs{tud@cdfont@@init} und das Festlegen der Befehle zur 
 % expliziten Schriftauswahl mit \cs{tud@cdfont@@@init}.
+% \ToDo{Condensed Schriften mit neuer Open Sans?}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@init{%
   \tud@cdfont@@init%
@@ -2441,6 +2448,9 @@
 %   gesichert und neu definiert werden, weil diese ggf. von anderen Paketen
 %   umdefiniert werden. Bspw. \cs{the}\cs{mathcode`!}
 % }[v2.07]
+% \ToDo{cdmath=disabled; s. \protecting{\GitHubRepo<45>; \Forum<511>}}[v2.07]
+% \ToDo{griech. Lettern als Symbole (nicht tudupgrk/tuditgrk); boldmath}[v2.07]
+% \ToDo{inverse Suche: \protecting{\Forum<539>}}[v2.07]
 %    \begin{macrocode}
 \tud@locked@newbool{@tud@cdmath@active}
 \tud@locked@bool@preset{@tud@cdmath@active}{true}%
@@ -2945,6 +2955,7 @@
 % sind aber nicht vollends stimmig. Der erste funktioniert nicht, sobald der 
 % Anwender \val{-interaction-mode} selbst definiert und für den zweiten müssen 
 % zumindest eingeschränkte Schreibrechte zwingend aktiviert sein.
+% \ToDo{cmr nicht zwingend notwendig}[v2.07]%^^A nur wenn \@tud@lgrgreekstrue
 %    \begin{macrocode}
   \@tud@res@swafalse%
   \if@tud@cdmath@fam@exist%
@@ -3009,7 +3020,14 @@
         defaultrm,defaultbf,defaultit,defaultsf,defaulttt%
       }{mathastext}%
       \RequirePackage{mathastext}[2018/08/22]%
+%    \end{macrocode}
+% \ToDo{cmr nicht notwendig}[v2.07]%^^A {\tud@cdfont@fam}{m}{b}{n}{it}%
+%    \begin{macrocode}
+%^^A \if@tud@lgrgreeks
       \tud@math@declare@lgrgreeks{cmr}{m}{bx}{n}{it}%
+%^^A \else
+%^^A   \tud@math@declare@lgrgreeks{\tud@cdfont@fam}{m}{b}{n}{it}%
+%^^A \fi
     \fi%
     \providecommand*\MTDeclareVersion[6][]{\DeclareMathVersion{##2}}%
     \tud@cdmath@@init%
@@ -3017,7 +3035,7 @@
 % Die Symbole für aufrechte und kursive griechische Lettern werden definiert. 
 % Da im Paket \pkg{opensans} keine mathematischen Schriftkodierungen enthalten 
 % sind, wird in diesem Fall auf die LGR-Kodierung zurückgegriffen.
-% \ToDo{kann mit \pkg{opensans-math} raus}[v2.??]
+% \ToDo{könnte mit \pkg{opensans-math} raus}[v2.08]
 %    \begin{macrocode}
     \if@tud@cdoldfont@active%
       \tud@res@cnt=\z@\relax%
@@ -3187,7 +3205,7 @@
 %   sich anbieten, die OML-Kodierung ähnlich zu \pkg{euler[vm]} auf eine 
 %   U-Kodierung zu erweitern und aufrechte griechische Lettern einzubinden, um 
 %   ein Alphabet zu sparen. Siehe Kodierungen FML/FMS, LML/LMS, LBL/LBS, LS1/LS2
-% }[v2.??]
+% }[v2.08]
 %    \begin{macrocode}
     \SetSymbolFont{letters}{#1}{OML}{iwona}{#4}{it}%
     \SetSymbolFont{letters}{#2}{OML}{iwona}{#5}{it}%
@@ -3269,6 +3287,7 @@
 % Wurde ein Paket geladen, welches die \pkg{amsfonts}-Schriftfamilie definiert,
 % so wird bei der Verwendung von \OpenSans eine Information ausgegeben, dass im 
 % Zweifel das Paket \pkg{mdsymbol} besser zu den Schriften des \CDs passt.
+% \ToDo{hinweis zu mdsymbol raus, bzw. Laden verzögern!}[v2.07]
 %    \begin{macrocode}
       \else%
         \@ifpackageloaded{mdsymbol}{}{%
@@ -3546,7 +3565,7 @@
 % welche die von \cs{tud@cdmath@declare@symb} und \cs{tud@cdmath@declare@char} 
 % erzeugten Listen \cs{tud@cdmath@symb@list} und \cs{tud@cdmath@char@list} 
 % nutzen.
-% \ToDo{Kodierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.??]
+% \ToDo{Kodierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.08]
 % \begin{macro}{\tud@cdmath@declare@greek@uc}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % Hiermit werden die Auswahlbefehle für Majuskeln der der griechischen Lettern 
@@ -3572,7 +3591,7 @@
 % weshalb der Eintrag |\up|\meta{Letter} in \cs{tud@cdmath@symb@list} gesetzt 
 % wird, was mit einem fehlenden |\tud@cdmath@symbol@|\meta{Letter} zu einem 
 % undefinierten |\up|\meta{Letter} bei \opt{cdmath=true} führt.
-% \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.??]
+% \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.08]
 %    \begin{macrocode}
 %^^A  \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}%
 %^^A    {\the\numexpr\tud@res@cnt+128\relax}%
@@ -3737,6 +3756,9 @@
       \tud@math@loop@greeks@lc\tud@math@slanted@greeks%
     \fi%
   \else%
+%    \end{macrocode}
+% \ToDo{\opt{slantedgreek} auswerten?}[v2.07]
+%    \begin{macrocode}
     \tud@cs@restore{mv@normal}%
     \tud@cs@restore{mv@bold}%
     \tud@cdmath@symbols@reset%
@@ -4185,6 +4207,9 @@
 % mathematischen Satz nun endlich gesetzt.
 %    \begin{macrocode}
   \AtBeginDocument{\tud@math@set}%
+%    \end{macrocode}
+% \ToDo{Hook definieren, um Anwender eigenen Kram definieren zu lassen}[v2.07]
+%    \begin{macrocode}
 }
 %    \end{macrocode}
 %
