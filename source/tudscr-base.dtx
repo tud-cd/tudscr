@@ -527,18 +527,20 @@
 % \begin{macro}{\iflanguageloaded}
 % \changes{v2.05}{2015/11/23}{neu}^^A
 % Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist.
-% \ToDo{ist Befehl noch sinnvoll? use polyglossia \cs{xpg@[b]loaded}?}[v2.07]
-% \ToDo{für polyglossia auch mit \cs{ifbabellanguageloaded} testen?}[v2.07]
-% \ToDo{besser nur als internen Befehl definieren \cs{tud@if@...}?!}[v2.07]
 %    \begin{macrocode}
-\newcommand*\iflanguageloaded[1]{%
-  \PackageWarning{tudscrbase}{%
-    Whether package `babel' nor package `polyglossia' has been loaded%
+\AtEndPreamble{%
+  \providecommand*\iflanguageloaded[1]{%
+    \PackageWarning{tudscrbase}{%
+      `\string\iflanguageloaded' is not defined. Loading\MessageBreak%
+      either package `babel' or package `polyglossia'\MessageBreak%
+      is recommended%
+    }%
+    \def\iflanguageloaded##1{\expandafter\@secondoftwo}%
+    \iflanguageloaded{#1}%
   }%
-  \expandafter\@secondoftwo%
 }
 \AfterPackage*{babel}{%
-  \renewcommand*\iflanguageloaded[1]{%
+  \providecommand*\iflanguageloaded[1]{%
     \@expandtwoargs\in@{,#1,}{,\bbl@loaded,}%
     \ifin@%
       \expandafter\@firstoftwo%
@@ -547,7 +549,6 @@
     \fi%
   }%
 }
-\BeforePackage{polyglossia}{\undef\iflanguageloaded}
 %    \end{macrocode}
 % \end{macro}^^A \iflanguageloaded
 %
