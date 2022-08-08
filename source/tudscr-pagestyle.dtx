@@ -1074,7 +1074,7 @@
 % von \cs{includegraphics} möglichst gering zu halten.
 %    \begin{macrocode}
 \newcommand*\tud@newlayerbox[1]{%
-  \expandafter\newsavebox\csname tud@layer@#1\endcsname%
+  \global\expandafter\newsavebox\csname tud@layer@#1\endcsname%
 }
 \newcommand*\tud@savelayerbox[1]{%
   \global\expandafter\sbox\csname tud@layer@#1\endcsname%
@@ -1088,6 +1088,7 @@
 % \end{macro}^^A \tud@newlayerbox
 % \begin{macro}{\tud@vlayerbox}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \changes{v2.06o}{2022/08/08}{unschöner Fix für duplizierte Warnungen}^^A
 % Für die Ausgabe der Logos und Inhalte wird dieser Befehl definiert. Dieser 
 % setzt die im zweiten Argument angegebenen Inhalte in eine vertikale Box, 
 % deren gewünschte Höhe im ersten Argument angegeben wird. Für den Fall, dass 
@@ -1097,19 +1098,27 @@
 % ergreifen und nicht lediglich eine Meldung einer zu übervollen \cs{vbox} zu
 % erhalten.
 %    \begin{macrocode}
-\newcommand*\tud@vlayerbox[3]{%
+\newcommand*\tud@vlayerbox[4][]{%
   \begingroup%
-    \setbox\z@\vbox{#2}%
-    \tud@setdim\@tempdima{\ht\z@+\dp\z@-#1}%
-    \ifdim\@tempdima>\z@\relax%
-      \ClassWarning{\TUD@Class@Name}{%
-        #3\MessageBreak%
-        The maximum height is exceeded by\MessageBreak%
-        \the\@tempdima%
+    \setbox\z@\vbox{#3}%
+    \tud@setdim\tud@res@glue{\dimexpr\glueexpr#2\relax\relax}%
+    \ifdim\dimexpr\ht\z@+\dp\z@-\tud@res@glue\relax>\p@\relax%
+      \edef\tud@res@a{%
+        \noexpand\ClassWarning{\noexpand\TUD@Class@Name}{%
+          #4\noexpand\MessageBreak%
+          The total height of \the\dimexpr\ht\z@+\dp\z@\relax\space exceeds the%
+          \noexpand\MessageBreak maximum height (\the\tud@res@glue)%
+        }%
+      }%
+      \IfArgIsEmpty{#1}{\tud@res@a}{%
+        \expandafter\ifx\csname tud@layer@#1@wrn\endcsname\tud@res@a\else%
+          \tud@res@a%
+          \global\cslet{tud@layer@#1@wrn}\tud@res@a%
+        \fi%
       }%
     \fi%
   \endgroup%
-  \vbox to #1{#2}%
+  \vbox to #2{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@vlayerbox
@@ -1607,8 +1616,6 @@
 % \changes{v2.02}{2014/06/23}{neu}^^A
 % \begin{macro}{\tud@headlogo@fileoptions}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{macro}{\tud@headlogo@wrn}
-% \changes{v2.02}{2014/06/23}{neu}^^A
 % Diese Befehle dienen zum Einbinden eines möglichen Zweitlogos im Kopf bündig
 % zum rechten Seitenrand. Mit \cs{headlogo}\oarg{Optionsliste}\marg{Dateiname} 
 % werden der Dateiname und das optionale Argument in \cs{tud@headlogo@filename} 
@@ -1618,7 +1625,6 @@
 %    \begin{macrocode}
 \newcommand*\tud@headlogo@filename{}
 \newcommand*\tud@headlogo@fileoptions{}
-\newcommand*\tud@headlogo@wrn{}
 \newcommand*\headlogo[2][]{%
   \tud@comp@clearpage%
   \renewcommand*\tud@headlogo@filename{#2}%
@@ -1630,18 +1636,9 @@
 %    \begin{macrocode}
   \global\@tud@headlogo@option@settrue%
   \global\@tud@footlogo@option@settrue%
-  \gdef\tud@headlogo@wrn{%
-    \ClassWarning{\TUD@Class@Name}{%
-      Secondary logo `\string\headlogo{\tud@headlogo@filename}'\MessageBreak%
-      is overwritten with DDC logo. Maybe you should\MessageBreak%
-      use `ddcfoot' or better `ddc' instead of `ddchead'%
-    }%
-    \global\let\tud@headlogo@wrn\relax%
-  }%
   \tud@comp@resetpagestyle%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@headlogo@wrn
 % \end{macro}^^A \tud@headlogo@fileoptions
 % \end{macro}^^A \tud@headlogo@filename
 % \end{macro}^^A \headlogo
@@ -1703,6 +1700,15 @@
     \or% \tud@ddc@head@num=white
       \@tempc{DDC-30}{}%
     \fi%
+    \ifnum\@tempa>\z@\relax
+      \ifdefvoid{\tud@headlogo@filename}{}{%
+        \ClassWarning{\TUD@Class@Name}{%
+          Secondary logo `\tud@headlogo@filename'\MessageBreak%
+          is overwritten with DDC logo. Maybe you should\MessageBreak%
+          use `ddcfoot' or better `ddc' instead of `ddchead'%
+        }%
+      }%
+    \fi%
     \global\@tud@headlogo@option@setfalse%
   \fi%
 }
@@ -1711,11 +1717,13 @@
 % \end{macro}^^A \tud@headlogo@set
 % \begin{macro}{\tud@headlogo@use}
 % \changes{v2.04}{2015/05/31}{neu}^^A
+% \begin{macro}{\tud@layer@headlogo@wrn}
 % Die Ausgabe von \DDC- oder Zweitlogo im Kopf erfolgt mit diesem Makro. Dabei 
 % werden diese in einer Box vertikal zentriert.
 %    \begin{macrocode}
+\newcommand*\tud@layer@headlogo@wrn{}
 \newcommand*\tud@headlogo@use{%
-  \tud@vlayerbox{\tud@dim@mainlogoheight}{%
+  \tud@vlayerbox[headlogo]{\tud@dim@mainlogoheight}{%
     \vss%
     \hbox{%
       \tud@ddc@check%
@@ -1729,12 +1737,9 @@
   }{%
     The given `\string\headlogo{\tud@headlogo@filename}' is too large.%
   }%
-  \ifdefvoid{\tud@headlogo@filename}{}{%
-    \tud@ddc@check%
-    \ifnum\@tempa>\z@\relax\tud@headlogo@wrn\fi%
-  }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@headlogo@wrn
 % \end{macro}^^A \tud@headlogo@use
 %
 % \iffalse
@@ -1974,7 +1979,7 @@
 % das Makro \cs{tud@footlogo@ddc@set} definiert.
 %    \begin{macrocode}
 \newcommand*\tud@footlogo@ddc@set[2]{%
-  \tud@savelayerbox{foot@#1}{%
+  \tud@savelayerbox{#1}{%
     \includegraphics[%
       keepaspectratio,%
       totalheight=\dimexpr\glueexpr\tud@footlogoheight@dim\relax\relax%
@@ -1989,22 +1994,22 @@
 \newcommand*\tud@footlogo@option@set{%
   \tud@footlogoheight@set%
   \if@tud@footlogo@option@set%
-    \tud@footlogo@ddc@set{black}{DDC-22}%
-    \tud@footlogo@ddc@set{HKS41}{DDC-25}%
-    \tud@footlogo@ddc@set{white}{DDC-28}%
+    \tud@footlogo@ddc@set{foot@black}{DDC-22}%
+    \tud@footlogo@ddc@set{foot@HKS41}{DDC-25}%
+    \tud@footlogo@ddc@set{foot@white}{DDC-28}%
     \tud@ddc@check%
     \ifcase\@tempb\relax\or\or% \tud@ddc@foot@num=color
-      \tud@footlogo@ddc@set{option}{DDC-01}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-01}%
     \or% \tud@ddc@foot@num=colorblack
-      \tud@footlogo@ddc@set{option}{DDC-07}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-07}%
     \or% \tud@ddc@foot@num=gray
-      \tud@footlogo@ddc@set{option}{DDC-19}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-19}%
     \or% \tud@ddc@foot@num=black
-      \tud@footlogo@ddc@set{option}{DDC-22}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-22}%
     \or% \tud@ddc@foot@num=blue
-      \tud@footlogo@ddc@set{option}{DDC-25}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-25}%
     \or% \tud@ddc@foot@num=white
-      \tud@footlogo@ddc@set{option}{DDC-28}%
+      \tud@footlogo@ddc@set{foot@option}{DDC-28}%
     \fi%
     \global\@tud@footlogo@option@setfalse%
     \global\@tud@footlogo@cmd@settrue%
@@ -2015,15 +2020,17 @@
 % \end{macro}^^A \tud@footlogo@ddc@set
 % \begin{macro}{\tud@footlogo@ddc@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
+% \begin{macro}{\tud@layer@footlogo@wrn}
 % Die Ausgabe des \DDC-Logos im Fuß erfolgt mit diesem Makro. Dabei wird dieses 
 % in einer Box optisch~-- leicht nach oben verschoben~-- vertikal zentriert.
 %    \begin{macrocode}
+\newcommand*\tud@layer@footlogo@wrn{}
 \newcommand*\tud@footlogo@ddc@use[2]{%
   \tud@ddc@check%
   \ifcase\@tempb\relax\else% \tud@ddc@foot@num=!false
     \tud@footlogo@option@set%
     \setbox\z@\hbox{%
-      \tud@vlayerbox{#1}{%
+      \tud@vlayerbox[footlogo]{#1}{%
         \vss%
         \hbox to #2{%
           \hss%
@@ -2035,11 +2042,11 @@
         }%
         \vss\vss%
       }{%
-        You should reduce `footlogoheight', because it is\MessageBreak%
-        too high (\the\dimexpr\tud@footlogoheight@dim\relax). %
+        You should reduce `footlogoheight', because it is\noexpand\MessageBreak%
+        too high. %
         \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-          Alternatively you could use\MessageBreak%
-          option `extrabottommargin=<length>'\MessageBreak%
+          Alternatively you could use\noexpand\MessageBreak%
+          option `extrabottommargin=<length>'\noexpand\MessageBreak%
           in order to enlarge the bottom margin. %
         \fi%
       }%
@@ -2052,6 +2059,7 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@footlogo@wrn
 % \end{macro}^^A \tud@footlogo@ddc@use
 % \begin{macro}{\tud@layer@foot@cmd}
 % \changes{v2.04}{2015/06/01}{neu}^^A
@@ -2437,6 +2445,7 @@
 % \begin{macro}{\tud@footcontent@use}
 % \changes{v2.04}{2015/06/01}{neu}^^A
 % \begin{macro}{\tud@footcontent@@use}
+% \begin{macro}{\tud@layer@footcontent@wrn}
 % Mit \cs{tud@footcontent@use} erfolgt die Ausgabe der mit \cs{footcontent} 
 % definierten Inhalte. Dabei wird darauf geachtet, ob ein \DDC-Logo im Fuß
 % verwendet wird. Die Ausgabe erfolgt jedoch nur, falls tatsächlich etwas 
@@ -2444,6 +2453,7 @@
 % Breite ausgegeben. Dies ist notwendig, da nachgelagerte Funktionen diese Box
 % fester Breite erwarten.
 %    \begin{macrocode}
+\newcommand*\tud@layer@footcontent@wrn{}
 \newcommand*\tud@footcontent@use[2]{%
   \@tempswafalse%
   \ifx\tud@footcontent@left\@empty%
@@ -2468,7 +2478,7 @@
 % Inhalt des Fußes in einer vertikalen Box gesetzt. Mit \cs{@tempdimc} wird im 
 % Bedarfsfall der Freiraum für das \DDC-Logo bereitgestellt.
 %    \begin{macrocode}
-    \tud@vlayerbox{#1}{%
+    \tud@vlayerbox[footcontent]{#1}{%
       \linespread{1}%
       \vss%
       \hbox to #2{%
@@ -2483,12 +2493,12 @@
 % Sollte der Inhalt für den Fußbereich zu groß sein, wird eine Warnung erzeugt.
 %    \begin{macrocode}
     }{%
-      The content for the footer (`\string\footcontent')\MessageBreak%
-      is too high. You should either reduce the content\MessageBreak%
+      The content for the footer (`\string\footcontent')\noexpand\MessageBreak%
+      is too high. You should either reduce the content\noexpand\MessageBreak%
       or lower the fontsize via the optional argument.%
       \ifnum\tud@cdgeometry@num>\@ne% true/symmetric/twoside
-        \MessageBreak%
-        Alternatively you can enlarge the bottom margin\MessageBreak%
+        \noexpand\MessageBreak%
+        Alternatively you can enlarge the bottom margin\noexpand\MessageBreak%
         by using option `extrabottommargin'.%
       \fi%
     }%
@@ -2523,6 +2533,7 @@
   \fi%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@layer@footcontent@wrn
 % \end{macro}^^A \tud@footcontent@@use
 % \end{macro}^^A \tud@footcontent@use
 %
