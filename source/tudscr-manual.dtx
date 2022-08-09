@@ -96,7 +96,7 @@
 % Vielzahl solcher Streams benötigt. Das Paket \pkg{morewrites} hat keinen 
 % Einfluss auf \pkg{glossaries}.
 %    \begin{macrocode}
-\RequirePackage{scrwfile}[2013/08/05]
+\RequirePackage{scrwfile}
 %    \end{macrocode}
 %
 % \iffalse
@@ -499,7 +499,7 @@
 % \begin{macro}{\fullref}
 % Verbesserte Referenzierungen auf Seiten.
 %    \begin{macrocode}
-\RequirePackage{varioref}[2011/10/02]
+\RequirePackage{varioref}
 \renewcommand*\fullref[1]{\hyperref[{#1}]{\autoref*{#1} \vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
@@ -2583,7 +2583,7 @@
 % Klasse erzeugt werden. 
 %    \begin{macrocode}
 \PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}[2013/07/11]
+\RequirePackage{imakeidx}
 %    \end{macrocode}
 % Zuerst ein paar kleinere Einstellungen für das Layout\dots
 %    \begin{macrocode}
@@ -2674,6 +2674,8 @@
 % danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
 % auch \cs{Process@@Index}.
 %    \begin{macrocode}
+\newcommand*\tud@xdy@settings{}
+\edef\tud@xdy@settings{-M \@currname-ind.xdy -L german-din}
 \NewDocumentCommand\makexdyindex{s o m !o}{%
   \let\@tempb\@empty%
 %<*class>
@@ -2687,14 +2689,17 @@
     }%
   }%
 %</class>
+  \ifundef{\inputencodingname}{}{%
+    \eappto\tud@xdy@settings{\space-C\space\inputencodingname}%
+  }%
   \protected@edef\@tempa{%
     title={#3},%
     columnsep=\noexpand\f@size\noexpand\p@,%
     \IfValueTF{#4}{%
       name={#4},%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname-#4.xlg \@tempb},%
+      options={\tud@xdy@settings\space-t \jobname-#4.xlg \@tempb},%
     }{%
-      options={-M \@currname-ind.xdy -L german-din -t \jobname.xlg},%
+      options={\tud@xdy@settings\space-t \jobname.xlg},%
     }%
     \IfValueT{#2}{#2}%
   }%
@@ -3060,20 +3065,32 @@
 % ist alles nachfolgende bis \cs{relax}.
 %    \begin{macrocode}
 \newcommand*\tud@cleversee{}
-\def\tud@cleversee#1#2#3\relax{%
-  \IfArgIsEmpty{#3}{%
-    \emph{#1}\space#2%
-  }{%
-%    \end{macrocode}
-% Folgen im Index nach \cs{cleversee}\marg{Querverweis} noch weitere Einträge, 
-% so sind diese zu Beginn durch \texttt{,\textvisiblespace} getrennt. Diese 
-% zwei Zeichen werden mithilfe von \cs{@tempa} ignoriert.
-%    \begin{macrocode}
-    \begingroup%
-      \def\@tempa, ##1\@nil{##1,\space\emph{\alsoname}\space#2}%
-      \@tempa#3\@nil%
-    \endgroup%
-  }%
+\def\tud@cleversee#1#2\relax{%
+  \begingroup%
+    \let\cleversee\@empty%
+    \let\cleverseealso\@empty%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b{#2}%
+    \def\tud@res@c##1\\##2\@nil{%
+      \appto\tud@res@a{##1}%
+      \def\tud@res@b{##2}%
+      \trim@spaces@in\tud@res@b%
+      \in@{\\}{##2}%
+    }%
+    \in@true%
+    \@whilesw\ifin@\fi{%
+      \expandafter\tud@res@c\tud@res@b\@nil%
+    }%
+    \ifx\tud@res@b\@empty%
+      \mbox{\emph{#1}}%
+    \else%
+      \def\tud@res@c##1 ##2\@nil{%
+        ##2##1\space\mbox{\emph{\alsoname}}%
+      }%
+      \expandafter\tud@res@c\tud@res@b\@nil%
+    \fi%
+    \space\tud@res@a%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cleversee
@@ -3980,7 +3997,7 @@
 % zusätzlichen Zwischenräume innerhalb der Listen beseitigt. Weiterhin wird 
 % linksbündiger Flattersatz für die Standardlisten aktiviert.
 %    \begin{macrocode}
-\RequirePackage{enumitem}[2011/09/28]
+\RequirePackage{enumitem}
 \setlist{before*={\endgraf\tud@RaggedRight},partopsep=0pt,noitemsep}
 %    \end{macrocode}
 % \begin{macro}{\stditem}
@@ -4270,7 +4287,7 @@
 % Mit Hilfe von \pkg{tabularx} können Tabellen bestimmter Breite und
 % automatisch berechneten Spaltenbreiten gesetzt werden.
 %    \begin{macrocode}
-\RequirePackage{tabularx}[1999/01/07]
+\RequirePackage{tabularx}
 %    \end{macrocode}
 % \begin{macro}{\TermTable}
 % \begin{macro}{\Term@Table}
@@ -4393,7 +4410,7 @@
 % bessere Verständnis des Anwenders angegeben. Um diese darzustellen wird das 
 % Paket \pkg{listings} verwendet.
 %    \begin{macrocode}
-\RequirePackage{listings}[2014/03/04]
+\RequirePackage{listings}
 \lstdefinestyle{tudscr}{%
   basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
   keywordstyle=,%
@@ -4439,12 +4456,12 @@
 % Das Paket \pkg{filemod} wird genutzt, um externer Dateien nur zu kompilieren,
 % wenn dies aufgrund einer Änderung auch notwendig ist.
 %    \begin{macrocode}
-\RequirePackage{filemod}[2011/09/19]
+\RequirePackage{filemod}
 %    \end{macrocode}
 % Um \cs{ShellEscape} sowohl für Windows als auch für unixoide Betriebssysteme 
 % nutzen zu können, wird das Paket \pkg{ifplatform} geladen.
 %    \begin{macrocode}
-\RequirePackage{ifplatform}[2010/10/22]
+\RequirePackage{ifplatform}
 %    \end{macrocode}
 % \begin{macro}{\tud@shellescape@wrn}
 % \changes{v2.02}{2014/10/14}{neu}^^A
@@ -4707,7 +4724,7 @@
 % und sinnvollen Paketen an. Diese sollten direkt nach \cs{StartTutorial} in 
 % der \env{Preamble}-Umgebung angegeben werden.
 %    \begin{macrocode}
-\TUDoptions{headingsvskip=-10ex}
+\TUDoptions{headingsvskip=-6ex}
 \newcommand\StartTutorial[1][]{%
   \immediate\openout\tud@write@a=\tud@tut@temp-preamble.tex\relax%
   \immediate\openout\tud@write@b=\tud@tut@temp-trunk.tex\relax%
@@ -4715,7 +4732,7 @@
   \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
   \maketitle%
-  \tud@if@strblank{#1}{}{%
+  \IfArgIsEmpty{#1}{}{%
     \noindent%
     \begin{abstract}%
     \noindent#1%
@@ -5230,7 +5247,7 @@
   \else%
     \PassOptionsToPackage{off}{auto-pst-pdf}%
   \fi%
-  \RequirePackage{auto-pst-pdf}[2009/04/26]%
+  \RequirePackage{auto-pst-pdf}
 %    \end{macrocode}
 % Nach dem Paket \pkg{auto-pst-pdf} seine Arbeit verrichtet hat, werden alle 
 % etwaigen temporär erzeugten Dateien radikal gelöscht.
@@ -5257,7 +5274,7 @@
 }{%
   \PassOptionsToPackage{colorinlistoftodos,color=HKS92!10}{todonotes}%
 }
-\RequirePackage{todonotes}[2012/07/25]
+\RequirePackage{todonotes}
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
     \tud@setdim\marginparwidth{2cm}%
@@ -5559,25 +5576,25 @@
 %
 % Für den Fließtext werden Pfeile u.\,ä. durch \pkg{textcomp} bereitgestellt.
 %    \begin{macrocode}
-\RequirePackage{textcomp}[2005/09/27]
+\RequirePackage{textcomp}
 %    \end{macrocode}
 % Vergrößerung des Durchschusses.
 %    \begin{macrocode}
-\RequirePackage{setspace}[2011/12/19]
+\RequirePackage{setspace}
 \setstretch{1.1}
 %    \end{macrocode}
 % Verbesserte Zitate.
 %    \begin{macrocode}
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\RequirePackage{quoting}[2014/01/28]
+\RequirePackage{quoting}
 %    \end{macrocode}
 % Automatisierte Datumsformatierung.
 %    \begin{macrocode}
-\RequirePackage{isodate}[2010/01/03]
+\RequirePackage{isodate}
 %    \end{macrocode}
 % Verschiedenste Symbole aus dem \LaTeX-Universum.
 %    \begin{macrocode}
-\RequirePackage{hologo}[2012/04/26]
+\RequirePackage{hologo}
 %    \end{macrocode}
 %
 % \iffalse
@@ -5587,7 +5604,7 @@
 % Mit dem Paket \pkg{ragged2e} wird~-- falls benötigt~-- die Silbentrennung im 
 % Flattersatz aktiviert. 
 %    \begin{macrocode}
-\RequirePackage{ragged2e}[2009/05/21]
+\RequirePackage{ragged2e}
 %    \end{macrocode}
 % Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt\dots
 %    \begin{macrocode}
@@ -5599,12 +5616,12 @@
 %    \end{macrocode}
 % Das Paket wird für die Erstellung von Tabellen verwendet.
 %    \begin{macrocode}
-\RequirePackage{booktabs}[2005/04/14]
+\RequirePackage{booktabs}
 %    \end{macrocode}
 % Die Formatierung von Gleitobjekten.
 %    \begin{macrocode}
-\RequirePackage{caption}[2015/09/17]
-\RequirePackage{floatrow}[2008/08/02]
+\RequirePackage{caption}
+\RequirePackage{floatrow}
 \DeclareCaptionSubType[alph]{figure}
 \DeclareCaptionSubType[alph]{table}
 \captionsetup{font=sf,labelfont=bf,labelsep=space}
@@ -5615,20 +5632,20 @@
 %    \end{macrocode}
 % Erstellen von Grafiken.
 %    \begin{macrocode}
-\RequirePackage{tikz}[2013/12/13]
+\RequirePackage{tikz}
 %    \end{macrocode}
 % Einbinden von ganzseitigen PDF"~Dokumenten als Beispiel im Handbuch.
 %    \begin{macrocode}
-\RequirePackage{pdfpages}[2013/08/25]
+\RequirePackage{pdfpages}
 %    \end{macrocode}
 % Typographisch saubere Einheiten.
 %    \begin{macrocode}
-\RequirePackage{units}[1998/08/04]
+\RequirePackage{units}
 %    \end{macrocode}
 % Das Paket \pkg{ellipsis} sorgt für korrekte Auslassungpunkte.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \RequirePackage{ellipsis}[2004/9/28]%
+  \RequirePackage{ellipsis}
   \let\ellipsispunctuation\relax%
 }
 %    \end{macrocode}
