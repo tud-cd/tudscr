@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-doc.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,16 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-doc.dtx
 %<*dtx>
-% \fi
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-doc.dtx}[2022/07/28 v2.06o TUD-Script\space%
-  (source code documentation based on scrartcl/scrdoc)%
-]
-%
-% \iffalse
+\ProvidesFile{tudscr-doc.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -53,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-doc.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -183,6 +172,75 @@
 %<*class&body>
 % \fi
 %
+% \subsection{Standardwerte für Titelei, Absatzauszeichnung und Index}
+%
+% Folgende Werte sind standardmäßig für den Titel eingestellt, können aber 
+% jederzeit überschrieben werden.
+%    \begin{macrocode}
+\AtEndOfClass{%
+  \@ifpackageloaded{tudscr-gitinfo}{%
+    \GetFileInfo{\jobname}%
+    \title{\file{\filename}}%
+    \date{%
+      \filedate%
+      \ifdefvoid{\fileversion}{}{\nobreakspace\fileversion}%
+      \ifdefvoid{\filerevision}{}{\nobreakspace\texttt{\filerevision}}%
+    }%
+  }{}%
+  \CodelineIndex%
+  \RecordChanges%
+}
+%    \end{macrocode}
+% Wurde in der Präambel \cs{GetFileInfo} nicht aufgerufen, dann erfolgt dies zu 
+% Beginn des Dokumentes.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \ifdefvoid{\filename}{%
+    \IfFileExists{\jobname.dtx}{%
+      \edef\filename{\jobname.dtx}%
+    }{%
+      \edef\filename{\jobname.tex}%
+    }%
+    \undef\filedate%
+    \undef\fileversion%
+    \undef\filerevision%
+    \undef\fileinfo%
+    \expandafter\GetFileInfo\expandafter{\filename}%
+  }{}%
+  \ifdefvoid{\filerevision}{\let\filerevision\@empty}{}%
+}
+%    \end{macrocode}
+%
+% \subsection{Seitenstil}
+%
+% \begin{macro}{\@docinclude}
+% \begin{macro}{\ps@tudscrdoc}
+% Die Auswahl des Seitenstils wird im Vergleich zur Klasse \cls{ltxdoc}
+% verbessert und an das Paket \pkg{tudscr-gitinfo} angepasst.
+%    \begin{macrocode}
+\pretocmd\@docinclude{%
+  \GetFileInfo{#1}\pagestyle{tudscrdoc}%
+}{}{\tud@patch@wrn{@docinclude}}
+\def\ps@tudscrdoc{%
+  \let\@mkboth\@gobbletwo%
+  \let\@oddhead\@empty%
+  \let\@evenhead\@empty%
+  \def\@oddfoot{%
+    File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
+    \nobreakspace\texttt{\ifdefvoid{\filename}{?}{\filename}}%
+    \enskip Version:\nobreakspace\ifdefvoid{\filedate}{?}{\filedate}%
+    \ifdefvoid{\fileversion}{}{\nobreakspace\fileversion}%
+    \ifdefvoid{\filerevision}{}{\enskip\texttt{\filerevision}}%
+    \hfill\thepage%
+  }%
+  \def\@evenfoot{\@oddfoot}%
+}
+\pagestyle{tudscrdoc}%
+\let\ps@titlepage\ps@tudscrdoc%
+%    \end{macrocode}
+% \end{macro}^^A \ps@tudscrdoc
+% \end{macro}^^A \@docinclude
+%
 % \subsection{Definition und Erscheinungsbild von Deklarationselementen}
 %
 % Das Paket~\pkg{doc} stellt die Funktionalitäten zur Quelltextdokumentation 
@@ -200,7 +258,7 @@
 % Schnittstelle, weshalb zusätzlich die Befehle |\Describe|\meta{Typ}|s| 
 % darauf aufbauend definiert werden.
 %
-% \begin{length}{\marginnotevskip}
+% \begin{length}{\tud@dim@marginnotevskip}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % \begin{macro}{\marginpar}
 % Da die Befehle |\Describe|\meta{Typ} zur Erzeugung einer Randnotiz für 
@@ -208,19 +266,19 @@
 % Versatz gesetzt werden, falls gleich mehrere auf einmal zu erzeugen sind. 
 % Hierfür wird das Paket~\pkg{marginnote} genutzt.
 %    \begin{macrocode}
-\newlength\marginnotevskip
+\tud@newdim\tud@dim@marginnotevskip
 \AfterPackage*{marginnote}{%
   \renewcommand*\marginpar[2][]{%
     \IfArgIsEmpty{#1}{%
-      \marginnote{#2}[\marginnotevskip]%
+      \marginnote{#2}[\tud@dim@marginnotevskip]%
     }{%
-      \marginnote[{#1}]{#2}[\marginnotevskip]%
+      \marginnote[{#1}]{#2}[\tud@dim@marginnotevskip]%
     }%
   }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \marginpar
-% \end{length}^^A \marginnotevskip
+% \end{length}^^A \tud@dim@marginnotevskip
 % \begin{macro}{\doc@createdescribes}
 % \changes{v2.05i}{2017/03/09}{neu}^^A
 % Die Definition für |\Describe|\meta{Typ}|s|. Die so erzeugten Befehle passen
@@ -231,17 +289,17 @@
 %    \begin{macrocode}
 \newcommand*\doc@createdescribes[1]{%
   \expandafter\newcommand\expandafter*\csname Describe#1s\endcsname[2][]{%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \def\@tempc{##2}%
     \@for\@tempa:=\@tempc\do{%
       \trim@spaces@in\@tempa%
       \ifx\@tempa\@empty\else%
         \def\@tempb{\@nameuse{Describe#1}[{##1}]}%
         \expandafter\@tempb\expandafter{\@tempa}%
-        \addtolength\marginnotevskip{\baselineskip}%
+        \tud@addtodim\tud@dim@marginnotevskip{1\baselineskip}%
       \fi%
     }%
-    \setlength\marginnotevskip{\z@}%
+    \tud@setdim\tud@dim@marginnotevskip{\z@}%
     \ignorespaces%
   }%
 }
@@ -644,7 +702,7 @@
 % \subsubsection{Erstellen aller Deklarationselemente}
 %
 % Nachdem nun die Anpassungen für die Änderungsliste erfolgt sind, können nun 
-% die für die Dokumentatiton notwendigen Umgebungen mit \cs{NewDocElement} 
+% die für die Dokumentation notwendigen Umgebungen mit \cs{NewDocElement} 
 % erstellt werden, wobei die Lokalisierungsvariablen |\tud@|\meta{\dots}|@name| 
 % zum Tragen kommen.
 %    \begin{macrocode}
@@ -1158,7 +1216,7 @@
 \newcommand*\efil{\hfil\nopagebreak}%
 \newcommand*\tud@lst@def{%
   \newcommand*\tud@lst@values{}%
-  \newif\if@tud@lst@multi%
+  \tud@newif\if@tud@lst@multi%
   \newcommand*\tud@lst@init{%
     \let\tud@lst@values\relax%
     \let\tud@lst@@sub\relax%
@@ -1179,7 +1237,7 @@
     \tud@lst@init%
   }%
   \newcommand*\tud@lst@@values{}%
-  \newif\if@tud@lst@@multi%
+  \tud@newif\if@tud@lst@@multi%
   \newcommand*\tud@lst@@init{%
     \let\tud@lst@@values\relax%
     \def\tud@lst@@sub{\subitem}%
@@ -1329,16 +1387,20 @@
 % \begin{macro}{\actualchar}
 % \begin{macro}{\quotechar}
 % \begin{macro}{\levelchar}
+% \ToDo{äquivalent zu tudscrmanual.cls; shell-escape raus, via makefile}[v2.07]
+%    \begin{macrocode}
+%^^A\BeforeClosingMainAux{%
+%^^A\immediate\closeout\@indexfile%
+%^^A\immediate\closeout\@glossaryfile%
+%    \end{macrocode}
 % Damit die erzeugten Dateien für Index und Änderungsliste von \app{texindy} 
 % verarbeitet werden können, müssen einige Steuerzeichen in der originalen 
 % \file{.ind}-Datei getauscht werden. Dafür wird diese zeilenweise eingelesen, 
 % die fraglichen Zeichen ersetzt und in eine weitere Hilfsdatei geschrieben.
 %    \begin{macrocode}
 \ifdefined\tudxdyflag
-  \newcommand*\tud@xdy@write{}%
-  \newwrite\tud@xdy@write%
-  \newcommand*\tud@xdy@read{}%
-  \newread\tud@xdy@read%
+  \tud@newwrite\tud@xdy@write%
+  \tud@newread\tud@xdy@read%
 %    \end{macrocode}
 % Die Makros für die fraglichen Steuerzeichen werden so angepasst, dass die
 % Wahrscheinlichkeit für eine Verwendung dieser Kombination in einem Makro- 
@@ -1362,33 +1424,33 @@
 % Um potenzielle Dopplungen zu vermeiden, wird \cs{quotechar} vor Zeichen 
 % entfernt, die ohnehin gegebenenfalls manuell behandelt werden müssen.
 %    \begin{macrocode}
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\quotechar"}{"}%
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\quotechar!}{!}%
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\quotechar:}{:}%
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\quotechar @}{@}%
 %    \end{macrocode}
 % Jetzt die manuellen Anpassungen für Zeichen, die eigentlich zur Steuerung
 % der Indexeinträge genutzt werden.
 %    \begin{macrocode}
-          \tud@replace\tud@line@replace{"}{""}%
-          \tud@replace\tud@line@replace{!}{"!}%
-          \tud@replace\tud@line@replace{:}{":}%
-          \tud@replace\tud@line@replace{@}{"@}%
-          \tud@replace\tud@line@replace{\"@}{"\@backslashchar"@}%
+          \tud@replace@@in\tud@line@replace{"}{""}%
+          \tud@replace@@in\tud@line@replace{!}{"!}%
+          \tud@replace@@in\tud@line@replace{:}{":}%
+          \tud@replace@@in\tud@line@replace{@}{"@}%
+          \tud@replace@@in\tud@line@replace{\"@}{"\"@}%
 %    \end{macrocode}
 % Abschließend erfolgt das Einsetzen der Steuerzeichen.
 %    \begin{macrocode}
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\actualchar}{@}%
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\quotechar}{"}%
-          \expandafter\tud@replace\expandafter\tud@line@replace%
+          \expandafter\tud@replace@@in\expandafter\tud@line@replace%
             \expandafter{\levelchar}{!}%
-          \tud@replace\tud@line@replace{" @}{}%
+          \tud@replace@@in\tud@line@replace{" @}{}%
           \ifeof\tud@xdy@read\else%
             \immediate\write\tud@xdy@write{%
               \unexpanded\expandafter{\tud@line@replace}%
@@ -1439,6 +1501,10 @@
     }%
   \fi%
 \fi
+%    \end{macrocode}
+% \ToDo{äquivalent zu tudscrmanual.cls}[v2.07]
+%    \begin{macrocode}
+%^^A}
 %    \end{macrocode}
 % \end{macro}^^A \levelchar
 % \end{macro}^^A \quotechar
@@ -1664,11 +1730,11 @@
 % die Seitenränder sowie den Abstand von Randnotizen und Textkörper dient.
 %    \begin{macrocode}
 \newcommand*\tud@setarea{%
-  \setlength\topmargin{-1in}%
-  \setlength\headheight{0pt}%
-  \setlength\headsep{3em}%
-  \setlength\footskip{\headsep}%
-  \setlength\textheight{\dimexpr\paperheight-\headsep*5/2-\footskip*3/2\relax}%
+  \tud@setdim\topmargin{-1in}%
+  \tud@setdim\headheight{0pt}%
+  \tud@setdim\headsep{3em}%
+  \tud@setdim\footskip{\headsep}%
+  \tud@setdim\textheight{\paperheight-\headsep*5/2-\footskip*3/2}%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%
@@ -1676,23 +1742,21 @@
   \begingroup%
     \MacroFont\selectfont%
     \settowidth\@tempdima{\space}%
-    \setlength\@tempdima{80\@tempdima}%
-    \addtolength\@tempdima{\MacroIndent}%
+    \tud@setdim\@tempdima{80\@tempdima}%
+    \tud@addtodim\@tempdima{\MacroIndent}%
     \edef\@tempa{%
       \endgroup%
-      \noexpand\setlength\noexpand\textwidth{\the\@tempdima}%
+      \unexpanded{\tud@setdim\textwidth}{\the\@tempdima}%
     }%
   \@tempa%
   \columnwidth=\textwidth%
   \hsize=\columnwidth%
   \linewidth=\hsize%
-  \setlength\columnsep{1em}%
-  \setlength\labelsep{1em}%
-  \setlength\marginparsep{\labelsep}%
-  \setlength\oddsidemargin{\dimexpr\paperwidth-\textwidth-\labelsep-1in\relax}%
-  \setlength\marginparwidth{%
-    \dimexpr\oddsidemargin+1in-\labelsep-\marginparsep\relax%
-  }%
+  \tud@setdim\columnsep{1em}%
+  \tud@setdim\labelsep{1em}%
+  \tud@setdim\marginparsep{\labelsep}%
+  \tud@setdim\oddsidemargin{\paperwidth-\textwidth-\labelsep-1in}%
+  \tud@setdim\marginparwidth{\oddsidemargin+1in-\labelsep-\marginparsep}%
 }
 \AtBeginDocument{\tud@setarea}
 %    \end{macrocode}
@@ -1788,32 +1852,6 @@
 % \end{macro}^^A \cls
 % \end{macro}^^A \bdl
 % \end{macro}^^A \app
-%
-% \subsection{Rückfalloptionen bei fehlenden Paketen}
-%
-% Zum Schluss erfolgen einige Anpassungen mit \cs{AtEndPreamble}, um abhängig 
-% vom Ladezustand einiger Pakete reagieren zu können.
-% \begin{macro}{\selectlanguage}
-% \begin{macro}{\glqq}
-% \begin{macro}{\grqq}
-% \begin{macro}{\enquote}
-% Etwas Kleinkram für \pkg{babel} und \pkg{csquotes}.
-%    \begin{macrocode}
-\TUD@UnwindPackage{babel}{%
-  \ClassWarning{\TUD@Class@Name}{Package `babel' not loaded}%
-  \providecommand*\selectlanguage[1]{}%
-  \providecommand*\glqq{}%
-  \providecommand*\grqq{}%
-}
-\TUD@UnwindPackage{csquotes}{%
-  \ClassWarning{\TUD@Class@Name}{Package `csquotes' not loaded}%
-  \providecommand\enquote[1]{\emph{#1}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \enquote
-% \end{macro}^^A \grqq
-% \end{macro}^^A \glqq
-% \end{macro}^^A \selectlanguage
 %
 % \iffalse
 %</class&body>

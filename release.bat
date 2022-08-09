@@ -6,7 +6,7 @@ echo =========================================================================
 set version=
 setlocal enabledelayedexpansion
 for /f "tokens=1,2,3* delims= " %%a in (
-  'findstr /r \TUD@Version@Check{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
+  'findstr /r \TUD@@Version{[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] source\tudscr-version.dtx'
 ) do (
   set version=%%c
   if "!version:~0,10!"=="TUD-Script" (
@@ -125,10 +125,9 @@ copy development\tools\*.*                  release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
-rmdir temp\install /s /q > nul
 cd release-%version%\temp
+7za a -tzip tudscr_%version%.zip  .\..\..\temp\doc\ .\..\..\temp\source\ .\..\..\temp\tex\
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
-7za a -tzip tudscr_%version%.zip   .\..\..\temp\*
 7za a -tzip tudscr_fonts_install.zip                                                @7za_files_metrics.txt
 REM call tudscr_fonts_convert.bat
 REM 7za a -tzip tudscr_fonts_converted.zip                                              @7za_files_fonts.txt

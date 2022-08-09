@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-title.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,16 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-title.dtx
 %<*dtx>
-% \fi
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-title.dtx}[2022/07/28 v2.06c TUD-Script\space%
-  (title)%
-]
-%
-% \iffalse
+\ProvidesFile{tudscr-title.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -53,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-title.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -105,7 +94,7 @@
 % Titels gesetzt. Um dieses Verhalten nachbilden zu können, wird diese Option
 % zur Verfügung gestellt.
 %    \begin{macrocode}
-\newif\if@tud@subjectthesis
+\tud@newif\if@tud@subjectthesis
 \TUD@key{subjectthesis}[true]{%
   \TUD@set@ifkey{subjectthesis}{@tud@subjectthesis}{#1}%
 }
@@ -120,7 +109,7 @@
 % verlangt. Diese Option dient zum Aktivieren dieser Unterschriftenzeile am
 % Ende der Titelseite.
 %    \begin{macrocode}
-\newif\if@tud@titlesignature
+\tud@newif\if@tud@titlesignature
 \TUD@key{titlesignature}[true]{%
   \TUD@set@ifkey{titlesignature}{@tud@titlesignature}{#1}%
 }
@@ -140,11 +129,9 @@
 % Warnung ausgegeben.
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{titlepage}[true]{%
-  \TUD@set@numkey{titlepage}{@tempa}{\TUD@bool@numkey,{firstiscover}{2}}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
-  \fi%
+\DefineFamilyKey{KOMA}{titlepage}{%
+  \FamilyKeyStateUnknownValue%
+  \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
 }
 \newcommand*\tud@titlepage@deactivate{%
   \if@titlepage%
@@ -184,7 +171,7 @@
 %<*book|report|article>
 \newkomafont{thesis}{%
   \usekomafont{title}%
-  \tud@thesis@fontsize%
+  \tud@subtitle@fontsizecmd%
 }
 %</book|report|article>
 \newkomafont{titlepage}{%
@@ -242,6 +229,10 @@
 \newcommand*\tud@title@pagenumber{}
 \let\tud@title@pagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
+%<*book|report|article>
+  \TUD@deprecated@length\pageheadingsvskip%
+  \TUD@deprecated@length\headingsvskip%
+%</book|report|article>
   \begingroup%
     \cleardoublepage%
 %    \end{macrocode}
@@ -264,7 +255,9 @@
         \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
-        \ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+        \tud@if@strequal{\titlepagestyle}{empty}%
+          {\thispagestyle{empty.tudheadings}}%
+          {}%
       }{}%
 %    \end{macrocode}
 % Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
@@ -298,6 +291,9 @@
 %    \end{macrocode}
 % Die einzelnen Parameter dienen zur Einstellung der Titelseite und entsprechen
 % in ihrem Verhalten den gleichnamigen Klassenoptionen.
+% \ToDo{cdgeometry liefert falschen Satzspiegel nach Titel, siehe vlp}[v2.07]
+% \ToDo{titleback ist im Flattersatz, warum?}[v2.07]
+% \ToDo{Warnung, wenn pagenumber gerade}[v2.07]
 %    \begin{macrocode}
 \TUD@parameter@family{title}{%
 %<*book|report|article>
@@ -336,7 +332,9 @@
 % aus der \pgs{tudheadings}-Reihe der Titel ebenfalls in diesem gesetzt wird,
 % auch wenn das Layout des \CDs selber nicht aktiv ist.
 %    \begin{macrocode}
-\patchcmd{\titlepage}{\thispagestyle{empty}}{%
+\patchcmd\titlepage{%
+  \thispagestyle{empty}%
+}{%
   \tud@if@tudheadings{\currentpagestyle}{%
     \thispagestyle{empty.tudheadings}%
   }{%
@@ -470,9 +468,9 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
-    \tud@cd@headstartvskip%
-    \TUD@deprecated@lengthcs{pageheadingsvskip}%
-    \vspace*{\tud@dim@pageheadingsvskip}%
+    \vspace*{-\baselineskip}%
+    \tud@cd@headstart@vskip%
+    \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
@@ -495,10 +493,9 @@
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
-        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
-        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
       \fi%
-      \vskip 2\bigskipamount%
+      \vskip\glueexpr\bigskipamount*2\relax%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
@@ -541,7 +538,7 @@
             \def\@tempc{%
               \@graduation%
               \ifx\@graduationabbreviation\@empty\else%
-                \nobreakspace\@graduationabbreviation%
+                \nobreakspace(\@graduationabbreviation)%
               \fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
@@ -553,7 +550,8 @@
         \vskip 2ex\@plus.5fill%
       \fi%
 %    \end{macrocode}
-% \ToDo{Befehl zum Angeben optionaler Inhalte, bspw. ein Bild}[v2.07]
+% \ToDo{Befehl zum Angeben optionaler Inhalte, bspw. ein Bild}[v2.08]
+% \ToDo{...othername als Liste für mehr als zwei Angaben}[v2.08]
 % Wenn Betreuer angegeben wurden, dann werden diese auf dem Titel ausgeben. Um
 % diese Titelseite auch für Dissertationen verwenden zu können, ist ein Feld 
 % für Gutachter vorgesehen. Außerdem wird für Promotionsschriften ein Feld für
@@ -576,13 +574,13 @@
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
+            \tud@if@strblank{\datetext}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\tud@date@print\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
             \ifx\@defensedate\@empty\else%
-              \ifxblank{\defensedatetext}{}{%
+              \tud@if@strblank{\defensedatetext}{}{%
                 \defensedatetext\tud@title@delimiter%
               }%
               {\usekomafont{date}{\@defensedate\par}}%
@@ -595,7 +593,7 @@
 %    \begin{macrocode}
         \if@tud@titlesignature%
           \let\tud@split@@author@do\tud@split@author@signature%
-          \vskip\tud@len@signatureskip\noindent%
+          \vskip\tud@glue@signaturevskip\noindent%
           \tud@ifin@and{\@@author}{}{\hfill}%
           \tud@multiple@split{@@author}%
         \fi%
@@ -733,7 +731,9 @@
 \newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
-    \ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}%
+      {}%
+      {\renewcommand*\tud@title@fontcolor{HKS41}}%
   \fi%
   \par%
   \ifx\tud@title@pagenumber\relax\else%
@@ -766,7 +766,7 @@
     \ifx\@extratitle\@empty%
       \ifx\@frontispiece\@empty\else%
         \if@twoside\null\fi%
-      \fi
+      \fi%
     \else%
       \tud@res@a{\@makeextratitle}%
     \fi%
@@ -785,10 +785,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
-  \tud@cd@headstartvskip%
+  \vspace*{-\baselineskip}%
+  \tud@cd@headstart@vskip%
 %<*book|report|article>
-  \TUD@deprecated@lengthcs{headingsvskip}%
-  \vspace*{\tud@dim@headingsvskip}%
+  \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \tud@cd@vphantom%
 %</book|report|article>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -817,15 +817,14 @@
 %    \begin{macrocode}
     {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
-      \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
 %<*book|report|article>
-    \vskip 2\bigskipamount%
+    \vskip\bigskipamount%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
 %    \end{macrocode}
@@ -855,12 +854,10 @@
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-    \vskip 2\bigskipamount%
+    \vskip\bigskipamount%
 %</book|report|article>
     \ifnum\col@number>\@ne\relax%
-      \ifdefvoid{\multicolsep}{}{%
-        \ifisskip{\multicolsep}{\vspace{-\multicolsep}}{}%
-      }%
+      \tud@if@lengthregister{\multicolsep}{\vspace{-\multicolsep}}{}%
     \fi%
 %    \end{macrocode}
 % Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
@@ -888,36 +885,32 @@
 \newcommand*\tud@maketitle@head{%
   \setbox\z@\vbox{%
     \ifx\@titlehead\@empty\else%
-      {\usekomafont{titlehead}{%
-        \begin{minipage}[t]{\textwidth}%
-          \@titlehead\tud@sec@strut%
-        \end{minipage}%
-      }}%
+      \begin{minipage}[t]{\textwidth}%
+        \usekomafont{titlehead}{\@titlehead\strut\par}%
+      \end{minipage}%
     \fi%
 %<*book|report|article>
     \tud@thesis@tosubject%
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
-      {\usekomafont{subject}{%
-        \@subject\tud@sec@strut%
-      }}%
+      {\usekomafont{subject}{\tud@sec@format[partnumber]{\@subject}}}%
     \fi%
   }%
 %    \end{macrocode}
 % Der ermittelte Offset muss~-- warum auch immer~-- um \val{1pt} vergrößert
 % werden. Zusätzlich wird ein mittlerer Abstand zwischen Kopf und Titel gesetzt.
 %    \begin{macrocode}
-  \setlength\@tempdima{\dimexpr\ht\z@+\dp\z@\relax}%
+  \tud@setdim\@tempdima{\ht\z@+\dp\z@}%
   \ifdim\@tempdima>\z@\relax%
 %<*book|report|article>
-    \vskip\dimexpr-\@tempdima-\p@-\medskipamount\relax%
+    \vskip\dimexpr-\@tempdima-\p@-1\medskipamount\relax%
 %</book|report|article>
     \usebox\z@\par\medskip%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@maketitle@inpage
+% \end{macro}^^A \tud@maketitle@head
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
@@ -927,31 +920,11 @@
 % der Titelseite soll sichergestellt werden, dass der Inhalt selbst nicht in
 % Majuskeln gesetzt wird.
 %    \begin{macrocode}
-\newcommand*\tud@title@format[1]{%
+\newcommand*\tud@title@format[2][]{%
   \begingroup%
     \let\\\newline%
-%    \end{macrocode}
-% Der Befehl \cs{thanks} wird so umdefiniert, dass der Inhalt in ein temporäres
-% Makro gespeichert wird. Danach wird durch das Setzen einer temporären Box der
-% Befehl \cs{thanks} ausgeführt und der Inhalt gesichert. Für die Ausführung von
-% \cs{tud@sec@format} wird das Argument von \cs{thanks} ignoriert. Nachdem das
-% gewünschte Feld in Majuskeln gesetzt wurde, wird die gespeicherte Fußnote
-% ausgegeben.
-%    \begin{macrocode}
-    \let\tud@thanks\relax%
-    \def\thanks##1{\gdef\tud@thanks{##1}}%
-    \let\footnote\thanks%
-    \sbox\z@{#1}%
-    \let\thanks\@gobble%
-    \let\footnote\@gobble%
-    \tud@sec@format{#1}%
-    \edef\tud@res@a{%
-      \endgroup%
-      \ifx\tud@thanks\relax\else%
-        \noexpand\thanks{\expandonce\tud@thanks}%
-      \fi%
-    }%
-  \tud@res@a%
+    \tud@sec@format[{#1}]{#2}%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@title@format
@@ -983,6 +956,8 @@
 % Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
 % \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
 % und \cs{@advisor}.
+% \ToDo{generisch für beliebig viele Bezeichner (Drittgutachter)}[v2.07]
+% \ToDo{...othername als Liste?}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@title@names[1]{%
   \letcs\@tempa{@#1}%
@@ -1056,7 +1031,9 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \tud@if@strblank{\dateofbirthtext}%
+          {}%
+          {\dateofbirthtext\tud@title@delimiter}%
         \@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
@@ -1066,15 +1043,17 @@
       \fi%
     \fi%
     \def\@tempc##1{%
-      \ifstr{\csuse{@##1}}{}{}{%
+      \expandafter\ifx\csname @##1\endcsname\@empty\else%
         \if@titlepage%
           \tud@newline@title%
-          \ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \tud@if@strblank{\csuse{##1name}}%
+            {}%
+            {\csuse{##1name}\tud@title@delimiter}%
           \csuse{@##1}%
         \else%
           \tud@title@wrn{##1}%
         \fi%
-      }%
+      \fi%
     }%
     \@tempc{course}%
     \@tempc{discipline}%
@@ -1121,9 +1100,9 @@
 % Autors zentriert ausgegeben.
 %    \begin{macrocode}
   \vbox{%
-    \hsize=.3\textwidth%
+    \hsize=\dimexpr\textwidth*3/10\relax%
     \centering%
-    \rule{.3\textwidth}{.05pt}\newline%
+    \rule{\dimexpr\textwidth*3/10\relax}{.05pt}\newline%
     \ignorespaces#1\strut\unskip%
   }%
 %    \end{macrocode}
@@ -1163,18 +1142,19 @@
   \if@twocolumn%
 %<*book|report|article>
     \if@titlepage%
-      \tud@maketitle[#1]%
-      \onecolumn{#2}\twocolumn%
+      \tud@maketitle[{#1}]%
+      \onecolumn#2\twocolumn%
     \else%
 %</book|report|article>
-      \tud@title@twocolumn{\tud@maketitle[#1]{#2}}%
+      \tud@title@twocolumn{\tud@maketitle[{#1}]#2}%
 %<*book|report|article>
     \fi%
 %</book|report|article>
   \else%
     \ClassError{\TUD@Class@Name}{%
       `\string\maketitleonecolumn' can only be used in twocolumn mode%
-    }{}%
+    }{You should use `\string\maketitle' instead.}%
+    \tud@maketitle[{#1}]#2%
   \fi%
 }
 %    \end{macrocode}
@@ -1200,7 +1180,7 @@
 % werden.
 %    \begin{macrocode}
     \global\setbox\tud@title@box\vbox{%
-      \vspace*{.9\baselineskip}#1\bigskip%
+      \vspace*{\dimexpr1\baselineskip*9/10\relax}#1\bigskip%
     }%
   \endgroup%
 %    \end{macrocode}
@@ -1208,11 +1188,11 @@
 % Vor der Version~v2.03 gab es für das \DDC-Logo einen abweichenden Satzspiegel 
 % der ggf. beachtet werden muss.
 %    \begin{macrocode}
-  \setlength\@tempdima{\textheight}%
+  \tud@setdim\@tempdima{\textheight}%
   \tud@if@v@lower{2.03}{%
     \tud@ddc@check%
     \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
-      \setlength\@tempdima{\dimexpr\textheight-\tud@len@ddcdiff\relax}%
+      \tud@setdim\@tempdima{\textheight-\tud@dim@ddcdiff}%
       \@tempswatrue%
     \fi%
   }{}%
@@ -1226,7 +1206,7 @@
       \splitmaxdepth\maxdepth%
       \vsplit\tud@title@box to \@tempdima%
       \clearpage%
-      \setlength\@tempdima{\textheight}%
+      \tud@setdim\@tempdima{\textheight}%
       \tud@if@v@lower{2.03}{\@tempswafalse}{}%
     }%
 %    \end{macrocode}
@@ -1253,7 +1233,7 @@
         You are using a two-column title along with\MessageBreak%
         the DDC-logo. Unfortunately in this case, the\MessageBreak%
         type area has to be adjusted manually. Please\MessageBreak%
-        use `\string\enlargethispage{-\the\tud@len@ddcdiff}'\MessageBreak%
+        use `\string\enlargethispage{-\the\tud@dim@ddcdiff}'\MessageBreak%
         in both columns after the title%
       }%
     \fi%
@@ -1295,7 +1275,7 @@
 % Der Befehl \cs{makecover} ist für eine Umschlagseite bei einem gebundenen 
 % Werk zu verwenden.
 %    \begin{macrocode}
-\newif\if@tud@coverpage
+\tud@newif\if@tud@coverpage
 \newcommand*\makecover[1][]{%
 %    \end{macrocode}
 % Ist die Option \opt{titlepage}|=|\val{firstiscover} aktiv, wird eine Warnung 
@@ -1369,27 +1349,27 @@
     \if@tud@cdgeometry@cover%
 %    \end{macrocode}
 % Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
-% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll. Die Makros werden
+% von \KOMAScript via \cs{dimexpr} interpretiert.
 %    \begin{macrocode}
       \if@tud@coverpage%
         \def\coverpagetopmargin{%
-          \dimexpr\tud@len@topmargin+\tud@len@barheight%
-            +\tud@len@headsep\relax%
+          \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
         }%
       \else%
         \tud@if@v@lower{2.03}{%
-          \def\coverpagetopmargin{.5\tud@len@both}%
+          \def\coverpagetopmargin{\tud@dim@bothmargin/2}%
         }{%
-          \def\coverpagetopmargin{\tud@len@slimmargin}%
+          \def\coverpagetopmargin{\tud@dim@slimmargin}%
         }%
       \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagebottommargin{.5\tud@len@both}%
+        \def\coverpagebottommargin{\tud@dim@bothmargin/2}%
       }{%
-        \def\coverpagebottommargin{\tud@len@widemargin}%
+        \def\coverpagebottommargin{\tud@dim@widemargin}%
       }%
-      \def\coverpageleftmargin{\tud@len@widemargin}%
-      \def\coverpagerightmargin{\tud@len@slimmargin}%
+      \def\coverpageleftmargin{\tud@dim@widemargin}%
+      \def\coverpagerightmargin{\tud@dim@slimmargin}%
     \fi%
     \if@tud@coverpage%
 %    \end{macrocode}
@@ -1411,7 +1391,7 @@
 %    \begin{macrocode}
       \begingroup%
         \tud@cover@setmargins%
-        \tud@len@areavskip=\z@%
+        \tud@setdim\tud@dim@areavskip{\z@}%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
@@ -1485,18 +1465,18 @@
 % voreingestellt sind. Das Vermeiden einer unerwünschten Überdeckung des Kopfes
 % oder ein zu kleiner Fußbereich muss durch den Anwender korrigiert werden. 
 %    \begin{macrocode}
-\renewcommand*{\coverpagetopmargin}{%
+\renewcommand*\coverpagetopmargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep\relax%
+    \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
   \else%
-    \dimexpr\topmargin+1in\relax%
+    \topmargin+1in%
   \fi%
 }
-\renewcommand*{\coverpagebottommargin}{%
+\renewcommand*\coverpagebottommargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@len@widemargin\relax%
+    \tud@dim@widemargin%
   \else%
-    2\dimexpr\coverpagetopmargin\relax%
+    \coverpagetopmargin*2%
   \fi%
 }
 %    \end{macrocode}
@@ -1520,26 +1500,22 @@
 % Standardmäßig ist \cs{coverbottommargin} abhängig von \cs{covertopmargin}, 
 % weshalb dieses Makro als erstes expandiert wird.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagebottommargin-\tud@len@layoutvoffset
-      +\paperheight-\tud@len@layoutheight\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagebottommargin-\tud@dim@layoutvoffset%
+        +\paperheight-\tud@dim@layoutheight%
     }%
     \edef\coverpagebottommargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpagetopmargin+\tud@len@layoutvoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpagetopmargin+\tud@dim@layoutvoffset}%
     \edef\coverpagetopmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Selbiges gilt für \cs{coverrightmargin} und \cs{coverleftmargin}.
 %    \begin{macrocode}
-    \setlength\@tempdima{%
-      \dimexpr\coverpagerightmargin-\tud@len@layouthoffset
-      +\paperwidth-\tud@len@layoutwidth\relax%
+    \tud@setdim\@tempdima{%
+      \coverpagerightmargin-\tud@dim@layouthoffset%
+        +\paperwidth-\tud@dim@layoutwidth%
     }%
     \edef\coverpagerightmargin{\the\@tempdima}%
-    \setlength\@tempdima{%
-      \dimexpr\coverpageleftmargin+\tud@len@layouthoffset\relax%
-    }%
+    \tud@setdim\@tempdima{\coverpageleftmargin+\tud@dim@layouthoffset}%
     \edef\coverpageleftmargin{\the\@tempdima}%
 %    \end{macrocode}
 % Abschließend werden die gewünschten Längen nach der lokalen Gruppe definiert.
@@ -1564,7 +1540,7 @@
     -\coverpagebottommargin\relax%
   \headheight=0pt%
   \headsep=0pt%
-  \footskip=\baselineskip%
+  \footskip=1\baselineskip%
   \@colht=\textheight%
   \@colroom=\textheight%
   \vsize=\textheight%

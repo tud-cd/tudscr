@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-area.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,16 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-area.dtx
 %<*dtx>
-% \fi%
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-area.dtx}[2022/07/28 v2.06o TUD-Script\space%
-  (type or page area)%
-]
-%
-% \iffalse
+\ProvidesFile{tudscr-area.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -53,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-area.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -91,7 +80,7 @@
 %^^A\url{http://tex.stackexchange.com/q/248902}
 %^^A\url{https://wiki.scribus.net/canvas/PDF_Boxes_:_mediabox,_cropbox,_bleedbox,_trimbox,_artbox}
 %^^A\url{http://www.prepressure.com/pdf/basics/page-boxes}
-% }[v2.07]
+% }[v2.08]
 %
 % \iffalse
 %<*class&body>
@@ -113,7 +102,7 @@
 % zu zentrieren. Diese Einstellung geht beim Laden eines neuen Satzspiegels mit 
 % \cs{loadgeometry} verloren. Hiermit wird das Problem behoben.
 %    \begin{macrocode}
-\newif\if@tud@x@crop@center
+\tud@newif\if@tud@x@crop@center
 \AfterPackage{crop}{%
   \CheckCommand*\CROP@center{%
     \voffset\stockheight
@@ -123,7 +112,7 @@
     \advance\hoffset-\paperwidth
     \hoffset.5\hoffset
   }%
-  \pretocmd{\CROP@center}{%
+  \pretocmd\CROP@center{%
     \@tud@x@crop@centertrue%
   }{}{\tud@patch@wrn{CROP@center}}%
 }
@@ -149,12 +138,12 @@
 % ausgeführt, wenn entweder die Option \opt{crop} deaktiviert ist oder die 
 % Klasse \cls{standalone} gar nicht geladen wurde.
 %    \begin{macrocode}
-\newif\if@tud@x@standalone@crop
+\tud@newif\if@tud@x@standalone@crop
 \AfterClass*{standalone}{\let\if@tud@x@standalone@crop\ifsa@crop}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@x@standalone@crop
 %
-% \subsection{Definition der Größen und Maße in abhängig vom Papierformat}
+% \subsection{Definition der Größen und Maße abhängig vom Papierformat}
 %
 % Die \TUDScript-Klassen sollen neben den vom \CD vorgegebenen Seitenrändern 
 % weitere Satzspiegel ermöglichen und u.\,a. auch die Nutzung des Paketes
@@ -164,101 +153,101 @@
 % Seitenränder direkt gewählt oder aber die mit \pkg{typearea} berechneten Maße
 % an \pkg{geometry} durchgereicht.
 %
-% \begin{length}{\tud@len@widemargin}
-% \begin{length}{\tud@len@slimmargin}
-% \begin{length}{\tud@len@both}
+% \begin{length}{\tud@dim@widemargin}
+% \begin{length}{\tud@dim@slimmargin}
+% \begin{length}{\tud@dim@bothmargin}
 % Die Seitenränder für links und rechts sowie deren Summe, welche später für
 % weitere Satzspiegeleinstelungen dazu verwendet wird, diese anteilig zu 
 % verteilen.
 %    \begin{macrocode}
-\newlength\tud@len@widemargin
-\newlength\tud@len@slimmargin
-\newlength\tud@len@both
+\tud@newdim\tud@dim@widemargin
+\tud@newdim\tud@dim@slimmargin
+\tud@newdim\tud@dim@bothmargin
 %    \end{macrocode}
-% \end{length}^^A \tud@len@both
-% \end{length}^^A \tud@len@slimmargin
-% \end{length}^^A \tud@len@widemargin
-% \begin{length}{\tud@len@topmargin}
-% \begin{length}{\tud@len@barheight}
-% \begin{length}{\tud@len@headsep}
-% \begin{length}{\tud@len@footsep}
+% \end{length}^^A \tud@dim@bothmargin
+% \end{length}^^A \tud@dim@slimmargin
+% \end{length}^^A \tud@dim@widemargin
+% \begin{length}{\tud@dim@topmargin}
+% \begin{length}{\tud@dim@barheight}
+% \begin{length}{\tud@dim@headsep}
+% \begin{length}{\tud@dim@footsep}
 % Es folgen die speziellen Maße für die Seiten mit dem TUD-Kopf, also die Höhe
 % oberhalb des Querbalkens, die Höhe des Querbalkens selbst sowie der vertikale
 % (Mindest"~)Abstand zwischen Querbalken und Textkörper sowie der Fußzeile.
 %    \begin{macrocode}
-\newlength\tud@len@topmargin
-\newlength\tud@len@barheight
-\newlength\tud@len@headsep
-\newlength\tud@len@footsep
+\tud@newdim\tud@dim@topmargin
+\tud@newdim\tud@dim@barheight
+\tud@newdim\tud@dim@headsep
+\tud@newdim\tud@dim@footsep
 %    \end{macrocode}
-% \end{length}^^A \tud@len@footsep
-% \end{length}^^A \tud@len@headsep
-% \end{length}^^A \tud@len@barheight
-% \end{length}^^A \tud@len@topmargin
-% \begin{length}{\tud@len@logox}
-% \begin{length}{\tud@len@logoy}
-% \begin{length}{\tud@len@logowidth}
+% \end{length}^^A \tud@dim@footsep
+% \end{length}^^A \tud@dim@headsep
+% \end{length}^^A \tud@dim@barheight
+% \end{length}^^A \tud@dim@topmargin
+% \begin{length}{\tud@dim@logox}
+% \begin{length}{\tud@dim@logoy}
+% \begin{length}{\tud@dim@logowidth}
 % Außerdem müssen Abmessungen und Position des TUD-Logos definiert werden,
 % genauer der horizontale (Soll"~)Abstand zwischen linkem Seitenrand und Logo,
 % der vertikale (Soll"~)Abstand zwischen oberem Seitenrand und Logo sowie die
 % Breite und Höhe\footnote{Proportionen sind durch die Grafik vorgegeben} des 
 % Logos.
 %    \begin{macrocode}
-\newlength\tud@len@logox
-\newlength\tud@len@logoy
-\newlength\tud@len@logowidth
+\tud@newdim\tud@dim@logox
+\tud@newdim\tud@dim@logoy
+\tud@newdim\tud@dim@logowidth
 %    \end{macrocode}
-% \end{length}^^A \tud@len@logowidth
-% \end{length}^^A \tud@len@logoy
-% \end{length}^^A \tud@len@logox
-% \begin{length}{\tud@len@line}
+% \end{length}^^A \tud@dim@logowidth
+% \end{length}^^A \tud@dim@logoy
+% \end{length}^^A \tud@dim@logox
+% \begin{length}{\tud@dim@line}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{length}{\tud@len@heavyline}
-% \begin{length}{\tud@len@thinline}
+% \begin{length}{\tud@dim@heavyline}
+% \begin{length}{\tud@dim@thinline}
 % Die Linienstärke der Outline im Kopf ist für ein monochromes Layout schmaler
 % als im Layout mit farbigem Hintergrund.\footnote{monochrom 
-% \cs{tud@len@thinline}, koloriert \cs{tud@len@heavyline}} Da im Dokument beide 
-% Varianten vorkommen können, wird die Breite \cs{tud@len@line} durch den
-% Seitenstil situativ entweder auf den Wert von \cs{tud@len@thinline} oder aber
-% \cs{tud@len@heavyline} gesetzt.
+% \cs{tud@dim@thinline}, koloriert \cs{tud@dim@heavyline}} Da im Dokument beide 
+% Varianten vorkommen können, wird die Breite \cs{tud@dim@line} durch den
+% Seitenstil situativ entweder auf den Wert von \cs{tud@dim@thinline} oder aber
+% \cs{tud@dim@heavyline} gesetzt.
 %    \begin{macrocode}
-\newlength\tud@len@line
-\newlength\tud@len@heavyline
-\newlength\tud@len@thinline
+\tud@newdim\tud@dim@line
+\tud@newdim\tud@dim@heavyline
+\tud@newdim\tud@dim@thinline
 %    \end{macrocode}
-% \end{length}^^A \tud@len@thinline
-% \end{length}^^A \tud@len@heavyline
-% \end{length}^^A \tud@len@line
-% \begin{length}{\tud@len@areaheadvskip}
+% \end{length}^^A \tud@dim@thinline
+% \end{length}^^A \tud@dim@heavyline
+% \end{length}^^A \tud@dim@line
+% \begin{length}{\tud@dim@areaheadvskip}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{length}{\tud@len@areadiff}
-% \begin{length}{\tud@len@areavskip}
+% \begin{length}{\tud@dim@areadiff}
+% \begin{length}{\tud@dim@areavskip}
 % Die Längen für den vertikalen Standardversatz der Überschriften sowie die 
 % Differenz der Kopfhöhen von normalem und TUD-Kopf-Satzspiegel. Die Differenz 
 % zwischen den unterschiedlichen Kopfhöhen der Satzspiegelvarianten wird durch
-% \cs{tud@cdgeometry@@process} berechnet und dabei in \cs{tud@len@areadiff} 
+% \cs{tud@cdgeometry@@process} berechnet und dabei in \cs{tud@dim@areadiff} 
 % gespeichert. Dabei muss unterschieden werden, ober der Satzspiegel des \CDs 
 % oder der durch \pkg{typearea} berechnete respektive durch den Anwender mit 
 % \pkg{geometry} vorgegebene genutzt wird. Davon abhängig wird zum Ausgleich 
-% die Länge \cs{tud@len@areavskip} definiert.
+% die Länge \cs{tud@dim@areavskip} definiert.
 %    \begin{macrocode}
-\newlength\tud@len@areaheadvskip
-\newlength\tud@len@areadiff
-\newlength\tud@len@areavskip
+\tud@newdim\tud@dim@areaheadvskip
+\tud@newdim\tud@dim@areadiff
+\tud@newdim\tud@dim@areavskip
 %    \end{macrocode}
-% \end{length}^^A \tud@len@areavskip
-% \end{length}^^A \tud@len@areadiff
-% \end{length}^^A \tud@len@areaheadvskip
-% \begin{length}{\tud@len@ddcdiff}
+% \end{length}^^A \tud@dim@areavskip
+% \end{length}^^A \tud@dim@areadiff
+% \end{length}^^A \tud@dim@areaheadvskip
+% \begin{length}{\tud@dim@ddcdiff}
 % \changes{v2.02}{2014/06/23}{neu}^^A
-% Zu guter Letzt noch die Länge \cs{tud@len@ddcdiff} für den Höhenausgleich des 
+% Zu guter Letzt noch die Länge \cs{tud@dim@ddcdiff} für den Höhenausgleich des 
 % Seitenfußes, welcher bei der Verwendung des \DDC-Logos in der Fußzeile bei 
 % Version~v2.02 für den Satzspiegel notwendig war. Dieser etwas verschrobene
 % Satzspiegel wird im Kompatibilitätsmodus weiterhin angeboten.
 %    \begin{macrocode}
-\tud@if@v@lower{2.03}{\newlength\tud@len@ddcdiff}{}
+\tud@if@v@lower{2.03}{\tud@newdim\tud@dim@ddcdiff}{}
 %    \end{macrocode}
-% \end{length}^^A \tud@len@ddcdiff
+% \end{length}^^A \tud@dim@ddcdiff
 % \begin{macro}{\tud@head@fontsize}
 % Für den Querbalken wird außerdem die zu verwendende Schriftgröße definiert.
 %    \begin{macrocode}
@@ -267,7 +256,7 @@
 % \end{macro}^^A \tud@head@fontsize
 % \begin{macro}{\tud@cdgeometry@set}
 % \changes{v2.03}{2015/01/23}{Längenberechnung für den Satzspiegel an 
-%   Referenzlänge \cs{tud@len@widemargin} gekoppelt}^^A
+%   Referenzlänge \cs{tud@dim@widemargin} gekoppelt}^^A
 % \changes{v2.05}{2015/07/15}{Fallunterscheidung an DIN-B-Reihe angepasst}^^A
 % \changes{v2.05}{2016/04/03}{Option \opt{layout} von \pkg{geometry} möglich}^^A
 % \begin{macro}{\if@tud@cdgeometry@adjust}
@@ -280,18 +269,18 @@
 % \changes{v2.06g}{2020/06/18}{neu}^^A
 % \begin{macro}{\tud@cdgeometry@papersize@last}
 % \changes{v2.06g}{2020/06/18}{neu}^^A
-% \begin{length}{\tud@len@layoutwidth}
+% \begin{length}{\tud@dim@layoutwidth}
 % \changes{v2.05}{2016/04/03}{neu}^^A
-% \begin{length}{\tud@len@layoutheight}
+% \begin{length}{\tud@dim@layoutheight}
 % \changes{v2.05}{2016/04/03}{neu}^^A
-% \begin{length}{\tud@len@layouthoffset}
+% \begin{length}{\tud@dim@layouthoffset}
 % \changes{v2.05}{2016/04/03}{neu}^^A
-% \begin{length}{\tud@len@layoutvoffset}
+% \begin{length}{\tud@dim@layoutvoffset}
 % \changes{v2.05}{2016/04/03}{neu}^^A
 % Hiermit werden in Abhängigkeit der gewählten Papiergröße die Maße für die
 % Größe der Kopfzeile, die Position des Logos, die Seitenränder sowie die
 % Schriftgröße in der Kopfzeile definiert. Aufgerufen wird der Befehl durch
-% \cs{tud@cdgeometry@@process}. Dabei fungiert \cs{tud@len@widemargin} als 
+% \cs{tud@cdgeometry@@process}. Dabei fungiert \cs{tud@dim@widemargin} als 
 % Bezugslänge. Die maßgebliche Papiergröße ist DIN~A4 bzw. DIN~B4. Die Längen
 % für alle anderen Papiermaße unterscheiden sich um den Faktor~$\sqrt{2}$,
 % wobei das Format DIN~A5 nach den Vorgaben des \CDs übersprungen wird. 
@@ -301,49 +290,49 @@
 % Mit der Einstellung \opt{cdgeometry}|=|\val{adapted} wird auch das Format 
 % DIN~A5 mit den skalierten Seitenrändern erstellt.
 %    \begin{macrocode}
-\newif\if@tud@cdgeometry@adjust
-\newlength\tud@len@layoutwidth
-\newlength\tud@len@layoutheight
-\newlength\tud@len@layouthoffset
-\newlength\tud@len@layoutvoffset
+\tud@newif\if@tud@cdgeometry@adjust
+\tud@newdim\tud@dim@layoutwidth
+\tud@newdim\tud@dim@layoutheight
+\tud@newdim\tud@dim@layouthoffset
+\tud@newdim\tud@dim@layoutvoffset
 \newcommand*\tud@cdgeometry@set{%
   \tud@cdgeometry@assignlayout%
   \tud@if@v@lower{2.05}{%
-    \ifdim\tud@len@layoutheight<\dimexpr105mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr105mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr148mm+1.5mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr148mm+1.5mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr229mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr229mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr297mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr297mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr420mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr420mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr594mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr594mm+2mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr841mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr841mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr1189mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1189mm+3mm\relax%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
     \fi\fi\fi\fi\fi\fi\fi\fi%
   }{%
-    \ifdim\tud@len@layoutheight<\dimexpr125mm+1.5mm\relax%
+    \ifdim\tud@dim@layoutheight<\dimexpr125mm+1.5mm\relax%
       \def\@tempa{0}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr176mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr176mm+2mm\relax%
       \def\@tempa{1}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr250mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr250mm+2mm\relax%
       \def\@tempa{2}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr353mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr353mm+2mm\relax%
       \def\@tempa{3}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr500mm+2mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr500mm+2mm\relax%
       \def\@tempa{4}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr707mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr707mm+3mm\relax%
       \def\@tempa{5}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr1000mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1000mm+3mm\relax%
       \def\@tempa{6}%
-    \else\ifdim\tud@len@layoutheight<\dimexpr1414mm+3mm\relax%
+    \else\ifdim\tud@dim@layoutheight<\dimexpr1414mm+3mm\relax%
       \def\@tempa{7}%
     \else%
       \def\@tempa{8}%
@@ -380,20 +369,20 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\tud@len@layoutheight}{148mm}%
-    \setlength\tud@len@widemargin{15mm}%
-    \setlength\tud@len@widemargin{\@tempa\tud@len@widemargin}%
-    \setlength\tud@len@heavyline{0.5pt}%
-    \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
-    \setlength\tud@len@thinline{0.25pt}%
-    \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength\@tempdima{4.5pt}%
-    \setlength\@tempdima{\@tempa\@tempdima}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{148mm}%
+    \tud@setdim\tud@dim@widemargin{15mm}%
+    \tud@setdim\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \tud@setdim\tud@dim@heavyline{0.5pt}%
+    \tud@setdim\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \tud@setdim\tud@dim@thinline{0.25pt}%
+    \tud@setdim\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \tud@setdim\@tempdima{4.5pt}%
+    \tud@setdim\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \or% <=A6/B6
-    \setlength\tud@len@widemargin{15mm}%
-    \setlength\tud@len@heavyline{0.5pt}%
-    \setlength\tud@len@thinline{0.25pt}%
+    \tud@setdim\tud@dim@widemargin{15mm}%
+    \tud@setdim\tud@dim@heavyline{0.5pt}%
+    \tud@setdim\tud@dim@thinline{0.25pt}%
     \renewcommand*\tud@head@fontsize{4.5}%
 %    \end{macrocode}
 % Für Formate der Klasse~5 gibt es zwei Varianten. Entweder, es wird sich an 
@@ -405,40 +394,40 @@
   \or% <=A5/B5
     \ifnum\tud@cdgeometry@calc@num=\z@\relax% restricted
       \@tud@cdgeometry@adjusttrue%
-      \setlength\tud@len@widemargin{30mm}%
-      \setlength\tud@len@heavyline{1pt}%
-      \setlength\tud@len@thinline{0.5pt}%
+      \tud@setdim\tud@dim@widemargin{30mm}%
+      \tud@setdim\tud@dim@heavyline{1pt}%
+      \tud@setdim\tud@dim@thinline{0.5pt}%
       \renewcommand*\tud@head@fontsize{9}%
     \else%
-      \setlength\tud@len@widemargin{21.213203mm}%
-      \setlength\tud@len@heavyline{0.707107pt}%
-      \setlength\tud@len@thinline{0.353553pt}%
+      \tud@setdim\tud@dim@widemargin{21.213203mm}%
+      \tud@setdim\tud@dim@heavyline{0.707107pt}%
+      \tud@setdim\tud@dim@thinline{0.353553pt}%
       \renewcommand*\tud@head@fontsize{6.363961}%
     \fi%
   \or% <=A4/B4
-    \setlength\tud@len@widemargin{30mm}%
-    \setlength\tud@len@heavyline{1pt}%
-    \setlength\tud@len@thinline{0.5pt}%
+    \tud@setdim\tud@dim@widemargin{30mm}%
+    \tud@setdim\tud@dim@heavyline{1pt}%
+    \tud@setdim\tud@dim@thinline{0.5pt}%
     \renewcommand*\tud@head@fontsize{9}%
   \or% <=A3/B3
-    \setlength\tud@len@widemargin{42.426407mm}%
-    \setlength\tud@len@heavyline{1.414214pt}%
-    \setlength\tud@len@thinline{0.707107pt}%
+    \tud@setdim\tud@dim@widemargin{42.426407mm}%
+    \tud@setdim\tud@dim@heavyline{1.414214pt}%
+    \tud@setdim\tud@dim@thinline{0.707107pt}%
     \renewcommand*\tud@head@fontsize{12.727922}%
   \or% <=A2/B2
-    \setlength\tud@len@widemargin{60mm}%
-    \setlength\tud@len@heavyline{2pt}%
-    \setlength\tud@len@thinline{1pt}%
+    \tud@setdim\tud@dim@widemargin{60mm}%
+    \tud@setdim\tud@dim@heavyline{2pt}%
+    \tud@setdim\tud@dim@thinline{1pt}%
     \renewcommand*\tud@head@fontsize{18}%
   \or% <=A1/B1
-    \setlength\tud@len@widemargin{84.852814mm}%
-    \setlength\tud@len@heavyline{2.828427pt}%
-    \setlength\tud@len@thinline{1.414214pt}%
+    \tud@setdim\tud@dim@widemargin{84.852814mm}%
+    \tud@setdim\tud@dim@heavyline{2.828427pt}%
+    \tud@setdim\tud@dim@thinline{1.414214pt}%
     \renewcommand*\tud@head@fontsize{25.455844}%
   \or% <=A0/B0
-    \setlength\tud@len@widemargin{120mm}%
-    \setlength\tud@len@heavyline{4pt}%
-    \setlength\tud@len@thinline{2pt}%
+    \tud@setdim\tud@dim@widemargin{120mm}%
+    \tud@setdim\tud@dim@heavyline{4pt}%
+    \tud@setdim\tud@dim@thinline{2pt}%
     \renewcommand*\tud@head@fontsize{36}%
   \else% >A0/B0
 %    \end{macrocode}
@@ -454,15 +443,15 @@
         calculate a proper type area%
       }%
     \fi%
-    \tud@divide\@tempa{\tud@len@layoutheight}{1189mm}%
-    \setlength\tud@len@widemargin{120mm}%
-    \setlength\tud@len@widemargin{\@tempa\tud@len@widemargin}%
-    \setlength\tud@len@heavyline{4pt}%
-    \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
-    \setlength\tud@len@thinline{2pt}%
-    \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength\@tempdima{36pt}%
-    \setlength\@tempdima{\@tempa\@tempdima}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{1189mm}%
+    \tud@setdim\tud@dim@widemargin{120mm}%
+    \tud@setdim\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \tud@setdim\tud@dim@heavyline{4pt}%
+    \tud@setdim\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \tud@setdim\tud@dim@thinline{2pt}%
+    \tud@setdim\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \tud@setdim\@tempdima{36pt}%
+    \tud@setdim\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
 %    \end{macrocode}
@@ -470,12 +459,12 @@
 % Format DIN~A4.
 %    \begin{macrocode}
   \ifnum\tud@cdgeometry@calc@num=\tw@\relax%
-    \tud@divide\@tempa{\tud@len@layoutheight}{297mm}%
-    \setlength\tud@len@widemargin{\@tempa\tud@len@widemargin}%
-    \setlength\tud@len@heavyline{\@tempa\tud@len@heavyline}%
-    \setlength\tud@len@thinline{\@tempa\tud@len@thinline}%
-    \setlength\@tempdima{\tud@head@fontsize pt}%
-    \setlength\@tempdima{\@tempa\@tempdima}%
+    \tud@divide\@tempa{\tud@dim@layoutheight}{297mm}%
+    \tud@setdim\tud@dim@widemargin{\@tempa\tud@dim@widemargin}%
+    \tud@setdim\tud@dim@heavyline{\@tempa\tud@dim@heavyline}%
+    \tud@setdim\tud@dim@thinline{\@tempa\tud@dim@thinline}%
+    \tud@setdim\@tempdima{\tud@head@fontsize pt}%
+    \tud@setdim\@tempdima{\@tempa\@tempdima}%
     \edef\tud@head@fontsize{\strip@pt\@tempdima}%
   \fi%
 %    \end{macrocode}
@@ -484,24 +473,22 @@
 % forciert.
 %    \begin{macrocode}
   \global\@tud@head@font@settrue%
-  \setlength\tud@len@slimmargin{\dimexpr2\tud@len@widemargin/3\relax}%
-  \setlength\tud@len@both{\dimexpr5\tud@len@widemargin/3\relax}%
-  \setlength\tud@len@topmargin{\dimexpr7\tud@len@widemargin/6\relax}%
-  \setlength\tud@len@barheight{\dimexpr\tud@len@widemargin/6\relax}%
-  \setlength\tud@len@headsep{\dimexpr2\tud@len@widemargin/5\relax}%
-  \setlength\tud@len@logox{\dimexpr1.1\tud@len@widemargin/3\relax}%
-  \setlength\tud@len@logoy{\dimexpr0.45\tud@len@widemargin\relax}%
-  \setlength\tud@len@logowidth{\dimexpr1.9\tud@len@widemargin\relax}%
-  \setlength\tud@len@footsep{%
-    \dimexpr\tud@len@widemargin-.6\tud@len@topmargin\relax%
-  }%
+  \tud@setdim\tud@dim@slimmargin{\tud@dim@widemargin*2/3}%
+  \tud@setdim\tud@dim@bothmargin{\tud@dim@widemargin*5/3}%
+  \tud@setdim\tud@dim@topmargin{\tud@dim@widemargin*7/6}%
+  \tud@setdim\tud@dim@barheight{\tud@dim@widemargin/6}%
+  \tud@setdim\tud@dim@headsep{\tud@dim@widemargin*2/5}%
+  \tud@setdim\tud@dim@logox{\tud@dim@widemargin*11/30}%
+  \tud@setdim\tud@dim@logoy{\tud@dim@widemargin*9/20}%
+  \tud@setdim\tud@dim@logowidth{\tud@dim@widemargin*19/10}%
+  \tud@setdim\tud@dim@footsep{\tud@dim@widemargin-\tud@dim@topmargin*3/5}%
 %    \end{macrocode}
 % Wird die Gestaltungshöhe DIN~A5 im Raster verwendet, werden die Abstände 
 % zwischen Kopf- unf Fußzeile angepasst.
 %    \begin{macrocode}
   \if@tud@cdgeometry@adjust%
-    \setlength\tud@len@headsep{\dimexpr.707107\tud@len@headsep\relax}%
-    \setlength\tud@len@footsep{\dimexpr.707107\tud@len@footsep\relax}%
+    \tud@setdim\tud@dim@headsep{.707107\tud@dim@headsep}%
+    \tud@setdim\tud@dim@footsep{.707107\tud@dim@footsep}%
   \fi%
   \tud@cdgeometry@papersize@store%
 }
@@ -510,11 +497,11 @@
 % dem Paket \pkg{geometry} angegeben wurde, entsprechend gesetzt.
 %    \begin{macrocode}
 \newcommand*\tud@cdgeometry@assignlayout{%
-  \ifdim\tud@len@layoutwidth<\p@\relax%
-    \setlength\tud@len@layoutwidth{\paperwidth}%
+  \ifdim\tud@dim@layoutwidth<\p@\relax%
+    \tud@setdim\tud@dim@layoutwidth{\paperwidth}%
   \fi%
-  \ifdim\tud@len@layoutheight<\p@\relax%
-    \setlength\tud@len@layoutheight{\paperheight}%
+  \ifdim\tud@dim@layoutheight<\p@\relax%
+    \tud@setdim\tud@dim@layoutheight{\paperheight}%
   \fi%
 }
 %    \end{macrocode}
@@ -539,18 +526,18 @@
     }%
     \ifx\tud@res@a\tud@cdgeometry@papersize@last\else%
       \appto\tud@res@b{%
-        \setlength\tud@len@layoutwidth{\z@}%
-        \setlength\tud@len@layoutheight{\z@}%
+        \tud@setdim\tud@dim@layoutwidth{\z@}%
+        \tud@setdim\tud@dim@layoutheight{\z@}%
         \tud@x@geometry@fixmargins%
       }%
     \fi%
   \tud@res@b%
 }
 %    \end{macrocode}
-% \end{length}^^A \tud@len@layoutvoffset
-% \end{length}^^A \tud@len@layouthoffset
-% \end{length}^^A \tud@len@layoutheight
-% \end{length}^^A \tud@len@layoutwidth
+% \end{length}^^A \tud@dim@layoutvoffset
+% \end{length}^^A \tud@dim@layouthoffset
+% \end{length}^^A \tud@dim@layoutheight
+% \end{length}^^A \tud@dim@layoutwidth
 % \end{macro}^^A \tud@cdgeometry@papersize@last
 % \end{macro}^^A \tud@cdgeometry@papersize@store
 % \end{macro}^^A \tud@cdgeometry@resetlayout
@@ -571,7 +558,7 @@
 % Option \opt{cdgeometry} temporär deaktiviert. Dies geschieht, um lediglich 
 % die im Hintergrund verwendeten Makros neu zu setzen.
 %    \begin{macrocode}
-\newif\if@tud@cdgeometry@reset
+\tud@newif\if@tud@cdgeometry@reset
 \newcommand*\tud@cdgeometry@reset[1]{%
   \@tud@cdgeometry@resettrue%
   \TUDoptions{cdgeometry=#1}%
@@ -671,49 +658,50 @@
 % \end{macro}^^A \tud@cdgeometry@num
 % \end{option}^^A cdgeometry
 % \begin{option}{extrabottommargin}
-% \begin{macro}{\tud@dim@extrabottommargin}
+% \begin{macro}{\tud@extrabottommargin@dim}
 % Diese Option dient dazu, die Höhe des Fußes anzupassen. Dies ist jedoch nur 
 % möglich, wenn der Satzspiegel des \CDs verwendet wird. Kommt \pkg{typearea} 
 % zum Einsatz, ist die Option wirkungslos. Da für die Länge ggf. auch Werte 
 % angegeben werden können, die abhängig von der Schriftgröße sind, wird die 
 % Ausführung dieser Option verzögert.
 %    \begin{macrocode}
-\newcommand*\tud@dim@extrabottommargin{\z@}
+\newcommand*\tud@extrabottommargin@dim{0pt}
 \TUD@key{extrabottommargin}{%
-  \TUD@set@dimenkey{extrabottommargin}{\tud@dim@extrabottommargin}{#1}%
+  \TUD@set@dimkey{extrabottommargin}{\tud@extrabottommargin@dim}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@dim@extrabottommargin
+% \end{macro}^^A \tud@extrabottommargin@dim
 % \begin{option}{bleedmargin}
 % \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\tud@dim@bleedmargin}
+% \begin{macro}{\tud@bleedmargin@dim}
 % \changes{v2.05}{2016/04/03}{neu}^^A
 % Wird entweder das Paket \pkg{crop} oder aber die Option \opt{layout} des 
 % Paketes \pkg{geometry} für Schnittmarken verwendet, werden alle farbigen 
 % Elemente des Layouts dahingehend vergrößert, dass beim Zuschneiden des 
 % Papierbogens \emph{in die Farbe} geschnitten wird. Verantwortlich hierfür ist 
-% das Makro \cs{tud@dim@bleedmargin}, welches natürlich auch vom Anwender mit
+% das Makro \cs{tud@bleedmargin@dim}, welches natürlich auch vom Anwender mit
 % der Option \opt{bleedmargin} beliebig gesetzt werden kann. Als Standardwert 
 % werden 5\% der größten Randbreite gesetzt.
+% \ToDo{^^A%
+%   Was genau ist der Unterschied zwischen cropmargin und bleedmargin? 
+%   Wo kommt der Standardwert her? Sinnvoll für Standardklassen?
+% }[v2.07]^^A
 %    \begin{macrocode}
-\newcommand*\tud@dim@bleedmargin{.2in}
+\newcommand*\tud@bleedmargin@dim{.2in}
 \TUD@key{bleedmargin}{%
-  \TUD@set@dimenkey{bleedmargin}{\tud@dim@bleedmargin}{#1}%
+  \TUD@set@dimkey{bleedmargin}{\tud@bleedmargin@dim}{#1}%
 %    \end{macrocode}
 % Negative Werte sind nicht möglich, diese werden automatisch korrigiert.
 %    \begin{macrocode}
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \ifdim\dimexpr\tud@dim@bleedmargin\relax<\z@\relax%
-      \def\@tempa-##1\@nil{\def\tud@dim@bleedmargin{##1}}%
-      \@tempa#1\@nil%
-    \fi%
+    \tud@length@setabsolute\tud@bleedmargin@dim%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@dim@bleedmargin
+% \end{macro}^^A \tud@bleedmargin@dim
 % \end{option}^^A bleedmargin
 % \end{option}^^A extrabottommargin
 % \begin{option}{twoside}
@@ -723,12 +711,12 @@
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{twoside}{%
+  \FamilyKeyStateUnknownValue%
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
-  \FamilyKeyStateProcessed%
 }
 \DefineFamilyKey{KOMA}{twocolumn}{%
+  \FamilyKeyStateUnknownValue%
   \TUD@SpecialOptionAtDocument{tud@cdgeometry@process}%
-  \FamilyKeyStateProcessed%
 }
 %    \end{macrocode}
 % \end{option}^^A twocolumn
@@ -776,11 +764,11 @@
 % sämtliche Einstellungen für den Satzspiegel unterdrückt.
 %    \begin{macrocode}
 \if@tud@x@standalone@crop
-  \PreventPackageFromLoading{geometry}%
-  \let\tud@cdgeometry@process\relax%
+  \PreventPackageFromLoading{geometry}
+  \let\tud@cdgeometry@process\relax
 \else
-  \RequirePackage{geometry}[2010/09/12]%
-\fi%
+  \RequirePackage{geometry}[2010/09/12]
+\fi
 \AfterPackage*{geometry}{%
   \CheckCommand*\Gm@initnewgm{%
     \Gm@passfalse
@@ -937,7 +925,7 @@
 % und \cs{newgeometry} angepasst, weshalb diese vorher gesichert werden.
 % \ToDo{erweiterte Möglichkeiten von \cs{newgeometry} dokumentieren}[v2.07]
 %    \begin{macrocode}
-  \newif\if@tud@x@geometry@enabled%
+  \tud@newif\if@tud@x@geometry@enabled%
   \@tud@x@geometry@enabledtrue%
   \tud@cs@store{geometry}%
   \tud@cs@store{newgeometry}%
@@ -974,7 +962,7 @@
 % angepasst werden. Hierfür wird am Ende von \cs{Gm@changelayout} ein Patch 
 % eingehängt.
 %    \begin{macrocode}
-  \apptocmd{\Gm@changelayout}{%
+  \apptocmd\Gm@changelayout{%
     \if@tud@x@geometry@enabled%
       \tud@if@preamble{}{%
         \@tud@x@geometry@fixmarginstrue%
@@ -995,12 +983,12 @@
 % mehrmals wiederverwendet werden, müssen diese u.U. korrigert bzw. auf ihren 
 % ursprünglichen Wert zurückgesetzt werden.
 %    \begin{macrocode}
-  \newif\if@tud@x@geometry@fixmargins%
+  \tud@newif\if@tud@x@geometry@fixmargins%
   \newcommand*\tud@x@geometry@fixmargins{%
     \ifGm@pass\else%
-      \addtolength\oddsidemargin{-\tud@len@layouthoffset}%
-      \addtolength\evensidemargin{-\tud@len@layouthoffset}%
-      \addtolength\topmargin{-\tud@len@layoutvoffset}%
+      \tud@addtodim\oddsidemargin{-\tud@dim@layouthoffset}%
+      \tud@addtodim\evensidemargin{-\tud@dim@layouthoffset}%
+      \tud@addtodim\topmargin{-\tud@dim@layoutvoffset}%
       \@tud@x@geometry@fixmarginsfalse%
     \fi%
   }%
@@ -1062,16 +1050,19 @@
         \tud@cdgeometry@assignlayout%
         \edef\tud@res@a{%
           \endgroup%
-            \noexpand\setlength\noexpand\tud@len@layoutwidth{\the\paperwidth}%
-            \noexpand\setlength\noexpand\tud@len@layoutheight{\the\paperheight}%
+            \unexpanded{\tud@setdim\tud@dim@layoutwidth}{\the\paperwidth}%
+            \unexpanded{\tud@setdim\tud@dim@layoutheight}{\the\paperheight}%
         }%
       \tud@res@a%
     \fi%
-    \ifstr{#2}{newgeometry}{%
-      \eappto\Gm@restore@org{%
+    \tud@if@strequal{#2}{newgeometry}{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
 %    \end{macrocode}
 % Wird der Befehl verwendet, wenn eigentlich \pkg{typearea} aktiv ist, so 
 % werden lediglich die Einstellungen zu \prm{paper} und \prm{layout} beachtet. 
@@ -1134,11 +1125,11 @@
       \tud@x@geometry@area@def{paper}{\paperwidth:#1}%
     }%
     \TUD@parameter@def{layout}{%
-      \ifstr{#1}{false}{%
-        \setlength\tud@len@layoutwidth{\z@}%
-        \setlength\tud@len@layoutheight{\z@}%
-        \setlength\tud@len@layouthoffset{\z@}%
-        \setlength\tud@len@layoutvoffset{\z@}%
+      \tud@if@strequal{#1}{false}{%
+        \tud@setdim\tud@dim@layoutwidth{\z@}%
+        \tud@setdim\tud@dim@layoutheight{\z@}%
+        \tud@setdim\tud@dim@layouthoffset{\z@}%
+        \tud@setdim\tud@dim@layoutvoffset{\z@}%
       }{%
         \tud@x@geometry@area@def{layout}{#1}%
       }%
@@ -1155,25 +1146,25 @@
       \@tempa#1,,\@nil%
     }%
     \TUD@parameter@def{layoutwidth}{%
-      \tud@x@geometry@area@def{layout}{#1:\tud@len@layoutheight}%
+      \tud@x@geometry@area@def{layout}{#1:\tud@dim@layoutheight}%
     }%
     \TUD@parameter@def{layoutheight}{%
-      \tud@x@geometry@area@def{layout}{\tud@len@layoutwidth:#1}%
+      \tud@x@geometry@area@def{layout}{\tud@dim@layoutwidth:#1}%
     }%
     \TUD@parameter@def{layoutoffset}{%
       \def\@tempa##1,##2,##3\@nil{%
         \IfArgIsEmpty{##2}{%
-          \setlength\tud@len@layouthoffset{##1}%
-          \setlength\tud@len@layoutvoffset{##1}%
+          \tud@setdim\tud@dim@layouthoffset{##1}%
+          \tud@setdim\tud@dim@layoutvoffset{##1}%
         }{%
-          \setlength\tud@len@layouthoffset{##1}%
-          \setlength\tud@len@layoutvoffset{##2}%
+          \tud@setdim\tud@dim@layouthoffset{##1}%
+          \tud@setdim\tud@dim@layoutvoffset{##2}%
         }%
       }%
       \@tempa#1,,\@nil%
     }%
-    \TUD@parameter@def{layouthoffset}{\setlength\tud@len@layouthoffset{#1}}%
-    \TUD@parameter@def{layoutvoffset}{\setlength\tud@len@layoutvoffset{#1}}%
+    \TUD@parameter@def{layouthoffset}{\tud@setdim\tud@dim@layouthoffset{#1}}%
+    \TUD@parameter@def{layoutvoffset}{\tud@setdim\tud@dim@layoutvoffset{#1}}%
     \TUD@parameter@def{bleedmargin}{\TUDoption{bleedmargin}{#1}}%
     \TUD@parameter@handler@macro{%
       \eappto\tud@x@geometry@parameter{%
@@ -1192,20 +1183,24 @@
 % \val{parameter} für alles Übrige.
 %    \begin{macrocode}
   \newcommand*\tud@x@geometry@area@def[2]{%
-    \tud@lowerstring{\@tempa}{#2}%
+    \tud@strlowercase\@tempa{#2}%
     \def\@tempb##1paper##2\@nil{%
-      \ifstr{##2}{paper}{\def\@tempa{##1}}{}%
+      \tud@if@strequal{##2}{paper}{\def\@tempa{##1}}{}%
     }%
     \expandafter\@tempb\@tempa paper\@nil%
     \@tempswafalse%
-    \ifstr{\@tempa}{seascape}{\@tempswatrue}{}%
-    \ifstr{\@tempa}{landscape}{\@tempswatrue}{}%
-    \ifstr{\@tempa}{portrait}{\@tempswatrue}{}%
-    \ifstr{\@tempa}{letter}{\@tempswatrue}{}%
-    \ifstr{\@tempa}{executive}{\@tempswatrue}{}%
-    \ifstr{\@tempa}{legal}{\@tempswatrue}{}%
+    \TUD@set@numkey{paper}{@tempc}{%
+      {seascape}{0},{landscape}{0},{portrait}{0},%
+      {letter}{0},{executive}{0},{legal}{0}%
+    }{\@tempa}%
+    \@tempswafalse%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \ifcase\@tempc\relax%
+        \@tempswatrue%
+      \fi%
+    \fi%
     \if@tempswa\else%
-      \ifx\@tempa\@empty\relax\else%
+      \ifx\@tempa\@empty\else%
         \def\@tempb##1##2\@nil{%
           \if ##1a\@tempswatrue%
             \else\if ##1b\@tempswatrue%
@@ -1214,7 +1209,7 @@
           \fi\fi\fi\fi%
           \if@tempswa%
             \@tempswafalse%
-            \IfArgIsEmpty{##2}{}{\ifnumber{##2}{\@tempswatrue}{}}%
+            \IfArgIsEmpty{##2}{}{\Ifnumber{##2}{\@tempswatrue}{}}%
           \fi%
         }%
         \expandafter\@tempb\@tempa\@nil%
@@ -1230,7 +1225,7 @@
         \if@tempswa\else%
           \def\tud@reserved##1:##2:##3:##4\@nil{%
             \if@tempswa\else%
-              \ifstr{\@tempa}{##1}{%
+              \tud@if@strequal{\@tempa}{##1}{%
                 \@tempswatrue%
                 \def\@tempa{##2##4:##3##4}%
               }{}%
@@ -1277,7 +1272,7 @@
 % \emph{Dies geschieht hier direkt und nicht in einer Gruppe,} weil der Aufruf 
 % von \cs{tud@x@geometry@area@set}|{layout}| lokal erfolgt.
 %    \begin{macrocode}
-          \ifstr{#1}{layout}{\let\scr@setpaperorientation\relax}{}%
+          \tud@if@strequal{#1}{layout}{\let\scr@setpaperorientation\relax}{}%
           \KOMAoption{paper}{##1:##2}%
         }%
       }%
@@ -1324,16 +1319,16 @@
 %    \begin{macrocode}
         \tud@cdgeometry@assignlayout%
         \@tud@res@swafalse%
-        \ifdim\tud@len@layoutwidth=\paperwidth\relax\else\@tud@res@swatrue\fi%
-        \ifdim\tud@len@layoutheight=\paperheight\relax\else\@tud@res@swatrue\fi%
+        \ifdim\tud@dim@layoutwidth=\paperwidth\relax\else\@tud@res@swatrue\fi%
+        \ifdim\tud@dim@layoutheight=\paperheight\relax\else\@tud@res@swatrue\fi%
         \edef\tud@res@a{%
           \endgroup%
-          \etex@unexpanded{\def#1}{%
+          \unexpanded{\def#1}{%
             layoutoffset={%
-              \the\tud@len@layouthoffset,\the\tud@len@layoutvoffset%
+              \the\tud@dim@layouthoffset,\the\tud@dim@layoutvoffset%
             }%
             \if@tud@res@swa%
-              ,layoutsize={\the\tud@len@layoutwidth,\the\tud@len@layoutheight}%
+              ,layoutsize={\the\tud@dim@layoutwidth,\the\tud@dim@layoutheight}%
             \fi%
           }%
         }%
@@ -1363,9 +1358,7 @@
 % gemachten Einstellungen zurückgesetzt.
 %    \begin{macrocode}
       \Gm@initnewgm%
-      \edef\@tempa{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,#1%
-      }%
+      \edef\@tempa{papersize={\the\paperwidth,\the\paperheight},#1}%
       \def\@tempc{\tud@cs@use{geometry}}%
       \expandafter\@tempc\expandafter{\@tempa,driver=none}%
     }{%
@@ -1376,10 +1369,13 @@
 %    \begin{macrocode}
       \edef\@tempa{#1}%
       \tud@cs@store{Gm@restore@org}%
-      \eappto\Gm@restore@org{%
+      \edef\@tempb{%
         \noexpand\paperwidth=\the\paperwidth\relax%
         \noexpand\paperheight=\the\paperheight\relax%
       }%
+      \expandafter\apptocmd\expandafter\Gm@restore@org\expandafter{%
+        \@tempb%
+      }{}{\tud@patch@wrn{Gm@restore@org}}%
       \def\@tempc{\tud@cs@use{newgeometry}}%
       \expandafter\@tempc\expandafter{\@tempa}%
       \tud@cs@restore{Gm@restore@org}%
@@ -1495,7 +1491,7 @@
 %    \begin{macrocode}
       \ifcase\tud@cdgeometry@num\relax%
         \edef\tud@cdgeometry@hmargin{%
-          left=\the\dimexpr\oddsidemargin+1in-\ta@bcor\relax,%
+          left=\the\dimexpr\glueexpr\oddsidemargin+1in-\ta@bcor\relax\relax,%
           textwidth=\the\textwidth,%
           \tud@cdgeometry@mpincl,%
           marginparwidth=\the\marginparwidth,%
@@ -1513,8 +1509,7 @@
             top=\the\dimexpr\topmargin+1in\relax,%
           \else%
             includehead=false,%
-            top=\the\dimexpr\topmargin%
-              +\headheight+\headsep+1in\relax,%
+            top=\the\dimexpr\topmargin+\headheight+\headsep+1in\relax,%
           \fi%
           headheight=\the\headheight,%
           headsep=\the\headsep,%
@@ -1524,11 +1519,13 @@
         }%
 %    \end{macrocode}
 % Und nun für den benutzerdefinierten Satzspiegel.
+% \ToDo{Angabe von BCOR zerschießt den gewünschten Satzspiegel}[v2.07]
 %    \begin{macrocode}
       \else% custom
         \ifGm@pass\else%
           \edef\tud@cdgeometry@hmargin{%
-            left=\the\dimexpr\oddsidemargin+1in-\Gm@bindingoffset\relax,%
+            left=\the\dimexpr\glueexpr\oddsidemargin+1in%
+              -\Gm@bindingoffset\relax\relax,%
             textwidth=\the\textwidth,%
             \ifGm@includemp%
               includemp=true,%
@@ -1550,8 +1547,7 @@
               top=\the\dimexpr\topmargin+1in\relax,%
             \else%
               includehead=false,%
-              top=\the\dimexpr\topmargin%
-                +\headheight+\headsep+1in\relax,%
+              top=\the\dimexpr\topmargin+\headheight+\headsep+1in\relax,%
             \fi%
             headheight=\the\headheight,%
             headsep=\the\headsep,%
@@ -1566,6 +1562,15 @@
         \fi%
       \fi%
 %    \end{macrocode}
+% Die Einstellungen für zweiseitigen respektive zweispaltigen Satz.
+%    \begin{macrocode}
+      \if@twoside%
+        \appto\tud@cdgeometry@hmargin{,twoside}%
+      \fi%
+      \if@twocolumn%
+        \appto\tud@cdgeometry@hmargin{,twocolumn}%
+      \fi%
+%    \end{macrocode}
 % Es wird die Höhendifferenz zwischen TUD-Kopf und Standardkopfzeile für den
 % benutzerdefnierten bzw. \pkg{typearea}-Satzspiegel berechnet. Für den 
 % Satzspiegel mit TUD-Kopf muss unterschieden werden, ob der Abstand zwischen
@@ -1574,23 +1579,23 @@
 % benutzerdefinierten bzw. \pkg{typearea}-Satzspiegel noch unterhalb des
 % TUD-Kopfes liegen, wird der Abstand zum Kopf vergrößert.
 %    \begin{macrocode}
-      \setlength\tud@len@areadiff{%
-        \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep%
-          -\topmargin-\headheight-\headsep-1in\relax%
+      \tud@setdim\tud@dim@areadiff{%
+        \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+          -\topmargin-\headheight-\headsep-1in%
       }%
-      \ifdim\tud@len@areadiff<\z@\relax%
-        \addtolength\tud@len@headsep{-\tud@len@areadiff}%
-        \setlength\@tempdima{\z@}%
+      \ifdim\tud@dim@areadiff<\z@\relax%
+        \tud@addtodim\tud@dim@headsep{-\tud@dim@areadiff}%
+        \tud@setdim\@tempdima{\z@}%
       \else%
-        \setlength\@tempdima{\tud@len@areadiff}%
+        \tud@setdim\@tempdima{\tud@dim@areadiff}%
       \fi%
       \edef\tud@cdgeometry@tudmargin{%
         ignorehead=true,%
-        top=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
-          +\tud@len@headsep\relax,%
-        headheight=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
-          -\tud@len@logoy\relax,%
-        headsep=\the\tud@len@headsep,%
+        top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          +\tud@dim@headsep\relax,%
+        headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          -\tud@dim@logoy\relax,%
+        headsep=\the\tud@dim@headsep,%
         textheight=\the\dimexpr\textheight-\@tempdima\relax%
       }%
 %    \end{macrocode}
@@ -1598,14 +1603,14 @@
 % separaten Satzspiegel.
 %    \begin{macrocode}
       \tud@if@v@lower{2.03}{%
-        \setlength\tud@len@ddcdiff{%
-          \dimexpr.6\tud@len@topmargin-\footskip+\tud@len@headsep%
-            +\footheight-1.25\baselineskip\relax%
+        \tud@setdim\tud@dim@ddcdiff{%
+          \tud@dim@topmargin*3/5-\footskip+\tud@dim@headsep%
+            +\footheight-1\baselineskip*5/4%
         }%
         \edef\tud@cdgeometry@ddcmargin{%
-          textheight=\the\dimexpr\textheight-\tud@len@areadiff%
-            -\tud@len@ddcdiff\relax,%
-          footskip=\the\dimexpr\footskip+\tud@len@ddcdiff\relax%
+          textheight=\the\dimexpr\textheight-\tud@dim@areadiff%
+            -\tud@dim@ddcdiff\relax,%
+          footskip=\the\dimexpr\footskip+\tud@dim@ddcdiff\relax%
         }%
       }{}%
 %    \end{macrocode}
@@ -1613,7 +1618,7 @@
 % Warnung ausgegeben, dass diese für den \pkg{typearea}-Satzspiegel wirkungslos
 % ist.
 %    \begin{macrocode}
-      \ifdim\dimexpr\tud@dim@extrabottommargin\relax=\z@\relax\else%
+      \ifdim\dimexpr\tud@extrabottommargin@dim\relax=\z@\relax\else%
         \begingroup%
           \edef\tud@res@a{%
             The key `extrabottommargin' is ineffective\MessageBreak%
@@ -1640,21 +1645,21 @@
 % Seitenrand (\cs{@tempdima}), die Textbreite (\cs{@tempdimb}) sowie die Breite 
 % der Randnotizen (\cs{@tempdimc}). Danach kommt der Gleichanteil.
 %    \begin{macrocode}
-    \else%  true/symmetric/twoside
-      \ifcase\tud@cdgeometry@num\relax\or\or%  true
-        \setlength\@tempdima{\tud@len@widemargin}%
+    \else% true/symmetric/twoside
+      \ifcase\tud@cdgeometry@num\relax\or\or% true
+        \tud@setdim\@tempdima{\tud@dim@widemargin}%
         \if@reversemargin%
-          \setlength\@tempdimc{\tud@len@widemargin}%
+          \tud@setdim\@tempdimc{\tud@dim@widemargin}%
         \else%
-          \setlength\@tempdimc{\tud@len@slimmargin}%
+          \tud@setdim\@tempdimc{\tud@dim@slimmargin}%
         \fi%
 %    \end{macrocode}
 % Die zweite Variante ist eigentlich nicht konform mit dem \CD. Sie ist sowohl
 % im einseitigen als auch im zweiseitgigen Satz symmetrisch.
 %    \begin{macrocode}
       \or% symmetric
-        \setlength\@tempdima{.5\tud@len@both}%
-        \setlength\@tempdimc{.5\tud@len@both}%
+        \tud@setdim\@tempdima{\tud@dim@bothmargin/2}%
+        \tud@setdim\@tempdimc{\tud@dim@bothmargin/2}%
 %    \end{macrocode}
 % Eigentlich ist auch die dritte Variante nach dem \CD nicht zulässig. Sie ist
 % im einseitigen Satz symmetrisch, im zweiseitgigen Satz wird die innere Seite
@@ -1663,16 +1668,16 @@
 %    \begin{macrocode}
       \or% twoside
         \if@twoside%
-          \setlength\@tempdima{.4\tud@len@both}%
+          \tud@setdim\@tempdima{\tud@dim@bothmargin*2/5}%
         \else%
-          \setlength\@tempdima{.5\tud@len@both}%
+          \tud@setdim\@tempdima{\tud@dim@bothmargin/2}%
         \fi%
-        \setlength\@tempdimc{.5\tud@len@both}%
+        \tud@setdim\@tempdimc{\tud@dim@bothmargin/2}%
         \if@twoside%
           \if@reversemargin%
-            \setlength\@tempdimc{.4\tud@len@both}%
+            \tud@setdim\@tempdimc{\tud@dim@bothmargin*2/5}%
           \else%
-            \setlength\@tempdimc{.6\tud@len@both}%
+            \tud@setdim\@tempdimc{\tud@dim@bothmargin*3/5}%
           \fi%
         \fi%
       \fi%
@@ -1680,19 +1685,17 @@
 % Die \emph{Berechnung} der Textbreite ist für alle Varainten identisch. Danach 
 % erfolgt die Zuweisung zum Makro.
 %    \begin{macrocode}
-      \addtolength\@tempdimc{-\headsep}%
-      \setlength\@tempdimb{%
-        \dimexpr\tud@len@layoutwidth-\tud@len@both-\ta@bcor\relax%
-      }%
+      \tud@addtodim\@tempdimc{-\headsep}%
+      \tud@setdim\@tempdimb{\tud@dim@layoutwidth-\tud@dim@bothmargin-\ta@bcor}%
       \if@mincl%
-        \addtolength\@tempdimb{-\@tempdimc}%
+        \tud@addtodim\@tempdimb{-\@tempdimc}%
       \fi%
       \edef\tud@cdgeometry@hmargin{%
         left=\the\@tempdima,%
         textwidth=\the\@tempdimb,%
         \tud@cdgeometry@mpincl,%
         marginparwidth=\the\@tempdimc,%
-        marginparsep=\the\dimexpr.5\headsep\relax,%
+        marginparsep=\the\dimexpr\headsep/2\relax,%
         \if@reversemargin%
           reversemarginpar=true,%
         \else%
@@ -1717,66 +1720,67 @@
       \tud@if@v@lower{2.03}{%
         \edef\tud@cdgeometry@vmargin{%
           \tud@cdgeometry@hincl,%
-          top=\the\dimexpr.5\tud@len@both\relax,%
+          top=\the\dimexpr\tud@dim@bothmargin/2\relax,%
           headheight=\the\headheight,%
-          headsep=\the\tud@len@headsep,%
-          bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin\relax,%
+          headsep=\the\tud@dim@headsep,%
+          bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
+            +\tud@extrabottommargin@dim\relax\relax,%
           \tud@cdgeometry@fincl,%
-          footskip=\the\dimexpr\tud@len@headsep+\footheight%
-            -1.25\baselineskip\relax%
+          footskip=\the\dimexpr\tud@dim@headsep+\footheight%
+            -1\baselineskip*5/4\relax%
         }%
       }{%
         \edef\tud@cdgeometry@vmargin{%
           \tud@cdgeometry@hincl,%
-          top=\the\tud@len@slimmargin,%
+          top=\the\tud@dim@slimmargin,%
           headheight=\the\headheight,%
           headsep=\the\headsep,%
-          bottom=\the\dimexpr\tud@len@widemargin%
-            +\tud@dim@extrabottommargin\relax,%
+          bottom=\the\dimexpr\glueexpr\tud@dim@widemargin%
+            +\tud@extrabottommargin@dim\relax\relax,%
           \tud@cdgeometry@fincl,%
-          footskip=\the\dimexpr\tud@len@footsep+\footheight\relax%
+          footskip=\the\dimexpr\tud@dim@footsep+\footheight\relax%
         }%
       }%
       \edef\tud@cdgeometry@tudmargin{%
         ignorehead=true,%
-        top=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
-          +\tud@len@headsep\relax,%
-        headheight=\the\dimexpr\tud@len@topmargin+\tud@len@barheight%
-          -\tud@len@logoy\relax,%
-        headsep=\the\tud@len@headsep%
+        top=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          +\tud@dim@headsep\relax,%
+        headheight=\the\dimexpr\tud@dim@topmargin+\tud@dim@barheight%
+          -\tud@dim@logoy\relax,%
+        headsep=\the\tud@dim@headsep%
       }%
 %    \end{macrocode}
 % Es wird die Differenz der Höhen zwischen TUD-Kopf und Standardkopfzeile
 % für den Satzspiegel des \CDs berechnet.
 %    \begin{macrocode}
-      \setlength\tud@len@areadiff{%
-        \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep%
-          -\tud@len@slimmargin\relax%
+      \tud@setdim\tud@dim@areadiff{%
+        \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+          -\tud@dim@slimmargin%
       }%
 %    \end{macrocode}
 % Für die Kompatibilitätsvariante wieder mal die Extrawurst.
 %    \begin{macrocode}
       \tud@if@v@lower{2.03}{%
-        \setlength\tud@len@areadiff{%
-          \dimexpr\tud@len@topmargin+\tud@len@barheight+\tud@len@headsep%
-            -.5\tud@len@both\relax%
+        \tud@setdim\tud@dim@areadiff{%
+          \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
+            -\tud@dim@bothmargin/2%
         }%
 %    \end{macrocode}
 % Wird die Fußzeile zum Satzspiegel gerechnet, ist für Seiten mit \DDC-Fuß 
 % etwas Handarbeit notwendig, damit dieser nicht allzu weit nach oben ragt.
 %    \begin{macrocode}
-        \setlength\tud@len@ddcdiff{.6\tud@len@topmargin}%
+        \tud@setdim\tud@dim@ddcdiff{\tud@dim@topmargin*3/5}%
         \edef\tud@cdgeometry@ddcmargin{%
           \if@fincl%
-            bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin%
-              +\tud@len@ddcdiff+\tud@len@headsep+\footheight%
-              -1.25\baselineskip\relax,%
+            bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
+              +\tud@extrabottommargin@dim+\tud@dim@ddcdiff+\tud@dim@headsep%
+              +\footheight-1\baselineskip*5/4\relax\relax,%
           \else%
-            bottom=\the\dimexpr.5\tud@len@both+\tud@dim@extrabottommargin%
-              +\tud@len@ddcdiff\relax,%
+            bottom=\the\dimexpr\glueexpr\tud@dim@bothmargin/2%
+              +\tud@extrabottommargin@dim+\tud@dim@ddcdiff\relax\relax,%
           \fi%
-          footskip=\the\dimexpr\tud@len@headsep+\footheight%
-            -1.25\baselineskip+\tud@len@ddcdiff\relax,%
+          footskip=\the\dimexpr\tud@dim@headsep+\footheight%
+            -1\baselineskip*5/4+\tud@dim@ddcdiff\relax,%
         }%
       }{}%
     \fi%
@@ -1786,22 +1790,22 @@
 % vertikale Verschiebung der Überschriften festgelegt, wobei hier insbesondere 
 % auf die Gestaltungshöhe DIN~A5 geachtet werden muss.
 %    \begin{macrocode}
-    \ifdim\tud@len@areadiff<\z@\relax\setlength\tud@len@areadiff{\z@}\fi%
-    \global\tud@len@areadiff=\tud@len@areadiff%
+    \ifdim\tud@dim@areadiff<\z@\relax\tud@setdim\tud@dim@areadiff{\z@}\fi%
+    \global\tud@dim@areadiff=\tud@dim@areadiff%
 %<*book|report|article>
-    \setlength\tud@len@areaheadvskip{.22\tud@len@topmargin}%
+    \tud@setdim\tud@dim@areaheadvskip{\tud@dim@topmargin*11/50}%
     \if@tud@cdgeometry@adjust%
-      \setlength\tud@len@areaheadvskip{.5\tud@len@areaheadvskip}%
+      \tud@setdim\tud@dim@areaheadvskip{\tud@dim@areaheadvskip/2}%
     \fi%
-    \global\tud@len@areaheadvskip=\tud@len@areaheadvskip%
+    \global\tud@dim@areaheadvskip=\tud@dim@areaheadvskip%
 %</book|report|article>
 %    \end{macrocode}
 % Für den Satzspiegel der Version~v2.02 wird außerdem die Länge für den höheren 
 % Seitenfuß gesetzt.
 %    \begin{macrocode}
     \tud@if@v@lower{2.03}{%
-      \ifdim\tud@len@ddcdiff<\z@\relax\setlength\tud@len@ddcdiff{\z@}\fi%
-      \global\tud@len@ddcdiff=\tud@len@ddcdiff%
+      \ifdim\tud@dim@ddcdiff<\z@\relax\tud@setdim\tud@dim@ddcdiff{\z@}\fi%
+      \global\tud@dim@ddcdiff=\tud@dim@ddcdiff%
     }{}%
 %    \end{macrocode}
 % Es wird \cs{tud@cdgeometry@@@process} aufgerufen, was die zuvor definierten
@@ -1871,7 +1875,7 @@
 % anschließend auch der richtige Satzspiegel wieder ausgewählt werden.
 %    \begin{macrocode}
     \tud@if@preamble{}{%
-      \ifstr{\tud@currentgeometry}{stdarea}{}{%
+      \tud@if@strequal{\tud@currentgeometry}{stdarea}{}{%
         \expandafter\tud@loadgeometry\expandafter{\tud@currentgeometry}%
       }%
     }%
@@ -1921,10 +1925,10 @@
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % Damit alle Satzspiegeleinstellungen vollständig vorgenommen und auch alle
 % Klassenoptionen korrekt verarbeitet werden, wird die Berechnung erstmalig 
-% mit \cs{AtEndPreamble}|{|\cs{tud@cdgeometry@init}|}| ausgeführt, nachdem der 
-% Ladezustandes des Paketes \pkg{scrlayer-scrpage} geprüft wurde. Dabei werden 
-% sowohl der benutzerdefinierte Satzspiegel als auch die durch \pkg{typearea}
-% berechneten Einstellungen gesichert.
+% am Ende der Präambel mit \cs{AtEndPreamble}|{|\cs{tud@cdgeometry@init}|}| 
+% ausgeführt, nachdem der Ladezustandes des Paketes \pkg{scrlayer-scrpage}
+% geprüft wurde. Dabei werden sowohl der benutzerdefinierte Satzspiegel als
+% auch die durch \pkg{typearea} berechneten Einstellungen gesichert.
 %    \begin{macrocode}
   \newcommand*\tud@cdgeometry@@init{%
     \csuse{@ta@usegeometryfalse}%
@@ -1934,8 +1938,8 @@
 % Bei der Initialisierung der zusätzlichen Satzspiegel soll keine Warnung 
 % bezüglich der Angabe eines vergrößerten Fußbereichs erscheinen.
 %    \begin{macrocode}
-    \tud@cs@store{tud@dim@extrabottommargin}%
-    \def\tud@dim@extrabottommargin{\z@}%
+    \tud@cs@store{tud@extrabottommargin@dim}%
+    \def\tud@extrabottommargin@dim{0pt}%
 %    \end{macrocode}
 % Zunächst werden die benutzerdefinierten Einstellungen für den Satzspiegel 
 % gesichert.
@@ -1943,7 +1947,7 @@
     \tud@cdgeometry@reset{custom}%
     \begingroup%
       \epreto\tud@x@geometry@init{%
-        paperwidth=\the\paperwidth,paperheight=\the\paperheight,%
+        papersize={\the\paperwidth,\the\paperheight},%
         \tud@cdgeometry@layout,%
         \tud@cdgeometry@mpincl,%
         \if@reversemargin%
@@ -1979,17 +1983,17 @@
 % Alle gesammelten Warnungen von \pkg{typearea} werden dem initialisierten
 % Satzspiegel hinzugefügt.
 %    \begin{macrocode}
-    \def\tud@res@b##1{%
-      \eappto\Gm@restore@@init@typearea{%
-        \noexpand\PackageWarningNoLine{typearea}{##1}%
-      }%
+    \def\do##1{%
+      \apptocmd\Gm@restore@@init@typearea{%
+        ##1%
+      }{}{\tud@patch@wrn{Gm@restore@@init@typearea}}%
     }%
-    \forlistloop\tud@res@b{\tud@res@a}%
+    \dolistloop{\tud@res@a}%
 %    \end{macrocode}
 % Hier werden die temporär geäanderten Einstellungen zurückgesetzt.
 %    \begin{macrocode}
     \tud@cs@restore{tud@cdgeometry@num}%
-    \tud@cs@restore{tud@dim@extrabottommargin}%
+    \tud@cs@restore{tud@extrabottommargin@dim}%
 %    \end{macrocode}
 % Der Kopf im \TUDCD erfordert einen eigenen Satzspiegel, der ggf. durch 
 % \cs{tud@BeforeSelectAnyPageStyle} aktiviert bzw. deaktiviert wird.
@@ -2027,7 +2031,7 @@
 % werden zwei~-- für die KOmpatibilitätsvariante drei~-- Layouts erstellt.
 % Diese können mit \cs{loadgeometry}\marg{Stil} geladen werden.
 %    \begin{macrocode}
-  \newcommand*\tud@currentgeometry{}
+  \newcommand*\tud@currentgeometry{}%
   \newcommand*\tud@BeforeSelectAnyPageStyle[1]{%
 %    \end{macrocode}
 % Der \pgs{tudheadings}-Seitenstil wird mit dem Befehl \cs{newpairofpagestyles}
@@ -2035,7 +2039,7 @@
 % auch mit \LaTeX-Standardseitenstilen \pgs{headings} bzw. \pgs{plain} 
 % umgeschaltet werden kann. Dies wird hiermit beachtet.
 %    \begin{macrocode}
-    \ifstr{#1}{\GetRealPageStyle{#1}}{%
+    \tud@if@strequal{#1}{\GetRealPageStyle{#1}}{%
 %    \end{macrocode}
 % Für den Fall, das ein \pgs{tudheadings}-Seitenstil geladen werden soll, muss 
 % der dazugehörige Satzspiegel ausgewählt werden\dots
@@ -2057,7 +2061,7 @@
 % Das \DDC-Logo im Fuß ist nicht aktiviert.
 %    \begin{macrocode}
           \ifcase\@tempb\relax% \tud@ddc@foot@num=false
-            \ifstr{\tud@currentgeometry}{tudarea}{}{%
+            \tud@if@strequal{\tud@currentgeometry}{tudarea}{}{%
               \tud@loadgeometry{tudarea}%
               \gdef\tud@currentgeometry{tudarea}%
             }%
@@ -2065,7 +2069,7 @@
 % Das \DDC-Logo im Fuß ist aktiviert.
 %    \begin{macrocode}
           \else% \tud@ddc@foot@num!=false
-            \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+            \tud@if@strequal{\tud@currentgeometry}{tudareaddc}{}{%
               \tud@loadgeometry{tudareaddc}%
               \gdef\tud@currentgeometry{tudareaddc}%
             }%
@@ -2074,60 +2078,47 @@
 % Ab der Version~v2.03 ist nur noch ein Satzspiegel vonnöten.
 %    \begin{macrocode}
         }{%
-          \ifstr{\tud@currentgeometry}{tudarea}{}{%
+          \tud@if@strequal{\tud@currentgeometry}{tudarea}{}{%
             \tud@loadgeometry{tudarea}%
             \gdef\tud@currentgeometry{tudarea}%
           }%
         }%
 %    \end{macrocode}
-% Die Länge \cs{tud@len@areavskip} gibt an, wie groß die Differenz zwischen 
+% Die Länge \cs{tud@dim@areavskip} gibt an, wie groß die Differenz zwischen 
 % Kopfhöhe zwischen aktuellem und dem speziellen \pgs{tudheadings}-Seitenstil 
 % ist. Da diese in diesem Fall identisch sind, wird die Länge zu \cs{z@} 
 % gesetzt.
 %    \begin{macrocode}
-        \setlength\tud@len@areavskip{\z@}%
+        \tud@setdim\tud@dim@areavskip{\z@}%
 %    \end{macrocode}
-% Im Seitenfuß wird für die Seitenzahl und ggf. die Kolumnentitel die passende 
-% Schrift verwendet.
-%    \begin{macrocode}
-        \tud@komafont@set{pagenumber}{\usekomafont{tudheadings}}%
-        \tud@komafont@set{pagefoot}{\usekomafont{tudheadings}}%
-%    \end{macrocode}
-% Dies ist der Fall, wenn kein \pgs{tudheadings}-Seitenstil geladen werden soll.
-% Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
+% Das ist der Zweig, wenn kein \pgs{tudheadings}-Seitenstil geladen werden 
+% soll. Zusätzlich zum Satzspeigel wird außerdem der Seitenstil \pgs{empty} 
 % zurückgesetzt.
 %    \begin{macrocode}
       }{%
-        \ifstr{\tud@currentgeometry}{stdarea}{}{%
+        \tud@if@strequal{\tud@currentgeometry}{stdarea}{}{%
           \tud@loadgeometry{stdarea}%
           \gdef\tud@currentgeometry{stdarea}%
         }%
 %    \end{macrocode}
-% Die Länge \cs{tud@len@areavskip} wird auf den berechneten Wert gesetzt. 
+% Die Länge \cs{tud@dim@areavskip} wird auf den berechneten Wert gesetzt. 
 % Nur für den Fall, dass die Kopfzeile zum Satzspiegel gerechnet wird und 
 % dieser nicht durch \pkg{typearea} berechnet wurde, muss diese Länge etwas
 % angepasst werden.
 %    \begin{macrocode}
-        \setlength\tud@len@areavskip{\tud@len@areadiff}%
+        \tud@setdim\tud@dim@areavskip{\tud@dim@areadiff}%
         \ifnum\tud@cdgeometry@num>\@ne\relax% true/symmetric/twoside
           \if@hincl%
-            \addtolength\tud@len@areavskip{%
-              \dimexpr-\headheight-\tud@len@headsep\relax%
-            }%
+            \tud@addtodim\tud@dim@areavskip{-\headheight-\tud@dim@headsep}%
           \fi%
         \fi%
-%    \end{macrocode}
-% Die Schriften für Seitenzahl und Kolumnentitel werden zurückgesetzt.
-%    \begin{macrocode}
-        \tud@komafont@unset{pagenumber}%
-        \tud@komafont@unset{pagefoot}%
       }%
 %    \end{macrocode}
-% Die Länge \cs{tud@len@areavskip} wird vorsichtshalber global gesetzt.
+% Die Länge \cs{tud@dim@areavskip} wird vorsichtshalber global gesetzt.
 %    \begin{macrocode}
-      \global\tud@len@areavskip=\tud@len@areavskip%
+      \global\tud@dim@areavskip=\tud@dim@areavskip%
     }{}%
-  }
+  }%
 %    \end{macrocode}
 % \end{macro}^^A \tud@currentgeometry
 % \end{macro}^^A \tud@BeforeSelectAnyPageStyle
@@ -2156,20 +2147,20 @@
 %    \begin{macrocode}
 \newcommand*\tud@x@typearea@before{%
   \tud@cdgeometry@resetlayout%
-  \tud@skip@store{paperheight}%
-  \tud@skip@store{paperwidth}%
+  \tud@cslength@store{paperheight}%
+  \tud@cslength@store{paperwidth}%
   \begingroup%
     \tud@cdgeometry@assignlayout%
     \edef\tud@res@a{%
       \endgroup%
-      \etex@unexpanded{\setlength\paperheight}{\the\tud@len@layoutheight}%
-      \etex@unexpanded{\setlength\paperwidth}{\the\tud@len@layoutwidth}%
+      \unexpanded{\tud@setdim\paperheight}{\the\tud@dim@layoutheight}%
+      \unexpanded{\tud@setdim\paperwidth}{\the\tud@dim@layoutwidth}%
     }%
   \tud@res@a%
 }
 \newcommand*\tud@x@typearea@after{%
-  \tud@skip@restore{paperheight}%
-  \tud@skip@restore{paperwidth}%
+  \tud@cslength@restore{paperheight}%
+  \tud@cslength@restore{paperwidth}%
   \tud@if@preamble{%
     \TUD@key@preset{cdgeometry}{false}%
   }{%
@@ -2183,18 +2174,18 @@
 %    \begin{macrocode}
 \xpretocmd{\typearea}{%
   \tud@x@typearea@before%
-  \def\tud@x@typearea@init{\typearea[#1]{#2}}%
+  \def\tud@x@typearea@init{\typearea[{#1}]{#2}}%
 }{}{\tud@patch@wrn{typearea}}
 \xapptocmd{\typearea}{\tud@x@typearea@after}{}{\tud@patch@wrn{typearea}}
 \xpretocmd{\areaset}{%
   \tud@x@typearea@before%
   \begingroup%
-    \setlength\@tempdima{#2}%
-    \setlength\@tempdimb{#3}%
+    \tud@setdim\@tempdima{#2}%
+    \tud@setdim\@tempdimb{#3}%
     \edef\tud@res@a{%
       \endgroup%
-      \noexpand\def\noexpand\tud@x@typearea@init{%
-        \noexpand\areaset[#1]{\the\@tempdima}{\the\@tempdimb}%
+      \def\noexpand\tud@x@typearea@init{%
+        \unexpanded{\areaset[{#1}]}{\the\@tempdima}{\the\@tempdimb}%
       }%
     }%
   \tud@res@a%
@@ -2207,17 +2198,17 @@
 %    \begin{macrocode}
 \tud@cs@store{storeareas}
 \renewcommand*\storeareas[1]{%
-  \begingroup
+  \begingroup%
     \tud@x@geometry@fixmargins%
     \tud@cs@use{storeareas}{#1}%
-    \def\tud@res@b##1{\unexpanded{\setlength##1}{\the##1}}%
+    \def\tud@res@b##1{\unexpanded{\tud@setdim##1}{\the##1}}%
     \edef\tud@res@a{%
       \endgroup%
-      \etex@unexpanded{\def#1}{%
-        \tud@res@b{\tud@len@layoutwidth}%
-        \tud@res@b{\tud@len@layoutheight}%
-        \tud@res@b{\tud@len@layouthoffset}%
-        \tud@res@b{\tud@len@layoutvoffset}%
+      \unexpanded{\def#1}{%
+        \tud@res@b{\tud@dim@layoutwidth}%
+        \tud@res@b{\tud@dim@layoutheight}%
+        \tud@res@b{\tud@dim@layouthoffset}%
+        \tud@res@b{\tud@dim@layoutvoffset}%
         \expandonce#1%
         \def\noexpand\tud@cdgeometry@num{\tud@cdgeometry@num}%
       }%
@@ -2260,17 +2251,23 @@
   \tud@cs@store{PackageWarningNoLine}%
   \renewcommand*\PackageWarningNoLine[2]{%
     \@tud@res@swatrue%
-    \ifstr{##1}{typearea}{%
-      \ifstrstart{##2}{Bad type area settings!}{\@tud@res@swafalse}{}%
-      \ifstrstart{##2}{%
+    \tud@if@strequal{##1}{typearea}{%
+      \tud@if@strstart{##2}{%
+        Bad type area settings!%
+      }{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
         Maybe no optimal type area settings!%
       }{\@tud@res@swafalse}{}%
-      \ifstrstart{##2}{Very low DIV value!}{\@tud@res@swafalse}{}%
+      \tud@if@strstart{##2}{%
+        Very low DIV value!%
+      }{\@tud@res@swafalse}{}%
     }{}%
     \if@tud@res@swa%
-      \tud@cs@use{PackageWarning}{##1}{##2}%
+      \tud@cs@use{PackageWarningNoLine}{##1}{##2}%
     \else%
-      \IfArgIsEmpty{#1}{}{\listeadd#1{##2}}%
+      \IfArgIsEmpty{#1}{}{%
+        \listeadd#1{\noexpand\tud@cs@use{PackageWarningNoLine}{##1}{##2}}%
+      }%
     \fi%
   }%
 }
@@ -2306,8 +2303,8 @@
     \let\tud@cdgeometry@@init\relax%
   }%
   \newcommand*\tud@cdgeometry@@process{%
-    \setlength\tud@len@layoutwidth{\paperwidth}%
-    \setlength\tud@len@layoutheight{\paperheight}%
+    \tud@setdim\tud@dim@layoutwidth{\paperwidth}%
+    \tud@setdim\tud@dim@layoutheight{\paperheight}%
     \tud@cdgeometry@set%
   }%
   \newcommand*\tud@x@geometry@fixmargins{}%
@@ -2338,14 +2335,23 @@
 % folgenden \KOMAScript-Befehle Leerseiten erzeugt werden, müssen diese minimal
 % angepasst werden.
 %    \begin{macrocode}
-\patchcmd{\cleardoubleoddpageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoubleoddpageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoubleoddpageusingstyle}}
-\patchcmd{\cleardoubleevenpageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoubleevenpageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoubleevenpageusingstyle}}
-\patchcmd{\cleardoublepageusingstyle}{\pagestyle}{%
-  \let\tud@BeforeSelectAnyPageStyle\@gobble\pagestyle%
+\patchcmd\cleardoublepageusingstyle{%
+  \pagestyle%
+}{%
+  \let\tud@BeforeSelectAnyPageStyle\@gobble%
+  \pagestyle%
 }{}{\tud@patch@wrn{cleardoublepageusingstyle}}
 %    \end{macrocode}
 % \end{macro}^^A \cleardoublepageusingstyle
@@ -2363,10 +2369,10 @@
 \tud@if@v@lower{2.03}{%
   \newcommand*\tud@ddc@enlargepage[1][]{%
     \tud@if@tudheadings{#1}{%
-      \ifstr{\tud@currentgeometry}{tudareaddc}{}{%
+      \tud@if@strequal{\tud@currentgeometry}{tudareaddc}{}{%
         \tud@ddc@check%
         \ifcase\@tempb\relax\else% \tud@ddc@foot@num!=false
-          \enlargethispage{-\tud@len@ddcdiff}%
+          \enlargethispage{-\tud@dim@ddcdiff}%
         \fi%
       }%
     }{}%

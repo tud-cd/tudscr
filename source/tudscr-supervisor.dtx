@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-supervisor.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,27 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-supervisor.dtx
 %<*dtx>
-% \fi
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-supervisor.dtx}[2022/07/28 v2.06c TUD-Script\space%
-%
-% \iffalse
-%</dtx>
-%<package>\ProvidesPackage{tudscrsupervisor}[%
-%<*package>
-%!TUD@Version
-%</package>
-%<package>  package
-%<*dtx|package>
-% \fi
-  (commands for supervisors)%
-]
-% \iffalse
-%</dtx|package>
-%<*dtx>
+\ProvidesFile{tudscr-supervisor.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -64,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-supervisor.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -91,8 +69,18 @@
 % zur Erstellung der Aufgabenstellung einer Abschlussarbeit sowie eines
 % Gutachtens und eines Aushangs bereit.
 %
+%    \begin{macrocode}
+%<*package&identify>
+\ProvidesPackage{tudscrsupervisor}[%
+%!TUD@Version
+  package (commands for supervisors)%
+]
+\TUD@Class@Check{tudscrsupervisor}
+%</package&identify>
+%    \end{macrocode}
+%
 % \iffalse
-%<*package>
+%<*package&body>
 % \fi
 %
 % \begin{macro}{\tud@multiple@fields@output}
@@ -102,6 +90,9 @@
 % Diesen beiden Makros dienen dazu, unterschiedliche Varianten für die Ausgabe 
 % innerhalb der nachfolgenden Umgebungen generieren zu können. Momentan werden 
 % diese nur innerhalb der \env{task}-Umgebung verwendet.
+% \ToDo{
+%   Definition von \cs{tud@multiple@fields@style} mit \cs{FamilyNumericalKey}
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@multiple@fields@output{}
 \newcommand*\tud@multiple@fields@style{table}
@@ -116,12 +107,12 @@
 % \end{macro}^^A \student
 % \begin{macro}{\tud@authortable@set}
 % \changes{v2.01b}{2014/06/04}{Probleme mit Paket \pkg{calc} behoben}^^A
-% \begin{length}{\tud@len@authortable}
+% \begin{length}{\tud@dim@authortable}
 % Der Befehl \cs{tud@authortable@set} dient bei Aufgabenstellung und Gutachten 
 % zur Ausgabe einer Tabelle mit Informationen zum Autor beziehungsweise zu den
 % Autoren.\footnote{Matrikelnummer, Jahrgang, Studiengang etc.}
 %    \begin{macrocode}
-\newlength\tud@len@authortable
+\tud@newdim\tud@dim@authortable
 \newcommand*\tud@authortable@set{%
   \begingroup%
   \let\thanks\@gobble%
@@ -138,19 +129,17 @@
 %    \begin{macrocode}
   \tud@multiple@split{@author}%
   \tud@multiple@fields@preset{@author}{\null}{}%
-  \setlength\tud@len@authortable{2em}%
+  \tud@setdim\tud@dim@authortable{2em}%
 %    \end{macrocode}
 % Anschließend werden die Bezeichner sowohl der obligatorischen als auch der
 % genutzten, optionalen Felder in \cs{@tempa} gespeichert. Mit der Liste wird
-% der längste Bezeichner bestimmt und dessen Länge in \cs{tud@len@authortable}
+% der längste Bezeichner bestimmt und dessen Länge in \cs{tud@dim@authortable}
 % gespeichert.
 %    \begin{macrocode}
   \def\@tempb##1{%
-    \expandafter\ifx\csname @##1\endcsname\@empty\else%
-      \expandafter\appto\expandafter\@tempa\expandafter{%
-        \expandafter,\csname ##1name\endcsname%
-      }%
-    \fi%
+    \tud@if@strempty{\csname @##1\endcsname}{}{%
+      \eappto\@tempa{,\expandafter\noexpand\csname ##1name\endcsname}%
+    }%
   }%
   \def\@tempa{%
     \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
@@ -164,11 +153,11 @@
   \@tempb{discipline}%
   \@for\@tempb:=\@tempa\do{%
     \settowidth\@tempdima{\@tempb\tud@title@delimiter}%
-    \ifdim\@tempdima>\tud@len@authortable\relax%
-      \setlength\tud@len@authortable{\@tempdima}%
+    \ifdim\@tempdima>\tud@dim@authortable\relax%
+      \tud@setdim\tud@dim@authortable{\@tempdima}%
     \fi%
   }%
-  \global\tud@len@authortable=\tud@len@authortable%
+  \global\tud@dim@authortable=\tud@dim@authortable%
 %    \end{macrocode}
 % Die Tabelle mit den benötigten Bezeichnern. Damit diese bis an den Seiterand
 % ohne Warnungen gesetzt werden können, wird die Auszeichnung von Absatzenden
@@ -176,7 +165,7 @@
 %    \begin{macrocode}
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
-  \begin{tabular}{@{}p{\tud@len@authortable}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}}%
     \ifx\@course\@empty\else%
       \coursename\tud@title@delimiter\tabularnewline%
     \fi%
@@ -242,8 +231,8 @@
 % Danach wird der Inhalt der Aufgabenstellung gesetzt.
 %    \begin{macrocode}
   \vskip\smallskipamount%
-  \begin{tabular}{@{}p{\tud@len@authortable}%
-    p{\dimexpr\textwidth-\tud@len@authortable-2\tabcolsep\relax}@{}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}%
+    p{\dimexpr\textwidth-\tabcolsep*2-\tud@dim@authortable\relax}@{}}%
     \titlename\tud@title@delimiter & \tud@RaggedRight\textsf{\textbf{\@@title}}%
   \end{tabular}%
   \par%
@@ -253,8 +242,14 @@
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
-% \end{length}^^A \tud@len@authortable
+% \end{length}^^A \tud@dim@authortable
 % \end{macro}^^A \tud@authortable@set
+% \begin{field}{\@headline}
+% Hier wird der Inhalt des Parametes \prm{headline} hinein geschrieben.
+%    \begin{macrocode}
+\newcommand*\@headline{}
+%    \end{macrocode}
+% \end{field}^^A \@headline
 %
 % \subsection{Aufgabenstellung}
 %
@@ -274,17 +269,18 @@
 %    \end{macrocode}
 % Die \env{tudpage}-Umgebung wird geöffnet. Mit dem Parameter \opt{headline} 
 % kann die standardmäßige Überschrift überschrieben werden.
+% \ToDo{style=table/inline mit \cs{FamilyNumericalKey}}[v2.07]
 %    \begin{macrocode}
   \cleardoubleoddpage%
   \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@def{style}{\def\tud@multiple@fields@style{##1}}%
     \TUD@parameter@handler@default{headline}%
   }%
-  \tudpage[pagestyle=empty,#1]%
+  \tudpage[{pagestyle=empty,#1}]%
 %    \end{macrocode}
 % Zu Beginn wird als erstes die Überschrift und~-- die entsprechende Option
 % vorausgesetzt~-- im PDF einen Lesezeichen- oder auch Outline-Eintrag gesetzt.
@@ -307,10 +303,10 @@
 % oberen Teil.
 %    \begin{macrocode}
   \def\tud@multiple@fields@output##1{%
-    \ifstr{\tud@multiple@fields@style}{table}{%
+    \tud@if@strequal{\tud@multiple@fields@style}{table}{%
       \def\and{%
         \tabularnewline%
-        \ifstr{\csuse{##1othername}}{}{}{%
+        \tud@if@strempty{\csuse{##1othername}}{}{%
           \csuse{##1othername}\tud@title@delimiter%
         }%
         & \def\and{\tabularnewline &}%
@@ -324,13 +320,13 @@
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi\medskip%
   \begingroup%
   \setparsizes{\z@}{\z@}{\z@\@plus 1fil}\par@updaterelative%
-  \begin{tabular}{@{}p{\tud@len@authortable}l@{}}%
+  \begin{tabular}{@{}p{\tud@dim@authortable}l@{}}%
     \ifx\@referee\@empty\else%
       \refereename\tud@title@delimiter & %
-        \tud@multiple@fields@output{referee}\tabularnewline[\smallskipamount]%
+        \tud@multiple@fields@output{referee}\tabularnewline[1\smallskipamount]%
     \fi%
     \supervisorname\tud@title@delimiter & %
-      \tud@multiple@fields@output{supervisor}\tabularnewline[\smallskipamount]%
+      \tud@multiple@fields@output{supervisor}\tabularnewline[1\smallskipamount]%
     \issuedatetext\tud@title@delimiter & \@issuedate\tabularnewline%
     \duedatetext\tud@title@delimiter & \@duedate\tabularnewline%
   \end{tabular}%
@@ -340,7 +336,7 @@
 % in einer Tabelle ausgegeben. Die \env{tudpage}-Umgebung wird beendet, und
 % eine neue (rechte) Seite geöffnet.
 %    \begin{macrocode}
-  \vskip\tud@len@signatureskip\noindent%
+  \vskip\tud@glue@signaturevskip\noindent%
   \ifx\@chairman\@empty\else%
     \begin{tabular}{@{}l@{}}%
       \@chairman\tabularnewline%
@@ -369,9 +365,10 @@
 % Dies soll die Standardform einer Aufgabenstellung sein. Im ersten Argument
 % werden kurz die Ziele motiviert und erläutert, im zweiten Argument werden im
 % besten Fall die Schwerpunkte in einer \env{itemize}-Umgebung aufgeschlüsselt.
+% \ToDo{optionales Argument zum Schluss für nachfolgenden Text}[v2.07]
 %    \begin{macrocode}
 \newcommand\taskform[3][]{%
-  \begin{task}[#1]%
+  \begin{task}[{#1}]%
     \ifblank{#2}{}{\minisec{\objectivesname}\smallskip#2}%
     \ifblank{#3}{}{%
       \minisec{\focusname}\smallskip%
@@ -407,13 +404,13 @@
   \cleardoubleoddpage%
   \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@def{grade}{\def\@grade{##1}}%
     \TUD@parameter@handler@default{headline}%
   }%
-  \tudpage[pagestyle=empty,#1]%
+  \tudpage[{pagestyle=empty,#1}]%
   \tudbookmark{\evaluationname}{evaluation}%
   \subsection*{%
     \ifx\@headline\@empty%
@@ -430,17 +427,17 @@
 %    \begin{macrocode}
   \removelastskip%
   \ifdim\parskip>\z@\vskip\parskip\else\vskip\topsep\fi%
-  \setlength\@tempskipa{\smallskipamount}%
+  \tud@setglue\@tempskipa{\smallskipamount}%
   \ifx\@grade\@empty\else%
     \vskip\@tempskipa\noindent%
     \gradetext%
-    \setlength\@tempskipa{\bigskipamount}%
+    \tud@setglue\@tempskipa{\bigskipamount}%
   \fi%
   \ifx\@date\@empty\else%
     \vskip\@tempskipa\noindent%
     \ifx\@place\@empty\else\@place,\nobreakspace\fi\@date%
   \fi%
-  \vskip\tud@len@signatureskip\noindent%
+  \vskip\tud@glue@signaturevskip\noindent%
 %    \end{macrocode}
 % Der Befehl \cs{and} wird für einen möglichen Zweitgutachter angepasst. Das 
 % Hilfsmakro \cs{@tempa} dient zur Übernahme des richtigen Bezeichners für
@@ -479,7 +476,7 @@
 % erfolgt die Bewertung, das letzte Argument beinhaltet die Note.
 %    \begin{macrocode}
 \newcommand\evaluationform[5][]{%
-  \begin{evaluation}[#1]%
+  \begin{evaluation}[{#1}]%
     \ifblank{#2}{}{\minisec{\taskname}\smallskip#2}%
     \ifblank{#3}{}{\minisec{\contentname}\smallskip#3}%
     \ifblank{#4}{}{\minisec{\assessmentname}\smallskip#4}%
@@ -505,7 +502,7 @@
   \cleardoubleoddpage%
   \def\@headline{\noticename}%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@handler@default{headline}%
@@ -514,7 +511,7 @@
 % Es wird zu Beginn das angegebene Datum oben auf der rechten Seite ausgegeben. 
 % Anschließend wird die Überschrift und der gegebene Titel gesetzt. 
 %    \begin{macrocode}
-  \tudpage[pagestyle=empty,cdhead=date,#1]%
+  \tudpage[{pagestyle=empty,cdhead=date,#1}]%
   \tudbookmark{\noticename}{notice}%
   \ifx\@headline\@empty\else%
     \section*{\@headline}%
@@ -534,10 +531,10 @@
       \tud@multiple@fields@preset{@contactperson}{}{##1}%
       \begin{tabular}[t]{@{}l@{}}%
         \ignorespaces##1\tabularnewline%
+        \ifx\@emailaddress\@empty\else\@emailaddress\tabularnewline\fi%
         \ifx\@office\@empty\else\@office\tabularnewline\fi%
         \ifx\@telephone\@empty\else\@telephone\tabularnewline\fi%
         \ifx\@telefax\@empty\else\@telefax\tabularnewline\fi%
-        \ifx\@emailaddress\@empty\else\@emailaddress\tabularnewline\fi%
       \end{tabular}%
       \tud@multiple@fields@restore{@contactperson}%
       \tud@multiple@@@split{##2}{\hfill}%
@@ -559,7 +556,7 @@
 % werden die Arbeitsschwerpunkte beschrieben.
 %    \begin{macrocode}
 \newcommand\noticeform[3][]{%
-  \begin{notice}[#1]%
+  \begin{notice}[{#1}]%
     \ifblank{#2}{}{%
       \ifx\@@title\@empty\else%
         \minisec{\expandonce{\@@title}}\medskip%
@@ -578,7 +575,7 @@
 % \end{macro}^^A \noticeform
 %
 % \iffalse
-%</package>
+%</package&body>
 % \fi
 %
 % \PrintBackMatter

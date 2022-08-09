@@ -2,7 +2,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -24,29 +24,54 @@
 \gdef\processLineX%#1{*
   \ifcase\ifx%#10\else
          \ifx<#11\else
-         \ifx!#12\else 3\fi\fi\fi\relax
+         \ifx!#12\else
+         \ifx/#13\else 4\fi\fi\fi\fi\relax
     \expandafter\putMetaComment\or
     \expandafter\checkOption\or
-    \expandafter\expandVariable\or
+    \expandafter\TUDexpandVariable\or
+    \expandafter\TUDexpandCommand\or
     \expandafter\removeComment\fi
   #1}
 \endgroup
-\def\expandVariable!#1\endLine{%
-  \advance\codeLinesPassed\@ne
-  \maybeMsg{x}%
-  \edef\inLine{\csname #1\endcsname}%
-  \let\do\putline@do
-  \activefiles
+\def\TUDexpandVariable!#1\endLine{%
+  \expandafter\ifx\csname#1\endcsname\relax
+    \errmessage{%
+      You've tried to expand the undefined command^^J%
+      \expandafter\string\csname#1\endcsname%
+    }%
+  \else
+    \advance\codeLinesPassed\@ne
+    \maybeMsg{x}%
+    \edef\inLine{\csname#1\endcsname}%
+    \let\do\putline@do
+    \activefiles
+  \fi
+}
+\def\TUDexpandCommand/#1=#2\endLine{%
+  \expandafter\ifx\csname#1\endcsname\relax
+    \errmessage{%
+      You've tried to expand the undefined command^^J%
+      \expandafter\string\csname#1\endcsname%
+    }%
+  \else
+    \advance\codeLinesPassed\@ne
+    \maybeMsg{x}%
+    \expandafter\edef\expandafter\inLine\expandafter{\csname#1\endcsname{#2}}%
+    \let\do\putline@do
+    \activefiles
+  \fi
 }
 \@@input tudscr-version.dtx
+\@@input tudscr-gitinfo.dtx
 \keepsilent
 \preamble
 
 TUD-Script -- Corporate Design of Technische Universitaet Dresden
+            \TUD@Version
 
-\TUD@Version
-
-Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
+              https://github.com/tud-cd/tudscr
+              https://latex.wcms-file3.tu-dresden.de/phpBB3/
 
 This file was generated from file(s) of the TUD-Script bundle.
 ----------------------------------------------------------------------------
@@ -67,12 +92,11 @@ The current maintainer and author of this work is Falk Hanisch.
 \usedir{tex/latex/tudscr}
 \generate{%
   \usepreamble\defaultpreamble%
-  \file{tudscrbase.sty}{%
-    \from{tudscr-version.dtx}{package,base}%
-    \from{tudscr-base.dtx}{package,base}%
-  }
   \file{tudscrbook.cls}{%
-    \from{tudscr-version.dtx}{class,book}%
+    \from{tudscr-version.dtx}{class,book,identify}%
+    \needed{tudscr-fonts.dtx}%
+    \needed{tudscr-supervisor.dtx}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-base.dtx}{class,book,load}%
     \from{tudscr-base.dtx}{class,book,option}%
     \from{tudscr-fonts.dtx}{class,book,option}%
@@ -93,11 +117,14 @@ The current maintainer and author of this work is Falk Hanisch.
     \from{tudscr-layout.dtx}{class,book,body}%
     \from{tudscr-title.dtx}{class,book,body}%
     \from{tudscr-frontmatter.dtx}{class,book,body}%
-    \from{tudscr-comp.dtx}{class,book,body}%
     \from{tudscr-misc.dtx}{class,book,body}%
+    \from{tudscr-comp.dtx}{class,book,body}%
   }
   \file{tudscrreprt.cls}{%
-    \from{tudscr-version.dtx}{class,report}%
+    \from{tudscr-version.dtx}{class,report,identify}%
+    \needed{tudscr-fonts.dtx}%
+    \needed{tudscr-supervisor.dtx}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-base.dtx}{class,report,load}%
     \from{tudscr-base.dtx}{class,report,option}%
     \from{tudscr-fonts.dtx}{class,report,option}%
@@ -118,11 +145,14 @@ The current maintainer and author of this work is Falk Hanisch.
     \from{tudscr-layout.dtx}{class,report,body}%
     \from{tudscr-title.dtx}{class,report,body}%
     \from{tudscr-frontmatter.dtx}{class,report,body}%
-    \from{tudscr-comp.dtx}{class,report,body}%
     \from{tudscr-misc.dtx}{class,report,body}%
+    \from{tudscr-comp.dtx}{class,report,body}%
   }
   \file{tudscrartcl.cls}{%
-    \from{tudscr-version.dtx}{class,article}%
+    \from{tudscr-version.dtx}{class,article,identify}%
+    \needed{tudscr-fonts.dtx}%
+    \needed{tudscr-supervisor.dtx}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-base.dtx}{class,article,load}%
     \from{tudscr-base.dtx}{class,article,option}%
     \from{tudscr-fonts.dtx}{class,article,option}%
@@ -143,11 +173,14 @@ The current maintainer and author of this work is Falk Hanisch.
     \from{tudscr-layout.dtx}{class,article,body}%
     \from{tudscr-title.dtx}{class,article,body}%
     \from{tudscr-frontmatter.dtx}{class,article,body}%
-    \from{tudscr-comp.dtx}{class,article,body}%
     \from{tudscr-misc.dtx}{class,article,body}%
+    \from{tudscr-comp.dtx}{class,article,body}%
   }
   \file{tudscrposter.cls}{%
-    \from{tudscr-version.dtx}{class,poster}%
+    \from{tudscr-version.dtx}{class,poster,identify}%
+    \needed{tudscr-fonts.dtx}%
+    \needed{tudscr-supervisor.dtx}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-base.dtx}{class,poster,load}%
     \from{tudscr-base.dtx}{class,poster,option}%
     \from{tudscr-fonts.dtx}{class,poster,option}%
@@ -168,75 +201,52 @@ The current maintainer and author of this work is Falk Hanisch.
     \from{tudscr-layout.dtx}{class,poster,body}%
     \from{tudscr-title.dtx}{class,poster,body}%
     \from{tudscr-frontmatter.dtx}{class,poster,body}%
-    \from{tudscr-comp.dtx}{class,poster,body}%
     \from{tudscr-misc.dtx}{class,poster,body}%
+    \from{tudscr-comp.dtx}{class,poster,body}%
   }
-}
-\generate{%
-  \usepreamble\defaultpreamble%
+  \file{tudscrbase.sty}{%
+    \from{tudscr-version.dtx}{package,base,identify}%
+    \from{tudscr-base.dtx}{package,base}%
+  }
+  \file{tudscrcolor.sty}{%
+    \from{tudscr-version.dtx}{package,color,identify}%
+    \from{tudscr-color.dtx}{package,color}%
+  }
   \file{tudscrsupervisor.sty}{%
-    \from{tudscr-version.dtx}{package,supervisor}%
-    \from{tudscr-supervisor.dtx}{package,supervisor}%
-    \from{tudscr-fields.dtx}{package,supervisor}%
-    \from{tudscr-localization.dtx}{package,supervisor}%
+    \from{tudscr-version.dtx}{package,supervisor,identify}%
+    \from{tudscr-supervisor.dtx}{package,supervisor,identify}%
+    \from{tudscr-fields.dtx}{package,supervisor,body}%
+    \from{tudscr-localization.dtx}{package,supervisor,body}%
+    \from{tudscr-supervisor.dtx}{package,supervisor,body}%
   }
-}
-\generate{%
-  \usepreamble\defaultpreamble%
+  \file{tudscrcomp.sty}{%
+    \from{tudscr-version.dtx}{package,comp,identify}%
+    \from{tudscr-comp.dtx}{package,comp,identify}%
+    \needed{tudscr-misc.dtx}%
+    \from{tudscr-comp.dtx}{package,comp,option}%
+    \from{tudscr-misc.dtx}{package,comp,execute}%
+    \from{tudscr-comp.dtx}{package,comp,body}%
+  }
   \file{tudscrfonts.sty}{%
-    \from{tudscr-version.dtx}{package,fonts}%
+    \from{tudscr-version.dtx}{package,fonts,identify}%
     \from{tudscr-fonts.dtx}{package,fonts,identify}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-base.dtx}{package,fonts,load}%
     \from{tudscr-fonts.dtx}{package,fonts,option}%
     \from{tudscr-misc.dtx}{package,fonts,option}%
     \from{tudscr-comp.dtx}{package,fonts,option}%
     \from{tudscr-misc.dtx}{package,fonts,execute}%
     \from{tudscr-fonts.dtx}{package,fonts,body}%
-    \from{tudscr-comp.dtx}{package,fonts,body}%
     \from{tudscr-misc.dtx}{package,fonts,body}%
+    \from{tudscr-comp.dtx}{package,fonts,body}%
   }
-}
-\generate{%
-  \usepreamble\defaultpreamble%
-  \file{tudscrcolor.sty}{%
-    \from{tudscr-version.dtx}{package,color}%
-    \from{tudscr-color.dtx}{package,color}%
-  }
-  \file{twocolfix.sty}{%
-    \from{tudscr-twocolfix.dtx}{package}%
-  }
-  \file{mathswap.sty}{%
-    \from{tudscr-mathswap.dtx}{package}%
-  }
-}
-\generate{%
-  \usepreamble\defaultpreamble%
-  \file{tudscrcomp.sty}{%
-    \from{tudscr-version.dtx}{package,comp,base}%
-    \from{tudscr-comp.dtx}{package,comp,base,identify}%
-  }
-  \file{tudscrcomp-book.sty}{%
-    \from{tudscr-version.dtx}{package,comp,book}%
-    \from{tudscr-comp.dtx}{package,comp,book,identify}%
-    \from{tudscr-comp.dtx}{package,comp,book,option}%
-    \from{tudscr-misc.dtx}{package,comp,book,execute}%
-    \from{tudscr-comp.dtx}{package,comp,book,body}%
-  }
-  \file{tudscrcomp-poster.sty}{%
-    \from{tudscr-version.dtx}{package,comp,poster}%
-    \from{tudscr-comp.dtx}{package,comp,poster,identify}%
-    \from{tudscr-comp.dtx}{package,comp,poster,option}%
-    \from{tudscr-misc.dtx}{package,comp,poster,execute}%
-    \from{tudscr-comp.dtx}{package,comp,poster,body}%
-  }
-}
-\generate{%
-  \usepreamble\defaultpreamble%
   \file{fix-tudscrfonts.sty}{%
-    \from{tudscr-version.dtx}{package,fixfonts}%
+    \from{tudscr-version.dtx}{package,fixfonts,identify}%
     \from{tudscr-comp.dtx}{package,fixfonts,identify}%
     \from{tudscr-base.dtx}{package,fixfonts,load}%
     \from{tudscr-layout.dtx}{package,fixfonts,option}%
+    \needed{tudscr-misc.dtx}%
+    \needed{tudscr-comp.dtx}%
     \from{tudscr-misc.dtx}{package,fixfonts,execute}%
     \from{tudscr-layout.dtx}{package,fixfonts,body}%
     \from{tudscr-comp.dtx}{package,fixfonts,body}%
@@ -245,36 +255,54 @@ The current maintainer and author of this work is Falk Hanisch.
 \generate{%
   \usepreamble\defaultpreamble%
   \file{tudscrmanual.cls}{%
-    \from{tudscr-version.dtx}{class,manual,inherit}%
-    \from{tudscr-manual.dtx}{class,manual}%
+    \from{tudscr-version.dtx}{class,manual,identify,inherit}%
+    \needed{tudscr-manual.dtx}%
     \from{tudscr-base.dtx}{class,manual,inherit,load}%
+    \from{tudscr-misc.dtx}{class,manual,option}%
     \from{tudscr-manual.dtx}{class,manual,option}%
     \from{tudscr-misc.dtx}{class,manual,inherit,execute}%
+    \from{tudscr-misc.dtx}{class,manual,body}%
     \from{tudscr-manual.dtx}{class,manual,body}%
     \from{tudscr-fields.dtx}{class,manual,body}%
     \from{tudscr-localization.dtx}{class,manual,body}%
     \from{tudscr-texindy.dtx}{class,manual}%
   }
-  \file{tudscrtutorial.sty}{%
-    \from{tudscr-version.dtx}{package,tutorial}%
-    \from{tudscr-manual.dtx}{package,tutorial,identify}%
-    \from{tudscr-base.dtx}{package,tutorial,load}%
-    \from{tudscr-manual.dtx}{package,tutorial,option}%
-    \from{tudscr-misc.dtx}{package,tutorial,execute}%
-    \from{tudscr-manual.dtx}{package,tutorial,body}%
-    \from{tudscr-texindy.dtx}{package,tutorial}%
+  \file{tudscrmanual.sty}{%
+    \from{tudscr-version.dtx}{package,manual,identify}%
+    \from{tudscr-manual.dtx}{package,manual,identify}%
+    \from{tudscr-base.dtx}{package,manual,load}%
+    \from{tudscr-misc.dtx}{package,manual,option}%
+    \from{tudscr-manual.dtx}{package,manual,option}%
+    \from{tudscr-misc.dtx}{package,manual,execute}%
+    \from{tudscr-misc.dtx}{package,manual,body}%
+    \from{tudscr-manual.dtx}{package,manual,body}%
+    \from{tudscr-texindy.dtx}{package,manual}%
   }
 }
 \generate{%
   \usepreamble\defaultpreamble%
   \file{tudscrdoc.cls}{%
-    \from{tudscr-version.dtx}{class,doc}%
+    \from{tudscr-version.dtx}{class,doc,identify}%
     \from{tudscr-base.dtx}{class,doc,load}%
+    \from{tudscr-misc.dtx}{class,doc,option}%
     \from{tudscr-doc.dtx}{class,doc,option}%
     \from{tudscr-localization.dtx}{class,doc}%
-    \from{tudscr-manual.dtx}{class,doc}%
+    \from{tudscr-misc.dtx}{class,doc,body}%
     \from{tudscr-doc.dtx}{class,doc,body}%
     \from{tudscr-texindy.dtx}{class,doc}%
+  }
+}
+\generate{%
+  \usepreamble\defaultpreamble%
+  \file{tudscr-gitinfo.sty}{%
+    \from{tudscr-version.dtx}{package,git,identify}%
+    \from{tudscr-gitinfo.dtx}{identify,package}%
+  }
+  \file{twocolfix.sty}{%
+    \from{tudscr-twocolfix.dtx}{package}%
+  }
+  \file{mathswap.sty}{%
+    \from{tudscr-mathswap.dtx}{package}%
   }
 }
 \endbatchfile

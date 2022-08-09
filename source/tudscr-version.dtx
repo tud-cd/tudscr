@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-version.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -20,10 +21,6 @@
 %
 % ----------------------------------------------------------------------------
 %
-% \fi
-%
-% \iffalse
-%%% From File: tudscr-version.dtx
 % \fi
 %
 % \iffalse comment
@@ -54,74 +51,82 @@
 % \subsection{Definition und Validierung der Version}
 %
 % \begin{macro}{\TUD@Version}
-% \begin{macro}{\TUD@Version@Check}
+% \begin{macro}{\TUD@@Version}
 % \changes{v2.02}{2014/07/22}{Expandieren der Versionsangabe bei der Verwendung 
 %   von \pkg{docstrip} ermöglicht}^^A
-% \begin{macro}{\TUD@Version@KOMA}
 % \begin{macro}{\TUDScriptVersion}
 % \begin{macro}{\TUDScriptVersionNumber}
-% Das Makro \cs{TUD@Version} gibt an, zu welcher \TUDScript"~Version die 
-% Datei gehört. Die Klassen und Pakete des Bundles verwenden dieses Makro
-% außerdem zur eigenen Versionsangabe. Je nachdem, ob \cs{TUD@Version}
-% bereits definiert ist oder nicht, wird mit \cs{TUD@Version@Check} die
-% Definition überprüft oder eine globale Definition vorgenommen. Da das Ganze
-% auch bei der Erstellung der Dokumentation geschieht, wird \cs{makeatletter}
-% innerhalb einer Gruppe verwendet. Das Makro \cs{TUD@Version@KOMA} definiert 
-% die mindestens notwendige Version von \KOMAScript. In \cs{TUDScriptVersion} 
-% wird die Versioninformation für den Anwender definiert.
+% \begin{macro}{\TUD@KOMAVersion}
+% \begin{macro}{\TUD@KOMAVersionNumber}
+% Die Klassen und Pakete des \TUDScript-Bundles verwenden \cs{TUD@Version}
+% zur Versionsangabe. Je nachdem, ob \cs{TUD@Version} bereits definiert ist 
+% oder nicht, wird mit \cs{TUD@@Version} die Definition überprüft oder eine 
+% globale Definition vorgenommen. In \cs{TUD@KOMAVersion} wird die mindestens 
+% notwendige Version von \KOMAScript{} definiert.
 %    \begin{macrocode}
+%<*identify>
+%<class|package>\NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \begingroup
-  \catcode`\@11\relax
-%<*!(package|class)>
-  \ifx\newcommand\undefined
-    \gdef\TUD@Version@Check#1{%
+  \catcode`\@11\relax%
+%<*!(class|package)>
+  \ifx\documentclass\undefined%
+    \gdef\TUD@@Version#1#2{%
       \gdef\TUD@Version{\space\space#1}%
-      \gdef\TUDScriptVersion{\space\space#1}%
-      \aftergroup\endinput%
-    }
-  \else
-%</!(package|class)>
-  \ifx\TUD@Version\@undefined
-    \newcommand*\TUD@Version@Check[1]{%
+      \gdef\TUD@KOMAVersion{\space\space#2}%
+    }%
+  \else%
+%</!(class|package)>
+  \ifx\TUD@Version\@undefined%
+    \newcommand*\TUD@@Version[2]{%
       \gdef\TUD@Version{#1}%
-      \gdef\TUDScriptVersion{#1}%
-      \def\@tempb##1 v##2 ##3\relax##4\relax{\gdef\TUDScriptVersionNumber{##2}}%
-      \edef\@tempa{\TUD@Version}%
-      \expandafter\@tempb\@tempa\relax? ? \relax\relax%
-      \gdef\TUD@Version@KOMA{3.32}%
-    }
-  \else
-    \newcommand*\TUD@Version@Check[1]{%
+      \gdef\TUD@KOMAVersion{#2}%
+    }%
+  \else%
+    \newcommand*\TUD@@Version[2]{%
       \def\@tempa{#1}%
       \ifx\TUD@Version\@tempa\else%
         \@latex@warning@no@line{%
           \noexpand\TUD@Version\space is `\TUD@Version',\MessageBreak%
           but `#1' was expected!\MessageBreak%
           You should not use classes, packages or files from\MessageBreak%
-          different TUD-Script-Bundle versions%
+          different TUD-Script bundle versions%
         }%
       \fi%
-    }
-  \fi
-%<*!(package|class)>
-  \fi
-%</!(package|class)>
-  \TUD@Version@Check{2021/07/15 v2.06n TUD-Script}
+    }%
+  \fi%
+%<*!(class|package)>
+  \fi%
+%</!(class|package)>
+  \TUD@@Version{2022/08/09 v2.06o TUD-Script}{2022/05/01 v3.36 KOMA-Script}%
+  \ifx\TUDScriptVersion\@undefined%
+    \xdef\TUDScriptVersion{\TUD@Version}%
+    \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
+    \expandafter\@tempa\TUD@Version ? ?\relax\relax{\TUDScriptVersionNumber}%
+    \expandafter\@tempa\TUD@KOMAVersion ? ?\relax\relax{\TUD@KOMAVersionNumber}%
+  \fi%
 \endgroup
+%</identify>
 %    \end{macrocode}
+% \end{macro}^^A \TUD@KOMAVersionNumber
+% \end{macro}^^A \TUD@KOMAVersion
 % \end{macro}^^A \TUDScriptVersionNumber
 % \end{macro}^^A \TUDScriptVersion
-% \end{macro}^^A \TUD@Version@KOMA
-% \end{macro}^^A \TUD@Version@Check
+% \end{macro}^^A \TUD@@Version
 % \end{macro}^^A \TUD@Version
 %
-% \iffalse
+% \iffalse ins:batch + dtx:driver
+%<*ins>
+\ifx\documentclass\undefined
+  \input docstrip.tex
+  \ifToplevel{\batchinput{tudscr.ins}}
+\else
+  \let\endbatchfile\relax
+\fi
+\endbatchfile
+%</ins>
 %<*dtx>
-% \fi
-%
-\ProvidesFile{tudscr-version.dtx}[\TUDScriptVersion\space (versions)]
-%
-% \iffalse
+\ProvidesFile{tudscr-version.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -133,14 +138,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-version.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -148,20 +148,48 @@
 %</dtx>
 % \fi
 %
-% Als erstes das benötigte \LaTeX-Format.
+% \iffalse comment
+% Der Rest wird nicht mehr vom Treiber benötigt.
+% \fi
+%
+% \iffalse 
+%<*identify>
+% \fi
+%
+% \subsection{Das \TUDScript-Logo und Anlaufstellen}
+% \begin{macro}{\TUDScript}
+% Der Schriftzug von \TUDScript.
 %    \begin{macrocode}
-%<package|class>\NeedsTeXFormat{LaTeX2e}[2019/10/01]
+\@ifundefined{TUDScript}{%
+  \DeclareRobustCommand\TUDScript{%
+    \mbox{%
+      \textsf{%
+        T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
+      }%
+    }\ifcsname xspace\endcsname\xspace\fi%
+  }%
+}{}
 %    \end{macrocode}
-% \begin{macro}{\tudscrmail}
-% Die E"~Mail-Adresse für Supportanfragen.
+% \end{macro}^^A \TUDScript
+%
+% \begin{macro}{\TUDScriptContact}
+% \begin{macro}{\TUDScriptRepository}
+% \begin{macro}{\TUDScriptForum}
+% Die E"~Mail-Adresse, Repository und Forum für Supportanfragen. 
 %    \begin{macrocode}
-%<package|class>\providecommand*\tudscrmail{hanisch.latex@outlook.com}
+\providecommand*\TUDScriptContact{hanisch.latex@outlook.com}
+\providecommand*\TUDScriptRepository{https://github.com/tud-cd/tudscr}
+\providecommand*\TUDScriptForum{https://latex.wcms-file3.tu-dresden.de/phpBB3/}
 %    \end{macrocode}
-% \end{macro}^^A \tudscrmail
+% \end{macro}^^A \TUDScriptForum
+% \end{macro}^^A \TUDScriptRepository
+% \end{macro}^^A \TUDScriptContact
 %
 % \iffalse
 %<*class>
 % \fi
+%
+% \subsection{Laden von Klassen und Paketen}
 %
 % \begin{macro}{\TUD@ProvidesClass}
 % \changes{v2.04}{2015/06/13}{neu}^^A
@@ -173,6 +201,8 @@
 % \changes{v2.04}{2015/06/12}{neu}^^A
 % \begin{macro}{\TUD@Class@KOMA}
 % \changes{v2.04}{2015/06/12}{neu}^^A
+% \begin{macro}{\TUDScriptClassName}
+% \begin{macro}{\TUDClassName}
 % Mit diesen Befehlen erfolgt die Versionsangabe der \TUDScript-Klassen beim
 % Laden. Dabei werden hier einmalig die Namen der jeweiligen Klassen definiert. 
 % Hierfür werden die Befehle \cs{TUD@ProvidesClass} für die Hauptklassen und 
@@ -181,31 +211,28 @@
 % Argument entspricht der Basis-Klasse. Das dritte Argument enthält eine kurze 
 % Beschreibung.
 %    \begin{macrocode}
-%<*!inherit>
-\newcommand*\TUD@ProvidesClass[3]{%
+%<!inherit>\newcommand*\TUD@ProvidesClass[3]
+%<inherit>\newcommand*\TUD@ProvidesWrapperClass[3]
+{%
   \ProvidesClass{#1}[%
 %!TUD@Version
     #3 (#2)%
   ]%
-  \newcommand*\TUD@Class@KOMA{#2}%
-  \ifx\TUD@Class@Parent\@undefined%
-    \newcommand*\TUD@Class@Name{#1}%
-    \TUD@Class@Info%
-  \fi%
-}
-%</!inherit>
-%<*inherit>
-\newcommand*\TUD@ProvidesWrapperClass[3]{%
-  \ProvidesClass{#1}[%
-%!TUD@Version
-    #3 (#2)%
-  ]%
-  \newcommand*\TUD@Class@Parent{#2}%
+%<!inherit>  \newcommand*\TUD@Class@KOMA{#2}%
+%<inherit>  \newcommand*\TUD@Class@Parent{#2}%
+%<!inherit>  \ifx\TUD@Class@Parent\@undefined%
   \newcommand*\TUD@Class@Name{#1}%
-  \TUD@Class@Info%
-}
-%</inherit>
 %    \end{macrocode}
+% Die Benutzermakros für den Namen der verwendeten \TUDScript-Klasse.
+%    \begin{macrocode}
+  \newcommand*\TUDScriptClassName{#1}%
+  \providecommand*\TUDClassName{\TUDScriptClassName}%
+  \TUD@Class@Info%
+%<!inherit>  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUDClassName
+% \end{macro}^^A \TUDScriptClassName
 % \end{macro}^^A \TUD@Class@KOMA
 % \end{macro}^^A \TUD@Class@Parent
 % \end{macro}^^A \TUD@Class@Name
@@ -219,11 +246,11 @@
 \providecommand*\TUD@Class@Info{%
   \typeout{+------------------------------------------------------------------}%
   \typeout{| Corporate Design of Technische Universitaet Dresden}%
-  \typeout{| Class:      \TUD@Class@Name}%
-  \typeout{| Version:    \TUD@Version}%
-  \typeout{| Author:     Falk Hanisch (\tudscrmail)}%
-  \typeout{| Repository: https://github.com/tud-cd/tudscr}%
-  \typeout{| Forum:      https://latex.wcms-file3.tu-dresden.de}%
+  \typeout{| Class:      \TUDScriptClassName}%
+  \typeout{| Version:    \TUDScriptVersion}%
+  \typeout{| Author:     Falk Hanisch (\TUDScriptContact)}%
+  \typeout{| Repository: \TUDScriptRepository}%
+  \typeout{| Forum:      \TUDScriptForum}%
   \typeout{+------------------------------------------------------------------}%
 }
 %    \end{macrocode}
@@ -237,63 +264,37 @@
 %<doc>\TUD@ProvidesClass{tudscrdoc}{scrartcl}{source code documentation class}
 %<manual>\TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
 %    \end{macrocode}
-% \begin{macro}{\TUDScriptClassName}
-% \begin{macro}{\TUDClassName}
-% Die Benutzermakros für den Namen der verwendeten \TUDScript-Klasse.
-%    \begin{macrocode}
-\edef\TUDScriptClassName{\TUD@Class@Name}
-\providecommand*\TUDClassName{\TUDScriptClassName}
-%    \end{macrocode}
-% \end{macro}^^A \TUDClassName
-% \end{macro}^^A \TUDScriptClassName
 %
 % \iffalse
 %</class>
-%<*package&(supervisor|comp|tutorial)>
+%<*package>
+%<*supervisor|comp|manual>
 % \fi
 %
-% \section{Verwendbarkeit von \TUDScript-Paketen}
-%
+% \begin{macro}{\TUD@Class@Check}
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % Einige Pakete sind nur mit den \TUDScript-Klassen verwendbar. Diese erzeugen 
-% einen Fehler, wenn sie nicht mit diesen verwendet werden.
+% einen Fehler, wenn sie nicht mit einer dieser verwendet werden.
 %    \begin{macrocode}
-\ifx\TUD@Class@Name\@undefined
-  \PackageError{%
-%<supervisor>    tudscrsupervisor%
-%<comp&base>    tudscrcomp%
-%<comp&book>    tudscrcomp-book%
-%<comp&poster>    tudscrcomp-poster%
-%<tutorial>    tudscrtutorial%
-  }{Unsupported class found}{%
-    This package can only be used with a class out of the\MessageBreak%
-    tudscr bundle (tudscrbook, tudscrreprt, tudscrartcl, tudscrposter).%
-  }%
-  \endinput%
-\fi
+\providecommand*\TUD@Class@Check[1]{%
+  \ifx\TUD@Class@Name\@undefined%
+    \PackageError{#1}{TUD-Script class not loaded}{%
+      This package requires a class of the TUD-Script bundle\MessageBreak%
+      (tudscrbook, tudscrreprt, tudscrartcl, tudscrposter).%
+    }%
+    \DeclareOption*{}%
+    \ProcessOptions\relax%
+    \expandafter\endinput%
+  \fi%
+}%
 %    \end{macrocode}
+% \end{macro}^^A \TUD@Class@Check
 %
 % \iffalse
-%</package&(supervisor|comp|tutorial)>
+%</supervisor|comp|manual>
+%</package>
+%</identify>
 % \fi
-%
-% \section{Das \TUDScript-Logo}
-% \begin{macro}{\TUDScript}
-% Der Schriftzug von \TUDScript.
-%    \begin{macrocode}
-%<*package|class>
-\@ifundefined{TUDScript}{%
-  \DeclareRobustCommand\TUDScript{%
-    \textsf{%
-      T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
-    }%
-    \ifcsname xspace\endcsname%
-      \xspace%
-    \fi%
-  }%
-}{}
-%</package|class>
-%    \end{macrocode}
-% \end{macro}^^A \TUDScript
 %
 % \PrintBackMatter
 %

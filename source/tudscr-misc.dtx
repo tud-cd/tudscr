@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-misc.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,16 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-misc.dtx
 %<*dtx>
-% \fi
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-misc.dtx}[2022/07/28 v2.06m TUD-Script\space%
-  (miscellaneous)%
-]
-%
-% \iffalse
+\ProvidesFile{tudscr-misc.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -53,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-misc.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -80,6 +69,7 @@
 % Alles, wofür sich eine separate Datei nicht lohnt, landet hier.
 %
 % \iffalse
+%<*!(manual|doc)>
 %<*class&option>
 % \fi
 %
@@ -91,7 +81,7 @@
 % genutzt werden, um zu steuern, ob für Titel und Inhaltsverzeichnis
 % automatisch ein Eintrag für die Sprungmarken erzeugt werden soll.
 %    \begin{macrocode}
-\newif\if@tud@bookmarks
+\tud@newif\if@tud@bookmarks
 \TUD@key{tudbookmarks}[true]{%
   \TUD@set@ifkey{tudbookmarks}{@tud@bookmarks}{#1}%
 }
@@ -113,15 +103,17 @@
 % Für die Titelseite werden~-- wie auch durch das Paket \pkg{hyperref}~-- die 
 % Fußnoten mit dem Befehl \cs{tud@x@hyperref@realfootnotes} auf den originalen 
 % Zustand zurückgesetzt.
+% \ToDo{nur als internen Befehl definieren, dazugehörige Option nötig?}[v2.07]
+% \ToDo{\cs{tud@x@hyperref@realfootnotes} prüfen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tudbookmark[1][]{\@gobbletwo}
 \newcommand*\tud@x@hyperref@realfootnotes{}
 \AfterPackage{hyperref}{%
-  \renewcommand*\tudbookmark[3][]{%
+  \renewcommand*\tudbookmark[3][0]{%
     \relax%
     \if@tud@bookmarks%
-      \phantomsection%
-      \ifblank{#1}{\pdfbookmark{#2}{#3}}{\pdfbookmark[#1]{#2}{#3}}%
+      \csuse{phantomsection}%
+      \pdfbookmark[{#1}]{#2}{#3}%
     \fi%
   }%
   \renewcommand*\tud@x@hyperref@realfootnotes{%
@@ -130,7 +122,6 @@
     \let\@footnotemark\H@@footnotemark%
     \let\@footnotetext\H@@footnotetext%
   }%
-  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@hyperref@realfootnotes
@@ -158,7 +149,7 @@
 % Titelseite PDF"=Lesezeichen bzw. Outline-Einträge erzeugt.
 %    \begin{macrocode}
 %<*book|report|article>
-\apptocmd{\titlepage}{%
+\apptocmd\titlepage{%
   \tud@x@bookmark@startatroot%
   \@tud@res@swafalse%
   \if@tud@coverpage\@tud@res@swatrue\fi%
@@ -179,14 +170,14 @@
 %    \end{macrocode}
 % Dies geschieht außerdem auch für die Titelköpfe.
 %    \begin{macrocode}
-\pretocmd{\tud@maketitle@inpage}{%
+\pretocmd\tud@maketitle@inpage{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
 %<article|poster>  1%
   ]{\titlename}{title}%
 }{}{\tud@patch@wrn{tud@maketitle@inpage}}
-\pretocmd{\@maketitle}{%
+\pretocmd\@maketitle{%
   \tud@x@bookmark@startatroot%
   \tudbookmark[%
 %<book|report>  0%
@@ -254,7 +245,7 @@
 %^^A% in den Überschriften Symbole für die Fußnoten anstelle von Zahlen 
 %^^A% verwendet werden sollen.
 %^^A%    \begin{macrocode}
-%^^A\newif\if@tud@symbolheadings
+%^^A\tud@newif\if@tud@symbolheadings
 %^^A\TUD@key{footnotes}{%
 %^^A  \TUD@set@numkey{footnotes}{@tempa}{%
 %^^A    {nosymbolheadings}{0},{numberheadings}{0},%
@@ -336,7 +327,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@x@scr@pt{}
 \def\tud@x@scr@pt #1pt#2\@nil{%
-  \ifstr{#2}{pt}{\ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
+  \tud@if@strequal{#2}{pt}{\Ifnumber{#1}{\@tud@x@scr@fontsize@settrue}{}}{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@scr@pt
@@ -353,10 +344,10 @@
 \AtBeginDocument{%
   \if@tud@x@scr@fontsize@set\else%
     \@tud@res@swafalse%
-    \ifdim\tud@len@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
-    \ifdim\tud@len@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
-    \ifdim\tud@len@layoutheight<295mm\relax\@tud@res@swatrue\fi%
-    \ifdim\tud@len@layoutheight>299mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@dim@layoutwidth<208mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@dim@layoutwidth>212mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@dim@layoutheight<295mm\relax\@tud@res@swatrue\fi%
+    \ifdim\tud@dim@layoutheight>299mm\relax\@tud@res@swatrue\fi%
     \if@tud@res@swa%
       \ClassWarningNoLine{\TUD@Class@Name}{%
         You've set a layout size, which is different from\MessageBreak%
@@ -369,9 +360,55 @@
 }
 %    \end{macrocode}
 %
+% \subsection{Fixierte Gleitobjekte für Poster}
+%
+% \begin{environment}{figurehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \changes{v2.06o}{2022/08/02}{für \cls{tudscrposter} übernommen}^^A
+% \begin{environment}{tablehere}
+% \changes{v2.05}{2016/04/17}{neu}^^A
+% \changes{v2.06o}{2022/08/02}{für \cls{tudscrposter} übernommen}^^A
+% \begin{macro}{\tud@here@begin}
+% \changes{v2.06o}{2022/08/02}{neu}^^A
+% \begin{macro}{\tud@here@end}
+% \changes{v2.06o}{2022/08/02}{neu}^^A
+% Für die Klasse \cls{tudscrposter} werden zwei Umgebungen bereitgestellt, mit 
+% denen sich Tabellen und Bilder an einer bestimmten Stelle exakt platzieren
+% lassen. Prinzipiell könnte hierfür auch das Paket \pkg{float} zum Einsatz
+% kommen. Ursprünglich stammt die Idee aus \cls{tudmathposter} und wurde hier 
+% generalisiert implementiert.
+%    \begin{macrocode}
+%<*poster>
+\newcommand*\tud@here@begin[1]{%
+  \def\@captype{#1}%
+  \vskip\intextsep%
+  \color@vbox%
+    \normalcolor%
+    \vbox\bgroup%
+      \hsize=\columnwidth%
+      \@parboxrestore%
+      \@floatboxreset%
+      \@setnobreak%
+      \ignorespaces%
+}
+\newcommand*\tud@here@end{%
+      \vskip\intextsep%
+      \@minipagefalse%
+      \outer@nobreak%
+    \egroup%
+  \color@endbox%
+}
+\newenvironment{figurehere}{\tud@here@begin{figure}}{\tud@here@end}
+\newenvironment{tablehere}{\tud@here@begin{table}}{\tud@here@end}
+%</poster>
+%    \end{macrocode}
+% \end{macro}^^A \tud@here@end
+% \end{macro}^^A \tud@here@begin
+% \end{environment}^^A tablehere
+% \end{environment}^^A figurehere
+%
 % \iffalse
 %</class&body>
-%<*class&!inherit|package&fonts>
 %<*option>
 % \fi
 %
@@ -424,7 +461,7 @@
 % \changes{v2.05}{2016/06/14}{neu}^^A
 % \begin{macro}{\if@tud@math@set}
 % \changes{v2.05}{2016/06/14}{neu}^^A
-% \begin{macro}{\if@tud@font@skip@set}
+% \begin{macro}{\if@tud@relspacing@set}
 % \changes{v2.05}{2016/06/14}{neu}^^A
 % \begin{macro}{\if@tud@x@scr@headings@reset}
 % \changes{v2.05}{2016/06/14}{neu}^^A
@@ -438,24 +475,24 @@
 % dazugehörigen Befehle für die Einstellungen von Schriften, Layout und/oder 
 % Satzspiegel in der richtigen Reihenfolge ausgeführt.
 %    \begin{macrocode}
-\newif\if@tud@font@set
-\newif\if@tud@math@set
-\newif\if@tud@font@skip@set
+\tud@newif\if@tud@font@set
+\tud@newif\if@tud@math@set
+\tud@newif\if@tud@relspacing@set
 %<*class>
-\newif\if@tud@x@scr@headings@reset
-\newif\if@tud@cd@process
-\newif\if@tud@cdgeometry@process
+\tud@newif\if@tud@x@scr@headings@reset
+\tud@newif\if@tud@cd@process
+\tud@newif\if@tud@cdgeometry@process
 %</class>
 \newcommand*\tud@atdocument@process{%
   \if@tud@font@set%
     \tud@font@set%
     \global\@tud@font@setfalse%
-    \global\@tud@font@skip@setfalse%
+    \global\@tud@relspacing@setfalse%
 %<class>    \global\@tud@cd@processfalse%
   \fi%
-  \if@tud@font@skip@set%
-    \tud@font@skip@set%
-    \global\@tud@font@skip@setfalse%
+  \if@tud@relspacing@set%
+    \tud@relspacing@set%
+    \global\@tud@relspacing@setfalse%
   \fi%
   \if@tud@math@set%
     \tud@math@set%
@@ -481,14 +518,14 @@
 % \end{macro}^^A \if@tud@cdgeometry@process
 % \end{macro}^^A \if@tud@cd@process
 % \end{macro}^^A \if@tud@x@scr@headings@reset
-% \end{macro}^^A \if@tud@font@skip@set
+% \end{macro}^^A \if@tud@relspacing@set
 % \end{macro}^^A \if@tud@math@set
 % \end{macro}^^A \if@tud@font@set
 % \end{macro}^^A \tud@atdocument@process
 %
 % \iffalse
 %</body>
-%</class&!inherit|package&fonts>
+%</!(manual|doc)>
 %<*execute>
 %<*class&!inherit|package&fonts>
 % \fi
@@ -502,7 +539,7 @@
 % die gewählte Kompatibilitäsversion getestet werden.
 %    \begin{macrocode}
 \DeclareOption*{}
-\FamilyProcessOptions[.comp]{TUD}\relax
+\TUDProcessOptions[.comp]\relax
 %    \end{macrocode}
 % Ab der \TUDScript-Version~v2.05 werden einige vertikale Abstände abhängig von 
 % der Schriftgröße definiert. Sollte eine frühere Kompatibilitätseinstellung 
@@ -534,6 +571,30 @@
 %</class&!inherit|package&fonts>
 % \fi
 %
+% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
+% werden die Farben aktiviert.
+%    \begin{macrocode}
+%<*package&manual>
+\KOMAoptions{headings=small}
+\TUDoptions{cdfoot=true}
+%</package&manual>
+%<*class&!inherit|package>
+\TUDExecuteOptions{%
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
+%<*class&!inherit>
+%<*book|report|article>
+  cd=true,tudbookmarks=true%
+%</book|report|article>
+%<*poster>
+  cd=bicolor,tudbookmarks=false%
+%</poster>
+%</class&!inherit>
+}
+%</class&!inherit|package>
+%    \end{macrocode}
+%
 % \subsection{Durchreichen von Optionen und Standardoptionen}
 %
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
@@ -542,7 +603,7 @@
 %    \begin{macrocode}
 %<*package>
 %<*fonts>
-\DeclareOption*{\expandafter\KOMAoptions\expandafter{\CurrentOption}}
+\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
 %</fonts>
 %<*fixfonts>
 \DeclareOption*{%
@@ -566,42 +627,19 @@
 %</inherit>
 %</class>
 %    \end{macrocode}
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
+% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
+% bzw. \TUDScript-Elternklasse geladen.
 %    \begin{macrocode}
-%<*package&tutorial>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&tutorial>
-\TUDExecuteOptions{%
-%<*package>
-%<*fixfonts>
-  headings=heavy%
-%</fixfonts>
-%<*tutorial>
-  ToDo=true%
-%</tutorial>
-%</package>
-%<*class&!inherit>
-%<*book|report|article>
-  cd=true,tudbookmarks=true%
-%</book|report|article>
-%<*poster>
-  cd=bicolor,tudbookmarks=false%
-%</poster>
-%</class&!inherit>
-}
 \TUDProcessOptions\relax
-%    \end{macrocode}
-% Die korrespindierende \KOMAScript-Klasse bzw. \TUDScript-Elternklasse wird 
-% geladen.
-%    \begin{macrocode}
 %<*class&!inherit>
-\LoadClass{\TUD@Class@KOMA}[2020/09/21]
+\LoadClass{\TUD@Class@KOMA}[%
+%!TUD@KOMAVersion
+]
 %</class&!inherit>
 %<*class&inherit>
-%<manual>\PassOptionsToClass{ttfont=roboto}{\TUD@Class@Parent}
-\LoadClass{\TUD@Class@Parent}
+\LoadClass{\TUD@Class@Parent}[%
+%!TUD@Version
+]
 %</class&inherit>
 %    \end{macrocode}
 %
@@ -626,7 +664,7 @@
 % Verwendung in der Präambel angemerkt.
 %    \begin{macrocode}
 \newcommand*\TUD@key@toolate[1]{%
-  \csedef{tud@key@#1@error}{%
+  \csedef{tud@key@toolate@@#1}{%
 %<*class>
     \noexpand\ClassError{\noexpand\TUD@Class@Name}%
 %</class>
@@ -635,7 +673,7 @@
 %</package&fonts>
     {Option `#1' too late}{%
       Option `#1' can only be set\space%
-      \ifcsname \@currname.\@currext-h@@k\endcsname%
+      \ifcsdef{\@currname.\@currext-h@@k}{%
         as optional \MessageBreak argument while loading\space%
 %<*class>
         class `\noexpand\TUD@Class@Name'%
@@ -643,15 +681,15 @@
 %<*package&fonts>
         package `tudscrfonts'%
 %</package&fonts>
-      \else%
-        in the preamble
-      \fi%
+      }{%
+        in the preamble%
+      }%
       \MessageBreak but you have tried to set it up later.%
     }%
   }%
-  \TUD@key{#1}[]%
+  \TUD@key[]{#1}[]%
   {%
-    \csuse{tud@key@#1@error}
+    \csuse{tud@key@toolate@@#1}%
     \FamilyKeyStateProcessed%
   }%
 }
@@ -661,43 +699,587 @@
 % \iffalse
 %</class&!inherit|package&fonts>
 %</execute>
+%<*manual|doc>
+% \fi
+%
+% \section{Zusätzliches für die Benutzer- und Quelltextdokumentation}
+%
+% Hier tauchen Hilfsmittel auf, die für die Dokumentation verwendet werden.
+%
+% \iffalse
+%<*option>
+% \fi
+%
+% \subsection{Zusätzliche Pakete}
+%
+% Bugfixes für unterschiedliche Pakete.
+%    \begin{macrocode}
+\RequirePackage{scrhack}[%
+%!TUD@KOMAVersion
+]
+%    \end{macrocode}
+% Das Paket für intelligente Leerzeichen am Ende von Makros mit \cs{xspace}.
+%    \begin{macrocode}
+\RequirePackage{xspace}[2009/10/20]
+\xspaceaddexceptions{"=}
+%    \end{macrocode}
+% Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
+% für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
+% werden. Die Randnotizen werden auf dem linken~-- weil größeren~-- Seitenrand
+% gesetzt.
+%    \begin{macrocode}
+\PassOptionsToPackage{quiet}{marginnote}
+\RequirePackage{marginnote}[2012/03/29]
+%<!doc>\reversemarginpar
+%    \end{macrocode}
+% Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
+% Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
+% Format. Sollte \app{lualatex} als Dokumentprozessor eingesetzt werden, sind 
+% dennoch die beiden \app{pdflatex}-Primitiven \cs{pdf(@)strcmp} und 
+% \cs{pdf(@)shellescape} nötig, wofür das Paket \pkg{pdftexcmds} geladen wird.
+%    \begin{macrocode}
+\RequirePackage{shellesc}[2016/06/07]
+\RequirePackage{pdftexcmds}[2016/05/21]
+%    \end{macrocode}
+%
+% Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
+% geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
+%
+%    \begin{macrocode}
+\PassOptionsToPackage{hyperindex=false}{hyperref}
+\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+%    \end{macrocode}
+% Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
+% Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
+% Funktionalität definiert. 
+%    \begin{macrocode}
+\AfterAtEndOfPackage*{hyperref}{%
+  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
+  \hypersetup{colorlinks,linkcolor=blue}%
+}
+%    \end{macrocode}
+% \begin{macro}{\hrfn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
+% Mit diesem Makro können Hyperlinks im Fließtext erzeugt werden, welche 
+% zusätzlich noch die dazugeörige URL als Fußnote anzeigen.
+%    \begin{macrocode}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{\strut\url{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \hrfn
+% \begin{macro}{\mailto}
+% Ein Makro zur Angabe einer verlinkten E"~Mail-Adresse.
+%    \begin{macrocode}
+\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}
+%    \end{macrocode}
+% \end{macro}^^A \mailto
+% \begin{macro}{\url}
+% \begin{macro}{\nolinkurl}
+% \begin{macro}{\href}
+% \begin{macro}{\hypersetup}
+% \begin{macro}{\phantomsection}
+% \begin{macro}{\pdfbookmark}
+% \begin{macro}{\currentpdfbookmark}
+% \begin{macro}{\subpdfbookmark}
+% \begin{macro}{\belowpdfbookmark}
+% Sollte \pkg{hyperref} nicht geladen werden, müssen einige Befehle rudimentär 
+% definiert werden.
+%    \begin{macrocode}
+\TUD@UnwindPackage{hyperref}{%
+  \RequirePackage{url}[2013/09/16]%
+  \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
+  \providerobustcmd*\nolinkurl[1]{\url{#1}}%
+  \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\hypersetup[1]{}%
+  \providecommand*\phantomsection{}%
+  \providecommand*\pdfbookmark[3][]{}%
+  \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\subpdfbookmark[2]{}%
+  \providecommand*\belowpdfbookmark[2]{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \belowpdfbookmark
+% \end{macro}^^A \subpdfbookmark
+% \end{macro}^^A \currentpdfbookmark
+% \end{macro}^^A \pdfbookmark
+% \end{macro}^^A \phantomsection
+% \end{macro}^^A \hypersetup
+% \end{macro}^^A \href
+% \end{macro}^^A \nolinkurl
+% \end{macro}^^A \url
+%
+% Etwas Kleinkram für \pkg{babel} und \pkg{csquotes}. Das letztere Paket dient
+% dem sprachabhängigen Setzen von Anführungszeichen und sollte erst nach 
+% \pkg{inputenc} oder \pkg{inputenx} geladen werden.
+%    \begin{macrocode}
+\AfterPackage*{babel}{\RequirePackage{csquotes}}
+%    \end{macrocode}
+% \begin{macro}{\selectlanguage}
+% \begin{macro}{\glqq}
+% \begin{macro}{\grqq}
+% \begin{macro}{\enquote}
+%    \begin{macrocode}
+\TUD@UnwindPackage{babel}{%
+  \ClassWarningNoLine{\TUD@Class@Name}{Package `babel' not loaded}%
+  \providecommand*\selectlanguage[1]{}%
+  \providecommand*\glqq{\quotedblbase}%
+  \providecommand*\grqq{\textquotedblleft}%
+  \providecommand*\seename{see}%
+  \providecommand*\alsoname{see\nobreakspace also}%
+}
+\TUD@UnwindPackage{csquotes}{%
+  \ClassWarningNoLine{\TUD@Class@Name}{Package `csquotes' not loaded}%
+  \providecommand\enquote[1]{\emph{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \enquote
+% \end{macro}^^A \grqq
+% \end{macro}^^A \glqq
+% \end{macro}^^A \selectlanguage
+%
+% \iffalse
+%<*class&manual>
+% \fi
+%
+% \subsection{Sortieren von Listen}
+%
+% \begin{macro}{\tud@list@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\tud@list@@sort}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\tud@templist}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% \begin{macro}{\if@tud@list@sorted}
+% \changes{v2.02}{2014/07/25}{neu}^^A
+% Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
+% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge in eine 
+% kommagetrennte Auflistung. Diese wird anschließend wieder in eine
+% \pkg{etoolbox}-Liste umgewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@templist{}
+\let\tud@templist\relax
+\newcommand*\tud@list@sort[1]{%
+  \ifdefvoid{#1}{%
+    \ClassWarning{tudscrmanual}{%
+      The given list \string#1\space\MessageBreak%
+      is empty, nothing to sort here%
+    }%
+  }{%
+    \let\tud@reserved#1%
+    \let\tud@templist\relax%
+    \forlistloop\tud@list@@sort{\tud@reserved}%
+    \let\tud@reserved\relax%
+    \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
+    \let#1\tud@reserved%
+  }%
+}
+%    \end{macrocode}
+% Hier erfolgt die eigentliche Sortierung der Liste.
+%    \begin{macrocode}
+\tud@newif\if@tud@list@sorted
+\newcommand*\tud@list@@sort[1]{%
+%    \end{macrocode}
+% Der erste Eintrag wird direkt der Liste hinzugefügt.
+%    \begin{macrocode}
+  \ifx\tud@templist\relax%
+    \def\tud@templist{#1}%
+%    \end{macrocode}
+% Weitere Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
+% Dabei wird die kommagetrennte Liste \cs{tud@templist} durchlaufen und
+% \cs{@tempb} als Hilfsmakro verwendet, in welches die aktuelle Liste innerhalb 
+% der \cs{@for}-Schleife stückweise expandiert wird. Wenn das aktuelle Element
+% an der dafür passenden Stelle eingesetzt wurde, wird \cs{if@tud@list@sorted} 
+% gesetzt.
+%    \begin{macrocode}
+  \else%
+    \@tud@list@sortedfalse%
+    \let\@tempb\@empty%
+    \@for\@tempa:=\tud@templist\do{%
+%    \end{macrocode}
+% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
+% angehangen.
+% \ToDo{\cs{expandafter}\cs{edef}\cs{expandafter} ist quatsch, oder?}[v2.07]
+%    \begin{macrocode}
+      \if@tud@list@sorted%
+        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+      \else%
+%    \end{macrocode}
+% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
+% durchlaufenenen Liste, so wird dieser davor eingefügt. Dabei muss der Fall, 
+% dass das Element der erste Eintrag in der temporären Liste \cs{@tempb} ist, 
+% eine Sonderbehandlung erfolgen. Anschließend wird \cs{@tud@list@sortedtrue} 
+% gesetzt.
+%    \begin{macrocode}
+        \expandafter\ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              #1,\@tempa%
+            }%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{%
+              \@tempb,#1,\@tempa%
+            }%
+          \fi%
+          \@tud@list@sortedtrue%
+        \else%
+%    \end{macrocode}
+% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
+% Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
+% Elementes wird abgedeckt.
+%    \begin{macrocode}
+          \ifx\@tempb\@empty%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
+          \else%
+            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
+          \fi%
+        \fi%
+      \fi%
+    }%
+%    \end{macrocode}
+% Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
+% dies hier am Ende der Liste.
+%    \begin{macrocode}
+    \if@tud@list@sorted\else%
+      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
+    \fi%
+%    \end{macrocode}
+% Die temporäre Liste \cs{@tempb} wird auf \cs{tud@templist} überschrieben.
+%    \begin{macrocode}
+    \let\tud@templist\@tempb%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \if@tud@list@sorted
+% \end{macro}^^A \tud@templist
+% \end{macro}^^A \tud@list@@sort
+% \end{macro}^^A \tud@list@sort
+%
+% \iffalse
+%</class&manual>
+% \fi
+%
+% \subsection{Stringmanipulation}
+%
+% \begin{macro}{\tud@replace@in}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
+% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
+% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
+% Unterstriche zu ersetzen.
+%    \begin{macrocode}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+%    \end{macrocode}
+% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
+% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
+% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
+% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
+% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
+% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
+% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
+% Ersatzzeichen vervollständigt.
+%    \begin{macrocode}
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden.
+%    \begin{macrocode}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@replace@@in
+% \end{macro}^^A \tud@replace@in
+%
+% \iffalse
+%</option>
 %<*body>
 % \fi
 %
-% \subsection{Anpassungen für das Paket \pkg{textcase}}
+% \subsection{Zusätzliche Markup-Befehle}
+% \subsubsection{Textauszeichnung}
 %
-% \begin{macro}{\@uclcnotmath}
-% \begin{macro}{\tud@x@textcase@uclcnotmath}
-% \changes{v2.02}{2014/06/27}{\pkg{textcase}: Ignorieren von Fußnoten im 
-%   Argument des Befehls \cs{MakeTextUppercase}}^^A
-% \changes{v2.03}{2015/01/21}{\pkg{textcase}: Ignorieren des Befehls 
-%   \cs{@mkboth} im Argument des Befehls \cs{MakeTextUppercase}}^^A
-% Damit Fußnoten innerhalb von \cs{MakeTextUppercase} nicht in Majuskeln
-% gesetzt werden, wird der interne Befehl \cs{@uclcnotmath} aus dem Paket
-% \pkg{textcase} angepasst.
+% \begin{macro}{\@pnumwidth}
+% \begin{macro}{\@tocrmarg}
+% Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
+% \ToDo{direkt in die Klassen übernehmen}[v2.07]
 %    \begin{macrocode}
-\if@tud@cdoldfont@active
-  \RequirePackage{textcase}[2004/10/07]
-  \AfterPackage*{textcase}{%
-    \robustify\NoCaseChange%
-    \newcommand*\tud@x@textcase@uclcnotmath{%
-      \@nonchangecase\hologo%
-      \def\footnote##1##{\toks@{\noexpand\footnote##1}\@footnote}%
-      \def\@footnote##1{\NoCaseChange{\the\toks@{##1}}}%
-      \def\@mkboth##1##2{\NoCaseChange{\@mkboth{##1}{##2}}}%
-    }%
-    \patchcmd{\@uclcnotmath}{\@nonchangecase\ensuremath}{%
-      \@nonchangecase\ensuremath\tud@x@textcase@uclcnotmath%
-    }{}{\tud@patch@wrn{@uclcnotmath}}%
-  }%
-\fi
-\TUD@deprecated@cs{NoCaseChange}{@firstofone}
+\renewcommand*\@pnumwidth{2.1em}
+\renewcommand*\@tocrmarg{3.1em}
 %    \end{macrocode}
-% \end{macro}^^A \tud@x@textcase@uclcnotmath
-% \end{macro}^^A \@uclcnotmath
+% \end{macro}^^A \@tocrmarg
+% \end{macro}^^A \@pnumwidth
+%
+% \begin{macro}{\textsbn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbnfont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textsbi}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\sbifont}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{macro}{\textttit}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% \begin{macro}{\ttitfont}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% Kombinierte Auszeichnungsbefehle für Text.
+%    \begin{macrocode}
+\newcommand*\textsbn{}
+\newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
+\DeclareTextFontCommand\textsbn{\sbnfont}
+\newcommand*\textsbi{}
+\newrobustcmd*\sbifont{\sffamily\bfseries\itshape}
+\DeclareTextFontCommand\textsbi{\sbifont}
+\newcommand*\textttit{}
+\newrobustcmd*\ttitfont{\ttfamily\itshape}
+\DeclareTextFontCommand\textttit{\ttitfont}
+%    \end{macrocode}
+% \end{macro}^^A \ttitfont
+% \end{macro}^^A \textttit
+% \end{macro}^^A \sbifont
+% \end{macro}^^A \textsbi
+% \end{macro}^^A \sbnfont
+% \end{macro}^^A \textsbn
+%
+% \subsubsection{Logisches Markup}
+%
+% \begin{macro}{\tud@english}
+% Hiermit wird der Argumentsinhalt mit englischen Trennungsmustern gesetzt,
+% falls die Sprache geladen wurde.
+%    \begin{macrocode}
+\newcommand*\tud@english[1]{%
+  \iflanguageloaded{english}{\foreignlanguage{english}{#1}}{#1}%
+}
+\AfterPackage*{babel}{%
+  \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@english
+% \begin{macro}{\KOMAScript}
+% \begin{macro}{\TUDScript}
+% \begin{macro}{\vTUDScript}
+% \begin{macro}{\vKOMAScript}
+% Für die robuste Verwendung im Text.
+%    \begin{macrocode}
+\kernel@make@fragile\KOMAScript
+\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
+\robustify\KOMAScript
+\robustify\TUDScript
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\KOMAScript{KOMA-Script{}}%
+    \def\TUDScript{TUD-Script{}}%
+  }%
+}
+%    \end{macrocode}
+% Diese Befehle geben in der Dokumentation die aktuelle Version von \TUDScript
+% sowie die mindestens notwendige Version von \KOMAScript{} aus.
+%    \begin{macrocode}
+\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
+\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
+%    \end{macrocode}
+% \end{macro}^^A \vKOMAScript
+% \end{macro}^^A \vTUDScript
+% \end{macro}^^A \TUDScript
+% \end{macro}^^A \KOMAScript
+% \begin{macro}{\CD}
+% \begin{macro}{\CDs}
+% \begin{macro}{\TUD}
+% \begin{macro}{\TnUD}
+% \begin{macro}{\TUDCD}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\TUDCDs}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\TUDForum}
+% \changes{v2.06o}{2022/08/04}{neu}^^A
+% \begin{macro}{\DDC}
+% Diese Befehle stellen regelmäßig in der Quelltextdokumentatuion und im 
+% Handbuch genutzte Textbausteine bereit. Dazu wird der Befehl \cs{xspace} aus 
+% dem \pkg{xspace}-Paket genutzt.
+%    \begin{macrocode}
+\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
+\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
+\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
+\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
+\newrobustcmd*\TUDForum{\mbox{T\kern.05em U\kern.05em D-\LaTeX-Forum}\xspace}
+\newrobustcmd*\DDC{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\CD{Corporate Design{}}%
+    \def\CDs{Corporate Designs{}}%
+    \def\TUD{Technische Universit\"at Dresden{}}%
+    \def\TnUD{Technischen Universit\"at Dresden{}}%
+    \def\TUDForum{TUD-LaTeX-Forum{}}%
+    \def\DDC{DRESDEN-concept{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \DDC
+% \end{macro}^^A \TUDForum
+% \end{macro}^^A \TUDCDs
+% \end{macro}^^A \TUDCD
+% \end{macro}^^A \TnUD
+% \end{macro}^^A \TUD
+% \end{macro}^^A \CDs
+% \end{macro}^^A \CD
+%
+% \begin{macro}{\OpenSans}
+% \changes{v2.06}{2018/07/02}{neu}^^A
+% \begin{macro}{\Univers}
+% \begin{macro}{\DIN}
+% Für die Nennung der Schriften spezielle Markos bereitgestellt.
+%    \begin{macrocode}
+\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace Sans}\xspace}
+\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
+\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace Bold}\xspace}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\OpenSans{Open Sans{}}%
+    \def\Univers{Univers{}}%
+    \def\DIN{DIN Bold{}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \DIN
+% \end{macro}^^A \Univers
+% \end{macro}^^A \OpenSans
+%
+% \begin{macro}{\GitHubBase}
+% Angabe der URL des verwendeten GitHub-Repository. Aktuell nicht implementiert.
+%    \begin{macrocode}
+\newcommand*\GitHubBase[1]{}
+%    \end{macrocode}
+% \end{macro}^^A \GitHubBase
+% \begin{macro}{\GitHubRepo}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. 
+%    \begin{macrocode}
+\NewDocumentCommand\GitHubRepo{!s !t' !O{releases} !D(){tud-cd/tudscr} !d<>}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \def\@tempa{https://github.com/#4/}%
+  \edef\@tempa{{\@tempa\IfValueTF{#5}{issues/#5}{#3}}}%
+  \addto@hook@expandafter\toks@{\@tempa}%
+  \IfBooleanF{#2}{%
+    \addto@hook\toks@{{\tud@english{GitHub-Repository~\textsbn{#4}}}}%
+  }%
+  \the\toks@\xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \GitHubRepo
+% \begin{macro}{\Download}
+% \changes{v2.05g}{2016/11/08}{neu}^^A
+% Der Befehl für die Angabe von direkten Downloadlinks.
+%    \begin{macrocode}
+%<*manual>
+\newcommand*\Download[1]{%
+  https://github.com/tud-cd/tudscr/releases/download/#1%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \Download
+% \begin{macro}{\CTAN}
+% \changes{v2.05}{2015/11/22}{neu}^^A
+%    \begin{macrocode}
+\NewDocumentCommand\CTAN{!s !o !g}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
+  \addto@hook\toks@{%
+    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
+  }%
+  \the\toks@\xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \CTAN
+% \begin{macro}{\Forum}
+% Der Befehl für die Ausgabe eines Links zum \TUDForum. Das optionale Argument 
+% in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
+% verlinken.
+%    \begin{macrocode}
+\NewDocumentCommand\Forum{!s !t' !O{\TUDForum} !d<>}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \def\@tempa{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  \edef\@tempa{{\@tempa\IfValueT{#4}{viewtopic.php?t=#4}}}%
+  \addto@hook@expandafter\toks@{\@tempa}%
+  \IfBooleanF{#2}{\addto@hook\toks@{{#3}}}%
+  \the\toks@\xspace%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Forum
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Falls irgendetwas besonders hervorgehoben werden sollte.
+%    \begin{macrocode}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Attention
+% \begin{macro}{\TUDScriptContactTitle}
+% \changes{v2.07}{2019/09/26}{neu}^^A
+% Die Angabe der E-Mail-Adresse auf dem Titel innerhalb von \cs{author}.
+%    \begin{macrocode}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef{\emailaddress}{%
+    \qquad\expandafter\mailto\expandafter{\TUDScriptContact}%
+  }{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{\let\TUDScriptContactTitle\relax}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUDScriptContactTitle
 %
 % \iffalse
 %</body>
+%</manual|doc>
 % \fi
 %
 % \PrintBackMatter

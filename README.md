@@ -2,9 +2,9 @@
  TUD-Script &ndash; Corporate Design of Technische Universität Dresden
 ----------------------------------------------------------------------------
 
- Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+ Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 
- tudscr 2021/07/15 v2.06n
+ tudscr 2022/08/09 v2.06o
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later.<br>
@@ -58,6 +58,16 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06o** (2022/08/09)
++ Schriftstärke im Mathematikmodus wird passend zu den Einstellungen für den 
+  Fließtext (`cdfont=light/heavy/normalbold/ultrabold`) gewählt
++ Kombination `cd=true` und `cdfont=false` verwendet Open Sans in Überschriften
++ `relspacing=true` Schriftgröße hat stärkeren Einfluss, unsauberer Übergang zu
+  nicht vordefinierten Zwischengrößen behoben
++ **tudscrposter** Umgebungen `figurehere` und `tablehere`
++ Verwendung der Symbole `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
+  `\textdownarrow` sowie `\textlangle` und `\textrangle` aus Paket **iwona**
 
 **v2.06n** (2021/07/15)
 + Fix für **siunitx**
@@ -283,6 +293,15 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06o** (2022/08/09)
++ font face in math mode matches text mode settings 
+  (`cdfont=light/heavy/normalbold/ultrabold`)
++ combination `cd=true` and `cdfont=false` uses Open Sans in headings
++ `relspacing=true` depends on selected font size
++ **tudscrposter** environments `figurehere` und `tablehere`
++ symbols for `\textleftarrow`, `\textrightarrow`, `\textuparrow`,
+  `\textdownarrow` as well as `\textlangle` and `\textrangle` from **iwona**
 
 **v2.06n** (2021/07/15)
 + bug fix for **siunitx**
