@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-title.dtx}[2020/06/25]
+\ProvidesFile{tudscr-title.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -45,10 +45,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -61,9 +62,11 @@
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 % \changes{v2.05}{2015/07/13}{Titel für Poster}^^A
 %
+%
+%
 % \section{Titelei für die \TUDScript-Klassen}
 %
-% Zusätzlich zu den \KOMAScript-Varianten werde für die \TUDScript-Klassen
+% Ergänzend zu den \KOMAScript-Varianten werden für die \TUDScript-Klassen
 % spezielle, im \TUDCD gehaltene Ausführungen von Titelseite und Titelkopf
 % bereitgestellt. Zusätzlich gibt es auch eine Umschlagsseite (Cover), welche
 % in beiden Gestaltungsvarianten genutzt werden kann.
@@ -72,8 +75,6 @@
 % eine Version mit leichtem Farbeinsatz und eine durchweg farbige Version im
 % \TUDCD bereitgestellt. Dabei wird auch das Aussehen und die Position des
 % Titels analog zu den Überschriften auf Teile- und Kapitelseiten festgelegt.
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*class&body>
@@ -128,11 +129,9 @@
 % Warnung ausgegeben.
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
-\DefineFamilyKey{KOMA}{titlepage}[true]{%
-  \TUD@set@numkey{titlepage}{@tempa}{\TUD@bool@numkey,{firstiscover}{2}}{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
-  \fi%
+\DefineFamilyKey{KOMA}{titlepage}{%
+  \FamilyKeyStateUnknownValue%
+  \AtEndOfFamilyOptions{\tud@titlepage@deactivate}%
 }
 \newcommand*\tud@titlepage@deactivate{%
   \if@titlepage%
@@ -230,6 +229,10 @@
 \newcommand*\tud@title@pagenumber{}
 \let\tud@title@pagenumber\relax
 \newcommand*\tud@maketitle[1][]{%
+%<*book|report|article>
+  \TUD@deprecated@length\pageheadingsvskip%
+  \TUD@deprecated@length\headingsvskip%
+%</book|report|article>
   \begingroup%
     \cleardoublepage%
 %    \end{macrocode}
@@ -252,7 +255,9 @@
         \tud@cs@use{maketitle}[\tud@title@pagenumber]%
       \fi%
       \tud@if@tudheadings{\currentpagestyle}{%
-        \Ifstr{\titlepagestyle}{empty}{\thispagestyle{empty.tudheadings}}{}%
+        \tud@if@strequal{\titlepagestyle}{empty}%
+          {\thispagestyle{empty.tudheadings}}%
+          {}%
       }{}%
 %    \end{macrocode}
 % Für die \TUDScript-Klassen gibt es für doe Titleseite sowie den Titelkopf 
@@ -463,9 +468,9 @@
 % Das ganze Layout wird vertikal so verschoben, dass der Titel auf der gleichen
 % Höhe steht wie die Überschriften auf Teil- und Kapitelseiten.
 %    \begin{macrocode}
-    \tud@cd@headstartvskip%
-    \TUD@deprecated@length{\pageheadingsvskip}%
-    \vspace*{\tud@pageheadingsvskip@dim}%
+    \vspace*{-\baselineskip}%
+    \tud@cd@headstart@vskip%
+    \vspace*{\dimexpr\tud@pageheadingsvskip@dim\relax}%
     \tud@cd@vphantom%
     \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
 %    \end{macrocode}
@@ -488,8 +493,7 @@
 % allerdings etwas kleiner.
 %    \begin{macrocode}
       \ifx\@subtitle\@empty\else%
-        {\usekomafont{partnumber}{\nobreak\tud@sec@strut}}%
-        {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+        {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
       \fi%
       \vskip\glueexpr\bigskipamount*2\relax%
 %    \end{macrocode}
@@ -534,7 +538,7 @@
             \def\@tempc{%
               \@graduation%
               \ifx\@graduationabbreviation\@empty\else%
-                \nobreakspace\@graduationabbreviation%
+                \nobreakspace(\@graduationabbreviation)%
               \fi%
             }%
             {\usekomafont{titlepage}{\graduationtext\par}}%
@@ -547,6 +551,7 @@
       \fi%
 %    \end{macrocode}
 % \ToDo{Befehl zum Angeben optionaler Inhalte, bspw. ein Bild}[v2.08]
+% \ToDo{...othername als Liste für mehr als zwei Angaben}[v2.08]
 % Wenn Betreuer angegeben wurden, dann werden diese auf dem Titel ausgeben. Um
 % diese Titelseite auch für Dissertationen verwenden zu können, ist ein Feld 
 % für Gutachter vorgesehen. Außerdem wird für Promotionsschriften ein Feld für
@@ -569,13 +574,13 @@
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
-            \ifxblank{\datetext}{}{\datetext\tud@title@delimiter}%
+            \tud@if@strblank{\datetext}{}{\datetext\tud@title@delimiter}%
             {\usekomafont{date}{\tud@date@print\par}}%
 %    \end{macrocode}
 % Zusätzlich kann noch ein Datum der mündlichen Verteidigung angegeben werden.
 %    \begin{macrocode}
             \ifx\@defensedate\@empty\else%
-              \ifxblank{\defensedatetext}{}{%
+              \tud@if@strblank{\defensedatetext}{}{%
                 \defensedatetext\tud@title@delimiter%
               }%
               {\usekomafont{date}{\@defensedate\par}}%
@@ -726,7 +731,9 @@
 \newcommand*\tud@maketitle@inpage{%
   \renewcommand*\tud@title@fontcolor{}%
   \ifcase\tud@cd@title@num\relax\or\else% *color
-    \Ifstr{\tud@pagecolor}{HKS41}{}{\renewcommand*\tud@title@fontcolor{HKS41}}%
+    \tud@if@strequal{\tud@pagecolor}{HKS41}%
+      {}%
+      {\renewcommand*\tud@title@fontcolor{HKS41}}%
   \fi%
   \par%
   \ifx\tud@title@pagenumber\relax\else%
@@ -778,10 +785,10 @@
 %    \begin{macrocode}
 \newcommand*\tud@maketitle@@inpage{%
   \global\@topnum=\z@%
-  \tud@cd@headstartvskip%
+  \vspace*{-\baselineskip}%
+  \tud@cd@headstart@vskip%
 %<*book|report|article>
-  \TUD@deprecated@length{\headingsvskip}%
-  \vspace*{\tud@headingsvskip@dim}%
+  \vspace*{\dimexpr\tud@headingsvskip@dim\relax}%
   \tud@cd@vphantom%
 %</book|report|article>
   \setparsizes{\z@}{\z@}{\z@\@plus1fil}\par@updaterelative%
@@ -810,15 +817,14 @@
 %    \begin{macrocode}
     {\usekomafont{title}{\tud@title@format{\@title}\par}}%
     \ifx\@subtitle\@empty\else%
-      \vskip 1ex\@plus.5ex\@minus.5ex%
-      {\usekomafont{subtitle}{\tud@title@format{\@subtitle}\par}}%
+      {\usekomafont{subtitle}{\tud@title@format[partnumber]{\@subtitle}\par}}%
     \fi%
     \vskip 2ex\@plus1ex\@minus1ex%
 %    \end{macrocode}
 % Ausgabe eines Autors oder mehrerer Autoren ggf. mit Zusatzinformationen.
 %    \begin{macrocode}
 %<*book|report|article>
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
     \let\tud@split@author@do\tud@split@author@title%
     \tud@multiple@split{@author}\par%
 %    \end{macrocode}
@@ -848,14 +854,10 @@
 %    \end{macrocode}
 % Am Ende wird noch etwas vertikaler Abstand eingefügt.
 %    \begin{macrocode}
-    \vskip\glueexpr\bigskipamount*2\relax%
+    \vskip\bigskipamount%
 %</book|report|article>
     \ifnum\col@number>\@ne\relax%
-      \ifdefvoid{\multicolsep}{}{%
-        \ifdeflength{\multicolsep}{\vspace{-\multicolsep}}{%
-          \ifdefdimen{\multicolsep}{\vspace{-\multicolsep}}{}%
-        }%
-      }%
+      \tud@if@lengthregister{\multicolsep}{\vspace{-\multicolsep}}{}%
     \fi%
 %    \end{macrocode}
 % Wird das \DDC-Logo im Kompatibilitätsmodus für die Version~v2.02 gesetzt, 
@@ -883,20 +885,16 @@
 \newcommand*\tud@maketitle@head{%
   \setbox\z@\vbox{%
     \ifx\@titlehead\@empty\else%
-      {\usekomafont{titlehead}{%
-        \begin{minipage}[t]{\textwidth}%
-          \@titlehead\tud@sec@strut%
-        \end{minipage}%
-      }}%
+      \begin{minipage}[t]{\textwidth}%
+        \usekomafont{titlehead}{\@titlehead\strut\par}%
+      \end{minipage}%
     \fi%
 %<*book|report|article>
     \tud@thesis@tosubject%
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
-      {\usekomafont{subject}{%
-        \@subject\tud@sec@strut%
-      }}%
+      {\usekomafont{subject}{\tud@sec@format[partnumber]{\@subject}}}%
     \fi%
   }%
 %    \end{macrocode}
@@ -906,13 +904,13 @@
   \tud@setdim\@tempdima{\ht\z@+\dp\z@}%
   \ifdim\@tempdima>\z@\relax%
 %<*book|report|article>
-    \vskip\glueexpr-\@tempdima-\p@-\medskipamount\relax%
+    \vskip\dimexpr-\@tempdima-\p@-1\medskipamount\relax%
 %</book|report|article>
     \usebox\z@\par\medskip%
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@maketitle@inpage
+% \end{macro}^^A \tud@maketitle@head
 %
 % \subsubsection{Hilfsmakros für die Ausgabe}
 %
@@ -922,10 +920,10 @@
 % der Titelseite soll sichergestellt werden, dass der Inhalt selbst nicht in
 % Majuskeln gesetzt wird.
 %    \begin{macrocode}
-\newcommand*\tud@title@format[1]{%
+\newcommand*\tud@title@format[2][]{%
   \begingroup%
     \let\\\newline%
-    \tud@sec@format{#1}%
+    \tud@sec@format[{#1}]{#2}%
   \endgroup%
 }
 %    \end{macrocode}
@@ -958,6 +956,8 @@
 % Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
 % \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
 % und \cs{@advisor}.
+% \ToDo{generisch für beliebig viele Bezeichner (Drittgutachter)}[v2.07]
+% \ToDo{...othername als Liste?}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@title@names[1]{%
   \letcs\@tempa{@#1}%
@@ -1031,7 +1031,9 @@
     \ifx\@dateofbirth\@empty\else%
       \if@titlepage%
         \tud@newline@title%
-        \ifxblank{\dateofbirthtext}{}{\dateofbirthtext\tud@title@delimiter}%
+        \tud@if@strblank{\dateofbirthtext}%
+          {}%
+          {\dateofbirthtext\tud@title@delimiter}%
         \@dateofbirth%
         \ifx\@placeofbirth\@empty\else%
           \nobreakspace\placeofbirthtext\nobreakspace\@placeofbirth%
@@ -1041,15 +1043,17 @@
       \fi%
     \fi%
     \def\@tempc##1{%
-      \Ifstr{\csuse{@##1}}{}{}{%
+      \expandafter\ifx\csname @##1\endcsname\@empty\else%
         \if@titlepage%
           \tud@newline@title%
-          \Ifstr{\csuse{##1name}}{}{}{\csuse{##1name}\tud@title@delimiter}%
+          \tud@if@strblank{\csuse{##1name}}%
+            {}%
+            {\csuse{##1name}\tud@title@delimiter}%
           \csuse{@##1}%
         \else%
           \tud@title@wrn{##1}%
         \fi%
-      }%
+      \fi%
     }%
     \@tempc{course}%
     \@tempc{discipline}%
@@ -1142,7 +1146,7 @@
       \onecolumn#2\twocolumn%
     \else%
 %</book|report|article>
-      \tud@title@twocolumn{\tud@maketitle[{#1}]{#2}}%
+      \tud@title@twocolumn{\tud@maketitle[{#1}]#2}%
 %<*book|report|article>
     \fi%
 %</book|report|article>
@@ -1256,8 +1260,7 @@
 % \changes{v2.02}{2014/06/23}{Warnung für die Option \opt{titlepage} mit dem
 %   Wert \val{firstiscover}}^^A
 % \changes{v2.02}{2014/08/08}{ohne \CD verwendbar}^^A
-% \changes{v2.02}{2014/08/12}{Satzspiegel mit \cs{coverpage\dots{}margin}
-%   änderbar, falls CD-Layout deaktiviert}^^A
+% \changes{v2.02}{2014/08/12}{Satzspiegel ohne CD-Layout änderbar}^^A
 % \changes{v2.03}{2015/01/09}{Anpassungen für neue Satzspiegelerzeugung}^^A
 % \begin{parameter}{cdcover}
 % \changes{v2.03}{2015/01/12}{neu}^^A
@@ -1340,32 +1343,33 @@
 %    \end{macrocode}
 % Wird der Parameter \opt{cdgeometry} aktiviert, werden die Seitenränder wie 
 % durch das \CD vorgegeben eingestellt. Andernfalls entsprechen diese den 
-% Einstellungen des Satzspiegels und können mit \cs{coverpage\dots margin} 
+% Einstellungen des Satzspiegels und können mit |\coverpage|\meta{\dots}|margin|
 % durch den Anwender angepasst werden.
 %    \begin{macrocode}
     \if@tud@cdgeometry@cover%
 %    \end{macrocode}
 % Bei der Höhe des oberen Seitenrandes muss unterschieden werden, ob der
-% Satzspiegel im \CD oder aber im Buchblock erscheinen soll.
+% Satzspiegel im \CD oder aber im Buchblock erscheinen soll. Die Makros werden
+% von \KOMAScript via \cs{dimexpr} interpretiert.
 %    \begin{macrocode}
       \if@tud@coverpage%
         \def\coverpagetopmargin{%
-          \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
+          \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
         }%
       \else%
         \tud@if@v@lower{2.03}{%
-          \def\coverpagetopmargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
+          \def\coverpagetopmargin{\tud@dim@bothmargin/2}%
         }{%
           \def\coverpagetopmargin{\tud@dim@slimmargin}%
         }%
       \fi%
       \tud@if@v@lower{2.03}{%
-        \def\coverpagebottommargin{\dimexpr(\tud@dim@bothmargin)/2\relax}%
+        \def\coverpagebottommargin{\tud@dim@bothmargin/2}%
       }{%
         \def\coverpagebottommargin{\tud@dim@widemargin}%
       }%
-      \def\coverpageleftmargin{\dimexpr\tud@dim@widemargin}%
-      \def\coverpagerightmargin{\dimexpr\tud@dim@slimmargin}%
+      \def\coverpageleftmargin{\tud@dim@widemargin}%
+      \def\coverpagerightmargin{\tud@dim@slimmargin}%
     \fi%
     \if@tud@coverpage%
 %    \end{macrocode}
@@ -1382,12 +1386,12 @@
       }%
 %    \end{macrocode}
 % Linker und rechter Rand sowie die Textbreite werden identisch erzeugt. Für 
-% das Layout im \CD wurden die Seitenränder (\cs{coverpage\dots margin}) zuvor 
-% angepasst.
+% das Layout im \CD wurden die Seitenränder (|\coverpage|\meta{\dots}|margin|) 
+% zuvor angepasst.
 %    \begin{macrocode}
       \begingroup%
         \tud@cover@setmargins%
-        \tud@dim@areavskip=\z@%
+        \tud@setdim\tud@dim@areavskip{\z@}%
 %    \end{macrocode}
 % Die Ausgabe des Covers und ggf. das Wiederherstellen des Satzspiegels.
 %    \begin{macrocode}
@@ -1415,9 +1419,9 @@
 % Die einzelnen Parameter dienen zur Einstellung der Umschlagseite und
 % entsprechen~-- \prm{cdgeometry} ausgenommen~-- in ihrem Verhalten den
 % gleichnamigen Klassenoptionen. Der genannte Parameter kann eigentlich nur mit
-% booleschen Werten verwenet werden. Für einen benutzerdefinierten Satzspiegel 
-% der Umschlagseite müssen die \KOMAScript-Makros \cs{coverpage\dots{}margin} 
-% angepasst werden.
+% booleschen Werten verwendet werden. Für einen benutzerdefinierten Satzspiegel 
+% der Umschlagseite müssen die \KOMAScript-Makros
+% |\coverpage|\meta{\dots}|margin| angepasst werden.
 %    \begin{macrocode}
 \tud@locked@newbool{@tud@cdgeometry@cover}
 \TUD@parameter@family{cover}{%
@@ -1463,16 +1467,16 @@
 %    \begin{macrocode}
 \renewcommand*\coverpagetopmargin{%
   \if@tud@coverpage%
-    \dimexpr\tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep\relax%
+    \tud@dim@topmargin+\tud@dim@barheight+\tud@dim@headsep%
   \else%
-    \dimexpr\topmargin+1in\relax%
+    \topmargin+1in%
   \fi%
 }
 \renewcommand*\coverpagebottommargin{%
   \if@tud@coverpage%
     \tud@dim@widemargin%
   \else%
-    \dimexpr(\coverpagetopmargin)*2\relax%
+    \coverpagetopmargin*2%
   \fi%
 }
 %    \end{macrocode}
@@ -1553,6 +1557,6 @@
 %</class&body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput

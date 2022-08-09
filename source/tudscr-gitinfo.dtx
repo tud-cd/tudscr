@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -33,6 +33,7 @@
 % \selectlanguage{ngerman}
 %
 %
+%
 % \section{Versionsinformationen aus dem GitHub-Repository}
 %
 % Um sich das ganze Aktualisieren von irgendwelchen Versionangaben zu sparen, 
@@ -42,20 +43,18 @@
 % geschrieben und entweder während des Durchlaufs mit \app{docstrip} oder aber
 % beim Erzeugen der Doku mithilfe des Paketes \pkg{tudscr-gitinfo} ausgelesen.
 %
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
-%
 % \subsection{GitHub-Versionsinformationen für \app{docstrip}}
 %
 % \begin{macro}{\GitFileInfo}
-% \changes{v2.07}{2019/10/19}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\GitContainerFile}
-% \changes{v2.07}{2019/10/19}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\InputGitContainer}
-% \changes{v2.07}{2019/10/19}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % In \cs{GitContainerFile} wird der Name der Datei gespeichert, welche die 
 % Versionsinformationen für alle Quelldateien enthält. Diese definiert für alle 
 % relevanten Dateien Makros in der Form
-% \cs{\meta{Dateiname}-ver\{\meta{Datum} \meta{Zeit} \meta{Hash}\}}. Diese 
+% |\|\meta{Dateiname}|-ver{|\meta{Datum}| |\meta{Zeit}| |\meta{Hash}|}|. Diese 
 % Datei wird eingebunden, falls vorhanden sowie der Befehl \cs{GitFileInfo} für 
 % das Hinzufügen der Versionsinformationen für das Erzeugen der Zieldateien mit 
 % \app{docstrip} definiert.
@@ -103,7 +102,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-gitinfo.dtx}[2020/06/25]
+\ProvidesFile{tudscr-gitinfo.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -114,10 +113,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -146,13 +146,13 @@
 \fi
 %    \end{macrocode}
 % \begin{macro}{\GetFileInfo}
-% \changes{v2.07}{2019/10/19}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\tud@GetFileInfo}
-% \changes{v2.07}{2019/10/19}{neu}^^A
-% \begin{macro}{\tud@Get@FileInfo}
-% \changes{v2.07}{2019/10/19}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
+% \begin{macro}{\tud@@GetFileInfo}
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\tud@git@file@list}
-% \changes{v2.07}{2019/10/20}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % Der Befehl \cs{GetFileInfo} hat das gleiche Ziel wie der gleichnamige Befehl 
 % aus dem Paket \pkg{doc}. Allerdings werden vorliegende Versionsinformationen 
 % aus einem GitHub-Repository bevorzugt geladen. Das Lesen der Informationen, 
@@ -182,8 +182,8 @@
   \ifcsname\filename-ver\endcsname%
     \def\@tempa##1 ##2 ##3\@nil{%
       \def\filedate{##1}%
-      \def\fileversion{##2}%
-      \def\filerevision{<##3>}%
+      \let\fileversion\@empty%
+      \def\filerevision{##3}%
     }%
     \edef\@tempb{\csname\filename-ver\endcsname}%
     \expandafter\@tempa\@tempb\@nil%
@@ -195,22 +195,14 @@
 % Verhalten von \cs{GetFileInfo} zurückgeschaltet.
 %    \begin{macrocode}
     \PackageWarningNoLine{tudscr-gitinfo}{No git info found for \filename}%
-    \expandafter\tud@Get@FileInfo\expandafter{\filename}%
+    \expandafter\tud@@GetFileInfo\expandafter{\filename}%
   \fi%
 }
-\newcommand*\tud@Get@FileInfo[1]{%
-  \ifx\filedate\@undefinded%
-    \edef\filedate{?}%
-  \fi%
-  \ifx\fileversion\@undefinded%
-    \def\fileversion{?}%
-  \fi%
-  \ifx\filerevision\@undefinded%
-    \let\filerevision\@empty%
-  \fi%
-  \ifx\fileinfo\@undefinded%
-    \let\fileinfo\@empty%
-  \fi%
+\newcommand*\tud@@GetFileInfo[1]{%
+  \@ifundefined{filedate}{\def\filedate{?}}{}%
+  \@ifundefined{fileversion}{\def\fileversion{?}}{}%
+  \@ifundefined{filerevision}{\let\filerevision\@empty}{}%
+  \@ifundefined{fileinfo}{\let\fileinfo\@empty}{}%
 %    \end{macrocode}
 % Verbesserte Variante, um nicht \cs{relax?} in die Felder zu schreiben.
 %    \begin{macrocode}
@@ -237,19 +229,21 @@
 %    \end{macrocode}
 % Hiermit wird der Befehl \cs{GetFileInfo} ggf. wieder überschrieben.
 %    \begin{macrocode}
-\RequirePackage{scrlfile}
+\RequirePackage{scrlfile}[%
+%!TUD@KOMAVersion
+]
 \AfterPackage*{doc}{\def\GetFileInfo{\tud@GetFileInfo}}
 %    \end{macrocode}
 % \end{macro}^^A \tud@git@file@list
-% \end{macro}^^A \tud@Get@FileInfo
+% \end{macro}^^A \tud@@GetFileInfo
 % \end{macro}^^A \tud@GetFileInfo
 % \end{macro}^^A \GetFileInfo
 % \begin{macro}{\tud@git@log}
-% \changes{v2.07}{2019/10/20}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\tud@git@@log}
-% \changes{v2.07}{2019/10/20}{neu}^^A
+% \changes{v2.06o}{2022/08/09}{neu}^^A
 % Der Befehl \cs{tud@git@log} definiert für die im Argument angegebene Datei 
-% das Makro \cs{\meta{Dateiname}-ver} mit den Versionsinformationen, welche mit 
+% das Makro |\|\meta{Dateiname}|-ver| mit den Versionsinformationen, welche mit 
 % \cs{tud@git@@log} ausgelesen wurden. 
 %    \begin{macrocode}
 \RequirePackage{pdftexcmds}
@@ -277,7 +271,7 @@
 \newcommand*\tud@git@@log[1]{}
 \xdef\tud@git@@log#1{%
   \noexpand\@@input|"git log -1 %
-    --format='\@percentchar ad \@percentchar  h' %
+    --format='\@percentchar ad \@percentchar h' %
     --date=format:'\@percentchar Y/\@percentchar m/\@percentchar d %
       \@percentchar H:\@percentchar M:\@percentchar S' %
     -- #1" %
@@ -326,7 +320,7 @@
 % ausgelesen und anschließend mit \cs{ProvidesFile} gesetzt, wobei eine Warnung 
 % erzeugt wird, wenn für die Datei schon einmal \cs{ProvidesFile} mit einer 
 % anderen Angabe genutzt wurde. Die zu schreibende Angabe wird hierfür in 
-% \cs{@tempa} expandiert und mit \cs{ ver@\meta{Dateiname}} verglichen.
+% \cs{@tempa} expandiert und mit |\ ver@|\meta{Dateiname} verglichen.
 %    \begin{macrocode}
 \AtEndOfPackage{%
   \GetFileInfo{\jobname}%
@@ -353,6 +347,6 @@
 }
 %    \end{macrocode}
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput

@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-fonts.dtx}[2020/06/25]
+\ProvidesFile{tudscr-fonts.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -45,10 +45,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -66,7 +67,9 @@
 %   den Mathematiksatz verbessert}^^A
 % \changes{v2.04c}{2015/11/29}{Bugfix für \pkg{fontspec} bei fehlenden 
 %   Schriften}^^A
-% \changes{v2.07}{2019/09/10}{Mathematikschriftstärke passend zu Fließtext}^^A
+% \changes{v2.06o}{2022/08/01}{Mathematikschriftstärke passend zu Fließtext}^^A
+%
+%
 %
 % \section{Die Hausschrift der \TnUD}
 %
@@ -90,8 +93,6 @@
 ]
 %</package&identify>
 %    \end{macrocode}
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*option>
@@ -119,7 +120,7 @@
 % }
 %
 % Die Schriften des \TUDCDs werden standardmäßig durch die \TUDScript-Klassen 
-% verwendet. Für Dokumentklassen, welche nicht zum \TUDScript-Bundle gehören, 
+% verwendet. Für Dokumentklassen, welche nicht zum \TUDScript-Bundle gehören,
 % können diese über das Paket \pkg{tudscrfonts} geladen werden.
 %    \begin{macrocode}
 \PreventPackageFromLoading[%
@@ -137,7 +138,6 @@
 %
 % Sollte keine \KOMAScript-Klasse genutzt werden, wird zusätzlich das Paket
 % \pkg{scrextend} benötigt. 
-% \ToDo{kann es zum Ende der Präambel geladen werden? Doku!}[v2.07]
 %    \begin{macrocode}
 \ifundef{\KOMAClassName}{%
   \RequirePackage{scrextend}[%
@@ -153,9 +153,9 @@
 \@for\@tempa:={%
   tudbook,tudbeamer,tudfax,tudform,tudhaus,tudletter,tudposter,tudmathposter%
 }\do{%
-  \if@tempswa\else%
+  \if@tempswa\else
     \@ifclassloaded{\@tempa}{\@tempswatrue\let\@tempb\@tempa}{}%
-  \fi%
+  \fi
 }%
 \if@tempswa%
   \@ifpackageloaded{fix-tudscrfonts}{}{%
@@ -208,6 +208,7 @@
 % wird geprüft, ob diesem mit den entsprechenden Optionen das Bereitstellen der 
 % Mathematikschriften überlassen wurde. In diesem Fall wird eine entsprechende 
 % Warnung an \cs{tud@cdmath@wrn} angehängt.
+% \ToDo{\cs{IfPackageAtLeastTF} oder ganz raus}[v2.07]
 %    \begin{macrocode}
 \tud@newif\if@tud@x@fontspec@enabled
 \PassOptionsToPackage{no-math}{fontspec}
@@ -276,8 +277,10 @@
 % Das Paket \pkg{mweights} wird geladen, um unterschiedliche Schriftschnitte
 % für beispielsweise die TypeWriter-Schriften nutzen zu können.
 % \ToDo{Paket \pkg{mweights} wurde in Kernel integriert}[v2.07]%
+% \ToDo{an neues NFSS anpassen, \cs{DeclareFontSeriesDefault} nutzen}[v2.07]%
+% \ToDo{ist \cs{IfFontSeriesContextTF} irgendwo nötig?}[v2.07]%
 %    \begin{macrocode}
-\TUD@RecommendPackage{mweights}[2017/03/30]%
+\TUD@RecommendPackage{mweights}
 \tud@newif\if@tud@x@mweights@enabled
 \AfterPackage*{mweights}{\@tud@x@mweights@enabledtrue}
 %    \end{macrocode}
@@ -357,9 +360,9 @@
 % \begin{macro}{\if@tud@cdfont@db@exist}
 % \changes{v2.06}{2018/07/12}{neu}^^A
 % \begin{macro}{\if@tud@cdmath@fam@exist}
-% \changes{v2.07}{2019/11/06}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\if@tud@cdmath@db@exist}
-% \changes{v2.07}{2019/11/06}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@x@mathastext@enc}
 % \changes{v2.06a}{2019/07/09}{neu}^^A
 % Mit \cs{tud@cdfont@check} wird geprüft, ob die Schrift \OpenSans respektive 
@@ -564,7 +567,7 @@
       not found for `#1' encoding. \MessageBreak%
     }%
     \if@tud@x@fontspec@enabled%
-      \Ifstr{\encodingdefault}{#1}{%
+      \tud@if@strequal{#1}{\encodingdefault}{%
         \appto\tud@res@a{%
           It seems, you haven't installed the required\MessageBreak%
           OTF-font on your system. You should provide\MessageBreak%
@@ -582,7 +585,7 @@
       \fi%
       \@tud@res@swafalse%
       \@for\tud@res@c:=\tud@res@b\do{%
-        \Ifstr{\tud@res@c}{#1}{\@tud@res@swatrue}{}%
+        \tud@if@strequal{#1}{\tud@res@c}{\@tud@res@swatrue}{}%
       }%
 %    \end{macrocode}
 % Wird eine unterstützte Kodierung verwendet, müssen die Schriften installiert 
@@ -600,8 +603,8 @@
           . \MessageBreak%
         }%
       \else%
-        \Ifstr{\encodingdefault}{#1}{%
-          \Ifstr{TU}{#1}{%
+        \tud@if@strequal{#1}{\encodingdefault}{%
+          \tud@if@strequal{#1}{TU}{%
             \appto\tud@res@a{%
               You should either load package `fontspec'\MessageBreak%
               or %
@@ -1033,6 +1036,7 @@
   \RelaxFamilyKey{TUD}{fontsize}%
   \DefineFamilyMember{KOMA}%
   \DefineFamilyKey{KOMA}{fontsize}{%
+    \FamilyKeyStateUnknownValue%
 %<*class>
     \@tud@x@scr@fontsize@settrue%
     \ClassWarning{\TUD@Class@Name}%
@@ -1045,7 +1049,6 @@
       used as class option%
     }%
     \TUD@SpecialOptionAtDocument{tud@relspacing@set}%
-    \FamilyKeyStateProcessed%
   }%
 }
 %    \end{macrocode}
@@ -1053,14 +1056,13 @@
 % \end{option}^^A fontsize
 % \begin{option}{relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^A
-% \changes{v2.07}{2019/09/10}{stärkerer Einfluss der Schriftgröße}^^A
+% \changes{v2.06o}{2022/08/08}{stärkerer Einfluss der Schriftgröße}^^A
 % \begin{macro}{\if@tud@relspacing}
 % \changes{v2.05}{2015/12/17}{neu}^^
 % Die Option \opt{relspacing} setzt einige Abstände und Längen in Abhängigkeit 
 % der aktuellen Grundschriftgröße, wenn sie aktiviert wurde. Die verwendete 
 % Grundschriftgröße kann mit der \KOMAScript-Option \opt{fontsize} eingestellt
-% werden. Die Definiton der Längen wird durch das Makro \cs{tud@relspacing@set} 
-% vorgenommen.
+% werden. Die Längendefinition erfolgt durch das Makro \cs{tud@relspacing@set}.
 %    \begin{macrocode}
 \tud@newif\if@tud@relspacing
 \TUD@key{relspacing}[true]{%
@@ -1316,7 +1318,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@set{%
 %    \end{macrocode}
-% Die Standardwerte für die Schriftfamilien werden gesetzt.
+% Zunächst werden die Standardwerte für die Schriftfamilien gesetzt.
 %    \begin{macrocode}
   \renewcommand*\rmdefault{\sfdefault}%
   \renewcommand*\updefault{n}%
@@ -1418,13 +1420,13 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdfont@declare@symb} übergebenen Letter für Auswahlbefehle
-% erhalten \cs{tud@cdfont@symbol@\dots} als Präfix. Da so der ursprüngliche 
+% erhalten |\tud@cdfont@symbol@...| als Präfix. Da so der ursprüngliche
 % Befehlsname verändert wird, würde dieser Befehlsname auch verwendet werden, 
 % wenn dieser in einem fragilen Kontext genutzt wird (siehe \cs{@changed@cmd}).
 % Deshalb wird im Anschluss der neue Befehl selbst robust definiert, damit 
 % eine spätere Expansion nach der Zuweisung mit \cs{tud@cs@letltx} nicht in 
-% \cs{tud@cdfont@symbol@\meta{symbol}} resultiert sondern in jedem Fall 
-% \cs{\meta{symbol}} erhalen bleibt.
+% |\tud@cdfont@symbol@|\meta{Letter} resultiert sondern in jedem Fall 
+% |\|\meta{Letter} erhalten bleibt.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareTextSymbol[4]{%
   \begingroup%
@@ -1492,6 +1494,7 @@
 % \begin{macro}{\tud@cdfont@declare@textsymb}
 % \changes{v2.06g}{2020/06/18}{neu}^^A
 % Die Definition der Textsymbole für die \val{TS1}-Kodierung.
+% \ToDo{weitere Symbole (\cs{textohm} etc.) der Open Sans hinzufügen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cdfont@declare@textsymb{%
   \tud@cdfont@declare@symb{textleftarrow}{TS1}{iwona}{24}%
@@ -1507,7 +1510,7 @@
 % \changes{v2.04}{2015/02/17}{neu}^^A
 % \begin{macro}{\tud@relspacing@@set}
 % \changes{v2.04}{2015/03/27}{neu}^^A
-% \changes{v2.07}{2019/09/10}{\cs{abovedisplayskip} als Referenz}^^A
+% \changes{v2.06o}{2022/08/08}{\cs{abovedisplayskip} als Referenz}^^A
 % \begin{macro}{\smallskipamount}
 % \changes{v2.04}{2015/04/24}{Wert abhängig von der Schriftgröße}^^A
 % \begin{macro}{\medskipamount}
@@ -1549,28 +1552,11 @@
 % Hiermit erfolgt das eigentliche Setzen der Abstände.
 %    \begin{macrocode}
 \newcommand*\tud@relspacing@@set{%
-  \tud@if@v@lower{2.07}{%
+  \tud@if@v@lower{2.06}{%
     \bigskipamount=\partopsep%
     \multiply\bigskipamount by 4%
   }{%
     \begingroup%
-%    \end{macrocode}
-% Das war ein Experiment, um anstelle von \cs{abovedisplayskip} lieber direkt
-% die ganzahlig gerundete Schriftgröße (\cs{f@size}) zu verwenden\dots
-%    \begin{macrocode}
-%^^A      \def\tud@res@a##1.##2.##3\@nil{%
-%^^A        \def\tud@res@a####1.####2####3####4\@nil{%
-%^^A          \@tempcnta=####1####2####3%
-%^^A          \advance\@tempcnta by 50%
-%^^A          \divide\@tempcnta by 100%
-%^^A          \edef\tud@res@a{\the\@tempcnta}%
-%^^A        }%
-%^^A        \tud@res@a##1.##200\@nil%
-%^^A      }%
-%^^A      \expandafter\tud@res@a\f@size.00.\@nil%
-%    \end{macrocode}
-% \dots was jedoch verworfen wurde.
-%    \begin{macrocode}
       \tud@setdim\@tempdima{\dimexpr\abovedisplayskip\relax}%
       \tud@setdim\@tempdimb{\@tempdima/3}%
       \edef\tud@res@a{%
@@ -1586,7 +1572,7 @@
   \smallskipamount=\bigskipamount%
   \divide\smallskipamount by 4%
   \tud@if@lengthregister{\abovecaptionskip}{%
-    \tud@setdim\abovecaptionskip{\dimexpr\bigskipamount\relax*5/6}%
+    \tud@setdim\abovecaptionskip{1\bigskipamount*5/6}%
   }{}%
   \tud@if@lengthregister{\belowcaptionskip}{%
     \tud@setdim\belowcaptionskip{\z@}%
@@ -1605,9 +1591,9 @@
 % \begin{macro}{\tud@cdfont@init}
 % \changes{v2.04}{2015/03/10}{neu}^^A
 % \begin{macro}{\tud@cdfont@@init}
-% \changes{v2.07}{2020/05/12}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@cdfont@@@init}
-% \changes{v2.07}{2020/05/12}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\cdfontln}
 % \changes{v2.06}{2018/06/29}{neu}^^A
 % \begin{macro}{\cdfontrn}
@@ -2024,8 +2010,7 @@
 % \cs{tudfont}, mit welchem die Schriften des \TUDCDs auch mit Klarnamen
 % ausgewählt werden können. Zur Kompatibilität wird der Befehl \cs{cdfont} 
 % definiert, welcher die gleiche Funktionalität bereitstellt. Zusätzlich wird 
-% der Befehl \cs{textcd} bereitgestellt, der die Auswahl der Schrift als 
-% Textbefehl ermöglicht.
+% mit \cs{textcd} die Auswahl der Schrift über einen Textbefehl ermöglicht.
 %    \begin{macrocode}
 \newcommand*\cdfont[1]{%
   \tud@cdfont@get{#1}%
@@ -2045,7 +2030,7 @@
   \renewcommand*\cdfont[1]{%
     \tud@cdfont@get{#1}%
     \ifx\@tempc\relax\else%
-      \Ifstr{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
+      \tud@if@strequal{\@tempc}{dinbn}{\dinbn}{\csuse{univ\@tempc}}%
     \fi%
   }%
   \renewcommand*\textcd[2]{%
@@ -2053,29 +2038,29 @@
     \ifx\@tempc\relax%
       \textsf{#2}%
     \else%
-      \Ifstr{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
+      \tud@if@strequal{\@tempc}{dinbn}{\textdbn{#2}}{\csuse{textu\@tempc}{#2}}%
     \fi%
   }%
 \fi
 \newcommand*\tud@cdfont@get[1]{%
   \tud@cdfont@trim\@tempa{#1}%
-  \Ifstr{\@tempa}{l}{\def\@tempc{ln}}{%
-  \Ifstr{\@tempa}{}{\def\@tempc{rn}}{%
-  \Ifstr{\@tempa}{r}{\def\@tempc{rn}}{%
-  \Ifstr{\@tempa}{s}{\def\@tempc{sn}}{%
-  \Ifstr{\@tempa}{b}{\def\@tempc{bn}}{%
-  \Ifstr{\@tempa}{x}{\def\@tempc{xn}}{%
-  \Ifstr{\@tempa}{li}{\def\@tempc{li}}{%
-  \Ifstr{\@tempa}{il}{\def\@tempc{li}}{%
-  \Ifstr{\@tempa}{i}{\def\@tempc{ri}}{%
-  \Ifstr{\@tempa}{ri}{\def\@tempc{ri}}{%
-  \Ifstr{\@tempa}{ir}{\def\@tempc{ri}}{%
-  \Ifstr{\@tempa}{si}{\def\@tempc{si}}{%
-  \Ifstr{\@tempa}{is}{\def\@tempc{si}}{%
-  \Ifstr{\@tempa}{bi}{\def\@tempc{bi}}{%
-  \Ifstr{\@tempa}{ib}{\def\@tempc{bi}}{%
-  \Ifstr{\@tempa}{xi}{\def\@tempc{xi}}{%
-  \Ifstr{\@tempa}{ix}{\def\@tempc{xi}}{%
+  \tud@if@strequal{\@tempa}{l} {\def\@tempc{ln}}{%
+  \tud@if@strequal{\@tempa}{}  {\def\@tempc{rn}}{%
+  \tud@if@strequal{\@tempa}{r} {\def\@tempc{rn}}{%
+  \tud@if@strequal{\@tempa}{s} {\def\@tempc{sn}}{%
+  \tud@if@strequal{\@tempa}{b} {\def\@tempc{bn}}{%
+  \tud@if@strequal{\@tempa}{x} {\def\@tempc{xn}}{%
+  \tud@if@strequal{\@tempa}{li}{\def\@tempc{li}}{%
+  \tud@if@strequal{\@tempa}{il}{\def\@tempc{li}}{%
+  \tud@if@strequal{\@tempa}{i} {\def\@tempc{ri}}{%
+  \tud@if@strequal{\@tempa}{ri}{\def\@tempc{ri}}{%
+  \tud@if@strequal{\@tempa}{ir}{\def\@tempc{ri}}{%
+  \tud@if@strequal{\@tempa}{si}{\def\@tempc{si}}{%
+  \tud@if@strequal{\@tempa}{is}{\def\@tempc{si}}{%
+  \tud@if@strequal{\@tempa}{bi}{\def\@tempc{bi}}{%
+  \tud@if@strequal{\@tempa}{ib}{\def\@tempc{bi}}{%
+  \tud@if@strequal{\@tempa}{xi}{\def\@tempc{xi}}{%
+  \tud@if@strequal{\@tempa}{ix}{\def\@tempc{xi}}{%
     \let\@tempc\relax%
 %<*class>
     \ClassWarning{\TUD@Class@Name}%
@@ -2089,20 +2074,20 @@
 \if@tud@cdoldfont@active
   \renewcommand*\tud@cdfont@get[1]{%
     \tud@cdfont@trim\@tempa{#1}%
-    \Ifstr{\@tempa}{45}{\def\@tempc{ln}}{%
-    \Ifstr{\@tempa}{55}{\def\@tempc{rn}}{%
-    \Ifstr{\@tempa}{65}{\def\@tempc{bn}}{%
-    \Ifstr{\@tempa}{75}{\def\@tempc{xn}}{%
-    \Ifstr{\@tempa}{45oblique}{\def\@tempc{ls}}{%
-    \Ifstr{\@tempa}{55oblique}{\def\@tempc{rs}}{%
-    \Ifstr{\@tempa}{65oblique}{\def\@tempc{bs}}{%
-    \Ifstr{\@tempa}{75oblique}{\def\@tempc{xs}}{%
-    \Ifstr{\@tempa}{oblique45}{\def\@tempc{ls}}{%
-    \Ifstr{\@tempa}{oblique55}{\def\@tempc{rs}}{%
-    \Ifstr{\@tempa}{oblique65}{\def\@tempc{bs}}{%
-    \Ifstr{\@tempa}{oblique75}{\def\@tempc{xs}}{%
-    \Ifstr{\@tempa}{din}{\def\@tempc{dinbn}}{%
-    \Ifstr{\@tempa}{din65}{\def\@tempc{dinbn}}{%
+    \tud@if@strequal{\@tempa}{45}       {\def\@tempc{ln}}{%
+    \tud@if@strequal{\@tempa}{55}       {\def\@tempc{rn}}{%
+    \tud@if@strequal{\@tempa}{65}       {\def\@tempc{bn}}{%
+    \tud@if@strequal{\@tempa}{75}       {\def\@tempc{xn}}{%
+    \tud@if@strequal{\@tempa}{45oblique}{\def\@tempc{ls}}{%
+    \tud@if@strequal{\@tempa}{55oblique}{\def\@tempc{rs}}{%
+    \tud@if@strequal{\@tempa}{65oblique}{\def\@tempc{bs}}{%
+    \tud@if@strequal{\@tempa}{75oblique}{\def\@tempc{xs}}{%
+    \tud@if@strequal{\@tempa}{oblique45}{\def\@tempc{ls}}{%
+    \tud@if@strequal{\@tempa}{oblique55}{\def\@tempc{rs}}{%
+    \tud@if@strequal{\@tempa}{oblique65}{\def\@tempc{bs}}{%
+    \tud@if@strequal{\@tempa}{oblique75}{\def\@tempc{xs}}{%
+    \tud@if@strequal{\@tempa}{din}      {\def\@tempc{dinbn}}{%
+    \tud@if@strequal{\@tempa}{din65}    {\def\@tempc{dinbn}}{%
       \let\@tempc\relax%
 %<*class>
       \ClassWarning{\TUD@Class@Name}%
@@ -2115,8 +2100,7 @@
   }%
 \fi
 \newcommand*\tud@cdfont@trim[2]{%
-  \protected@edef\@tempa{\trim@spaces{#2}}%
-  \tud@lowerstring{\@tempa}{\@tempa}%
+  \tud@strlowercase\@tempa{\trim@spaces{#2}}%
   \tud@cdfont@@trim{ }{}%
   \tud@cdfont@@trim{-}{}%
   \tud@cdfont@@trim{_}{}%
@@ -2137,8 +2121,7 @@
 }
 \if@tud@cdoldfont@active
   \renewcommand*\tud@cdfont@trim[2]{%
-    \protected@edef\@tempa{\trim@spaces{#2}}%
-    \tud@lowerstring{\@tempa}{\@tempa}%
+    \tud@strlowercase\@tempa{\trim@spaces{#2}}%
     \tud@cdfont@@trim{ }{}%
     \tud@cdfont@@trim{-}{}%
     \tud@cdfont@@trim{_}{}%
@@ -2243,7 +2226,7 @@
     }%
     \TUDoptions{ttfont=lmodern}%
   \fi\fi%
-  \ifcase\tud@ttfont@num\relax%
+  \ifcase\tud@ttfont@num\relax% false
     \let\tud@ttfont@fam\ttdefault%
   \or% roboto
     \let\tud@ttfont@fam\tud@ttfont@rb%
@@ -2310,7 +2293,7 @@
 % \end{macro}^^A \tud@ttfont@set
 % \begin{macro}{\tud@ttfont@init}
 % \changes{v2.06}{2018/07/12}{neu}^^A
-% \changes{v2.07}{2020/01/22}{Anpassungen für \val{TS1}-Kodierung; wird immer 
+% \changes{v2.06o}{2022/08/01}{Anpassungen für \val{TS1}-Kodierung; wird immer 
 %   definiert und \cs{DeclareEncodingSubset} wird verwendet}^^A
 % \begin{macro}{\tud@ttfont@rb@scale}
 % \changes{v2.06}{2018/08/30}{neu}^^A
@@ -2371,7 +2354,7 @@
       \edef\tud@ttfont@rb@scale{s*[\tud@ttfont@rb@scale]}%
       \begingroup%
         \def\tud@res@c##1##2{%
-          \tud@lowerstring\tud@res@a{##1}%
+          \tud@strlowercase\tud@res@a{##1}%
           \DeclareFontFamily{##1}{\tud@ttfont@rb}{\hyphenchar\font=\m@ne}%
 %    \end{macrocode}
 % Das temporäre Makro verlangt im ersten Argument die NFSS-Serie, im zweiten 
@@ -2471,8 +2454,9 @@
 %   gesichert und neu definiert werden, weil diese ggf. von anderen Paketen
 %   umdefiniert werden. Bspw. \cs{the}\cs{mathcode`!}
 % }[v2.07]
-% \ToDo{cdmath=disabled; s. \protecting{\GitHubRepo'<45>; \Forum'<511>}}[v2.07]
+% \ToDo{cdmath=disabled; s. \protecting{\GitHubRepo<45>; \Forum<511>}}[v2.07]
 % \ToDo{griech. Lettern als Symbole (nicht tudupgrk/tuditgrk); boldmath}[v2.07]
+% \ToDo{inverse Suche: \protecting{\Forum<539>}}[v2.07]
 %    \begin{macrocode}
 \tud@locked@newbool{@tud@cdmath@active}
 \tud@locked@bool@preset{@tud@cdmath@active}{true}%
@@ -2686,11 +2670,10 @@
 % die Nomenklatur der Auswahlbefehle betrifft. Mit diesem Makro wird nach den 
 % am häufigsten auftretenden Varianten für die Auswahl für aufrechte und 
 % kursive Lettern gesucht, um diese auf die von \TUDScript genutzte Nomenklatur 
-% (\cs{up\meta{Letter}}, \cs{it\meta{Letter}}, \cs{other\meta{Letter}})
+% (|\up|\meta{Letter}, |\it|\meta{Letter}, |\other|\meta{Letter})
 % abzubilden, damit diese unabhängig von der Einstellung für \opt{cdmath}
 % genutzt werden kann und somit neben den normalen Makros zusätzliche Befehle 
-% (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}) für das explizite 
-% Auswählen aufrechter und kursiver Lettern bereitstehen.
+% für das explizite Auswählen aufrechter und kursiver Lettern bereitstehen.
 %    \begin{macrocode}
 \newcommand*\tud@math@map@greeks{%
   \tud@math@loop@greeks@all\tud@math@map@@greeks%
@@ -2707,15 +2690,15 @@
   \ifcsundef{other#1}{\ifcsundef{#1other}{}{\csletcs{other#1}{#1other}}}{}%
 }
 %    \end{macrocode}
-% Einige Pakete stellen für griechische Majuskeln die Befehle \cs{var\dots} 
+% Einige Pakete stellen für griechische Majuskeln Befehle |\var|\meta{Letter}
 % bereit, um diese im kursiven Schnitt zu setzen. Weiterhin existiert für 
-% aufrechte Majuskeln auch noch die Form \cs{Up\meta{Letter}}. Diese werden 
+% aufrechte Majuskeln auch noch die Form |\Up|\meta{Letter}. Diese werden 
 % ebenfalls ausgewertet und ggf. auf die \TUDScript-Nomenklatur abgebildet.
 %    \begin{macrocode}
 \newcommand*\tud@math@map@@@greeks[1]{%
   \ifcsundef{it#1}{\ifcsundef{var#1}{}{\csletcs{it#1}{var#1}}}{}%
   \ifcsundef{up#1}{%
-    \tud@lowerstring\tud@res@a{#1}%
+    \tud@strlowercase\tud@res@a{#1}%
     \edef\tud@res@a{Up\tud@res@a}%
     \ifcsundef{\tud@res@a}{}{\csletcs{up#1}{\tud@res@a}}%
   }{}%
@@ -2757,7 +2740,7 @@
     }%
     \tud@cs@use{mv@normal}%
     \let\tud@res@c\@empty%
-    \Ifstr{\tud@math@letters@enc}{\detokenize{OML}}{%
+    \tud@if@strequal{\tud@math@letters@enc}{OML}{%
       \def\tud@res@a##1{%
         \ifcsundef{it##1}{%
           \eappto\tud@res@c{%
@@ -2770,7 +2753,7 @@
       \tud@res@cnt=\z@\relax%
       \tud@math@loop@greeks@all\tud@res@a%
     }{}%
-    \Ifstr{\tud@math@operators@enc}{\detokenize{OT1}}{%
+    \tud@if@strequal{\tud@math@operators@enc}{OT1}{%
       \def\tud@res@a##1{%
         \ifcsundef{up##1}{%
           \eappto\tud@res@c{%
@@ -2904,11 +2887,7 @@
       }%
     }%
     \@tud@res@swafalse%
-    \ifundef{\upalpha}{}{%
-      \ifx\upalpha\alpha%
-        \@tud@res@swatrue%
-      \fi%
-    }%
+    \ifundef{\upalpha}{}{\ifx\upalpha\alpha\@tud@res@swatrue\fi}%
 %    \end{macrocode}
 % Existiert \cs{upalpha} und ist mit \cs{alpha} identisch, werden \emph{alle} 
 % griechischen Lettern aufrecht gesetzt.
@@ -2919,13 +2898,9 @@
 %    \end{macrocode}
 % Existiert \cs{itGamma} und ist mit \cs{Gamma} identisch oder\dots
 %    \begin{macrocode}
-      \ifundef{\itGamma}{}{%
-        \ifx\itGamma\Gamma%
-          \@tud@res@swatrue%
-        \fi%
-      }%
+      \ifundef{\itGamma}{}{\ifx\itGamma\Gamma\@tud@res@swatrue\fi}%
 %    \end{macrocode}
-% \dots\cs{Gamma} entspricht einer möglichen Standarddefnition,\dots
+% \dots\cs{Gamma} entspricht einer kursiven Standarddefnition, \dots
 %    \begin{macrocode}
       \if@tud@res@swa\else%
         \let\tud@res@a\relax%
@@ -2951,14 +2926,17 @@
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % \changes{v2.06a}{2019/07/09}{Bugfix für \pkg{mathastext} Eingabekodierung}^^A
 % \begin{macro}{\tud@cdmath@@init}
+% \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\tud@cdmath@@@init}
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@cdmath@@@@@init}
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@cdmath@set}
-% \changes{v2.07}{2019/09/10}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@cdmath@normal@name}
-% \changes{v2.07}{2019/09/10}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@cdmath@bold@name}
-% \changes{v2.07}{2019/09/10}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}
 % \begin{macro}{\tud@mathversion}
 % \changes{v2.06}{2019/06/17}{neu}^^A
 % \begin{macro}{\MTDeclareVersion}
@@ -2978,10 +2956,10 @@
 % Für die LGR-Kodierung werden die Bundles \bdl{cbfonts} und \bdl{cbfonts-fd} 
 % benötigt. Leider lässt sich momentan nur auf letzteres testen. Für ersteres 
 % ließe sich |\font\testfont=grmn1200|\footnote{\file{ltxcheck.tex}} oder der 
-% externe Aufruf \verb=\immediate\openin\pathfont="|kpsewhich grmn1200.tfm"= 
+% externe Aufruf \verb+\immediate\openin\pathfont="|kpsewhich grmn1200.tfm"+ 
 % nutzen\footnote{\url{https://tex.stackexchange.com/q/306980}}. Beide Ansätze
-% sind aber nicht vollends stimmig. Der erste funktioniert nicht, sobald der
-% Anwender \val{-interaction-mode} selbst definiert und für den zweiten müssen
+% sind aber nicht vollends stimmig. Der erste funktioniert nicht, sobald der 
+% Anwender \val{-interaction-mode} selbst definiert und für den zweiten müssen 
 % zumindest eingeschränkte Schreibrechte zwingend aktiviert sein.
 % \ToDo{cmr nicht zwingend notwendig}[v2.07]%^^A nur wenn \@tud@lgrgreekstrue
 %    \begin{macrocode}
@@ -3047,7 +3025,7 @@
         subdued,defaultmathsizes,nosmalldelims,noequal,%
         defaultrm,defaultbf,defaultit,defaultsf,defaulttt%
       }{mathastext}%
-      \RequirePackage{mathastext}[2018/08/22]%
+      \RequirePackage{mathastext}
 %    \end{macrocode}
 % \ToDo{cmr nicht notwendig}[v2.07]%^^A {\tud@cdfont@fam}{m}{b}{n}{it}%
 %    \begin{macrocode}
@@ -3063,7 +3041,7 @@
 % Die Symbole für aufrechte und kursive griechische Lettern werden definiert. 
 % Da im Paket \pkg{opensans} keine mathematischen Schriftkodierungen enthalten 
 % sind, wird in diesem Fall auf die LGR-Kodierung zurückgegriffen.
-% \ToDo{kann mit \pkg{opensans-math} raus}[v2.??]
+% \ToDo{könnte mit \pkg{opensans-math} raus}[v2.08]
 %    \begin{macrocode}
     \if@tud@cdoldfont@active%
       \tud@res@cnt=\z@\relax%
@@ -3138,7 +3116,7 @@
     \tud@res@a{true}{false}%
     \tud@res@a{true}{true}%
 %    \end{macrocode}
-% Für den zugegbener Maßen etwas  unwahrscheinlichen Fall, dass die Kombination 
+% Für den zugegbener Maßen etwas unwahrscheinlichen Fall, dass die Kombination 
 % aus \opt{cdfont=false} und \opt{cdmath=true} genutzt wird, werden für die 
 % Initialisierung die Schriften des \CDs kurzzeitig aktiviert. Damit wird dem 
 % Umstand Sorge getragen, dass das Paket \pkg{mathastext} bei der Definition 
@@ -3228,12 +3206,12 @@
     \SetSymbolFont{operators}{#1}{OT1}{iwona}{#4}{n}%
     \SetSymbolFont{operators}{#2}{OT1}{iwona}{#5}{n}%
 %    \end{macrocode}
-% \ToDo{
+% \ToDo{%
 %   sollte \pkg{opensans-math} irgendwann einmal real werden, dann würde es
 %   sich anbieten, die OML-Kodierung ähnlich zu \pkg{euler[vm]} auf eine 
 %   U-Kodierung zu erweitern und aufrechte griechische Lettern einzubinden, um 
 %   ein Alphabet zu sparen. Siehe Kodierungen FML/FMS, LML/LMS, LBL/LBS, LS1/LS2
-% }[v2.??]
+% }[v2.08]
 %    \begin{macrocode}
     \SetSymbolFont{letters}{#1}{OML}{iwona}{#4}{it}%
     \SetSymbolFont{letters}{#2}{OML}{iwona}{#5}{it}%
@@ -3293,7 +3271,7 @@
     }{}%
   }{}%
 %    \end{macrocode}
-% Das Paket \pkg{cmbright} stelt zusätzlich noch Schriftschnitte für die 
+% Das Paket \pkg{cmbright} stellt zusätzlich noch Schriftschnitte für die 
 % Symbolschriften \val{AMSa} und \val{AMSb} bereit, welche gegebenenfalls für 
 % die alten Schriften geladen werden.
 %    \begin{macrocode}
@@ -3392,10 +3370,10 @@
     \begingroup%
       \let\tud@res@a\relax%
       \if@tud@cdmath@active%
-        \Ifstr{#1}{normal}{%
+        \tud@if@strequal{#1}{normal}{%
           \edef\tud@res@a{\tud@cdmath@normal@name}%
         }{%
-          \Ifstr{#1}{bold}{%
+          \tud@if@strequal{#1}{bold}{%
             \edef\tud@res@a{\tud@cdmath@bold@name}%
           }{}%
         }%
@@ -3470,8 +3448,8 @@
 }
 %    \end{macrocode}
 % Die an \cs{tud@cdmath@declare@symb} und \cs{tud@cdmath@declare@char} 
-% übergebenen Lettern für Auswahlbefehle nutzen \cs{tud@cdmath@symbol@\dots} 
-% als Präfix, wodurch sich die Definitionen für einzelne Mathematikversionen 
+% übergebenen Letter für Auswahlbefehle nutzen |\tud@cdfont@symbol@...| als
+% Präfix, wodurch sich die Definitionen für einzelne Mathematikversionen 
 % beliebig tauschen lassen.
 %    \begin{macrocode}
 \newcommand*\tud@DeclareMathSymbol[4]{%
@@ -3560,7 +3538,7 @@
   \addto@hook@expandafter\tud@cdmath@symbols@toks{\tud@res@a}%
 %    \end{macrocode}
 % Für das Überschreiben des \cs{mathcode} des gewünschen \meta{Zeichen} wird 
-% dieser aus der Bedeutung von \cs{tud@cdmath@symbols@\meta{Zeichen}} mit
+% dieser aus der Bedeutung von |\tud@cdmath@symbols@|\meta{Zeichen} mit
 % \cs{meaning} herausgelöst.
 %    \begin{macrocode}
   \begingroup%
@@ -3586,130 +3564,29 @@
 %
 % In Anlehnung an verschiedene Pakete für Mathematikschriften werden Symbole 
 % für aufrechte und kursive Majuskeln der griechischen Lettern definiert. Damit 
-% auch bei diesen Buchstaben ein Umschalten für die unterschiedlichen Schriften
-% möglich ist, wird eine interne Version definiert und im Bedarfsfall der
-% dazugehörige \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die Befehle
+% auch bei diesen ein Umschalten für die unterschiedlichen Schriften möglich 
+% ist, wird eine interne Version definiert und im Bedarfsfall der dazugehörige 
+% \LaTeX-Befehl mit dieser überschrieben. Hierfür sind die beiden Befehle
 % \cs{tud@cdmath@symbols@set} und \cs{tud@cdmath@symbols@reset} verantwortlich,
 % welche die von \cs{tud@cdmath@declare@symb} und \cs{tud@cdmath@declare@char} 
 % erzeugten Listen \cs{tud@cdmath@symb@list} und \cs{tud@cdmath@char@list} 
 % nutzen.
-% \ToDo{Kodierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.??]
+% \ToDo{Kodierungen \val{LS1/LS2}; siehe \pkg{stix,libertinust1math}}[v2.08]
 % \begin{macro}{\tud@cdmath@declare@greek@uc}
 % \changes{v2.04}{2015/03/10}{neu}^^A
-% \begin{macro}{\tud@cdmath@symbol@upGamma}
-% \begin{macro}{\tud@cdmath@symbol@upDelta}
-% \begin{macro}{\tud@cdmath@symbol@upTheta}
-% \begin{macro}{\tud@cdmath@symbol@upLambda}
-% \begin{macro}{\tud@cdmath@symbol@upXi}
-% \begin{macro}{\tud@cdmath@symbol@upPi}
-% \begin{macro}{\tud@cdmath@symbol@upSigma}
-% \begin{macro}{\tud@cdmath@symbol@upUpsilon}
-% \begin{macro}{\tud@cdmath@symbol@upPhi}
-% \begin{macro}{\tud@cdmath@symbol@upPsi}
-% \begin{macro}{\tud@cdmath@symbol@upOmega}
-% \begin{macro}{\tud@cdmath@symbol@itGamma}
-% \begin{macro}{\tud@cdmath@symbol@itDelta}
-% \begin{macro}{\tud@cdmath@symbol@itTheta}
-% \begin{macro}{\tud@cdmath@symbol@itLambda}
-% \begin{macro}{\tud@cdmath@symbol@itXi}
-% \begin{macro}{\tud@cdmath@symbol@itPi}
-% \begin{macro}{\tud@cdmath@symbol@itSigma}
-% \begin{macro}{\tud@cdmath@symbol@itUpsilon}
-% \begin{macro}{\tud@cdmath@symbol@itPhi}
-% \begin{macro}{\tud@cdmath@symbol@itPsi}
-% \begin{macro}{\tud@cdmath@symbol@itOmega}
 % Hiermit werden die Auswahlbefehle für Majuskeln der der griechischen Lettern 
-% für die klassischen Kodierungen definiert.%    \begin{macrocode}
+% für die klassischen Kodierungen definiert.
+%    \begin{macrocode}
 \newcommand*\tud@cdmath@declare@greek@uc[1]{%
   \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
   \tud@cdmath@declare@symb{up#1}{\mathalpha}{operators}{\the\tud@res@cnt}%
   \advance\tud@res@cnt\@ne\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdmath@symbol@itOmega
-% \end{macro}^^A \tud@cdmath@symbol@itPsi
-% \end{macro}^^A \tud@cdmath@symbol@itPhi
-% \end{macro}^^A \tud@cdmath@symbol@itUpsilon
-% \end{macro}^^A \tud@cdmath@symbol@itSigma
-% \end{macro}^^A \tud@cdmath@symbol@itPi
-% \end{macro}^^A \tud@cdmath@symbol@itXi
-% \end{macro}^^A \tud@cdmath@symbol@itLambda
-% \end{macro}^^A \tud@cdmath@symbol@itTheta
-% \end{macro}^^A \tud@cdmath@symbol@itDelta
-% \end{macro}^^A \tud@cdmath@symbol@itGamma
-% \end{macro}^^A \tud@cdmath@symbol@upOmega
-% \end{macro}^^A \tud@cdmath@symbol@upPsi
-% \end{macro}^^A \tud@cdmath@symbol@upPhi
-% \end{macro}^^A \tud@cdmath@symbol@upUpsilon
-% \end{macro}^^A \tud@cdmath@symbol@upSigma
-% \end{macro}^^A \tud@cdmath@symbol@upPi
-% \end{macro}^^A \tud@cdmath@symbol@upXi
-% \end{macro}^^A \tud@cdmath@symbol@upLambda
-% \end{macro}^^A \tud@cdmath@symbol@upTheta
-% \end{macro}^^A \tud@cdmath@symbol@upDelta
-% \end{macro}^^A \tud@cdmath@symbol@upGamma
 % \end{macro}^^A \tud@cdmath@declare@greek@uc
 % \begin{macro}{\tud@cdmath@declare@greek@lc}
 % \changes{v2.06}{2018/07/17}{neu}^^A
-% \begin{macro}{\tud@cdmath@symbol@upalpha}
-% \begin{macro}{\tud@cdmath@symbol@upbeta}
-% \begin{macro}{\tud@cdmath@symbol@upgamma}
-% \begin{macro}{\tud@cdmath@symbol@updelta}
-% \begin{macro}{\tud@cdmath@symbol@upepsilon}
-% \begin{macro}{\tud@cdmath@symbol@upzeta}
-% \begin{macro}{\tud@cdmath@symbol@upeta}
-% \begin{macro}{\tud@cdmath@symbol@uptheta}
-% \begin{macro}{\tud@cdmath@symbol@upiota}
-% \begin{macro}{\tud@cdmath@symbol@upkappa}
-% \begin{macro}{\tud@cdmath@symbol@uplambda}
-% \begin{macro}{\tud@cdmath@symbol@upmu}
-% \begin{macro}{\tud@cdmath@symbol@upnu}
-% \begin{macro}{\tud@cdmath@symbol@upxi}
-% \begin{macro}{\tud@cdmath@symbol@uppi}
-% \begin{macro}{\tud@cdmath@symbol@uprho}
-% \begin{macro}{\tud@cdmath@symbol@upsigma}
-% \begin{macro}{\tud@cdmath@symbol@uptau}
-% \begin{macro}{\tud@cdmath@symbol@upupsilon}
-% \begin{macro}{\tud@cdmath@symbol@upphi}
-% \begin{macro}{\tud@cdmath@symbol@upchi}
-% \begin{macro}{\tud@cdmath@symbol@uppsi}
-% \begin{macro}{\tud@cdmath@symbol@upomega}
-% \begin{macro}{\tud@cdmath@symbol@upvarepsilon}
-% \begin{macro}{\tud@cdmath@symbol@upvartheta}
-% \begin{macro}{\tud@cdmath@symbol@upvarpi}
-% \begin{macro}{\tud@cdmath@symbol@upvarrho}
-% \begin{macro}{\tud@cdmath@symbol@upvarsigma}
-% \begin{macro}{\tud@cdmath@symbol@upvarphi}
-% \begin{macro}{\tud@cdmath@symbol@italpha}
-% \begin{macro}{\tud@cdmath@symbol@itbeta}
-% \begin{macro}{\tud@cdmath@symbol@itgamma}
-% \begin{macro}{\tud@cdmath@symbol@itdelta}
-% \begin{macro}{\tud@cdmath@symbol@itepsilon}
-% \begin{macro}{\tud@cdmath@symbol@itzeta}
-% \begin{macro}{\tud@cdmath@symbol@iteta}
-% \begin{macro}{\tud@cdmath@symbol@ittheta}
-% \begin{macro}{\tud@cdmath@symbol@itiota}
-% \begin{macro}{\tud@cdmath@symbol@itkappa}
-% \begin{macro}{\tud@cdmath@symbol@itlambda}
-% \begin{macro}{\tud@cdmath@symbol@itmu}
-% \begin{macro}{\tud@cdmath@symbol@itnu}
-% \begin{macro}{\tud@cdmath@symbol@itxi}
-% \begin{macro}{\tud@cdmath@symbol@itpi}
-% \begin{macro}{\tud@cdmath@symbol@itrho}
-% \begin{macro}{\tud@cdmath@symbol@itsigma}
-% \begin{macro}{\tud@cdmath@symbol@ittau}
-% \begin{macro}{\tud@cdmath@symbol@itupsilon}
-% \begin{macro}{\tud@cdmath@symbol@itphi}
-% \begin{macro}{\tud@cdmath@symbol@itchi}
-% \begin{macro}{\tud@cdmath@symbol@itpsi}
-% \begin{macro}{\tud@cdmath@symbol@itomega}
-% \begin{macro}{\tud@cdmath@symbol@itvarepsilon}
-% \begin{macro}{\tud@cdmath@symbol@itvartheta}
-% \begin{macro}{\tud@cdmath@symbol@itvarpi}
-% \begin{macro}{\tud@cdmath@symbol@itvarrho}
-% \begin{macro}{\tud@cdmath@symbol@itvarsigma}
-% \begin{macro}{\tud@cdmath@symbol@itvarphi}
-% Aufrechte griechische  Minuskeln sind in den mathematischen Kodierungen von 
+% Aufrechte griechische Minuskeln sind in den mathematischen Kodierungen von 
 % \LaTeX{} leider nicht enthalten, weshalb diese hier auch nicht für die 
 % normale OML-Kodierung deklariert werden können.
 %    \begin{macrocode}
@@ -3717,10 +3594,10 @@
   \tud@cdmath@declare@symb{it#1}{\mathalpha}{letters}{\the\tud@res@cnt}%
 %    \end{macrocode}
 % Für aufrechte griechische Minuskeln gibt es gewöhnlich keine Symbolschrift, 
-% weshalb der Eintrag \cs{up\meta{Letter}} in \cs{tud@cdmath@symb@list} gesetzt 
-% wird, was mit einem fehlenden \cs{tud@cdmath@symbol@\meta{Letter}} zu einem 
-% undefinierten \cs{up\meta{Letter}} bei \opt{cdmath=true} führt.
-% \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.??]
+% weshalb der Eintrag |\up|\meta{Letter} in \cs{tud@cdmath@symb@list} gesetzt 
+% wird, was mit einem fehlenden |\tud@cdmath@symbol@|\meta{Letter} zu einem 
+% undefinierten |\up|\meta{Letter} bei \opt{cdmath=true} führt.
+% \ToDo{falls irgendwann erweiterte OML-Kodierung existiert, dann nutzen}[v2.08]
 %    \begin{macrocode}
 %^^A  \tud@cdmath@declare@symb{it##1}{\mathalpha}{letters}%
 %^^A    {\the\numexpr\tud@res@cnt+128\relax}%
@@ -3728,64 +3605,6 @@
   \advance\tud@res@cnt\@ne\relax%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@cdmath@symbol@itvarphi
-% \end{macro}^^A \tud@cdmath@symbol@itvarsigma
-% \end{macro}^^A \tud@cdmath@symbol@itvarrho
-% \end{macro}^^A \tud@cdmath@symbol@itvarpi
-% \end{macro}^^A \tud@cdmath@symbol@itvartheta
-% \end{macro}^^A \tud@cdmath@symbol@itvarepsilon
-% \end{macro}^^A \tud@cdmath@symbol@itomega
-% \end{macro}^^A \tud@cdmath@symbol@itpsi
-% \end{macro}^^A \tud@cdmath@symbol@itchi
-% \end{macro}^^A \tud@cdmath@symbol@itphi
-% \end{macro}^^A \tud@cdmath@symbol@itupsilon
-% \end{macro}^^A \tud@cdmath@symbol@ittau
-% \end{macro}^^A \tud@cdmath@symbol@itsigma
-% \end{macro}^^A \tud@cdmath@symbol@itrho
-% \end{macro}^^A \tud@cdmath@symbol@itpi
-% \end{macro}^^A \tud@cdmath@symbol@itxi
-% \end{macro}^^A \tud@cdmath@symbol@itnu
-% \end{macro}^^A \tud@cdmath@symbol@itmu
-% \end{macro}^^A \tud@cdmath@symbol@itlambda
-% \end{macro}^^A \tud@cdmath@symbol@itkappa
-% \end{macro}^^A \tud@cdmath@symbol@itiota
-% \end{macro}^^A \tud@cdmath@symbol@ittheta
-% \end{macro}^^A \tud@cdmath@symbol@iteta
-% \end{macro}^^A \tud@cdmath@symbol@itzeta
-% \end{macro}^^A \tud@cdmath@symbol@itepsilon
-% \end{macro}^^A \tud@cdmath@symbol@itdelta
-% \end{macro}^^A \tud@cdmath@symbol@itgamma
-% \end{macro}^^A \tud@cdmath@symbol@itbeta
-% \end{macro}^^A \tud@cdmath@symbol@italpha
-% \end{macro}^^A \tud@cdmath@symbol@upvarphi
-% \end{macro}^^A \tud@cdmath@symbol@upvarsigma
-% \end{macro}^^A \tud@cdmath@symbol@upvarrho
-% \end{macro}^^A \tud@cdmath@symbol@upvarpi
-% \end{macro}^^A \tud@cdmath@symbol@upvartheta
-% \end{macro}^^A \tud@cdmath@symbol@upvarepsilon
-% \end{macro}^^A \tud@cdmath@symbol@upomega
-% \end{macro}^^A \tud@cdmath@symbol@uppsi
-% \end{macro}^^A \tud@cdmath@symbol@upchi
-% \end{macro}^^A \tud@cdmath@symbol@upphi
-% \end{macro}^^A \tud@cdmath@symbol@upupsilon
-% \end{macro}^^A \tud@cdmath@symbol@uptau
-% \end{macro}^^A \tud@cdmath@symbol@upsigma
-% \end{macro}^^A \tud@cdmath@symbol@uprho
-% \end{macro}^^A \tud@cdmath@symbol@uppi
-% \end{macro}^^A \tud@cdmath@symbol@upxi
-% \end{macro}^^A \tud@cdmath@symbol@upnu
-% \end{macro}^^A \tud@cdmath@symbol@upmu
-% \end{macro}^^A \tud@cdmath@symbol@uplambda
-% \end{macro}^^A \tud@cdmath@symbol@upkappa
-% \end{macro}^^A \tud@cdmath@symbol@upiota
-% \end{macro}^^A \tud@cdmath@symbol@uptheta
-% \end{macro}^^A \tud@cdmath@symbol@upeta
-% \end{macro}^^A \tud@cdmath@symbol@upzeta
-% \end{macro}^^A \tud@cdmath@symbol@upepsilon
-% \end{macro}^^A \tud@cdmath@symbol@updelta
-% \end{macro}^^A \tud@cdmath@symbol@upgamma
-% \end{macro}^^A \tud@cdmath@symbol@upbeta
-% \end{macro}^^A \tud@cdmath@symbol@upalpha
 % \end{macro}^^A \tud@cdmath@declare@greek@lc
 % \begin{macro}{\tud@cdmath@declare@greek@lgr}
 % \changes{v2.06}{2019/06/19}{neu}^^A
@@ -3898,7 +3717,7 @@
   }%
 }
 \newcommand*\tud@cdmath@also@@@greeks[1]{%
-  \tud@lowerstring\tud@res@a{#1}%
+  \tud@strlowercase\tud@res@a{#1}%
   \edef\tud@res@a{Up\tud@res@a}%
   \ifcsundef{\tud@res@a}{}{%
     \expandafter\tud@cdmath@declare@alias\expandafter{\tud@res@a}{up#1}%
@@ -3943,6 +3762,9 @@
       \tud@math@loop@greeks@lc\tud@math@slanted@greeks%
     \fi%
   \else%
+%    \end{macrocode}
+% \ToDo{\opt{slantedgreek} auswerten?}[v2.07]
+%    \begin{macrocode}
     \tud@cs@restore{mv@normal}%
     \tud@cs@restore{mv@bold}%
     \tud@cdmath@symbols@reset%
@@ -3993,6 +3815,8 @@
 % \begin{macro}{\tud@head@font@bold}
 % \begin{macro}{\tud@head@font@@bold}
 % \changes{v2.05}{2016/04/17}{neu}^^A
+% \begin{macro}{\tud@font@phantomglyphs}
+% \changes{v2.06o}{2022/07/25}{neu}^^A
 % Die Schrift der Kopfzeile wird entweder in den Schriften des \CDs oder aber 
 % in den serifenlosen Standardschriften gesetzt, wobei für beide Varianten
 % sowohl eine fettgedruckte als auch eine normale Version benötigt wird. Die
@@ -4002,6 +3826,7 @@
 % wird verwendet, um die Einstellung der fetten Schriften ohne die fixierte 
 % Schriftgröße nutzen zu können.
 %    \begin{macrocode}
+\newcommand*\tud@font@phantomglyphs{\"A\"O\"Ugjpqy}
 \newcommand*\tud@head@font@light{}
 \newcommand*\tud@head@font@bold{}
 %<poster>\newcommand*\tud@head@font@@bold{}
@@ -4109,6 +3934,7 @@
   }%
 \fi
 %    \end{macrocode}
+% \end{macro}^^A \tud@font@phantomglyphs
 % \end{macro}^^A \tud@head@font@@bold
 % \end{macro}^^A \tud@head@font@bold
 % \end{macro}^^A \tud@head@font@light
@@ -4140,7 +3966,7 @@
 % entsprechende Letter nicht vorhanden ist.
 %    \begin{macrocode}
 \ifx\tud@reserved\@empty
-  \RequirePackage{newunicodechar}[2012/11/12]
+  \RequirePackage{newunicodechar}
   \uccode"00DF="1E9E
   \lccode"1E9E="00DF
   \newunicodechar{^^^^00df}{\iffontchar\font"00DF \symbol{"00DF}\else ss\fi}
@@ -4157,9 +3983,9 @@
 % Fall. Allerdings ist es mit dem Paket \pkg{ragged2e} möglich, das Verhalten
 % für den Flattersatz zu ändern und die Silbentrennung zu aktivieren. Mit der
 % Option \opt{newcommands} werden dabei die originalen Befehle überschrieben,
-% vorher jedoch in \cs{LaTeX\dots} gesichert. Diese Makros dienen dazu, die
-% Überschriften in jedem Fall~-- auch bei der Verwendung von \pkg{ragged2e} mit
-% der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
+% vorher jedoch beispielsweise in \cs{LaTeXraggedright} gesichert. Diese Makros 
+% dienen dazu, die Überschriften in jedem Fall~-- auch bei der Verwendung von
+% \pkg{ragged2e} mit der Option \opt{newcommands}~-- ohne Trennungen zu setzen.
 %    \begin{macrocode}
 \newcommand*\tud@raggedright{\raggedright}
 \newcommand*\tud@RaggedRight{\raggedright}
@@ -4176,38 +4002,82 @@
 % \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
 %
 % \begin{macro}{\lseries}
+% \begin{macro}{\tud@x@siunitx@mapping}
+% \changes{v2.06o}{2022/08/08}{neu}
 % \begin{macro}{\tud@x@siunitx@reset}
-% \changes{v2.07}{2019/11/05}{neu}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen. Außerdem muss bei der Auswahl der Schriften evtl. auf das 
-% Paket reagiert werden, weil es sich bei der Definition der Schriften für den 
-% Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} oder aber den 
-% zuletzt gemachten Einstellungen mit \cs{newfontfamily} verlässt. Sind die 
-% Schriften des \CDs aktiv, wird dies temporär mit \opt{cdfont}|=|\val{false}
-% revidiert und direkt nach den durch \pkg{siunitx} zu Beginn des Dokumentes 
-% erfolgten Einstellungen durch \cs{tud@x@siunitx@reset} wiederhergestellt. 
-% Dieser etwas merkwürdige Workaround geht auf die gemeldeten Probleme im 
-% \GitHubRepo<22> sowie im \Forum<503> zurück.
+% \changes{v2.06o}{2022/07/31}{neu}
 %    \begin{macrocode}
-\newcommand*\tud@x@siunitx@reset{}
 \AfterAtEndOfPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
-  \AtEndPreamble{%
-    \if@tud@cdfont@active%
-      \if@tud@cdfont@heavy%
-        \renewcommand*\tud@x@siunitx@reset{\TUDoptions{cdfont=heavy}}%
-      \else%
-        \renewcommand*\tud@x@siunitx@reset{\TUDoptions{cdfont=true}}%
+  \IfPackageAtLeastTF{siunitx}{2021-04-18}{%
+%    \end{macrocode}
+% Das Paket \pkg{siunitx} in der Version |v3| stellt eine Schnittstelle für 
+% die Zuordnung von Schriftschnitten zur verwendeten Mathematikversionen zur
+% Verfügung. Da vorher erheblicher Aufwand betrieben wurde, die korrekten
+% Schriftschnitte im Mathematikmodus mit den Versionen |normal| und |bold|
+% bereitzustellen, werden bei aktivierten Schriften des \CDs die entsprechenden
+% Zuordnungen gesetzt.
+%    \begin{macrocode}
+    \newcommand*\tud@x@siunitx@mapping{%
+      \if@tud@cdfont@active
+        \csname keys_set:nx\endcsname { siunitx / series-version-mapping }
+          {
+            \tud@cdfont@md  = normal,
+            \tud@cdfont@bf  = bold,
+            \tud@cdfont@ebf = bold
+          }
+      \else
+%    \end{macrocode}
+% Zurücksetzen auf die Standardeinstellungen von \pkg{siunitx}.
+%    \begin{macrocode}
+        \csname keys_set:nn\endcsname { siunitx / series-version-mapping }
+          {
+            ul = light  ,
+            el = light  ,
+            l  = light  ,
+            sl = light  ,
+            m  = normal ,
+            sb = bold   ,
+            b  = bold   ,
+            eb = bold   ,
+            ub = bold
+          }
+      \fi
+    }
+    \xapptocmd\tud@font@set%
+      {\tud@x@siunitx@mapping}%
+      {}{\tud@patch@wrn{tud@font@set}}%
+  }{%
+%    \end{macrocode}
+% Das Paket \pkg{siunitx} in der Version |v2| nutzt den Befehl \cs{lseries} für
+% den Fall, dass für den Fließtext eine Schrift die Serie \val{l} verwendet. 
+% Dem wird hier Rechnung getragen. Außerdem muss bei der Auswahl der Schriften 
+% evtl. auf das Paket reagiert werden, weil es sich bei der Definition der 
+% Schriften für den Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} 
+% verlässt. Deshalb werden am Ende der Präambel die Schrifteinstellungen mit 
+% \opt{cdfont}|=|\val{false} deaktiviert und zu Beginn des Dokumentes auf die 
+% aktuelle Einstellung gesetzt. Dieser etwas merkwürdige Workaround geht auf 
+% die gemeldeten Probleme im \GitHubRepo<22> sowie im \Forum<503> zurück.
+%    \begin{macrocode}
+    \newcommand*\tud@x@siunitx@reset{}%
+    \providecommand*\lseries{\fontseries{l}\selectfont}%
+    \AtEndPreamble{%
+      \if@tud@cdfont@active%
+        \if@tud@cdfont@heavy%
+          \def\tud@x@siunitx@reset{\TUDoptions{cdfont=heavy}}%
+        \else%
+          \def\tud@x@siunitx@reset{\TUDoptions{cdfont=true}}%
+        \fi%
+        \appto\tud@x@siunitx@reset{\tud@font@set[]}%
+        \TUDoptions{cdfont=false}%
+        \tud@font@set[]%
       \fi%
-      \appto\tud@x@siunitx@reset{\tud@font@set[]}%
-      \TUDoptions{cdfont=false}\tud@font@set[]%
-    \fi%
-  }%
-  \AtBeginDocument{\tud@x@siunitx@reset}%
+    }%
+    \AtBeginDocument{\tud@x@siunitx@reset}%
+  }
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@siunitx@reset
+% \end{macro}^^A \tud@x@siunitx@mapping
 % \end{macro}^^A \lseries
 %
 % \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
@@ -4248,7 +4118,7 @@
       \tud@cs@store{mv@bold}%
       \tud@cdmath@set%
     \fi%
-    \RequirePackage{bm}[2017/01/16]%
+    \RequirePackage{bm}
     \tud@cs@restore{mv@normal}%
     \tud@cs@restore{mv@bold}%
   \fi%
@@ -4274,13 +4144,14 @@
 %</package>
 %    \end{macrocode}
 %
-% \subsection{Schriftauswahl}
+% \subsection{Aktivieren der gewählten Schriften}
 %
 % Die eigentliche Schriftauswahl erfolgt~-- abhängig von den zuvor gesetzten 
 % Einstellungen~-- erst am Ende der Präambel, um etwaige Voreinstellungen
 % anderer Schriftpakete beachten zu können. Dabei erfolgt die Auswahl der
 % Schriften für den Mathematiksatz durch \cs{AtBeginDocument} innerhalb von 
 % \cs{AtEndPreamble} am Ende \emph{möglichst aller} \cs{AtBeginDocument}.
+% \ToDo{das passt mit den neuen hooks so nicht mehr unbedingt}[v2.07]
 %    \begin{macrocode}
 \AtEndPreamble{%
 %    \end{macrocode}
@@ -4325,28 +4196,26 @@
 %    \begin{macrocode}
   \tud@cdmath@init%
   \tud@x@bm@delayed%
-  \AtBeginDocument{%
 %    \end{macrocode}
 % Bereitstellung der Auswahlbefehle für griechische Lettern in der Nomenklatur 
-% von \TUDScript (\cs{up\meta{Bezeichner}}, \cs{it\meta{Bezeichner}}).
+% von \TUDScript (|\up|\meta{Letter}, |\it|\meta{Letter}).
 %    \begin{macrocode}
-    \tud@math@map@greeks%
+  \tud@math@map@greeks%
 %    \end{macrocode}
 % Für die griechischen Lettern wird mit \cs{tud@math@checkslanted@greeks} 
 % geprüft, ob diese durch ein Paket explizit auf kursive Majuskeln oder eine 
 % vollständig aufrechte Variante gesetzt wurden. Ist dies der Fall, wird der
 % Standardwert für die Option \opt{slantedgreek} entsprechend angepasst.
 %    \begin{macrocode}
-    \tud@math@checkslanted@greeks%
+  \tud@math@checkslanted@greeks%
 %    \end{macrocode}
 % Nachdem alle Vorbereitungen getroffen wurden, werden die Schriften für den 
 % mathematischen Satz nun endlich gesetzt.
 %    \begin{macrocode}
-    \tud@math@set%
+  \AtBeginDocument{\tud@math@set}%
 %    \end{macrocode}
 % \ToDo{Hook definieren, um Anwender eigenen Kram definieren zu lassen}[v2.07]
 %    \begin{macrocode}
-  }%
 }
 %    \end{macrocode}
 %
@@ -4354,6 +4223,6 @@
 %</body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput
