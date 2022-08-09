@@ -4,14 +4,14 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, either version 1.3c of this license or
 %  any later version. The latest version of this license is in
-%    https://www.latex-project.org/lppl.txt
+%    http://www.latex-project.org/lppl.txt
 %  and version 1.3c or later is part of all distributions of
 %  LaTeX version 2008-05-04 or later.
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-frontmatter.dtx}[2020/06/25]
+\ProvidesFile{tudscr-frontmatter.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -45,10 +45,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -61,6 +62,8 @@
 % \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
 % \changes{v2.05}{2015/07/07}{Umgebung \env{abstract} für Poster}^^A
 %
+%
+%
 % \section{Befehle und Umgebungen für den Vorspann}
 %
 % Im Vorspann des Dokumentes kann der Benutzer eine Zusammenfassung oder auch 
@@ -71,10 +74,7 @@
 % werden die Begriffe \enquote*{Zusammenfassung}, \enquote*{Kurzfassung} sowie
 % \enquote*{Erklärung} für die unterschiedlichen Elemente als gleichwertige 
 % Synonyme verwendet. Die Schalter und Befehle zum Setzen der Optionen heißen
-% entweder \cs{tud@abstract@\dots} oder aber \cs{tud@declaration@\dots} je nach
-% Element.
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
+% entweder |\tud@abstract@...| oder |\tud@declaration@...| je nach Element.
 %
 % \iffalse
 %<*class&body>
@@ -95,9 +95,8 @@
   \global\let\tud@fm@set\tud@fm@first%
 %    \end{macrocode}
 % Danach erfolgt ggf. die Prüfung der resultierenden Seitenhöhe.
-% \ToDo{Warum ifnumless?}[v2.07]
 %    \begin{macrocode}
-  \ifnumless{\csuse{tud@#1@level@num}}{3}{% false/true/section
+  \ifnum\csuse{tud@#1@level@num}<3\relax% false/true/section
     \ifboolexpr{%
       bool {@titlepage} and bool {@tud@#1@fil} and bool {@tud@#1@multi}%
     }{%
@@ -124,12 +123,12 @@
 % jede Erklärung immer auf eine neue Seite gesetzt. Die Optionen zum vertikalen 
 % Zentrieren wird ignoriert. Auf eine Warnung für den Anwender wird verzichtet.
 %    \begin{macrocode}
-  }{% chapter
+  \else% chapter
 %<*book|report>
     \boolfalse{@tud@#1@multi}%
     \boolfalse{@tud@#1@fil}%
 %</book|report>
-  }%
+  \fi%
 %    \end{macrocode}
 % Zum Schluss wird ggf. der gesammelte Eintrag im Inhaltsverzeichnis erstellt.
 % Danach wird das übergebene Argument ausgeführt.
@@ -155,7 +154,7 @@
 %
 % \begin{macro}{\tud@fm@toc}
 % \changes{v2.04}{2015/03/20}{neu}^^A
-% \changes{v2.06}{2018/02/22}{Bugfix: \cs{csuse\{phantomsection\}} für Anker}^^A
+% \changes{v2.06}{2018/02/22}{Bugfix: \cs{phantomsection} für Anker}^^A
 % \begin{macro}{\tud@fm@@toc}
 % \changes{v2.04}{2015/03/20}{neu}^^A
 % Ist die Einstellung \val{tocaggregate} aktiv, wird der gesammelte Eintrag ins 
@@ -167,38 +166,36 @@
 % Der gesammelte Eintrag aller Überschriften ins Inhaltsverzeichnis. Dafür 
 % wird der komplette Inhalt in einer Box gesetzt und nur die Überschriften
 % aggregiert.
-% \ToDo{Warum ifnumodd?}[v2.07]
 %    \begin{macrocode}
   \ifbool{@tud@#1@multi}{%
     \begingroup%
       \let\tud@fm@@toc\@empty%
       \renewcommand*\tud@fm@head[2]{%
-        \protected@xdef\tud@fm@@toc{\tud@fm@@toc/##2}%
+        \protected@xdef\tud@fm@@toc{%
+          \ifx\tud@fm@@toc\@empty\else\tud@fm@@toc/\fi##2%
+        }%
       }%
       \let\clearpage\relax%
       \sbox\z@{\vbox{#2}}%
-      \ifx\tud@fm@@toc\@empty\else%
-        \protected@xdef\tud@fm@@toc{\expandafter\@gobble\tud@fm@@toc}%
-      \fi%
       \csuse{phantomsection}%
       \protected@edef\@tempa{%
         \endgroup%
         \ifx\tud@fm@@toc\@empty\else%
-          \noexpand\ifnumodd{\csname tud@#1@toc@num\endcsname}{%
+          \ifodd\csuse{tud@#1@toc@num}\relax
 %<*book|report>
             \noexpand\addchaptertocentry{}{\tud@fm@@toc}%
 %</book|report>
 %<*article>
             \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
 %</article>
-          }{%
+          \else
 %<*book|report>
             \noexpand\addsectiontocentry{}{\tud@fm@@toc}%
 %</book|report>
 %<*article>
             \noexpand\addsubsectiontocentry{}{\tud@fm@@toc}%
 %</article>
-          }%
+          \fi
         \fi%
       }%
     \@tempa%
@@ -389,7 +386,7 @@
 % \changes{v2.02}{2014/11/05}{Bugfix Kolumnentitel und Inhaltsverzeichnis}^^A
 % \changes{v2.04}{2015/04/21}{Abstände nur, wenn keine Zitatumgebung aktiv}^^A
 % Dieses Makro dient zur Ausgabe der Erklärungsüberschrift auf der gewünschten
-% Gliederungsebene. Die gewählte Ebene ist in \cs{tud@\meta{Typ}@level@num}
+% Gliederungsebene. Die gewählte Ebene ist in |\tud@|\meta{Typ}|@level@num|
 % gespeichert. Verwendet wird das Makro folgendermaßen:
 % \cs{tud@fm@head}\marg{Erklärungstyp}\marg{Überschrift}. Damit 
 % die ggf. aktive Option \opt{abstract/declaration}|=|\val{toc} funktionieren
@@ -397,7 +394,7 @@
 % mit dem Befehl \cs{phantomsection} aus dem Paket \pkg{hyperref}~-- wenn es 
 % tatsächlich geladen wurde~-- ein Anker für einen Hyperlink erzeugt.
 %
-% Ist \cs{tud@\meta{Typ}@toc@num} ungerade, so entspricht die Ebene des
+% Ist |\tud@|\meta{Typ}|@toc@num| ungerade, so entspricht die Ebene des
 % erzeugten Eintrags ins Inhaltsverzeichnis für \cls{tudscrartcl} normalerweise
 % dem eines Abschnitts, der für \cls{tudscrbook} und \cls{tudscrreprt} dem eines
 % Kapitels.\footnote{sonst sieht das Inhaltsverzeichnis recht bescheiden aus}
@@ -408,19 +405,20 @@
   \ifcase\csuse{tud@#1@level@num}\relax% false
     \if@titlepage\endgraf\fi%
     \csuse{phantomsection}%
-    \Ifstr{\@currenvir}{\tud@quoting}{}{%
+    \tud@if@strequal{\@currenvir}{\tud@quoting}{}{%
       \if@twocolumn%
-        \vskip\glueexpr\smallskipamount-\parskip\relax%
+        \vskip\smallskipamount%
       \else%
-        \vskip\glueexpr\bigskipamount-\parskip\relax%
+        \vskip\bigskipamount%
       \fi%
+      \vskip-\parskip%
     }%
   \or% true
     \if@titlepage\endgraf\fi%
     \csuse{phantomsection}%
     \@afterindentfalse%
-    \Ifstr{\@currenvir}{\tud@quoting}{}{%
-      \vskip\glueexpr\bigskipamount-\parskip\relax%
+    \tud@if@strequal{\@currenvir}{\tud@quoting}{}{%
+      \vskip\bigskipamount\vskip-\parskip%
     }%
     \begingroup%
       \noindent\centering%
@@ -429,7 +427,7 @@
       \endgraf%
     \endgroup%
     \nopagebreak%
-    \vskip\glueexpr\medskipamount-\parskip\relax%
+    \vskip\medskipamount\vskip-\parskip%
     \@afterheading%
   \or% section
     \section*{#2}%
@@ -523,7 +521,7 @@
 % \changes{v2.02}{2014/11/05}{neu}^^A
 % Das aus \KOMAScript{} bekannte Verhalten für die Zusammenfassung wird für die
 % beiden Klassen \cls{tudscrartcl} und \cls{tudscrreprt} adaptiert. Dazu werden
-% boolesche Schlüssel bei der Definiton der beiden Optionen \opt{abstract} und 
+% boolesche Schlüssel bei der Definition der beiden Optionen \opt{abstract} und 
 % \opt{declaration} eingefügt. Außerdem werden zusätzliche Werte zur Auswahl 
 % einer Gliederungsebene für die gesetzten Überschriften wie \cs{section} oder 
 % \cs{chapter}\footnote{nicht für \cls{tudscrartcl}} oder bereitgestellt, 
@@ -532,7 +530,7 @@
 %
 % Des Weiteren werden mehrere Schlüssel für die Anordnung und Positionierung
 % von Zusammenfassung bzw. Erklärungen bereitgestellt. Diese dienen dem Setzen
-% der  Optionen \opt{abstract} bzw. \opt{declaration} mit den Werten 
+% der Optionen \opt{abstract} bzw. \opt{declaration} mit den Werten 
 % \val{single/multi}, \val{toc/notoc}, \val{fill/nofill} sowie \val{leveldown}.
 %    \begin{macrocode}
 \newcommand*\tud@fm@switch{%
@@ -744,6 +742,7 @@
 %    \begin{macrocode}
 \DefineFamilyMember{KOMA}
 \DefineFamilyKey{KOMA}{abstract}[true]{%
+  \FamilyKeyStateUnknownValue%
   \AtEndOfFamilyOptions{\TUDoptions{abstract=#1}}%
 }
 %    \end{macrocode}
@@ -852,7 +851,7 @@
   \else%
 %</book|report|article>
     \ifnum\tud@abstract@level@num=\tw@\relax%
-      \vskip\glueexpr\bigskipamount-\parskip\relax%
+      \vskip\bigskipamount\vskip-\parskip%
     \fi%
 %<*book|report|article>
   \fi%
@@ -872,7 +871,7 @@
 % gesetzt, falls kein anderer mit \opt{pagestyle} angegeben wurde.
 %    \begin{macrocode}
   \TUD@parameter@def{markboth}[true]{%
-    \ifstrbool{#1}{%
+    \tud@if@strbool{#1}{%
       \@tud@abstract@markbothtrue%
       \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
     }{%
@@ -1106,7 +1105,7 @@
     \clearpage%
   \else%
     \ifnum\tud@declaration@level@num=\tw@\relax%
-      \vskip\glueexpr\bigskipamount-\parskip\relax%
+      \vskip\bigskipamount\vskip-\parskip%
     \fi%
   \fi%
 ]
@@ -1122,7 +1121,7 @@
   \TUD@parameter@def{columns}{\renewcommand*\tud@x@multicol@num{#1}}%
   \TUD@parameter@def{pagestyle}{\tud@fm@pagestyle{declaration}{#1}}%
   \TUD@parameter@def{markboth}[true]{%
-    \ifstrbool{#1}{%
+    \tud@if@strbool{#1}{%
       \@tud@declaration@markbothtrue%
       \ifx\tud@envir@ps\relax\def\tud@envir@ps{headings}\fi%
     }{%
@@ -1187,17 +1186,17 @@
   }%
 }
 \newcommand*\tud@fm@declaration[1][]{%
-  \ifbool{@tud@declarations}{%
+  \if@tud@declarations%
     \begingroup%
-      \tud@fm@@confirmation[\tud@fm@supporter,{#1}]%
+      \tud@fm@@confirmation[{\tud@fm@supporter,#1}]%
       \tud@fm@blocking[{#1}]%
     \endgroup%
-  }{%
-    \begin{declarations}[\tud@fm@supporter,{#1}]%
+  \else%
+    \begin{declarations}[{\tud@fm@supporter,#1}]%
       \tud@fm@@confirmation%
       \tud@fm@blocking%
     \end{declarations}%
-  }%
+  \fi%
 }
 %    \end{macrocode}
 % Mit \cs{nextdeclaration} kann eine freie Erklärung abgegeben werden. Dabei 
@@ -1207,16 +1206,16 @@
 % \cs{tud@fm@body@start} und \cs{tud@fm@body@end} notwendig ist.
 %    \begin{macrocode}
 \newcommand*\nextdeclaration[3][]{%
-  \ifbool{@tud@declarations}{%
+  \if@tud@declarations%
     \tud@fm@body@start{declaration}{#1}{#2}%
       #3%
     \tud@fm@body@end{declaration}%
-  }{%
+  \else%
     \ClassError{\TUD@Class@Name}{Incorrect usage of `\string\nextdeclaration'}{%
       The command `\string\nextdeclaration' can only be used\MessageBreak%
       within the environment `declarations'.%
     }%
-  }%
+  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \nextdeclaration
@@ -1254,13 +1253,13 @@
   \begingroup%
     \TUD@parameter@handler@default[declaration]{supporter}%
     \undef\KV@declaration@company%
-    \ifbool{@tud@declarations}{%
-      \tud@fm@@confirmation[\tud@fm@supporter,{#1}]%
-    }{%
-      \begin{declarations}[\tud@fm@supporter,{#1}]%
+    \if@tud@declarations%
+      \tud@fm@@confirmation[{\tud@fm@supporter,#1}]%
+    \else%
+      \begin{declarations}[{\tud@fm@supporter,#1}]%
         \tud@fm@@confirmation%
       \end{declarations}%
-    }%
+    \fi%
   \endgroup%
 }
 %    \end{macrocode}
@@ -1268,7 +1267,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@fm@@confirmation[1][]{%
   \tud@fm@body@start{declaration}{#1}{\confirmationname}%
-    \confirmationtext\vskip\z@\@confirmationclosing%
+    \confirmationtext\vskip\z@skip\@confirmationclosing%
   \tud@fm@body@end{declaration}%
 }
 %    \end{macrocode}
@@ -1291,13 +1290,13 @@
     \undef\KV@declaration@supporter%
     \undef\KV@declaration@closing%
     \undef\KV@declaration@confirmationclosing%
-    \ifbool{@tud@declarations}{%
+    \if@tud@declarations%
       \tud@fm@blocking[{#1}]%
-    }{%
+    \else%
       \begin{declarations}[{#1}]%
         \tud@fm@blocking%
       \end{declarations}%
-    }%
+    \fi%
   \endgroup%
 }
 %    \end{macrocode}
@@ -1317,6 +1316,6 @@
 %</book|report|article>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput

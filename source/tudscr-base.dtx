@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-base.dtx}[2020/06/25]
+\ProvidesFile{tudscr-base.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -45,10 +45,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -59,6 +60,8 @@
 % \selectlanguage{ngerman}
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+%
+%
 %
 % \section{Das Paket \pkg{tudscrbase} -- Basisdefinitionen für \TUDScript}
 %
@@ -76,14 +79,14 @@
 %    \end{macrocode}
 %
 % \ToDo{
-%   Schnittstelle äquivalent zu \cs{KOMA@kav@\dots}? Dann hierfür 
+%   Schnittstelle äquivalent zu \cs{KOMA@kav@...}? Dann hierfür 
 %   \pkg{etoolbox}-Listen und \cs{listadd} sowie \cs{listremove} nutzen
-% }[v2.??]
+% }[v2.08]
 % \ToDo{
 %   Teile im Quelltext suchen, die nur einmalig durchlaufen werden müssen 
 %   (bspw. notwendige Pakete und Schriften) und über aux-Eintrag abkürzen?!
 %   siehe \cs{TUD@CheckPackage}
-% }[v2.??]
+% }[v2.07]
 %^^A\BeforeClosingMainAux{%
 %^^A  \if@tud@xxx\if@filesw%
 %^^A    \immediate\write\@mainaux{%
@@ -93,7 +96,6 @@
 %^^A}
 %
 %
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 %    \begin{macrocode}
 %<*load>
@@ -115,8 +117,9 @@
 \AtBeginDocument{%
   \ifcsundef{scr@v@first}{}{%
 %    \end{macrocode}
-% Sollte die benötigte \KOMAScript-Version nicht vorhanden sein, wird ein 
-% Fehler erzeugt.
+% Es wird gerpüft, ob die mindestens benötigte \KOMAScript-Version
+% (v\csuse{TUD@KOMAVersionNumber}) verfügbar ist. Sollte dies nicht der Fall
+% sein, wird ein Fehler erzeugt.
 %    \begin{macrocode}
     \ifcsundef{scr@v@\TUD@KOMAVersionNumber}{%
       \PackageError{tudscrbase}{%
@@ -128,9 +131,8 @@
       }%
     }{%
 %    \end{macrocode}
-% Ist die mindestens nötige Version (\csname TUD@KOMAVersion\endcsname) von 
-% \KOMAScript{} installiert, wird geprüft, ob die Kompatibilitätseinstellung
-% akzeptabel ist.
+% Ist die mindestens nötige Version von \KOMAScript{} installiert, wird 
+% geprüft, ob die Kompatibilitätseinstellung akzeptabel ist.
 %    \begin{macrocode}
       \expandafter\ifnum\scr@v@is@lt{3.12}\relax%
         \PackageError{tudscrbase}{%
@@ -159,40 +161,48 @@
 % Makros, zur erweiterten Auswertung boolescher Ausdrücke und allgemein zur
 % Ablaufsteuerung benötigt.
 %    \begin{macrocode}
-\RequirePackage{iftex}[2019/11/07]
-\RequirePackage{etoolbox}[2019/09/21]
-\RequirePackage{xpatch}[2012/10/02]
-\RequirePackage{letltxmacro}[2019/12/03]
+\RequirePackage{iftex}
+\RequirePackage{etoolbox}
+\RequirePackage{xpatch}
+\RequirePackage{letltxmacro}
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
-% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v3.27]
+% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v2.07]
 %    \begin{macrocode}
-\RequirePackage{kvsetkeys}[2012/04/25]
+\RequirePackage{kvsetkeys}
 %    \end{macrocode}
 % Mit dem Paket \pkg{trimspaces} können eventuell vorhandene Leerzeichen aus
 % einem Argument entfernt. Dies wird beispielsweise beim Einlesen von Feldern 
 % oder bei der expliziten Auswahl einer Schrift des \CD sgenutzt.
 %    \begin{macrocode}
-\RequirePackage{trimspaces}[2009/09/17]
+\RequirePackage{trimspaces}
+%    \end{macrocode}
+% Für \pkg{hyperref} werden \cs{TUDScript} und \cs{KOMAScript} deaktiviert.
+%    \begin{macrocode}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
+  }%
+}
 %    \end{macrocode}
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
-%
 % \subsubsection{Erweiterte Definition von \TeX-Primitiven}
 %
 % Mit \LaTeX{} lassen sich einige Primitiven definieren, ohne zu Prüfen, ob 
 % ggf. bereits eine Definition vorhanden ist. Dies wird hiermit umgangen.
 % \begin{macro}{\tud@newif}
-% \changes{v2.07}{2019/09/29}{neu}^^A
+% \changes{v2.06o}{2022/07/27}{neu}^^A
 % \begin{macro}{\tud@newcount}
-% \changes{v2.07}{2019/09/29}{neu}^^A
+% \changes{v2.06o}{2022/07/27}{neu}^^A
 % \begin{macro}{\tud@newtoks}
-% \changes{v2.07}{2019/09/29}{neu}^^A
+% \changes{v2.06o}{2022/07/27}{neu}^^A
 % \begin{macro}{\tud@newread}
-% \changes{v2.07}{2019/09/29}{neu}^^A
+% \changes{v2.06o}{2022/07/27}{neu}^^A
 % \begin{macro}{\tud@newwrite}
-% \changes{v2.07}{2019/09/29}{neu}^^A
+% \changes{v2.06o}{2022/07/27}{neu}^^A
 %    \begin{macrocode}
 \newcommand*\tud@newif[1]{\@ifdefinable#1{\newif#1}}
 \newcommand*\tud@newcount[1]{\@ifdefinable#1{\newcount#1}}
@@ -205,88 +215,22 @@
 % \end{macro}^^A \tud@newtoks
 % \end{macro}^^A \tud@newcount
 % \end{macro}^^A \tud@newif
-% \begin{macro}{\tud@absnum}
-% \changes{v2.07}{2020/04/24}{neu}^^A
-% Mit diesem Befehl wird der Betrag eines numerischen Werte zurückgelifert.
-%    \begin{macrocode}
-\newcommand*\tud@absnum{}
-\def\tud@absnum#1\relax{%
-  \numexpr\ifnum\numexpr#1\relax<\z@-\fi\numexpr#1\relax\relax%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@absnum
 %
-% \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
-%
-% Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
-% gedacht sind.
-% \ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@res@\dots} ändern}[v2.??]
-% \ToDo{\cs{tud@reserved} in \cs{tud@res@?}, Achtung bei Dopplungen!}[v2.??]
-% \ToDo{Schlüssel sollten weiterhin \cs{@temp\dots}-Makros verwenden}[v2.??]
-% \ToDo{Makros mit \val{@num} in count ändern}[v2.??]
-% \begin{macro}{\tud@reserved}
-% \changes{v2.05}{2015/10/27}{neu}^^A
-% \begin{macro}{\tud@res@a}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\tud@res@b}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\tud@res@c}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\tud@res@d}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\if@tud@res@swa}
-% \changes{v2.06}{2018/07/12}{neu}^^A
-% \begin{macro}{\tud@res@cnt}
-% \changes{v2.06}{2019/06/13}{neu}^^A
-% Makros zur temporären Verwendung.
-%    \begin{macrocode}
-\newcommand*\tud@reserved{}
-\newcommand*\tud@res@a{}
-\newcommand*\tud@res@b{}
-\newcommand*\tud@res@c{}
-\newcommand*\tud@res@d{}
-\tud@newif\if@tud@res@swa
-\tud@newcount\tud@res@cnt
-%    \end{macrocode}
-% \end{macro}^^A \tud@res@cnt
-% \end{macro}^^A \if@tud@res@swa
-% \end{macro}^^A \tud@res@d
-% \end{macro}^^A \tud@res@c
-% \end{macro}^^A \tud@res@b
-% \end{macro}^^A \tud@res@a
-% \end{macro}^^A \tud@reserved
-% \begin{macro}{\tud@toks@}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\addto@hook@expandafter}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Es wird ein token-Regsiter reserviert, welches im weiteren Verlauf an allen
-% möglichen Punkten verwendet wird. Mit \cs{addto@hook@expandafter} wird~-- in 
-% Ergänzung zu \cs{addto@hook} aus dem \LaTeXe"~Kernel~-- ein Makro zum Anfügen
-% des expandierten Arguments an ein token-Register bereitgestellt.
-%    \begin{macrocode}
-\tud@newtoks\tud@toks@
-\newcommand*\addto@hook@expandafter[2]{%
-  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \addto@hook@expandafter
-% \end{macro}^^A \tud@toks@
-%
-% \subsubsection{Definiton von Längen-Registern}
+% \subsubsection{Definition von Längen-Registern}
 %
 % \begin{macro}{\tud@newglue}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@newdim}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@setglue}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@setdim}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@addtoglue}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@addtodim}
-% \changes{v2.07}{2019/11/24}{neu}^^A
-% Der \LaTeXe"~Kernel stellt lediglich \cs{newlength} zur Verfügung, um bereits 
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Der \LaTeX"~Kernel stellt lediglich \cs{newlength} zur Verfügung, um bereits 
 % bestehende Makros nicht zu überschreiben. Soll jedoch ein \cs{dimen}-Register 
 % definiert werden, gibt es keinen entsprechenden Befehl. Auch die Zuweisung 
 % von Längenwerte kann mit \cs{setlength} nicht sauber erfolgen, da nicht 
@@ -348,7 +292,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@res@glue
 % \begin{macro}{\tud@if@lengthregister}
-% \changes{v2.07}{2019/11/26}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % Prüft, ob der übergebene Befehl ein \cs{skip}"~ oder \cs{dimen}-Register ist.
 %    \begin{macrocode}
 \newcommand*\tud@if@lengthregister[1]{%
@@ -366,7 +310,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@lengthregister
 % \begin{macro}{\tud@length@setabsolute}
-% \changes{v2.07}{2019/11/24}{neu}^^A
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % Um Schlüssel für Längen definieren zu können, die zwingend positiv sind, kann 
 % dieses Makro genutzt werden. Übergeben werden muss entweder eine Länge oder 
 % ein Makro, welches einen Längenausdruck enthält.
@@ -385,14 +329,180 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@length@setabsolute
-% \begin{macro}{\tud@length@to@string}
-% \changes{v2.07}{2019/11/23}{neu}^^A
+%
+% \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
+%
+% Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
+% gedacht sind.
+% \ToDo{sämtliche \cs{@temp...}-Makros auf \cs{tud@res@...} ändern}[v2.07]
+% \ToDo{\cs{tud@reserved} in \cs{tud@res@...}, Achtung bei Dopplungen!}[v2.07]
+% \ToDo{Schlüssel sollten weiterhin \cs{@temp...}-Makros verwenden}[v2.07]
+% \ToDo{Makros mit \val{@num} in count ändern}[v2.07]
+% \begin{macro}{\tud@reserved}
+% \changes{v2.05}{2015/10/27}{neu}^^A
+% \begin{macro}{\tud@res@a}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@res@b}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@res@c}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@res@d}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\if@tud@res@swa}
+% \changes{v2.06}{2018/07/12}{neu}^^A
+% \begin{macro}{\tud@res@cnt}
+% \changes{v2.06}{2019/06/13}{neu}^^A
+% Makros zur temporären Verwendung.
+%    \begin{macrocode}
+\newcommand*\tud@reserved{}
+\newcommand*\tud@res@a{}
+\newcommand*\tud@res@b{}
+\newcommand*\tud@res@c{}
+\newcommand*\tud@res@d{}
+\tud@newif\if@tud@res@swa
+\tud@newcount\tud@res@cnt
+%    \end{macrocode}
+% \end{macro}^^A \tud@res@cnt
+% \end{macro}^^A \if@tud@res@swa
+% \end{macro}^^A \tud@res@d
+% \end{macro}^^A \tud@res@c
+% \end{macro}^^A \tud@res@b
+% \end{macro}^^A \tud@res@a
+% \end{macro}^^A \tud@reserved
+% \begin{macro}{\tud@toks@}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\addto@hook@expandafter}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% Es wird ein token-Regsiter reserviert, welches im weiteren Verlauf an allen
+% möglichen Punkten verwendet wird. Mit \cs{addto@hook@expandafter} wird~-- in 
+% Ergänzung zu \cs{addto@hook} aus dem \LaTeX"~Kernel~-- ein Makro zum Anfügen
+% des expandierten Arguments an ein token-Register bereitgestellt.
+%    \begin{macrocode}
+\tud@newtoks\tud@toks@
+\newcommand*\addto@hook@expandafter[2]{%
+  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \addto@hook@expandafter
+% \end{macro}^^A \tud@toks@
+%
+% \subsubsection{Verzweigung für Präambel und Dokument}
+%
+% \begin{macro}{\tud@if@preamble}
+% \changes{v2.05o}{2022/07/25}{als Ersatz für \cs{if@atdocument}}^^A
+% Mit \KOMAScript~v3.37 wurde das Aktivieren des Schalters \cs{if@atdocument} 
+% aufgrund des stark veränderten und damit leider nur bedingt deterministischen 
+% \hrfn{https://sourceforge.net/p/koma-script/tickets/23/}{Hook-Managements} 
+% des Kernels auf |begindocument/before| verschoben. Dieser Befehl wird als
+% Gegenstück definiert und führt in Abhängigkeit von |begindocument/after| 
+% Quelltext verzweigt aus.
+%    \begin{macrocode}
+\newcommand*\tud@if@preamble{}
+\let\tud@if@preamble\@firstoftwo
+\AfterEndPreamble{\let\tud@if@preamble\@secondoftwo}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@preamble
+%
+% \subsubsection{Strings}
+% \minisec{Expandierte Tests}
+%
+% \begin{macro}{\tud@if@strequal}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strstart}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strempty}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% \begin{macro}{\tud@if@strblank}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
+% Hiermit wird geprüft, ob ein String gleich, leer oder blank (Leerzeichen)
+% ist, wobei die gegebene Argumente expandiert werden. In ihrer Syntax sind 
+% sie identisch zu den aus aus \pkg{etoolbox} stammenden und unterlagerten
+% Befehlen \cs{ifstrequal}, \cs{ifstrempty} und \cs{ifblank}. Der Befehl 
+% \cs{tud@if@strstart} nutzt \cs{Ifstrstart} von \KOMAScript.
+%    \begin{macrocode}
+\newcommand*\tud@if@strequal[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifstrequal{#1}{#2}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strstart[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Ifstrstart{\noexpand\detokenize{#1}}{\noexpand\detokenize{#2}}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strempty{\tud@if@strequal{}}
+\newcommand*\tud@if@strblank[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifblank{#1}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@strblank
+% \end{macro}^^A \tud@if@strempty
+% \end{macro}^^A \tud@if@strstart
+% \end{macro}^^A \tud@if@strequal
+%
+% \minisec{Test auf booleschen Ausdruck in Form eines Strings}
+%
+% \begin{macro}{\tud@if@strbool}
+% \changes{v2.03}{2015/01/09}{neu}^^A
+% Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
+% Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
+% interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
+% \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
+% kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
+% \newline
+% \cs{tud@if@strbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
+%    \begin{macrocode}
+\newcommand*\tud@if@strbool[4]{%
+  \TUD@set@ifkey{strbool}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa#2\else#3\fi%
+  \else%
+    #4
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@strbool
+%
+% \minisec{Erzwungene Kleinschreibung von Strings}
+%
+% \begin{macro}{\tud@strlowercase}
+% Dieses Makro expandiert das zweite Argument, setzt es in Minuskeln und
+% speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
+% wird zum Beispiel benötigt, um bestimmte Werte bei Schlüssel-Wert-Paaren,
+% Schlüsselwörtern in einigen Feldern oder auch Einheiten bei Längenangaben
+% sicher erkennen zu können. Die Syntax lautet:
+% \newline
+% \cs{tud@strlowercase}\marg{Zielmakro}\marg{String} benutzt.
+%    \begin{macrocode}
+\newcommand*\tud@strlowercase[2]{%
+  \protected@edef#1{%
+    \lowercase{\def\noexpand#1{#2}}%
+  }#1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@strlowercase
+%
+% \minisec{Ausgabe einer Länge als Strings}
+%
+% \begin{macro}{\tud@strlength}
+% \changes{v2.06o}{2022/07/28}{neu}^^A
 % Die direkte Verwendung von \cs{the} auf ein \cs{skip}-Register hat zur Folge, 
 % dass die Einheit \val{pt} mit die Charactercodes \val{12} zurückgegeben 
 % werden, was bei der Weiterverarbeitung unter Umständen Probleme bereitet. 
 % Dieses Makro löst das Problem.
 %    \begin{macrocode}
-\newcommand*\tud@length@to@string[2]{%
+\newcommand*\tud@strlength[2]{%
   \begingroup%
     \def\tud@res@c{\glueexpr#2\relax}%
     \edef\tud@res@a{\strip@pt\dimexpr\tud@res@c\relax pt}%
@@ -417,97 +527,7 @@
   \tud@res@a%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@length@to@string
-%
-%
-% \subsubsection{Strings}
-% \minisec{Expandierte Tests}
-%
-% \begin{macro}{\tud@if@strequal}
-% \changes{v2.07}{2020/02/07}{neu}^^A
-% \begin{macro}{\tud@if@strempty}
-% \changes{v2.07}{2020/02/07}{neu}^^A
-% \begin{macro}{\tud@if@strblank}
-% \changes{v2.07}{2020/02/07}{neu}^^A
-% Hiermit wird geprüft, ob ein String gleich, leer oder blank (Leerzeichen)
-% ist. In ihrer Syntax sind die Befehle identisch zu \cs{ifstrequal},
-% \cs{ifstrempty} und \cs{ifblank}, allerdings werden er im Gegensatz zu diesen 
-% die gegebene Argumente expandiert.
-% \ToDo{\cs{ifxblank} raus}[v2.07]
-% \ToDo{ifblank, ifstrequal/ifstrempty/Ifstr suchen und ersetzen}[v2.07]
-%    \begin{macrocode}
-\newcommand*\ifxblank{\tud@if@strblank}
-\newcommand*\tud@if@strequal[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\ifstrequal{#1}{#2}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@if@strempty{\tud@if@strequal{}}
-\newcommand*\tud@if@strblank[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\ifblank{#1}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@strblank
-% \end{macro}^^A \tud@if@strempty
-% \end{macro}^^A \tud@if@strequal
-%
-% \minisec{Test auf booleschen Ausdruck in Form eines Strings}
-%
-% \begin{macro}{\ifstrbool}
-% \changes{v2.03}{2015/01/09}{neu}^^A
-% Dieser Befehl dient zum Testen, ob ein gegebener String als boolescher 
-% Ausdruck interpretiert werden kann. Ist der String als \enquote{wahr} 
-% interpretierbar, wird das zweite Argument ausgeführt. Kann der String als 
-% \enquote{falsch} angesehen werden, dementsprechen das dritte. Ist der String 
-% kein logischer Wert, kommt das letzte Argument zum Tragen. Die Syntax lautet:
-%
-% \cs{ifstrbool}\marg{Argument}\marg{Wahr}\marg{Falsch}\marg{Andernfalls}
-% \ToDo{nur als internen Befehl definieren \cs{tud@if@...}}[v2.07]
-% \ToDo{> \cs{tud@if@bool@else} und mit \cs{TUD@set@ifkey} umsetzen}[v2.07]
-%    \begin{macrocode}
-\newcommand*\ifstrbool[4]{%
-  \Ifstr{#1}{true}{#2}{%
-    \Ifstr{#1}{on}{#2}{%
-      \Ifstr{#1}{yes}{#2}{%
-        \Ifstr{#1}{false}{#3}{%
-          \Ifstr{#1}{no}{#3}{%
-            \Ifstr{#1}{off}{#3}{%
-              #4%
-            }%
-          }%
-        }%
-      }%
-    }%
-  }%
-}
-%    \end{macrocode}
-% \end{macro}^^A \ifstrbool
-%
-% \minisec{Erzwungene Kleinschreibung von Strings}
-%
-% \begin{macro}{\tud@lowerstring}
-% Dieses Makro expandiert das zweite Argument, setzt es in Minuskeln und
-% speichert das Ergebnis in den im ersten Argument angegebenen Befehl. Dies 
-% wird zum Beispiel benötigt, um bestimmte Werte bei bei Schlüssel-Wert-Paaren,
-% Schlüsselwörter in einigen Feldern oder auch Einheiten bei Längenangaben
-% sicher erkennen zu können.
-% \ToDo{in \cs{tud@strlowercase} umbenennen, optionales Arg wie svg?}[v2.07]
-%    \begin{macrocode}
-\newcommand*\tud@lowerstring[2]{%
-  \protected@edef#1{%
-    \lowercase{\def\noexpand#1{#2}}%
-  }#1%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lowerstring
+% \end{macro}^^A \tud@strlength
 %
 % \minisec{Entfernen aller Leerzeichen in Strings}
 %
@@ -517,25 +537,13 @@
 % \cs{TUD@set@dimkey} eine Warnung auszugeben, falls das übergebene Argument 
 % fehlerhaft formatiert ist, wobei Unterschiede bei Leerzeichen ignoriert 
 % werden sollen.
-%\ToDo{%
-%  \protecting{\texttt{\detokenize{\expandafter\zap@space\tud@res@a \@empty}}}%
-% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@remove@spaces@within[1]{%
   \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \def\tud@res@b##1 ##2\@nil{%
-      \appto\tud@res@c{##1}%
-      \IfArgIsEmpty{##2}{}{\tud@res@b##2\@nil}%
-    }%
-    \edef\tud@res@c{%
-      \unexpanded{\let\tud@res@c\@empty}%
-      \noexpand\tud@res@b\expandonce\tud@res@a\space\noexpand\@nil%
-    }%
-    \tud@res@c%
+    \protected@edef\tud@res@a{\noexpand\zap@space#1\space\noexpand\@empty}%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\tud@res@c}%
+      \unexpanded{\def#1}{\tud@res@a}%
     }%
   \tud@res@a%
 }
@@ -547,18 +555,20 @@
 % \begin{macro}{\iflanguageloaded}
 % \changes{v2.05}{2015/11/23}{neu}^^A
 % Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist.
-% \ToDo{ist Befehl noch sinnvoll? use polyglossia \cs{xpg@[b]loaded}?}[v2.07]
-% \ToDo{für polyglossia auch mit \cs{ifbabellanguageloaded} testen?}[v2.07]
-% \ToDo{besser nur als internen Befehl definieren \cs{tud@if@...}?!}[v2.07]
 %    \begin{macrocode}
-\newcommand*\iflanguageloaded[1]{%
-  \PackageWarning{tudscrbase}{%
-    Whether package `babel' nor package `polyglossia' has been loaded%
+\AtEndPreamble{%
+  \providecommand*\iflanguageloaded[1]{%
+    \PackageWarning{tudscrbase}{%
+      `\string\iflanguageloaded' is not defined. Loading\MessageBreak%
+      either package `babel' or package `polyglossia'\MessageBreak%
+      is recommended%
+    }%
+    \def\iflanguageloaded##1{\expandafter\@secondoftwo}%
+    \iflanguageloaded{#1}%
   }%
-  \expandafter\@secondoftwo%
 }
 \AfterPackage*{babel}{%
-  \renewcommand*\iflanguageloaded[1]{%
+  \providecommand*\iflanguageloaded[1]{%
     \@expandtwoargs\in@{,#1,}{,\bbl@loaded,}%
     \ifin@%
       \expandafter\@firstoftwo%
@@ -567,16 +577,15 @@
     \fi%
   }%
 }
-\BeforePackage{polyglossia}{\undef\iflanguageloaded}
 %    \end{macrocode}
 % \end{macro}^^A \iflanguageloaded
 %
 % \subsubsection{Expansion geschützter Makros}
 %
-% Im \LaTeXe"~Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher 
-% zwei Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt 
-% die Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung 
-% von \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
+% Im \LaTeX"~Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei
+% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
+% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
+% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
 % \begin{macro}{\protected@expandtwoargs}
 % \changes{v2.02}{2014/11/13}{neu}^^A
 % Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
@@ -684,14 +693,14 @@
 % Varianten getestet. Zunächst die Standardvariante in Kleinschreibung\dots
 %    \begin{macrocode}
     \@tud@res@swatrue%
-    \tud@lowerstring\tud@res@a{#1#2.fd}%
+    \tud@strlowercase\tud@res@a{#1#2.fd}%
     \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
 %    \end{macrocode}
 % \dots gefolgt von der Variante mit Kleinschreibung der Kodierung und dem 
 % Namen der Schrift wie angegeben\dots
 %    \begin{macrocode}
     \if@tud@res@swa%
-      \tud@lowerstring\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@a{#1}%
       \edef\tud@res@a{\tud@res@a#2.fd}%
       \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
     \fi%
@@ -738,6 +747,7 @@
 %
 % Der Befehl \cs{tud@cs@letltx} nutzt intern \cs{LetLtxMacro} aus dem Paket 
 % \pkg{letltxmacro}, um auch robust definierte Befehle korrekt zu sichern.
+% \ToDo{Kernel stellt mittlerweiele \cs{NewCommandCopy} bereit}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cs@letltx[2]{%
   \expandafter\expandafter\expandafter\LetLtxMacro%
@@ -745,12 +755,12 @@
 }
 %    \end{macrocode}
 % Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
-% angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
+% angegebene Befehl in einem neuem Makro |\@@tud@|\meta{Befehlsname}
 % gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
 % einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
 % jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
 % Durch das Makro \cs{tud@cs@restore}\marg{Befehlsname} wird das mit
-% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
+% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch gelöscht. Der
 % ursprüngliche Befehl kann als solcher mit \cs{tud@cs@use}\marg{Befehlsname}
 % weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
 % \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
@@ -824,7 +834,7 @@
     \if@tud@res@swa%
       \aftergroup\@firstofone%
     \else%
-      \PackageError{tudscrbase}{`\@backslashchar#1' is not a macro}{%
+      \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined macro}{%
         The macro `\@backslashchar#1' was never defined. \MessageBreak%
         Please contact the TUD-Script maintainer\MessageBreak%
         via \TUDScriptContact. A bugfix is urgently required.%
@@ -881,18 +891,16 @@
   }%
 }
 \newcommand*\tud@cslength@check[1]{%
-  \begingroup%
-    \expandafter\tud@if@lengthregister\expandafter{\csname#1\endcsname}{%
-      \aftergroup\@firstofone%
-    }{%
-      \PackageError{tudscrbase}{`\@backslashchar#1' is not a length}{%
-        The length `\@backslashchar#1' was never defined. \MessageBreak%
-        Please contact the TUD-Script maintainer\MessageBreak%
-        via \TUDScriptContact. A bugfix is urgently required.%
-      }%
-      \aftergroup\@gobble%
+  \expandafter\tud@if@lengthregister\expandafter{\csname #1\endcsname}{%
+    \expandafter\@firstofone%
+  }{%
+    \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined length}{%
+      The length `\@backslashchar#1' was never defined. \MessageBreak%
+      Please contact the TUD-Script maintainer\MessageBreak%
+      via \TUDScriptContact. A bugfix is urgently required.%
     }%
-  \endgroup%
+    \expandafter\@gobble%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cslength@check
@@ -904,6 +912,7 @@
 % um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
 % bereits definierte Befehle anzupassen. Falls dies nicht gelingt, wird eine 
 % Warnung ausgegeben, die hier definiert wird.
+% \ToDo{generelle Schnittstelle schaffen und failure hier behandeln}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@patch@wrn[1]{%
   \PackageWarning{tudscrbase}{%
@@ -959,7 +968,7 @@
 % aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
 % unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
 % geschaffen. Hierfür wird für jede Option ein korrelierende Schalter 
-% \cs{if@tud@key@\meta{Schlüssel}@set} definiert. Dieser wird auf \val{true} 
+% |\if@tud@key@|\meta{Schlüssel}|@set| definiert. Dieser wird auf \val{true} 
 % gesetzt, sobald der Schlüssel explizit gesetzt wurde, womit ein Standardwert 
 % einer Klassenoption überschrieben werden kann. Das Setzen der Standardwerte 
 % erfolgt intern mit dem Befehl \cs{TUD@key@preset}.
@@ -967,7 +976,7 @@
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
 %    \end{macrocode}
 % Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
-% erzeugt (\cs{if@tud@key@\meta{Schlüssel}@set}), welche im Falle des direkten
+% erzeugt (|\if@tud@key@|\meta{Schlüssel}|@set|), welche im Falle des direkten
 % Aufrufs des Schlüssels, ein Überschreiben mit einem Standardwert verhindert.
 %    \begin{macrocode}
   \providebool{@tud@key@#2@set}%
@@ -995,7 +1004,7 @@
   }%
 }
 %    \end{macrocode}
-% Es kann intern über \cs{if@tud@key@\meta{Schlüssel}@set} geprüft werden, ob
+% Es kann intern über |\if@tud@key@|\meta{Schlüssel}|@set| geprüft werden, ob
 % einem Schlüssel ein explizites Wert zugewiesen wurde. Sollte dies nicht der
 % Fall sein, kann dieser hiermit intern beliebig angepasst werden. Da es durch 
 % das Setzen der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese
@@ -1023,7 +1032,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@ifkey[3]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#3}%
+    \tud@strlowercase\tud@res@a{#3}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
@@ -1041,7 +1050,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@numkey[4]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#4}%
+    \tud@strlowercase\tud@res@a{#4}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
@@ -1056,17 +1065,16 @@
   {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
 }
 %    \end{macrocode}
-% \end{macro}^^A \TUD@set@numkey
 % \end{macro}^^A \TUD@bool@numkey
+% \end{macro}^^A \TUD@set@numkey
 % \begin{macro}{\TUD@set@gluekey}
-% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
-% \changes{v2.07}{2019/11/21}{überarbeitet, Trennung in Skip und Dimension}^^A
+% \changes{v2.06o}{2022/08/01}{neu}^^A
 % \begin{macro}{\tud@normalize@gluekey}
-% \changes{v2.07}{2019/11/21}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}^^A
 % \begin{macro}{\tud@normalize@@gluekey}
-% \changes{v2.07}{2019/11/21}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}^^A
 % \begin{macro}{\tud@validate@gluekey}
-% \changes{v2.07}{2019/11/21}{neu}^^A
+% \changes{v2.06o}{2022/08/01}{neu}^^A
 % Mit \cs{TUD@set@gluekey} und \cs{TUD@set@dimkey} wird der übergebene Wert
 % entweder als Skip (Länge mit Kleister) oder Dimension (Länge ohne Kleister)
 % im spezifizierten Makro gespeichert, wobei auf eine gültige Eingabe geprüft 
@@ -1080,7 +1088,7 @@
 %    \begin{macrocode}
 \newcommand*\TUD@set@gluekey[4][pt]{%
   \begingroup%
-    \tud@lowerstring\tud@res@a{#4}%
+    \tud@strlowercase\tud@res@a{#4}%
 %    \end{macrocode}
 % Es wird geprüft, ob das Argument zu einem String expandiert. Ist dies der
 % Fall, wird die vermeintliche Längenangabe mit \cs{tud@normalize@gluekey} 
@@ -1091,20 +1099,7 @@
     \edef\tud@res@b{\detokenize\expandafter{\tud@res@a}}%
     \edef\tud@res@c{\detokenize\expandafter{\@backslashchar}}%
     \@expandtwoargs\in@{\tud@res@c}{\tud@res@b}%
-    \ifin@%
-%    \end{macrocode}
-% Unter Umständen könnten auch noch Zähler und numerische Ausdrücke beachtet 
-% werden, allerdings halte ich dies für nicht sehr sinnvoll.
-%    \begin{macrocode}
-%<*donotuse>
-      \Ifiscount{\tud@res@a}{%
-        \protected@edef\tud@res@a{\numexpr\tud@res@a\relax}%
-      }{}%
-      \Ifisnumexpr{\tud@res@a}{%
-        \protected@edef\tud@res@a{\dimexpr\tud@res@a #1\relax}%
-      }{}%
-%</donotuse>
-    \else%
+    \ifin@\else%
       \tud@normalize@gluekey\tud@res@a{#1}%
     \fi%
 %    \end{macrocode}
@@ -1128,7 +1123,7 @@
 % interpretierenden String und im zweiten die ggf. zu setzende Einheit. Dieser
 % String wird in den Basiswert und möglichen Kleister aufgetrennt, wobei
 % hierbei auch eine vertauschte und eigentlich fehlerhafte Angabe von Kleister
-% in der Form \verb=... minus ... plus ...= verarbeitet wird.
+% in der Form |... minus ... plus ...| verarbeitet wird.
 %    \begin{macrocode}
 \newcommand*\tud@normalize@gluekey[2]{%
   \begingroup%
@@ -1228,7 +1223,7 @@
 %    \end{macrocode}
 % Danach wird mit \cs{Ifdimen} geprüft, ob die Angabe tatsächlich eine Länge
 % ist. Hier kommt zum Tragen, das \cs{Ifdimen} auch wahr ist, wenn lediglich 
-% eine gültige Einheit ohne Maßzahl (\cs{Ifdimen}\verb={pt}=) angegeben wird.
+% eine gültige Einheit ohne Maßzahl (\cs{Ifdimen}|{pt}|) angegeben wird.
 % Für Werte ohne Dimensionsangabe wird gegebenenfalls einfach das optionale
 % Argument als intendierte angenommen. Sollte es sich bei dem Argument nicht um
 % einen String sondern um eine \TeX"~Primitive oder ein geschütztes Makro
@@ -1263,9 +1258,9 @@
         \Ifdimen{\tud@res@a pt}{\@tud@res@swatrue}{\@tud@res@swafalse}%
         \if@tud@res@swa%
           \appto\tud@res@a{fil##2}%
-          \Ifstr{##2}{}{}{%
-            \Ifstr{##2}{l}{}{%
-              \Ifstr{##2}{ll}{}{\@tud@res@swafalse}%
+          \tud@if@strequal{##2}{}{}{%
+            \tud@if@strequal{##2}{l}{}{%
+              \tud@if@strequal{##2}{ll}{}{\@tud@res@swafalse}%
             }%
           }%
         \fi%
@@ -1319,6 +1314,7 @@
 % \end{macro}^^A \TUD@set@gluekey
 % \begin{macro}{\TUD@set@dimkey}
 % \changes{v2.05}{2016/06/15}{neu}^^A
+% \changes{v2.06}{2018/08/01}{forcierte Kleinschreibung Schlüsselwerte}^^A
 % Zur Angabe von Dimensionen wird auf \cs{TUD@set@gluekey} zurückgegriffen 
 % und anschließend geprüft, ob das Argument für \cs{dimen} genutzt werden kann.
 %    \begin{macrocode}
@@ -1353,7 +1349,7 @@
           \Ifisglue{\tud@res@a}{%
             \Ifisdimension{\tud@res@a}{}{%
               \setlength\@tempdima{\dimexpr\glueexpr\tud@res@a\relax\relax}%
-              \tud@length@to@string\tud@res@a{\@tempdima}%
+              \tud@strlength\tud@res@a{\@tempdima}%
               \def\tud@res@b{something containing glue}%
               \@tud@res@swatrue%
             }%
@@ -1392,6 +1388,9 @@
 \newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
 %    \end{macrocode}
 % \end{macro}^^A \TUD@unknown@keyval
+%
+% \subsubsection{Voreinstellungen für abhängige Optionen}
+%
 % \begin{macro}{\tud@locked@newnum}
 % \begin{macro}{\tud@locked@num@preset}
 % \begin{macro}{\tud@locked@num@set}
@@ -1399,10 +1398,11 @@
 % definieren, für das mit \cs{tud@locked@num@preset}\marg{Name}\marg{Definition}
 % eine Voreinstellung definiert werden kann, solange der Wert nicht mit
 % \cs{tud@locked@num@set}\marg{Name}\marg{Definition} explizit überschrieben
-% wurde.
+% wurde. Damit ist es möglich, Voreinstellungen abhängig von anderen Optionen 
+% zu realisieren.
 %    \begin{macrocode}
 \newcommand*\tud@locked@newnum[2]{%
-  \expandafter\newcommand\expandafter*\csname#1\endcsname{#2}%
+  \expandafter\newcommand\expandafter*\csname #1\endcsname{#2}%
   \newbool{#1@locked}%
   \tud@num@set{#1}{#2}%
 }
@@ -1468,7 +1468,7 @@
   \booltrue{#1@locked}%
 }
 \newcommand*\tud@bool@set[2]{%
-  \ifstrbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
+  \tud@if@strbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
     \PackageError{tudscrbase}{%
       `#2' is not a valid boolean expression%
     }{%
@@ -1489,7 +1489,7 @@
 % \begin{macro}{\TUD@parameter@family}
 % \begin{macro}{\TUD@parameter@@family}
 % \begin{macro}{\TUD@parameter@checkfamily}
-% Mit \cs{TUD@parameter@family}\marg{Familienname}\marg{Definitionen} können  
+% Mit \cs{TUD@parameter@family}\marg{Familienname}\marg{Definitionen} können
 % für die optionalen Argumente von Befehlen Schlüssel-Wert-Parameter definiert
 % werden. Das erste Argument definiert den Familiennamen für den jeweiligen 
 % Befehl, welcher eindeutig gewählt werden sollte. Dieser wird im Hilfsmakro
@@ -1503,7 +1503,7 @@
 % \ToDo{
 %   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
 %   KOMA-Option \val{@else@} verwenden?
-% }[v3.27]
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@@family{}
 \newcommand*\TUD@parameter@family[2]{%
@@ -1515,7 +1515,7 @@
 % Dieser Befehl prüft, ob eine Familie für den Paramter definiert wurde.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@checkfamily[2]{%
-  \ifxblank{#1}{%
+  \tud@if@strblank{#1}{%
     \PackageError{tudscrbase}{%
       No family for \@backslashchar#2 defined%
     }{%
@@ -1545,8 +1545,8 @@
   \expandafter\define@key\expandafter{#1}%
 }
 %    \end{macrocode}
-% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann entsprechend zur
-% \mbox{\TeX"~Primitive \cs{let}} die Definition der Verarbeitung eines
+% Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann äquivalent zur
+% \mbox{\TeX-Primitive \cs{let}} die Definition der Verarbeitung eines
 % Parameters auf einen weiteren übertragen werden.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@let[3][\TUD@parameter@@family]{%
@@ -1637,12 +1637,12 @@
 % \ToDo{
 %   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
 %   KOMA-Option \val{@else@} verwenden?
-% }[v3.27]
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
   \expandafter\kv@set@family@handler\expandafter{#1}{%
-    \Ifstr{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
+    \tud@if@strequal{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
   }%
 }
 %    \end{macrocode}
@@ -1674,17 +1674,17 @@
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@default[2][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@default}%
-  \ifxblank{#2}{%
+  \tud@if@strblank{#2}{%
     \def\@tempa{\let\tud@reserved\relax}%
   }{%
     \def\@tempa{\def\tud@reserved{#2=\kv@value}}%
   }%
   \appto\@tempa{%
-    \Ifstr{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
+    \tud@if@strequal{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
     \Ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
     \iflanguageloaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
     \ifx\tud@reserved\relax%
-      \ifxblank{\kv@value}{}{%
+      \tud@if@strblank{\kv@value}{}{%
         \PackageError{tudscrbase}{%
           Unknown default value `\kv@value'%
         }{%
@@ -1726,11 +1726,16 @@
 % Ladezustand eines Paketes auszuführen.
 % \begin{macro}{\TUD@UnwindPackage}
 % \changes{v2.05}{2015/10/28}{neu}^^A
+% \changes{v2.06o}{2022/08/02}{Sternversion}^^A
 % Dieser Befehl dient zur Ausführung von Quelltext, falls ein Paket bis zum 
 % Ende der Dokumentpräambel nicht geladen wurde. Im ersten obligatorischen
-% Argument wird das Paket angegeben, im zweiten der Quellcode.
+% Argument wird das Paket angegeben, im zweiten der Quellcode. Die Sternversion 
+% führt den Quellcode auch nach dem Laden des Paketes aus.
 %    \begin{macrocode}
-\newcommand*\TUD@UnwindPackage[2]{\AtEndPreamble{\@ifpackageloaded{#1}{}{#2}}}
+\NewDocumentCommand\TUD@UnwindPackage{s m m}{%
+  \IfBooleanT{#1}{\AfterPackage*{#2}{#3}}%
+  \AtEndPreamble{\@ifpackageloaded{#2}{}{#3}}%
+}
 \@onlypreamble\TUD@UnwindPackage
 %    \end{macrocode}
 % \end{macro}^^A \TUD@UnwindPackage
@@ -1755,15 +1760,17 @@
       is urgently required. An erroneous output\MessageBreak%
       may occur. Please update your distribution%
     }%
-    \IfFileExists{#1.sty}{}{\RequirePackage{#1}[{#2}]}%
+    \IfFileExists{#1.sty}{}{\RequirePackage{#1}[#2]}%
   }%
 }
 \@onlypreamble\TUD@CheckPackage
 %    \end{macrocode}
 % Hiermit wird geprüft, ob ein installiertes Paket in einer bestimmten Version
 % vorhanden ist, ohne dieses zu laden. Hierfür wird die Datei zeilenweise 
-% gelesen, bis der Eintrag \cs{ProvidesPackage\marg{Paketname}\oarg{Version}} 
-% gefunden wird. 
+% gelesen, bis der Eintrag \cs{ProvidesPackage}\marg{Paketname}\oarg{Version} 
+% gefunden wird.
+% \ToDo{kann \cs{@ifl@t@r} ersetzt werden?}[v2.07]
+% \ToDo{Name in \cs{IfPackageExistsAtLeastTF} ändern}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@if@packagelater@exists[2]{%
   \begingroup%
@@ -1813,7 +1820,7 @@
 \newcommand*\TUD@Recommend@Package{}
 \def\TUD@Recommend@Package#1[#2]{%
   \IfFileExists{#1.sty}{%
-    \RequirePackage{#1}[{#2}]%
+    \RequirePackage{#1}[#2]%
   }{%
     \PackageWarning{tudscrbase}{%
       The usage of package `#1' (#2) is\MessageBreak%
@@ -1842,14 +1849,14 @@
   \ifcsundef{if@tud@#1@loaded}{%
     \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
       You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
-      the usage of \string\TUD@AfterPackage@do{#1}{<code>}.%
+      using \string\TUD@AfterPackage@do{#1}{<code>}.%
     }%
   }{%
-    \if@atdocument%
-      \ifbool{@tud@#1@loaded}{#2}{}%
-    \else%
+    \tud@if@preamble{%
       \AfterAtEndOfPackage*{#1}{#2}%
-    \fi%
+    }{%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -1876,7 +1883,7 @@
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
       You should load package `scrextend' right after\MessageBreak%
-      the documentclass. The following option is gobbled\MessageBreak%
+      the documentclass. The following option is gobbled:\MessageBreak%
       \string\KOMAoptions{`#1'}%
     }%
   }%
@@ -1909,7 +1916,6 @@
 % \fi
 %
 % \section{Zusätzliches für die \TUDScript-Klassen}
-%
 % \subsection{Erweiterung von \KOMAScript-Schriftelementen}
 %
 % \begin{macro}{\tud@komafont@set}
@@ -1919,7 +1925,7 @@
 % Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
 % Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
 % \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
-% einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
+% einem Schriftelement ein Hilfsmakro |\tud@komafont@|\meta{Element} 
 % zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
 % werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
 %    \begin{macrocode}
@@ -1970,7 +1976,7 @@
 % \env{tudpage} wird das Paket \pkg{environ} für die Umgebungsdefinition
 % benötigt.
 %    \begin{macrocode}
-\RequirePackage{environ}[2013/04/01]
+\RequirePackage{environ}
 %    \end{macrocode}
 %
 % Innerhalb dieser Umgebungen soll es außerdem möglich sein, ein mehrspaltiges 
@@ -2022,7 +2028,7 @@
         which now will be loaded automatically%
       }%
     }{}%
-    \RequirePackage{graphicx}[1999/02/16]%
+    \RequirePackage{graphicx}
   }%
 %    \end{macrocode}
 % Mit dem Paket \pkg{tudscrcolor} werden die Befehle für die Auswahl der Farben
@@ -2038,6 +2044,6 @@
 %</class&body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput

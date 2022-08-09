@@ -4,7 +4,7 @@
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-supervisor.dtx}[2020/06/25]
+\ProvidesFile{tudscr-supervisor.dtx}[2022/08/09]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -45,10 +45,11 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -57,6 +58,8 @@
 % \fi
 %
 % \selectlanguage{ngerman}
+%
+%
 %
 % \section{^^A
 %   Das Paket \pkg{tudscrsupervisor} -- Betreuung wissenschaftlicher Arbeiten^^A
@@ -75,8 +78,6 @@
 \TUD@Class@Check{tudscrsupervisor}
 %</package&identify>
 %    \end{macrocode}
-%
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 % \iffalse
 %<*package&body>
@@ -136,11 +137,9 @@
 % gespeichert.
 %    \begin{macrocode}
   \def\@tempb##1{%
-    \expandafter\ifx\csname @##1\endcsname\@empty\else%
-      \expandafter\appto\expandafter\@tempa\expandafter{%
-        \expandafter,\csname ##1name\endcsname%
-      }%
-    \fi%
+    \tud@if@strempty{\csname @##1\endcsname}{}{%
+      \eappto\@tempa{,\expandafter\noexpand\csname ##1name\endcsname}%
+    }%
   }%
   \def\@tempa{%
     \namesname,\titlename,\issuedatetext,\duedatetext,\supervisorname%
@@ -245,6 +244,12 @@
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@authortable
 % \end{macro}^^A \tud@authortable@set
+% \begin{field}{\@headline}
+% Hier wird der Inhalt des Parametes \prm{headline} hinein geschrieben.
+%    \begin{macrocode}
+\newcommand*\@headline{}
+%    \end{macrocode}
+% \end{field}^^A \@headline
 %
 % \subsection{Aufgabenstellung}
 %
@@ -269,13 +274,13 @@
   \cleardoubleoddpage%
   \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@def{style}{\def\tud@multiple@fields@style{##1}}%
     \TUD@parameter@handler@default{headline}%
   }%
-  \tudpage[pagestyle=empty,{#1}]%
+  \tudpage[{pagestyle=empty,#1}]%
 %    \end{macrocode}
 % Zu Beginn wird als erstes die Überschrift und~-- die entsprechende Option
 % vorausgesetzt~-- im PDF einen Lesezeichen- oder auch Outline-Eintrag gesetzt.
@@ -298,10 +303,10 @@
 % oberen Teil.
 %    \begin{macrocode}
   \def\tud@multiple@fields@output##1{%
-    \Ifstr{\tud@multiple@fields@style}{table}{%
+    \tud@if@strequal{\tud@multiple@fields@style}{table}{%
       \def\and{%
         \tabularnewline%
-        \Ifstr{\csuse{##1othername}}{}{}{%
+        \tud@if@strempty{\csuse{##1othername}}{}{%
           \csuse{##1othername}\tud@title@delimiter%
         }%
         & \def\and{\tabularnewline &}%
@@ -318,10 +323,10 @@
   \begin{tabular}{@{}p{\tud@dim@authortable}l@{}}%
     \ifx\@referee\@empty\else%
       \refereename\tud@title@delimiter & %
-        \tud@multiple@fields@output{referee}\tabularnewline[\smallskipamount]%
+        \tud@multiple@fields@output{referee}\tabularnewline[1\smallskipamount]%
     \fi%
     \supervisorname\tud@title@delimiter & %
-      \tud@multiple@fields@output{supervisor}\tabularnewline[\smallskipamount]%
+      \tud@multiple@fields@output{supervisor}\tabularnewline[1\smallskipamount]%
     \issuedatetext\tud@title@delimiter & \@issuedate\tabularnewline%
     \duedatetext\tud@title@delimiter & \@duedate\tabularnewline%
   \end{tabular}%
@@ -399,13 +404,13 @@
   \cleardoubleoddpage%
   \let\@headline\@empty%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@def{grade}{\def\@grade{##1}}%
     \TUD@parameter@handler@default{headline}%
   }%
-  \tudpage[pagestyle=empty,{#1}]%
+  \tudpage[{pagestyle=empty,#1}]%
   \tudbookmark{\evaluationname}{evaluation}%
   \subsection*{%
     \ifx\@headline\@empty%
@@ -497,7 +502,7 @@
   \cleardoubleoddpage%
   \def\@headline{\noticename}%
   \TUD@parameter@family{tudpage}{%
-    \TUD@parameter@def{headline}{\def\@headline{##1}}%
+    \TUD@parameter@def{headline}{\tud@trim@field\@headline{##1}}%
     \TUD@parameter@let{heading}{headline}%
     \TUD@parameter@let{line}{headline}%
     \TUD@parameter@handler@default{headline}%
@@ -506,7 +511,7 @@
 % Es wird zu Beginn das angegebene Datum oben auf der rechten Seite ausgegeben. 
 % Anschließend wird die Überschrift und der gegebene Titel gesetzt. 
 %    \begin{macrocode}
-  \tudpage[pagestyle=empty,cdhead=date,{#1}]%
+  \tudpage[{pagestyle=empty,cdhead=date,#1}]%
   \tudbookmark{\noticename}{notice}%
   \ifx\@headline\@empty\else%
     \section*{\@headline}%
@@ -573,6 +578,6 @@
 %</package&body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput

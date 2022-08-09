@@ -28,10 +28,14 @@ echo.
 set sourceinput="\def\tudfinalflag{}\input{tudscrsource.tex}"
 set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
+cd source
+pdflatex --shell-escape %sourceinput%
+cd ..
 xcopy source temp\ /s
 cd temp
 call clearsource.bat
 del clearsource.bat
+xcopy ..\source\tudscr-gitinfo-ver.aux .
 cd doc
 call cleardoc.bat
 del  cleardoc.bat
@@ -125,10 +129,9 @@ copy development\tools\*.*                  release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr.pdf       release-%version%\temp\
 copy temp\doc\latex\tudscr\tudscr_print.pdf release-%version%\temp\
 move temp\install\*.*                       release-%version%\temp\
-rmdir temp\install /s /q > nul
 cd release-%version%\temp
+7za a -tzip tudscr_%version%.zip  .\..\..\temp\doc\ .\..\..\temp\source\ .\..\..\temp\tex\
 for /f %%f in ('dir /b *.bat') do unix2dos -k %%f
-7za a -tzip tudscr_%version%.zip   .\..\..\temp\*
 7za a -tzip tudscr_fonts_install.zip                                                @7za_files_metrics.txt
 REM call tudscr_fonts_convert.bat
 REM 7za a -tzip tudscr_fonts_converted.zip                                              @7za_files_fonts.txt

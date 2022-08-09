@@ -2,6 +2,8 @@
 \documentclass[%
   english,ngerman,%
   cdgeometry=no,DIV=12,%
+  cd=false,cdfont=false,cdtitle=true,%
+  headings=normal,%
   automark,%
   listof=toc,%
 ]{tudscrartcl}
@@ -9,12 +11,14 @@
   \usepackage{fontspec}
 \else
   \usepackage[T1]{fontenc}
-  \input glyphtounicode.tex
-  \pdfgentounicode=1
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
+\usepackage{babel}
+\usepackage[babel]{microtype}
+\usepackage{widows-and-orphans}
+\usepackage{lmodern}
 
-\usepackage{tudscrtutorial}
+\usepackage{tudscrmanual}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -24,10 +28,10 @@
     {»}{{\guillemetright}}1 {«}{{\guillemetleft}}1
 }
 \lstset{escapechar=§}
-
-\usepackage{lmodern}
-\TUDoptions{cd=false,cdfont=false,cdtitle=true}
-\KOMAoptions{headings=normal}
+\makeatletter
+% TODO als optionales Argument für Hint*
+\newcommand*\pcolumnfuzz[1]{\pretocmd\@endpbox{\hfuzz=#1}{}{}}
+\makeatother
 
 \usepackage{tudscrsupervisor}
 \usepackage{array}
@@ -44,7 +48,20 @@
   group-minimum-digits=3%
 }
 \usepackage{xfrac}
-\AfterPackage*{hyperref}{%
+\usepackage{enumitem}
+\usepackage{caption}
+\DeclareCaptionSubType[alph]{figure}
+\DeclareCaptionSubType[alph]{table}
+\usepackage{floatrow}
+\renewcommand{\floatpagefraction}{0.7}
+
+\usepackage{tikz}
+\usetikzlibrary{chains}
+\usetikzlibrary{decorations.markings}
+\tikzset{on grid}
+\usepackage{pstricks,pst-node}
+
+\AtEndPreamble{%
   \usepackage[%
     automake,%
     xindy={language=german-din},%
@@ -64,39 +81,14 @@
 }
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
-\addbibresource{\jobname.bib}
 \DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
-
-\usepackage{enumitem}
-
-\usepackage{caption}
-\DeclareCaptionSubType[alph]{figure}
-\DeclareCaptionSubType[alph]{table}
-\usepackage{floatrow}
-\renewcommand{\floatpagefraction}{0.7}
-
-\usepackage{tikz}
-\usetikzlibrary{chains}
-\usetikzlibrary{decorations.markings}
-\tikzset{on grid}
-
-% TODO pst-pdf funktioniert momentan nicht mit hyperref 
-%      github.com/rolfn/pst-pdf/issues/6
-\usepackage{pstricks,pst-node}
-
-\makeatletter
-\newcommand*\pcolumnfuzz[1]{\pretocmd\@endpbox{\hfuzz=#1}{}{}}
-\makeatother
-
-\usepackage[check=warning]{widows-and-orphans}
-\usepackage{bookmark}
-
+\addbibresource{\jobname.bib}
 \begin{filecontents}[force,silent,nosearch]{\jobname.bib}
 @book{talbot2012,
   author    = {Nicola L. C. Talbot},
-  title     = {{\LaTeX} for Complete Novices},
+  title     = {\LaTeX{} for Complete Novices},
   publisher = {Dickimaw Books},
-  series    = {Dickimaw {\LaTeX} Series},
+  series    = {Dickimaw \LaTeX{} Series},
   volume    = {1},
   isbn      = {978-1-909440-00-5},
   address   = {Norfolk, UK},
@@ -106,9 +98,9 @@
 }
 @book{talbot2013,
   author    = {Nicola L. C. Talbot},
-  title     = {Using {\LaTeX} to Write a PhD Thesis},
+  title     = {Using \LaTeX{} to Write a PhD Thesis},
   publisher = {Dickimaw Books},
-  series    = {Dickimaw {\LaTeX} Series},
+  series    = {Dickimaw \LaTeX{} Series},
   volume    = {2},
   isbn      = {978-1-909440-02-9},
   address   = {Norfolk, UK},
@@ -129,9 +121,9 @@
   title        = {Feinheiten bei wissenschaftlichen Publikationen~--
                   Mikrotypographie"=Regeln, Teil~I},
   journaltitle = {Die \TeX{}nische Komödie},
-  year         = {1997},
+  year         = {1996},
   month        = {2},
-  volume       = {4/96},
+  volume       = {4},
   pages        = {23-40},
   url          = {http://www.dante.de/tex/Dokumente/dtk-neubauer.pdf},
   urldate      = {2014-12-01},
@@ -143,14 +135,14 @@
   journaltitle = {Die \TeX{}nische Komödie},
   year         = {1997},
   month        = {5},
-  volume       = {1/97},
-  pages        = {25--44},
+  volume       = {1},
+  pages        = {25-44},
   url          = {http://www.dante.de/tex/Dokumente/dtk-neubauer.pdf},
   urldate      = {2014-12-01},
 }
 @online{struckmann2007,
   author  = {Struckmann, Werner},
-  title   = {Einige typographische Grundregeln und ihre Umsetzung in \LaTeX},
+  title   = {Einige typographische Grundregeln und ihre Umsetzung in \LaTeX{}},
   date    = {2007-09-03},
   url     = {http://www2.informatik.hu-berlin.de/sv/lehre/typographie.pdf},
   urldate = {2014-12-01}
@@ -164,23 +156,26 @@
 }
 \end{filecontents}
 
-
+\usepackage{bookmark}
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+\subject{Tutorial für \hologo{LaTeX}}
 \title{%
   Ein Anwenderleitfaden für das Erstellen einer wissenschaftlichen Abhandlung%
 }
 \author{Falk Hanisch\TUDScriptContactTitle}
-\date{15.11.2019}
+\date{2019-11-15}
 
 \makeatletter
 \begingroup%
   \def\and{, }%
   \let\thanks\@gobble%
   \let\footnote\@gobble%
+  \let\emailaddress\@gobble%
   \hypersetup{%
-    pdfauthor = {\@author},%
-    pdftitle = {\@title},%
-    pdfsubject = {Tutorial für \hologo{LaTeX}},%
+    pdfauthor   = {\@author},%
+    pdftitle    = {\@title},%
+    pdfsubject  = {\@subject},%
     pdfkeywords = {LaTeX, \TUDScript, Tutorial, Anwenderleitfaden},%
   }%
 \endgroup%
@@ -1628,7 +1623,6 @@ von \Package{biblatex} zu finden.
   title     = {The \TeX book},
   date      = {1984},
   maintitle = {Computers \& Typesetting},
-  volume    = {A},
   publisher = {Addison-Wesley},
   location  = {Reading, Massachusetts},
   language  = {english},
