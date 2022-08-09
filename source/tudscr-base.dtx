@@ -1,9 +1,10 @@
 % \iffalse meta-comment
+%/GitFileInfo=tudscr-base.dtx
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
 % ----------------------------------------------------------------------------
 %
-%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2021
+%  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %
 % ----------------------------------------------------------------------------
 %
@@ -32,27 +33,9 @@
 \fi
 \endbatchfile
 %</ins>
-%%% From File: tudscr-base.dtx
 %<*dtx>
-% \fi
-%
-\ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2022/07/28 v2.06o TUD-Script\space%
-%
-% \iffalse
-%</dtx>
-%<package&base>\ProvidesPackage{tudscrbase}[%
-%<*package&base>
-%!TUD@Version
-%</package&base>
-%<package&base>  package
-%<*dtx|package&base>
-% \fi
-  (basics for the bundle)%
-]
-% \iffalse
-%</dtx|package&base>
-%<*dtx>
+\ProvidesFile{tudscr-base.dtx}[2022/08/09]
+\RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
   \usepackage{fontspec}
@@ -64,14 +47,9 @@
 \usepackage{tudscrfonts}
 \usepackage[babel]{microtype}
 
-\CodelineIndex
-\RecordChanges
-\GetFileInfo{tudscr-base.dtx}
-\title{\file{\filename}}
-\author{Falk Hanisch\qquad\expandafter\mailto\expandafter{\tudscrmail}}
-\date{\fileversion\nobreakspace(\filedate)}
-
+\GitHubBase{\TUDScriptRepository}
 \begin{document}
+  \author{Falk Hanisch\TUDScriptContactTitle}
   \maketitle
   \tableofcontents
   \DocInput{\filename}
@@ -90,6 +68,15 @@
 % Für die Erstellung der \TUDScript-Klassen werden die dafür benötigten Pakete
 % eingebunden und Steuerungsbefehle definiert. Die Klassen sowie einige Pakete
 % benötigen das Paket und laden dieses auch.
+%
+%    \begin{macrocode}
+%<*package&base>
+\ProvidesPackage{tudscrbase}[%
+%!TUD@Version
+  package (basics for the bundle)%
+]
+%</package&base>
+%    \end{macrocode}
 %
 % \ToDo{
 %   Schnittstelle äquivalent zu \cs{KOMA@kav@...}? Dann hierfür 
@@ -112,7 +99,9 @@
 %
 %    \begin{macrocode}
 %<*load>
-\RequirePackage{tudscrbase}[\TUD@Version]
+\RequirePackage{tudscrbase}[%
+%!TUD@Version
+]
 %</load>
 %    \end{macrocode}
 %
@@ -120,13 +109,53 @@
 %<*package&base>
 % \fi
 %
+% \subsection{Notwendige Kompatibilitätseinstellung für \KOMAScript}
+%
+% Die installierte Version und die gewählte Kompatibilitätseinstellung von 
+% \KOMAScript{} wird gerpüft.
+%    \begin{macrocode}
+\AtBeginDocument{%
+  \ifcsundef{scr@v@first}{}{%
+%    \end{macrocode}
+% Es wird gerpüft, ob die mindestens benötigte \KOMAScript-Version
+% (v\csuse{TUD@KOMAVersionNumber}) verfügbar ist. Sollte dies nicht der Fall
+% sein, wird ein Fehler erzeugt.
+%    \begin{macrocode}
+    \ifcsundef{scr@v@\TUD@KOMAVersionNumber}{%
+      \PackageError{tudscrbase}{%
+        KOMA-Script v\TUD@KOMAVersionNumber\space is required%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        \TUD@KOMAVersion, but only\MessageBreak%
+        \KOMAScriptVersion\space was found.%
+      }%
+    }{%
+%    \end{macrocode}
+% Ist die mindestens nötige Version von \KOMAScript{} installiert, wird 
+% geprüft, ob die Kompatibilitätseinstellung akzeptabel ist.
+%    \begin{macrocode}
+      \expandafter\ifnum\scr@v@is@lt{3.12}\relax%
+        \PackageError{tudscrbase}{%
+          KOMA-Script compatibility level too low%
+        }{%
+          \TUD@Version\space must be used at least with\MessageBreak%
+          `version=3.12' KOMA-Script compatibility option.%
+        }%
+      \fi%
+    }%
+  }%
+}
+%    \end{macrocode}
+%
 % \subsection{Notwendige Pakete für \TUDScript}
 %
 % \changes{v2.06f}{2020/01/14}{Anpassungen für \pkg{scrbase} \val{v3.28}}^^A
 % Das Paket \pkg{scrbase} wird zur Optionsdefinition benötigt, \pkg{scrlfile} 
 % für verschiedene Hooks vor sowie nach Klassen und Paketen.
 %    \begin{macrocode}
-\RequirePackage{scrbase}[2020/09/21]
+\RequirePackage{scrbase}[%
+%!TUD@KOMAVersion
+]
 %    \end{macrocode}
 % Die folgenden Pakete werden für die Manipulation bereits definierter
 % Makros, zur erweiterten Auswertung boolescher Ausdrücke und allgemein zur
@@ -788,7 +817,7 @@
       \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined macro}{%
         The macro `\@backslashchar#1' was never defined. \MessageBreak%
         Please contact the TUD-Script maintainer\MessageBreak%
-        via \tudscrmail. A bugfix is urgently required.%
+        via \TUDScriptContact. A bugfix is urgently required.%
       }%
       \aftergroup\@gobble%
     \fi%
@@ -848,7 +877,7 @@
     \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined length}{%
       The length `\@backslashchar#1' was never defined. \MessageBreak%
       Please contact the TUD-Script maintainer\MessageBreak%
-      via \tudscrmail. A bugfix is urgently required.%
+      via \TUDScriptContact. A bugfix is urgently required.%
     }%
     \expandafter\@gobble%
   }%
@@ -869,7 +898,7 @@
   \PackageWarning{tudscrbase}{%
     It wasn't possible to patch `\@backslashchar#1'\MessageBreak%
     Please contact the TUD-Script maintainer\MessageBreak%
-    via \tudscrmail. Without a bugfix an\MessageBreak%
+    via \TUDScriptContact. Without a bugfix an\MessageBreak%
     erroneous output may occur%
   }%
 }
@@ -1985,7 +2014,9 @@
 % Mit dem Paket \pkg{tudscrcolor} werden die Befehle für die Auswahl der Farben
 % des \CDs definiert, welches wiederum \pkg{xcolor} lädt.
 %    \begin{macrocode}
-  \RequirePackage{tudscrcolor}[\TUD@Version]%
+  \RequirePackage{tudscrcolor}[%
+%!TUD@Version
+  ]%
 }
 %    \end{macrocode}
 %
