@@ -1,4 +1,3 @@
-% \CheckSum{849}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -23,29 +22,22 @@
 %
 % \fi
 %
-% \CharacterTable
-%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
-%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
-%   Digits        \0\1\2\3\4\5\6\7\8\9
-%   Exclamation   \!     Double quote  \"     Hash (number) \#
-%   Dollar        \$     Percent       \%     Ampersand     \&
-%   Acute accent  \'     Left paren    \(     Right paren   \)
-%   Asterisk      \*     Plus          \+     Comma         \,
-%   Minus         \-     Point         \.     Solidus       \/
-%   Colon         \:     Semicolon     \;     Less than     \<
-%   Equals        \=     Greater than  \>     Question mark \?
-%   Commercial at \@     Left bracket  \[     Backslash     \\
-%   Right bracket \]     Circumflex    \^     Underscore    \_
-%   Grave accent  \`     Left brace    \{     Vertical bar  \|
-%   Right brace   \}     Tilde         \~}
-%
-% \iffalse
+% \iffalse ins:batch + dtx:driver
+%<*ins>
+\ifx\documentclass\undefined
+  \input docstrip.tex
+  \ifToplevel{\batchinput{tudscr.ins}}
+\else
+  \let\endbatchfile\relax
+\fi
+\endbatchfile
+%</ins>
 %%% From File: tudscr-base.dtx
 %<*dtx>
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-base.dtx}[2022/07/25 v2.06o TUD-Script\space%
+\ProvidesFile{tudscr-base.dtx}[2022/07/28 v2.06o TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -70,8 +62,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\KOMAoptions{parskip=half-}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \CodelineIndex
@@ -93,20 +83,22 @@
 %
 % \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
 %
+%
+%
 % \section{Das Paket \pkg{tudscrbase} -- Basisdefinitionen für \TUDScript}
 %
 % Für die Erstellung der \TUDScript-Klassen werden die dafür benötigten Pakete
 % eingebunden und Steuerungsbefehle definiert. Die Klassen sowie einige Pakete
 % benötigen das Paket und laden dieses auch.
 %
-% \ToDo{%
-%    Schnittstelle äquivalent zu \cs{KOMA@kav@\dots}? Dann hierfür 
-%    \pkg{etoolbox}-Listen und \cs{listadd} sowie \cs{listremove} nutzen
+% \ToDo{
+%   Schnittstelle äquivalent zu \cs{KOMA@kav@...}? Dann hierfür 
+%   \pkg{etoolbox}-Listen und \cs{listadd} sowie \cs{listremove} nutzen
 % }[v2.??]
-% \ToDo{%
+% \ToDo{
 %   Teile im Quelltext suchen, die nur einmalig durchlaufen werden müssen 
 %   (bspw. notwendige Pakete und Schriften) und über aux-Eintrag abkürzen?!
-%   siehe \cs{TUD@CheckPackage}%
+%   siehe \cs{TUD@CheckPackage}
 % }[v2.??]
 %^^A\BeforeClosingMainAux{%
 %^^A  \if@tud@xxx\if@filesw%
@@ -117,7 +109,6 @@
 %^^A}
 %
 %
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
 %
 %    \begin{macrocode}
 %<*load>
@@ -155,7 +146,7 @@
 %    \end{macrocode}
 % Das Paket \pkg{kvsetkeys} erweitert \pkg{keyval} um die Möglichkeit, das
 % Verhalten bei der Angabe eines nicht definierten Schlüssels festzulegen.
-% \ToDo{sollte eigentlich auch mit KOMA-Option \val{@else@} gehen}[v2.07]
+% \ToDo{sollte auch mit KOMA-Option \val{@else@} gehen, besser raus}[v2.07]
 %    \begin{macrocode}
 \RequirePackage{kvsetkeys}[2012/04/25]
 %    \end{macrocode}
@@ -165,14 +156,25 @@
 %    \begin{macrocode}
 \RequirePackage{trimspaces}[2009/09/17]
 %    \end{macrocode}
+% Für \pkg{hyperref} werden \cs{TUDScript} und \cs{KOMAScript} deaktiviert.
+%    \begin{macrocode}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\TUDScript{TUD-Script}%
+    \def\KOMAScript{KOMA-Script}%
+  }%
+}
+%    \end{macrocode}
 %
 % \subsection{Grundlegende Befehle für \TUDScript}
 % \subsubsection{Temporäre Makros zur internen Verwendung durch \TUDScript}
 %
 % Hier werden Makros definiert, die allein für die interne temporäre Nutzung 
 % gedacht sind.
-% \ToDo{Sämtliche \cs{@temp\dots}-Makros auf \cs{tud@res@\dots} ändern}[v2.??]
-% \ToDo{\cs{tud@reserved} in \cs{tud@res@?}, Achtung bei Dopplungen!}[v2.??]
+% \ToDo{sämtliche \cs{@temp...}-Makros auf \cs{tud@res@...} ändern}[v2.??]
+% \ToDo{\cs{tud@reserved} in \cs{tud@res@...}, Achtung bei Dopplungen!}[v2.??]
+% \ToDo{Schlüssel sollten weiterhin \cs{@temp...}-Makros verwenden}[v2.??]
+% \ToDo{Makros mit \val{@num} in count ändern}[v2.??]
 % \begin{macro}{\tud@reserved}
 % \changes{v2.05}{2015/10/27}{neu}^^A
 % \begin{macro}{\tud@res@a}
@@ -327,7 +329,7 @@
 %
 % \subsubsection{Division für rationale Zahlen}
 %
-% Mit \LaTeXe{} kann~-- ohne die Verwendung zusätzlicher Pakete~-- nicht ohne 
+% Mit \LaTeX{} kann~-- ohne die Verwendung zusätzlicher Pakete~-- nicht ohne 
 % Weiteres eine Division durchgeführt werden, die als Ergenis eine rationale 
 % Zahl liefert. Dem wird hier Abhilfe geleistet.
 % \begin{macro}{\tud@divide}
@@ -454,14 +456,11 @@
 % \begin{macro}{\tud@cs@letltx}
 % \changes{v2.06}{2019/06/13}{\cs{LetLtxMacro} zum Sichern originärer Makros}^^A
 % \begin{macro}{\tud@cs@store}
-% \changes{v2.06}{2018/07/15}{%
-%   mit \cs{DeclareRobustCommand} definierte Befehle unterstüzt%
-% }^^A
+% \changes{v2.06}{2018/07/15}{mit \cs{DeclareRobustCommand} definierte Befehle
+%   werden unterstüzt}^^A
 % \begin{macro}{\tud@cs@restore}
-% \changes{v2.06}{2018/07/15}{%
-%    stellt originäre Makros auch wieder her, wenn diese mit \cs{undef} 
-%    zwischendurch \emph{undefiniert} gesetzt wurden%
-% }^^A
+% \changes{v2.06}{2018/07/15}{stellt originäre Makros auch wieder her, wenn
+%   diese mit \cs{undef} zwischendurch \emph{undefiniert} gesetzt wurden}^^A
 % \begin{macro}{\tud@cs@reset}
 % \begin{macro}{\tud@cs@update}
 % \changes{v2.04}{2015/03/03}{neu}^^A
@@ -482,12 +481,12 @@
 }
 %    \end{macrocode}
 % Mit dem Aufruf \cs{tud@cs@store}\marg{Befehlsname} wird der im Argument 
-% angegebene Befehl in einem neuem Makro \cs{@@tud@\meta{Befehlsname}}
+% angegebene Befehl in einem neuem Makro |\@@tud@|\meta{Befehlsname}
 % gespeichert. Dieser kann danach beliebig angepasst werden. Soll der Befehl zu
 % einem späteren Zeitpunkt auf den Orginalzustand zurücksetzen, kann hierfür
 % jederzeit der Befehl \cs{tud@cs@reset}\marg{Befehlsname} verwendet werden.
 % Durch das Makro \cs{tud@cs@restore}\marg{Befehlsname} wird das mit
-% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch  gelöscht. Der
+% \cs{tud@cs@store} erstellte Hilfsmakro zusätzlich noch gelöscht. Der
 % ursprüngliche Befehl kann als solcher mit \cs{tud@cs@use}\marg{Befehlsname}
 % weiterhin genutzt werden. Ein zuvor bereits gesicherter Befehl kann mit 
 % \cs{tud@cs@update}\marg{Befehlsname} auf die momentane Definition 
@@ -680,7 +679,7 @@
 % aber in bestimmten Fällen eine Option in Abhängigkeit von einer anderen
 % unterschiedliche Standardwerte annehmen soll, wird dafür eine Möglichkeit
 % geschaffen. Hierfür wird für jede Option ein korrelierende Schalter 
-% \cs{if@tud@key@\meta{Schlüssel}@set} definiert. Dieser wird auf \val{true} 
+% |\if@tud@key@|\meta{Schlüssel}|@set| definiert. Dieser wird auf \val{true} 
 % gesetzt, sobald der Schlüssel explizit gesetzt wurde, womit ein Standardwert 
 % einer Klassenoption überschrieben werden kann. Das Setzen der Standardwerte 
 % erfolgt intern mit dem Befehl \cs{TUD@key@preset}.
@@ -688,7 +687,7 @@
 \newcommand*\TUD@key[2][.\@currname.\@currext]{%
 %    \end{macrocode}
 % Basierend auf dem Namen des Schalters wird die notwendige, boolesche Variable
-% erzeugt (\cs{if@tud@key@\meta{Schlüssel}@set}), welche im Falle des direkten
+% erzeugt (|\if@tud@key@|\meta{Schlüssel}|@set|), welche im Falle des direkten
 % Aufrufs des Schlüssels, ein Überschreiben mit einem Standardwert verhindert.
 %    \begin{macrocode}
   \providebool{@tud@key@#2@set}%
@@ -716,7 +715,7 @@
   }%
 }
 %    \end{macrocode}
-% Es kann intern über \cs{if@tud@key@\meta{Schlüssel}@set} geprüft werden, ob
+% Es kann intern über |\if@tud@key@|\meta{Schlüssel}|@set| geprüft werden, ob
 % einem Schlüssel ein explizites Wert zugewiesen wurde. Sollte dies nicht der
 % Fall sein, kann dieser hiermit intern beliebig angepasst werden. Da es durch 
 % das Setzen der Option mit \cs{TUDoption} zu einer Sperrung kommt, muss diese
@@ -889,7 +888,7 @@
 % \begin{macro}{\TUD@parameter@@family}
 % \begin{macro}{\TUD@parameter@checkfamily}
 % Mit \cs{TUD@parameter@family}\marg{Familienname}\marg{Definitionen} können
-% Schlüssel"=Wert"=Parameter für die optionalen Argumente von Befehle definiert
+% für die optionalen Argumente von Befehlen Schlüssel-Wert-Parameter definiert
 % werden. Das erste Argument definiert den Familiennamen für den jeweiligen 
 % Befehl, welcher eindeutig gewählt werden sollte. Dieser wird im Hilfsmakro
 % \cs{TUD@parameter@@family} gesichert. Dies soll im Zusammenspiel mit dem 
@@ -899,10 +898,10 @@
 % Parameter für den Benutzer bewerkstelligen~-- ohne die Angabe der Familie 
 % nur innerhalb des zweiten Argumentes von \cs{TUD@parameter@family} verwendet
 % werden können.
-% \ToDo{%
-%  Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}?%
-%  KOMA-Option \val{@else@} verwenden?
-% }[v2.07]%
+% \ToDo{
+%   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
+%   KOMA-Option \val{@else@} verwenden?
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@@family{}
 \newcommand*\TUD@parameter@family[2]{%
@@ -970,7 +969,7 @@
   \IfArgIsEmpty{#2}{}{%
 %    \end{macrocode}
 % Hierfür wird die angegebene Parameterliste sukzessive abgearbeitet. Elemente, 
-% welche in Schlüssel"=Wert"=Syntax angegeben wurden, bleiben unverändert\dots
+% welche in Schlüssel-Wert-Syntax angegeben wurden, bleiben unverändert\dots
 %    \begin{macrocode}
     \let\@tempb\@empty%
     \def\@tempa##1{%
@@ -1033,10 +1032,10 @@
 % Das erste obligatorische Argument von \cs{TUD@parameter@handler@macro} wird 
 % für die Verarbeitung unbekannter Schlüssel-Wert-Paare genutzt, das zweite für 
 % einfache optionale Argumente.
-% \ToDo{%
-%  Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}?%
-%  KOMA-Option \val{@else@} verwenden?
-% }[v2.07]%
+% \ToDo{
+%   Eine Katastrophe, dringend überarbeiten; generelle Lösung mit \cs{toks@}? 
+%   KOMA-Option \val{@else@} verwenden?
+% }[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
   \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
@@ -1103,9 +1102,9 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUD@parameter@handler@default
 % \begin{macro}{\TUD@parameter@error}
-% Das Makro \cs{TUD@parameter@wrn}\marg{Parameter}\marg{Werteliste} gibt für
+% Das Makro \cs{TUD@parameter@error}\marg{Parameter}\marg{Werteliste} gibt für
 % den Fall einer ungültigen Wertzuweisung an einen bestimmten \meta{Parameter}
-% eine Warnung mit einem entsprechenden Hinweis auf gültige Werte innerhalb von
+% einen Fehler mit einem entsprechenden Hinweis auf gültige Werte innerhalb von
 % \meta{Werteliste} aus.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@error[2]{%
@@ -1147,7 +1146,7 @@
   \tud@if@packagelater@exists{#1}{#2}{}{%
     \PackageWarningNoLine{tudscrbase}{%
       The version `#2' of package `#1'\MessageBreak%
-      is urgently required. An erroneous output\MessageBreak
+      is urgently required. An erroneous output\MessageBreak%
       may occur. Please update your distribution%
     }%
     \IfFileExists{#1.sty}{}{\RequirePackage{#1}[#2]}%
@@ -1156,9 +1155,9 @@
 \@onlypreamble\TUD@CheckPackage
 %    \end{macrocode}
 % Hiermit wird geprüft, ob ein installiertes Paket in einer bestimmten Version
-% installiert ist, ohne dieses zu laden. Hierfür wird die Datei zeilenweise 
-% gelesen, bis der Eintrag \cs{ProvidesPackage\marg{Paketname}\oarg{Version}} 
-% gefunden wird. 
+% vorhanden ist, ohne dieses zu laden. Hierfür wird die Datei zeilenweise 
+% gelesen, bis der Eintrag \cs{ProvidesPackage}\marg{Paketname}\oarg{Version} 
+% gefunden wird.
 %    \begin{macrocode}
 \newcommand*\tud@if@packagelater@exists[2]{%
   \begingroup%
@@ -1311,7 +1310,7 @@
 % Es wird die Möglichkeit geschaffen, bestimmten Schriftelementen weitere
 % Eigenschaften mitzugeben. Damit dies optionsabhängig geschehen kann und
 % \cs{addtokomafont} nur einmalig verwendete werden muss, wird im Zweifelsfall
-% einem Schriftelement ein Hilfsmakro \cs{tud@komafont@\meta{Element}} 
+% einem Schriftelement ein Hilfsmakro |\tud@komafont@|\meta{Element} 
 % zugewiesen, welches intern angepasst werden kann. Mit \cs{tud@komafont@set} 
 % werden dem angegebenen Element die gewünschten Schriftattribute zugeteilt.
 %    \begin{macrocode}
@@ -1428,60 +1427,6 @@
 %</class&body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput
-
-%
-% \begin{macro}{\TUD@noworlater}
-% \changes{v2.05}{2015/07/03}{neu implementiert}^^A
-% \begin{macro}{\TUD@noworlater@simple}
-% \changes{v2.05}{2015/07/03}{neu}^^A
-% Hiermit kann die Abarbeitung der Optionen an das Ende der verwendeten 
-% Klasse bzw. des Paketes verzögert werden. Aufgrund der Besonderheiten der
-% Befehle \cs{AtEndOfClass} und \cs{AtEndOfPackage} können diese nicht
-% innerhalb von \pkg{tudscrbase} sondern erst außerhalb nach dem Laden
-% definiert werden. Damit keine Probleme dabei auftreten, falls das Paket
-% geladen wird ohne daran anschließend die notwendigen Redefinitionen
-% durchzuführen, werden die beiden Varianten des Befehls \cs{TUD@noworlater} 
-% im Paket definiert. 
-%
-% Im ersten Argument von \cs{TUD@noworlater} wird einer der wertzuweisenden
-% Befehle für Optionen (\cs{TUD@set@\dots}) erwartet. Dieser wird immer
-% ausgeführt, um ungültige Wertzuweisungen einer Option, welche als globale
-% Klassenoption angegeben wurde, über die \LaTeX-Standardroutine als Warnung
-% auszugeben. Bei der eigentlichen~-- sprich verzögerten~-- Ausführung der
-% Option wird die Wertzuweisung abermals ausgeführt, gefolgt von der im 
-% zweiten Argument definierten Abarbeitung dieser.
-%    \begin{macrocode}
-%<*package&base>
-\newcommand*\TUD@noworlater[2]{}
-\newcommand*\TUD@noworlater@simple[2]{%
-  \PackageWarning{tudscrbase}{%
-    The content of \string\TUD@noworlater will be executed immediately%
-  }%
-  #1#2%
-}
-\let\TUD@noworlater\TUD@noworlater@simple
-%</package&base>
-%    \end{macrocode}
-% Nach dem Laden des Paketes wird geprüft, ob die ursprüngliche Definition 
-% des Befehls aus dem Paket noch besteht. Ist dies der Fall, wird der Befehl
-% zur Verzögerung an das Ende der Klasse bzw. des Paketes umdefiniert.
-%    \begin{macrocode}
-%<*load>
-\ifx\TUD@noworlater\TUD@noworlater@simple
-%<*class>
-  \renewcommand*\TUD@noworlater[2]{#1\AtEndOfClass{#1#2}}%
-  \AtEndOfClass{\renewcommand*\TUD@noworlater[2]{#1#2}}%
-%</class>
-%<*package>
-  \renewcommand*\TUD@noworlater[2]{#1\AtEndOfPackage{#1#2}}%
-  \AtEndOfPackage{\renewcommand*\TUD@noworlater[2]{#1#2}}%
-%</package>
-\fi
-%</load>
-%    \end{macrocode}
-% \end{macro}^^A \TUD@noworlater@simple
-% \end{macro}^^A \TUD@noworlater
-%

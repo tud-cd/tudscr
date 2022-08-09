@@ -1,4 +1,3 @@
-% \CheckSum{4457}
 % \iffalse meta-comment
 %
 %  TUD-Script -- Corporate Design of Technische Universität Dresden
@@ -23,29 +22,22 @@
 %
 % \fi
 %
-% \CharacterTable
-%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
-%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
-%   Digits        \0\1\2\3\4\5\6\7\8\9
-%   Exclamation   \!     Double quote  \"     Hash (number) \#
-%   Dollar        \$     Percent       \%     Ampersand     \&
-%   Acute accent  \'     Left paren    \(     Right paren   \)
-%   Asterisk      \*     Plus          \+     Comma         \,
-%   Minus         \-     Point         \.     Solidus       \/
-%   Colon         \:     Semicolon     \;     Less than     \<
-%   Equals        \=     Greater than  \>     Question mark \?
-%   Commercial at \@     Left bracket  \[     Backslash     \\
-%   Right bracket \]     Circumflex    \^     Underscore    \_
-%   Grave accent  \`     Left brace    \{     Vertical bar  \|
-%   Right brace   \}     Tilde         \~}
-%
-% \iffalse
+% \iffalse ins:batch + dtx:driver
+%<*ins>
+\ifx\documentclass\undefined
+  \input docstrip.tex
+  \ifToplevel{\batchinput{tudscr.ins}}
+\else
+  \let\endbatchfile\relax
+\fi
+\endbatchfile
+%</ins>
 %%% From File: tudscr-manual.dtx
 %<*dtx>
 % \fi
 %
 \ifx\ProvidesFile\undefined\def\ProvidesFile#1[#2]{}\fi
-\ProvidesFile{tudscr-manual.dtx}[2019/10/23 v2.06e TUD-Script\space%
+\ProvidesFile{tudscr-manual.dtx}[2022/07/28 v2.06o TUD-Script\space%
 %
 % \iffalse
 %</dtx>
@@ -70,8 +62,6 @@
 \fi
 \usepackage{babel}
 \usepackage{tudscrfonts}
-\KOMAoptions{parskip=half-}
-\usepackage{bookmark}
 \usepackage[babel]{microtype}
 
 \CodelineIndex
@@ -96,17 +86,15 @@
 % \changes{v2.02}{2014/11/18}{\pkg{tudscrtutorial}: Index für Tutorials}^^A
 % \changes{v2.05}{2015/08/04}{Geteilte Deklarationen für Klasse und Paket}^^A
 %
-% \section{Handbuch und Leitfäden zu \TUDScript}
 %
-% Es werden die Klasse \cls{tudscrmanual} für das Handuch sowie das Paket
-% \pkg{tudscrtutorial} für das Setzen von einigen Anwenderleitfäden bzw.
-% Tutorials erzeugt. Da es zwischen der Klasse und dem Paket es eine große
-% Menge an Überschneidungen gibt, basieren diese auf der gleichen Quelldatei. 
-% Einiges davon wird auch für die Quelltextdokumentationsklasse \cls{tudscrdoc} 
-% verwendet.
 %
-% \StopEventually{\PrintIndex\PrintChanges\PrintToDos}
+% \section{Anwenderdokumentation und Leitfäden zu \TUDScript}
 %
+% Es werden die Klasse \cls{tudscrmanual} (auf Basis von \cls{tudscrreprt}) für 
+% die Anwenderdokumentation sowie das Paket \pkg{tudscrtutorial} für das Setzen
+% von einigen Anwenderleitfäden bzw. Tutorials erzeugt. Da es zwischen der
+% Klasse und dem Paket es eine große Menge an Überschneidungen gibt, basieren
+% diese auf der gleichen Quelldatei.
 % \iffalse
 %<*body|class&doc>
 % \fi
@@ -564,14 +552,16 @@
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false,colorlinks,linkcolor=blue}{hyperref}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
+\PassOptionsToPackage{hyperindex=false}{hyperref}
+\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
 % Funktionalität definiert. 
 %    \begin{macrocode}
-\AfterPackage*{hyperref}{%
+\AfterAtEndOfPackage*{hyperref}{%
+  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
+  \hypersetup{colorlinks,linkcolor=blue}%
 %    \end{macrocode}
 % Zuerst die Einstellungen für \cls{tudscrmanual} und \pkg{tudscrtutorial}.
 %
@@ -590,7 +580,7 @@
 % \begin{macro}{\tudhyperref}
 % \changes{v2.02}{2014/10/27}{neu}^^A
 % \begin{macro}{\tud@manualname}
-% \changes{v2.05}{2015/1q/19}{neu}^^A
+% \changes{v2.05}{2015/11/19}{neu}^^A
 % Diese Befehle dienen sowohl zum Definieren von Textankern im Handbuch als 
 % auch  zum Referenzieren auf diese. Bei der Erstellung des Ankers mit 
 % \cs{tudhyperdef} wird zusätzlich auch noch ein Label (\cs{label}) erzeugt.
@@ -665,66 +655,6 @@
 %
 % \iffalse
 %</!doc>
-%<*doc>
-% \fi
-%
-% \begin{macro}{\hypersourcedef}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@def}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@codeline}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% \begin{macro}{\hypersource@ref@page}
-% \changes{v2.05}{2016/04/26}{neu}^^A
-% Diese Makros werden verwendet, um im Index respektive in der Änderungsliste 
-% mithilfe von \pkg{hyperref} Hyperlinks auf Codezeilen respektive Seiten im 
-% Dokument zu setzen. 
-%
-% Mit \cs{hypersourcedef} wird ein Textanker gesetzt, falls dieser noch nicht 
-% definiert wurde, was durch \cs{hypersource@def} abgesichert wird. Als 
-% Argument wird hierfür die aktuelle Codezeile verwendet.
-%    \begin{macrocode}
-  \newcommand*\hypersource@def{}
-  \newcommand*\hypersourcedef[1]{%
-    \ifstr{#1}{\hypersource@def}{}{%
-      \Hy@raisedlink{\hyperdef{}{source:#1}{}}%
-      \xdef\hypersource@def{#1}%
-    }%
-  }%
-%    \end{macrocode}
-% Mit \cs{hypersource@ref@\dots} wird auf Anker im Dokument verlinkt. Dies 
-% erfolgt indirekt über die Attribute \val{main} bzw. \val{usage}, welche bei
-% der Definitionen von Befehlen etc. im Index genutzt werden. Hierfür werden
-% die dazugehörigen Makros umdefiniert.
-%    \begin{macrocode}
-  \newcommand*\hypersource@ref@codeline[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperref{}{}{source:##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \newcommand*\hypersource@ref@page[2][\@firstofone]{%
-    \begingroup%
-      \def\@tempa##1{\hyperlink{page.##1}{#1{##1}}}%
-      \forcsvlist\@tempa{#2}%
-    \endgroup%
-  }%
-  \renewcommand*\main[1]{%
-    \ifcodeline@index%
-      \hypersource@ref@codeline[\underline]{#1}%
-    \else%
-      \hypersource@ref@page[\underline]{#1}%
-    \fi%
-  }%
-  \renewcommand*\usage[1]{\hypersource@ref@page[\textit]{#1}}%
-%    \end{macrocode}
-% \end{macro}^^A \hypersource@ref@page
-% \end{macro}^^A \hypersource@ref@codeline
-% \end{macro}^^A \hypersource@def
-% \end{macro}^^A \hypersourcedef
-%
-% \iffalse
-%</doc>
 % \fi
 %
 % Das war's. Damit sind die Ausführungen für das Paket \pkg{hyperref} beendet.
@@ -756,6 +686,10 @@
 % \begin{macro}{\hypersetup}
 % \begin{macro}{\href}
 % \begin{macro}{\phantomsection}
+% \begin{macro}{\pdfbookmark}
+% \begin{macro}{\currentpdfbookmark}
+% \begin{macro}{\subpdfbookmark}
+% \begin{macro}{\belowpdfbookmark}
 % \begin{macro}{\texorpdfstring}
 % \begin{macro}{\nolinkurl}
 % Einige vom Paket \pkg{hyperref} definierten Befehle werden vorgehalten.
@@ -763,12 +697,20 @@
   \providecommand*\hypersetup[1]{}%
   \providecommand*\href[3][]{#3}%
   \providecommand*\phantomsection{}%
+  \providecommand*\pdfbookmark[3][]{}%
+  \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\subpdfbookmark[2]{}%
+  \providecommand*\belowpdfbookmark[2]{}%
   \providecommand*\texorpdfstring[2]{#1}%
   \RequirePackage{url}[2013/09/16]%
   \providecommand*\nolinkurl[1]{\url{#1}}%
 %    \end{macrocode}
 % \end{macro}^^A \nolinkurl
 % \end{macro}^^A \texorpdfstring
+% \end{macro}^^A \belowpdfbookmark
+% \end{macro}^^A \subpdfbookmark
+% \end{macro}^^A \currentpdfbookmark
+% \end{macro}^^A \pdfbookmark
 % \end{macro}^^A \phantomsection
 % \end{macro}^^A \href
 % \end{macro}^^A \hypersetup
@@ -840,19 +782,6 @@
 %
 % \iffalse
 %</!doc>
-%<*doc>
-% \fi
-%
-%    \end{macrocode}
-% Und hier der Teil für die Quelltextdokumentation.
-%    \begin{macrocode}
-  \providecommand*\hypersourcedef[1]{}
-  \providecommand*\hypersource@def{}
-  \providecommand*\hypersource@ref@codeline[2][]{}
-  \providecommand*\hypersource@ref@page[2][]{}
-%
-% \iffalse
-%</doc>
 % \fi
 %
 %    \begin{macrocode}
@@ -886,19 +815,6 @@
 \newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
 %    \end{macrocode}
 % \end{macro}^^A \mailto
-% Wenn \pkg{hyperref} geladen wird, erzeugt das Paket \pkg{babel} innerhalb von 
-% \cs{pdfstringdef} ziemlich viele und absolut unnötige Infos in der Form
-% \texttt{Package babel Info: Redefining ngerman shorthand}. Dieser Patch dient
-% zum Unterdrücken dieser Infos.
-% \begin{macro}{\pdfstringdef}
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{%
-  \patchcmd{\pdfstringdef}{\csname HyPsd@babel@}{%
-    \let\bbl@info\@gobble\csname HyPsd@babel@%
-  }{}{\tud@patch@wrn{pdfstringdef}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \pdfstringdef
 %
 % \iffalse
 %</body|class&doc>
@@ -912,16 +828,6 @@
 \renewcommand*\fullref[1]{\hyperref[#1]{\autoref*{#1} \vpageref{#1}}}
 %    \end{macrocode}
 % \end{macro}^^A \fullref
-% Das Paket \pkg{microtype} wird für den optischen Randausgleich verwendet. Es 
-% sollte erst nach \pkg{hyperref} geladen werden.
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-%    \end{macrocode}
-% Wurde \pkg{hyperref} nicht geladen, dann soll auf \pkg{microtype} trotzdem 
-% nicht verzichtet werden.
-%    \begin{macrocode}
-\TUD@UnwindPackage{hyperref}{\RequirePackage[babel]{microtype}[2013/05/23]}
-%    \end{macrocode}
 %
 % \iffalse
 %</body>
@@ -1420,7 +1326,7 @@
 % Argumenten am Ende genutzt werden können. Sollte ein Label existieren, wird 
 % automatisch ein Hyperlink erzeugt, welcher mit der optionalen Angabe von
 % |'|\meta{Referenzvariante}|'| um einen textuellen Querverweis ergänzt werden
-% kann. Mit \verb=|=\meta{Indexmarkup}\verb=|= kann die Erscheinung im Index
+% kann. Mit \verb+|+\meta{Indexmarkup}\verb+|+ kann die Erscheinung im Index
 % angepasst werden. Bei einigen Befehlen kann zusätzlich zuvor im Markup mit
 % dem optionalen Argument \parg{Bundleelement} die Zuweisung auf ein bestimmtes
 % Paket oder eine Klasse aus dem \TUDScript-Bundle erfolgen.
@@ -2024,7 +1930,7 @@
 %   Default-Eintrag hinterlegen, um ggf. darauf zu prüfen%
 % }[v2.??]%
 % \ToDo{%
-%   neues Makro \cs{PLength} mit \cs{PName\{Längenwert\}}
+%   neues Makro \cs{PLength} mit \cs{PName}\marg{Längenwert}
 % }[v2.??]%
 % \begin{macro}{\PValue}
 % \begin{macro}{\PName}
@@ -3250,13 +3156,13 @@
 % dem \TUDScript-Bundle erstellt werden, wird das optionale Argument in runden 
 % Klammern \parg{\string\Class\marg{Klasse}/\string\Package\marg{Paket}} für 
 % einen Verweis auf das \parg{Bundleelement} verwendet, der in \cs{@idxbundle} 
-% gespeichert wird. Das Argument \verb=|=\meta{Indexmarkup}\verb=|= wird bei
+% gespeichert wird. Das Argument \verb+|+\meta{Indexmarkup}\verb+|+ wird bei
 % Deklarationen zur Unterdrückung von Untereinträgen verwendet.
 % Der vollständige Funktionsaufruf lautet:
 % \newline\begingroup\scriptsize
 %   \cs{tud@idx@get}\cs{tud@idx@key}\cs{tud@idx@fmt}\ignorespaces%
 %   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}\ignorespaces%
-%   \parg{Bundleelem.}\verb=|=\meta{Indexmark.}\verb=|=\ignorespaces%
+%   \parg{Bundleelem.}\verb+|+\meta{Indexmark.}\verb+|+\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
 \newcommand*\tud@idx@key{}
@@ -3579,7 +3485,7 @@
 % \newline\begingroup\scriptsize
 %   \cs{Process@Index}\marg{Stern?}\marg{Element}\ignorespaces%
 %   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Bundleelement}\ignorespaces%
-%   \verb=|=\meta{Indexmarkup}\verb=|=\ignorespaces%
+%   \verb+|+\meta{Indexmarkup}\verb+|+\ignorespaces%
 % \endgroup
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Index{mmd==od()d||}{%
@@ -3659,7 +3565,7 @@
 %    \end{macrocode}
 % Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
 % Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexmarkup 
-% \verb=|=\val{declare}\verb=|= eine Quasi-Deklaration verwendet werden kann. 
+% \verb+|+\val{declare}\verb+|+ eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
 % gewünschten Formatierung im Index erscheinen zu lassen.
 %    \begin{macrocode}    
@@ -3723,8 +3629,8 @@
 % Indexuntereintrag erzeugt, der wiederum auf einen Indexeintrag des zweiten 
 % Argumentes verweist. Dabei kann im zweiten Argument ein normaler Begriff oder 
 % ein Markup-Befehl verwendet werden. Normalerweise wird für den Querverweis 
-% die Referenzklasse \verb=|see= verwendet, die Sternversion des Befehls
-% hingegen nutzt \verb=|seeunverified=, um auf eine Prüfung des verwiesenen
+% die Referenzklasse \verb+|see+ verwendet, die Sternversion des Befehls
+% hingegen nutzt \verb+|seeunverified+, um auf eine Prüfung des verwiesenen
 % Eintrags zu verzichten.
 %    \begin{macrocode}
 \NewDocumentCommand\SeeRef{s m m}{%
@@ -4436,7 +4342,7 @@
 % Handbuch erläutert werden.
 %
 % Das Paket \pkg{enumitem} erlaubt das Beeinflussen der Standardlisten und die 
-% Ableitung neuer Listen aus diesen. Mit \cs{setlist\{noitemsep\}} werden die 
+% Ableitung neuer Listen aus diesen. Mit \cs{setlist}|{noitemsep}| werden die 
 % zusätzlichen Zwischenräume innerhalb der Listen beseitigt. Weiterhin wird 
 % linksbündiger Flattersatz für die Standardlisten aktiviert.
 %    \begin{macrocode}
@@ -5598,7 +5504,7 @@
 % und der Inhalt von \file{\string\tud@tut@temp.tex} wie gewünscht eingebunden
 % und kompiliert. Damit die so erstellte PDF-Datei mit \cs{IncludeStandalone}
 % im weiteren Verlauf in das Tutorial eingebunden werden kann, wird diese 
-% außerdem noch in \cs{\meta{Argument}-temp.pdf} umbenannt. Das Makro
+% außerdem noch in \file{\meta{Argument}-temp.pdf} umbenannt. Das Makro
 % \cs{StandaloneDate} wird auf das Datum der Master-Datei gesetzt, damit das
 % voreingestellte Datum der erzeugten Datei angepasst werden kann.
 %    \begin{macrocode}
@@ -6142,15 +6048,15 @@
     \addto@hook\toks@{##2\@nil{\@tempb{##1}{##2}}}%
 %    \end{macrocode}
 % Der Inhalt von \cs{toks@} ist
-% \cs{def}\cs{@tempa\#1\meta{Zeichen}\#2}\cs{@nil\{\cs{@tempb\{\#1\}\{\#2\}}\}}
+% |\def\@tempa#1|\meta{Zeichen}|#2\@nil{\@tempb{#1}{#2}}|
 % und definiert \cs{@tempa}.
 %    \begin{macrocode}
     \the\toks@%
 %    \end{macrocode}
 % Nun wird \cs{@tempb} definiert. Dieses Makro fügt dem Zielmakro das erste
 % Argumente gefolgt von \meta{Ersatzzeichen} hinzu. Mit dem zweiten Argument
-% wird anschließend \cs{@tempa\#\#2}\cs{@nil} so lange rekursiv aufgerufen, bis
-% es wirklich leer ist, wodurch das zweite Argument \meta{Zeichen} sukzessive 
+% wird anschließend |\@tempa##2\@nil| so lange rekursiv aufgerufen, bis es
+% wirklich leer ist, wodurch das zweite Argument \meta{Zeichen} sukzessive 
 % durch das dritte Argument \meta{Ersatzzeichen} ersetzt wird.
 %    \begin{macrocode}
     \def\@tempb##1##2{%
@@ -6174,8 +6080,8 @@
     \eaddto@hook\toks@{\@tempc}%
     \eaddto@hook\toks@{\detokenize{#2}\@nil}%
 %    \end{macrocode}
-% Der Inhalt von \cs{toks@} hat die Form \cs{@tempa\#1\meta{Zeichen}}\cs{@nil},
-% wobei der Inhalt von \meta{\#1} expandiert wird.
+% Der Inhalt von \cs{toks@} hat die Form |\@tempa#1|\meta{Zeichen}|\@nil|,
+% wobei der Inhalt von |#1| expandiert wird.
 %    \begin{macrocode}
     \def#1{}%
     \the\toks@%
@@ -6299,11 +6205,7 @@
   }\xspace%
 }
 \AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\DDC{DRESDEN-concept}%
-    \def\TUDScript{TUD-Script}%
-    \def\KOMAScript{KOMA-Script}%
-  }%
+  \pdfstringdefDisableCommands{\def\DDC{DRESDEN-concept}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \DDC
@@ -6375,6 +6277,6 @@
 %</body>
 % \fi
 %
-% \Finale
+% \PrintBackMatter
 %
 \endinput
