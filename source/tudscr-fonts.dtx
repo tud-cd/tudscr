@@ -3970,39 +3970,82 @@
 % \subsubsection{Anpassungen für das Paket \pkg{siunitx}}
 %
 % \begin{macro}{\lseries}
+% \begin{macro}{\tud@x@siunitx@mapping}
+% \changes{v2.06o}{2022/08/08}{neu}
 % \begin{macro}{\tud@x@siunitx@reset}
 % \changes{v2.06o}{2022/07/31}{neu}
-% Das Paket \pkg{siunitx} nutzt den Befehl \cs{lseries} für den Fall, dass für
-% den Fließtext eine Schrift die Serie \val{l} verwendet. Dem wird hier 
-% Rechnung getragen. Außerdem muss bei der Auswahl der Schriften evtl. auf das 
-% Paket reagiert werden, weil es sich bei der Definition der Schriften für den 
-% Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} oder aber den 
-% zuletzt gemachten Einstellungen mit \cs{newfontfamily} verlässt. Sind die 
-% Schriften des \CDs aktiv, wird dies temporär mit \opt{cdfont}|=|\val{false}
-% revidiert und direkt nach den durch \pkg{siunitx} zu Beginn des Dokumentes 
-% erfolgten Einstellungen durch \cs{tud@x@siunitx@reset} wiederhergestellt. 
-% Dieser etwas merkwürdige Workaround geht auf die gemeldeten Probleme im 
-% \GitHubRepo<22> sowie im \Forum<503> zurück.
 %    \begin{macrocode}
-\newcommand*\tud@x@siunitx@reset{}
 \AfterAtEndOfPackage*{siunitx}{%
-  \providecommand*\lseries{\fontseries{l}\selectfont}%
-  \AtEndPreamble{%
-    \if@tud@cdfont@active%
-      \if@tud@cdfont@heavy%
-        \def\tud@x@siunitx@reset{\TUDoptions{cdfont=heavy}}%
-      \else%
-        \def\tud@x@siunitx@reset{\TUDoptions{cdfont=true}}%
+  \IfPackageAtLeastTF{siunitx}{2021-04-18}{%
+%    \end{macrocode}
+% Das Paket \pkg{siunitx} in der Version |v3| stellt eine Schnittstelle für 
+% die Zuordnung von Schriftschnitten zur verwendeten Mathematikversionen zur
+% Verfügung. Da vorher erheblicher Aufwand betrieben wurde, die korrekten
+% Schriftschnitte im Mathematikmodus mit den Versionen |normal| und |bold|
+% bereitzustellen, werden bei aktivierten Schriften des \CDs die entsprechenden
+% Zuordnungen gesetzt.
+%    \begin{macrocode}
+    \newcommand*\tud@x@siunitx@mapping{%
+      \if@tud@cdfont@active
+        \csname keys_set:nx\endcsname { siunitx / series-version-mapping }
+          {
+            \tud@cdfont@md  = normal,
+            \tud@cdfont@bf  = bold,
+            \tud@cdfont@ebf = bold
+          }
+      \else
+%    \end{macrocode}
+% Zurücksetzen auf die Standardeinstellungen von \pkg{siunitx}.
+%    \begin{macrocode}
+        \csname keys_set:nn\endcsname { siunitx / series-version-mapping }
+          {
+            ul = light  ,
+            el = light  ,
+            l  = light  ,
+            sl = light  ,
+            m  = normal ,
+            sb = bold   ,
+            b  = bold   ,
+            eb = bold   ,
+            ub = bold
+          }
+      \fi
+    }
+    \xapptocmd\tud@font@set%
+      {\tud@x@siunitx@mapping}%
+      {}{\tud@patch@wrn{tud@font@set}}%
+  }{%
+%    \end{macrocode}
+% Das Paket \pkg{siunitx} in der Version |v2| nutzt den Befehl \cs{lseries} für
+% den Fall, dass für den Fließtext eine Schrift die Serie \val{l} verwendet. 
+% Dem wird hier Rechnung getragen. Außerdem muss bei der Auswahl der Schriften 
+% evtl. auf das Paket reagiert werden, weil es sich bei der Definition der 
+% Schriften für den Mathematikmodus auf \cs{familydefault} bzw. \cs{rmfamily} 
+% verlässt. Deshalb werden am Ende der Präambel die Schrifteinstellungen mit 
+% \opt{cdfont}|=|\val{false} deaktiviert und zu Beginn des Dokumentes auf die 
+% aktuelle Einstellung gesetzt. Dieser etwas merkwürdige Workaround geht auf 
+% die gemeldeten Probleme im \GitHubRepo<22> sowie im \Forum<503> zurück.
+%    \begin{macrocode}
+    \newcommand*\tud@x@siunitx@reset{}%
+    \providecommand*\lseries{\fontseries{l}\selectfont}%
+    \AtEndPreamble{%
+      \if@tud@cdfont@active%
+        \if@tud@cdfont@heavy%
+          \def\tud@x@siunitx@reset{\TUDoptions{cdfont=heavy}}%
+        \else%
+          \def\tud@x@siunitx@reset{\TUDoptions{cdfont=true}}%
+        \fi%
+        \appto\tud@x@siunitx@reset{\tud@font@set[]}%
+        \TUDoptions{cdfont=false}%
+        \tud@font@set[]%
       \fi%
-      \appto\tud@x@siunitx@reset{\tud@font@set[]}%
-      \TUDoptions{cdfont=false}%
-      \tud@font@set[]%
-    \fi%
-  }%
-  \AtBeginDocument{\tud@x@siunitx@reset}%
+    }%
+    \AtBeginDocument{\tud@x@siunitx@reset}%
+  }
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@siunitx@reset
+% \end{macro}^^A \tud@x@siunitx@mapping
 % \end{macro}^^A \lseries
 %
 % \subsubsection{Mathematikschriften in Verbindung mit dem Paket \pkg{bm}}
