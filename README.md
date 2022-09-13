@@ -4,7 +4,7 @@
 
  Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 
- **tudscr 2022/xx/xx v2.07**
+ **tudscr 2022/??/?? v2.06p**
 
  This material is subject to the LaTeX Project Public License version 1.3c
  or later.<br>
@@ -58,6 +58,9 @@ Das Bundle beinhaltet:
 
 Versionen
 ---------
+
+**v2.06p** (2022/??/??)
++ ...
 
 **v2.06o** (2022/08/09)
 + Schriftstärke im Mathematikmodus wird passend zu den Einstellungen für den 
@@ -293,6 +296,9 @@ The bundle offers:
 
 Versions
 --------
+
+**v2.06p** (2022/??/??)
++ ...
 
 **v2.06o** (2022/08/09)
 + font face in math mode matches text mode settings 
