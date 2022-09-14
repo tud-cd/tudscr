@@ -760,7 +760,6 @@
 % \subsection{Umsetzung des Layouts}
 %
 % \begin{macro}{\tud@sec@fontface}
-% \changes{v2.05}{2016/04/04}{Optionales Argument für \pkg{tudscrcomp}}^^A
 % \changes{v2.06}{2018/08/20}{extra-fette Überschriften möglich}^^A
 % \changes{v2.06o}{2022/08/02}{Überschrifen im \CD ohne aktive
 %   Fließtextschriften möglich}^^A
@@ -776,9 +775,8 @@
 % \ToDo{Auf neues NFSS anpassen, \cs{fontseriesforce} überprüfen}[v2.07]
 %    \begin{macrocode}
 %<package&fixfonts>\AfterPackage{tudscrfonts}{%
-\newcommand*\tud@sec@fontface[1][]{\tud@sec@@fontface{#1}}%
-\newcommand*\tud@sec@@fontface[1]{%
-  \sectfont#1%
+\newcommand*\tud@sec@fontface{\tud@sec@@fontface}
+\newcommand*\tud@sec@@fontface{%
   \if@tud@cdfont@active%
     \if@tud@heavyheadings%
       \if@tud@x@mweights@enabled%
@@ -786,16 +784,16 @@
         \edef\bfseries@sf{\tud@cdfont@ebf}%
         \edef\bfseries@tt{\tud@ttfont@ebf}%
       \fi%
-      \let\bfdefault\tud@cdfont@ebf%
+      \edef\bfdefault{\tud@cdfont@ebf}%
       \fontseriesforce{\tud@cdfont@ebf}%
     \fi%
   \else%
     \tud@if@v@lower{2.06}{}{%
       \fontfamily{\tud@cdfont@fam}%
       \if@tud@heavyheadings%
-        \let\bfdefault\tud@cdfont@ebf%
+        \edef\bfdefault{\tud@cdfont@ebf}%
       \else%
-        \let\bfdefault\tud@cdfont@bf%
+        \edef\bfdefault{\tud@cdfont@bf}%
       \fi%
       \fontseriesforce{\bfdefault}%
     }%
@@ -808,9 +806,9 @@
 % dies per Option auch deaktiviert werden.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
-  \renewcommand*\tud@sec@fontface[1][]{%
+  \renewcommand*\tud@sec@fontface{%
     \if@tud@cdoldfont@nodin%
-      \tud@sec@@fontface{#1}%
+      \tud@sec@@fontface%
     \else%
       \tud@db\tud@raggedright%
     \fi%
