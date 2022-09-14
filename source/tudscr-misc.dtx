@@ -446,7 +446,7 @@
 %<*option>
 % \fi
 %
-% \section{Verarbeitung von Optionen}
+% \section{Verarbeitung von Optionen und Laden der \KOMAScript"~Klassen}
 % \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach |\begin{document}| mehrere Layoutoptionen 
@@ -656,32 +656,45 @@
 %</class&!inherit|package&fonts>
 % \fi
 %
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
+% \subsection{Durchreichen von Optionen und Standardeinstellungen}
+%
+% Es werden die Standardeinstellungen ausgeführt.
 %    \begin{macrocode}
-%<*package&manual>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&manual>
-%<*class&!inherit|package>
+%<*class&!inherit|package&fixfonts>
 \TUDExecuteOptions{%
-%<*package&fixfonts>
-  headings=heavy%
-%</package&fixfonts>
-%<*class&!inherit>
+%<*class>
 %<*book|report|article>
   cd=true,tudbookmarks=true%
 %</book|report|article>
 %<*poster>
   cd=bicolor,tudbookmarks=false%
 %</poster>
-%</class&!inherit>
+%</class>
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
 }
-%</class&!inherit|package>
+%</class&!inherit|package&fixfonts>
+%<*manual>
+%<*class>
+\PassOptionsToClass
+%</class>
+%<*package>
+\TUDoptions
+%</package>
+{%
+  ttfont=roboto,%
+%<*package>
+  headingsvskip=-6ex,%
+%</package>
+  cdfoot=true%
+}
+%<*class>
+{\TUD@Class@Parent}
+%</class>
+\TUD@KOMAoptions{headings=optiontoheadandtoc}
+%</manual>
 %    \end{macrocode}
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
 % genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
 % geprüft, ob ein spezielles Papierformat angegeben wurde.
@@ -712,6 +725,9 @@
 %</inherit>
 %</class>
 %    \end{macrocode}
+%
+% \subsection{Laden der unterlagerten Klassen}
+%
 % Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
 % bzw. \TUDScript-Elternklasse geladen.
 %    \begin{macrocode}
@@ -761,7 +777,7 @@
 %    \begin{macrocode}
 \PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}
-%<!doc>\reversemarginpar
+%<manual>\reversemarginpar
 %    \end{macrocode}
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
 % Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
@@ -776,8 +792,21 @@
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
-\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+\PassOptionsToPackage{%
+  colorlinks,%
+  hyperindex=false%
+}{hyperref}
+\AtBeginDocument{%
+  \bookmarksetup{%
+    open,%
+%<*manual>
+    openlevel=1,%
+%</manual>
+%<*doc>
+    openlevel=2,%
+%</doc>
+  }%
+}
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
@@ -785,14 +814,28 @@
 %    \begin{macrocode}
 \AfterAtEndOfPackage*{hyperref}{%
   \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
-  \hypersetup{colorlinks,linkcolor=blue}%
+  \hypersetup{%
+    linkcolor=blue,%
+    pdfpagelayout=OneColumn%
+  }%
+  \robustify\url%
+  \robustify\nolinkurl%
+  \robustify\href%
+  \robustify\hyperref%
 }
 %    \end{macrocode}
 % \begin{macro}{\url}
 % \begin{macro}{\nolinkurl}
 % \begin{macro}{\hypersetup}
-% \begin{macro}{\phantomsection}
+% \begin{macro}{\HyperDestRename}
 % \begin{macro}{\href}
+% \begin{macro}{\hyperdef}
+% \begin{macro}{\hyperref}
+% \begin{macro}{\hypertarget}
+% \begin{macro}{\hyperlink}
+% \begin{macro}{\hyperpage}
+% \begin{macro}{\Hy@raisedlink}
+% \begin{macro}{\@currentHref}
 % Sollte \pkg{hyperref} nicht geladen werden, müssen einige Befehle rudimentär 
 % definiert werden.
 %    \begin{macrocode}
@@ -812,12 +855,32 @@
   \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
   \providerobustcmd*\nolinkurl[1]{\url{#1}}%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\phantomsection{}%
+  \providecommand*\HyperDestRename[2]{}%
   \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\hyperdef[4][]{#4}%
+  \providerobustcmd*\hyperref{%
+    \kernel@ifnextchar[%]
+      {\tud@x@hyperref@a}%
+      {\tud@x@hyperref@b}%
+  }%
+  \newcommand*\tud@x@hyperref@a[2][]{#2}%
+  \newcommand*\tud@x@hyperref@b[4]{#4}%
+  \providecommand*\hypertarget[2]{#2}%
+  \providecommand*\hyperlink[2]{#2}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+  \providecommand*\@currentHref{}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \@currentHref
+% \end{macro}^^A \Hy@raisedlink
+% \end{macro}^^A \hyperpage
+% \end{macro}^^A \hyperlink
+% \end{macro}^^A \hypertarget
+% \end{macro}^^A \hyperref
+% \end{macro}^^A \hyperdef
 % \end{macro}^^A \href
-% \end{macro}^^A \phantomsection
+% \end{macro}^^A \HyperDestRename
 % \end{macro}^^A \hypersetup
 % \end{macro}^^A \nolinkurl
 % \end{macro}^^A \url
@@ -906,19 +969,12 @@
 \newcommand*\tud@templist{}
 \let\tud@templist\relax
 \newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \let\tud@reserved#1%
-    \let\tud@templist\relax%
-    \forlistloop\tud@list@@sort{\tud@reserved}%
-    \let\tud@reserved\relax%
-    \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
-    \let#1\tud@reserved%
-  }%
+  \let\tud@reserved#1%
+  \let\tud@templist\relax%
+  \forlistloop\tud@list@@sort{\tud@reserved}%
+  \let\tud@reserved\relax%
+  \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
+  \let#1\tud@reserved%
 }
 %    \end{macrocode}
 % Hier erfolgt die eigentliche Sortierung der Liste.
@@ -1085,6 +1141,22 @@
 %    \end{macrocode}
 % \end{macro}^^A \@tocrmarg
 % \end{macro}^^A \@pnumwidth
+% \begin{macro}{\bsc}
+% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
+%   \cs{DeclareRobustCommand}}^^A
+% \begin{macro}{\txb}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% Befehle für das Setzen von Backslash und senkrechtem Strich.
+%    \begin{macrocode}
+\newrobustcmd*\bsc{%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+  \textbackslash%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+}
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
+%    \end{macrocode}
+% \end{macro}^^A \txb
+% \end{macro}^^A \bsc
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
@@ -1119,6 +1191,16 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \mailto
+% \begin{macro}{\seeref}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
+% statt \cs{seealso} genutzt werden.
+%    \begin{macrocode}
+\NewDocumentCommand\seeref{s m}{%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+}
+%    \end{macrocode}
+% \end{macro}^^A \seeref
 % \begin{macro}{\Attention}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % Falls irgendetwas besonders hervorgehoben werden soll.
@@ -1286,6 +1368,17 @@
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
 % \end{macro}^^A \OpenSans
+% \begin{macro}{\notudscrartcl}
+%    \begin{macrocode}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
+  Option nicht verf\"ugbar.%
+}
+%    \end{macrocode}
+% \end{macro}^^A \notudscrartcl
+%
+% \subsubsection{Markup für Links}
+%
 % \begin{macro}{\GitHubBase}
 % \changes{v2.07}{2019/11/11}{neu}^^A
 % \begin{macro}{\tud@github@url@base}
@@ -1436,6 +1529,23 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \CTAN
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
+%    \begin{macrocode}
+%<*manual>
+\NewDocumentCommand\scrguide{!t' !O{\KOMAScript-Handbuch}}{%
+  \begingroup%
+    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
+    \tud@res@a{%
+      http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
+    }{#2}%
+  \endgroup%
+  \xspace%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \scrguide
 %
 % \subsubsection{Setzen von Schriftzügen}
 %
