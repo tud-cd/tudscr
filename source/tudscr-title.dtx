@@ -505,7 +505,7 @@
 % Abschlussarbeit gesetzt wird oder nicht. Falls dies nicht der Fall ist, dann
 % wird das angegebene bzw. das heutige Datum und ggf. die Ergänzung ausgegeben.
 %    \begin{macrocode}
-      \ifx\@thesis\@empty%
+      \ifx\@@thesis\@empty%
         \if@tud@coverpage\else%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus.1fill%
@@ -568,7 +568,7 @@
 % Durch das Paket \pkg{tudscrsupervisor} wird zusätzlich das Feld \cs{@duedate}
 % definiert, welches hier ggf. für auf ein nutzbares Datum geprüft wird.
 %    \begin{macrocode}
-        \ifx\@thesis\@empty\else%
+        \ifx\@@thesis\@empty\else%
           \tud@date@check%
           \ifx\@date\@empty\else%
             \vskip 2ex\@plus1ex\@minus1ex%
@@ -887,8 +887,22 @@
         \usekomafont{titlehead}{\@titlehead\strut\par}%
       \end{minipage}%
     \fi%
+%    \end{macrocode}
+% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
+% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
+% auch leer ist.
+%    \begin{macrocode}
 %<*book|report|article>
-    \tud@thesis@tosubject%
+    \if@tud@subjectthesis\ifx\@thesis\@empty\else%
+      \ifx\@subject\@empty\else%
+        \ClassWarning{\TUD@Class@Name}{%
+          The option `subjectthesis' was activated, so\MessageBreak%
+          the field `subject' will be overwritten with the\MessageBreak%
+          given thesis%
+        }%
+      \fi%
+      \let\@subject\@thesis%
+    \fi\fi%
 %</book|report|article>
     \ifx\@subject\@empty\else%
       \par\medskip%
@@ -931,25 +945,6 @@
 %<*book|report|article>
 % \fi
 %
-% \begin{macro}{\tud@thesis@tosubject}
-% Bei der Verwendung der Option \opt{subjectthesis} wird zum einen geprüft, ob
-% das Feld \cs{@thesis} gesetzt ist und zum anderen, ob das Feld \cs{@subject}
-% auch leer ist.
-%    \begin{macrocode}
-\newcommand*\tud@thesis@tosubject{%
-  \if@tud@subjectthesis\ifx\@thesis\@empty\else%
-    \ifx\@subject\@empty\else%
-      \ClassWarning{\TUD@Class@Name}{%
-        The option `subjectthesis' was activated, so\MessageBreak%
-        the field `subject' will be overwritten with the\MessageBreak%
-        given thesis%
-      }%
-    \fi%
-    \let\@subject\@thesis%
-  \fi\fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@thesis@tosubject
 % \begin{macro}{\tud@title@names}
 % Dieser Befehl dient zur getrennten Ausgabe von mehreren, mit dem Makro 
 % \cs{and} separierten Einträgen in den Feldern \cs{@supervisor}, \cs{@referee}
@@ -1041,7 +1036,7 @@
       \fi%
     \fi%
     \def\@tempc##1{%
-      \expandafter\ifx\csname @##1\endcsname\@empty\else%
+      \tud@if@strempty{\csuse{@##1}}{}{%
         \if@titlepage%
           \tud@newline@title%
           \tud@if@strblank{\csuse{##1name}}%
@@ -1051,7 +1046,7 @@
         \else%
           \tud@title@wrn{##1}%
         \fi%
-      \fi%
+      }%
     }%
     \@tempc{course}%
     \@tempc{discipline}%
