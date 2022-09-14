@@ -128,14 +128,17 @@
 % \changes{v2.06p}{2022/09/13}{neu}^^A
 % Die Zuordnung der numerischen Kompatibilitätswert zu den einzelnen Versionen.
 % Alle definierten Versionen werden zusätzlich in \cs{tud@v@list} abgelegt.
+% Die Speicherung erfolgt als Token-Paar, um eine einfache Verarbeitung der 
+% speziellen Befehle \cs{tud@v@first} und \cs{tud@v@last} zu ermöglichen.
 %    \begin{macrocode}
-\newcommand*\tud@v@first{0}
-\newcommand*\tud@v@last{0}
+\newcommand*\tud@v@first{}
+\newcommand*\tud@v@last{}
 \newcommand*\tud@v@list{}
 \def\tud@res@b#1#2{%
-  \expandafter\newcommand\expandafter*\csname tud@v@#1\endcsname{#2}%
+  \expandafter\newcommand\expandafter*\csname tud@v@#1\endcsname{{#1}{#2}}%
   \listadd\tud@v@list{#1}%
-  \def\tud@v@last{#2}%
+  \ifx\tud@v@first\@empty\def\tud@v@first{{#1}{#2}}\fi
+  \def\tud@v@last{{#1}{#2}}%
 }
 \@tfor\tud@res@a:=%
 {{2.00}{0}}%
@@ -159,6 +162,48 @@
 % \end{macro}^^A \tud@v@2.01
 % \end{macro}^^A \tud@v@2.00
 % \end{macro}^^A \tud@v@first
+% \begin{macro}{\tud@v@validate}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
+% Normalisiert die Versionsangabe des letzten Argumentes und erzeugt einen 
+% Fehler, falls die gegebene Version nicht definiert ist. In das erste Argument 
+% wird entweder die Version oder für die Sternversion das Kompatibilitätslevel 
+% zurückgeschrieben. Das optionale Argument kann für zusätzliche Informationen 
+% in der Fehlermeldung genutzt werden. Im Fehlerfall wird der Code zweiten 
+% optionalen Argumentes |()| ausgeführt und entweder die aktuelle oder~-- falls 
+% |'| verwendet wurde~-- die erste Version zurückgeliefert.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@v@validate{s t' m o d() m}{%
+  \begingroup%
+    \tud@v@get\tud@res@a{#6}%
+    \ifcsundef{tud@v@\tud@res@a}{%
+      \edef\tud@res@a{\csuse{tud@v@\IfBooleanTF{#2}{first}{last}}}%
+%<*class>
+      \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+      \PackageError{tudscrfonts}%
+%</package&fonts>
+        {Invalid version number}{%
+          \IfValueT{#4}{#4\space\MessageBreak}%
+          The version number `#6' is unknown, possible values are:\MessageBreak%
+          \tud@v@list\MessageBreak as well as `first' and `last'. %
+          Version `\expandafter\@firstoftwo\tud@res@a' is assumed!%
+        }%
+    }{%
+      \edef\tud@res@a{\csuse{tud@v@\tud@res@a}}%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#3}{%
+        \IfBooleanTF{#1}%
+          {\expandafter\@secondoftwo}{\expandafter\@firstoftwo}\tud@res@a%
+      }%
+      \IfValueT{#5}{\unexpanded{#5}}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@validate
 % \begin{macro}{\tud@v@get}
 % \changes{v2.05}{2016/05/31}{neu}^^A
 % Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
@@ -168,18 +213,19 @@
 %    \begin{macrocode}
 \newcommand*\tud@v@get[2]{%
   \begingroup%
-    \def\@tempa{%
+    \edef\tud@res@c{#2}%
+    \def\tud@res@a{%
       \kernel@ifnextchar v%
-        {\@tempb}%
-        {\@tempb v}%
+        {\tud@res@b}%
+        {\tud@res@b v}%
     }%
-    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-    \@tempa #2\@nil%
-    \edef\tud@reserved{%
+    \def\tud@res@b v##1\@nil{\edef\tud@res@c{\zap@space##1 \@empty}}%
+    \expandafter\tud@res@a\tud@res@c\@nil%
+    \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{\def#1}{\@tempc}%
+      \unexpanded{\def#1}{\tud@res@c}%
     }%
-  \tud@reserved%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@v@get
@@ -196,38 +242,25 @@
 % Versionsnummer und Kompatibilitätswert mit den Makros |\tud@v@|\meta{Version} 
 % erfolgt.
 %    \begin{macrocode}
-\newcommand*\tud@v@comp{\tud@v@last}
+\newcommand*\tud@v@comp{}
+\edef\tud@v@comp{\expandafter\@secondoftwo\tud@v@last}
 %    \end{macrocode}
 % Damit dieser Schlüssel gezielt als erstes bei der Abarbeitung der Optionen
 % aufgerufen werden kann, wird diesem ein spezielles Mitglied zugeteilt.
 %    \begin{macrocode}
 \TUD@key[.comp]{tudscrver}[last]{%
-  \tud@v@get\@tempa{#1}%
-  \ifcsundef{tud@v@\@tempa}{%
+  \tud@v@validate*'\tud@v@comp%
+    [Option `tudscrver=#1' unknown, `tudscrver=first' is used.]%
+    {#1}%
 %<*class>
-    \ClassWarningNoLine{\TUD@Class@Name}%
+  \ClassInfoNoLine{\TUD@Class@Name}%
 %</class>
 %<*package&fonts>
-    \PackageWarningNoLine{tudscrfonts}%
+  \PackageInfoNoLine{tudscrfonts}%
 %</package&fonts>
-    {%
-      You did set option `tudscrver=\@tempa', but\MessageBreak%
-      this value is not supported. Possible values are:\MessageBreak%
-      \tud@v@list\MessageBreak%
-      Because of this, `tudscrver=first' was set%
-    }%
-    \def\tud@v@comp{0}%
-  }{%
-%<*class>
-    \ClassInfoNoLine{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-    \PackageInfoNoLine{tudscrfonts}%
-%</package&fonts>
-    {%
-      Switching compatibility level to `v\@tempa'%
-    }%
-    \edef\tud@v@comp{\csuse{tud@v@\@tempa}}%
+  {%
+    Option `tudscrver=#1' was set, switching to\MessageBreak%
+    compatibility level `\tud@v@comp'%
   }%
   \FamilyKeyStateProcessed%
 }
@@ -261,29 +294,20 @@
 %    \begin{macrocode}
 \newcommand*\tud@if@v@lower[1]{%
   \begingroup%
-    \tud@v@get\@tempa{#1}%
-    \ifcsundef{tud@v@\@tempa}{%
-      \def\tud@reserved{%
-%<*class>
-        \ClassWarningNoLine{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-        \PackageWarningNoLine{tudscrfonts}%
-%</package&fonts>
-        {%
-          Erroneous usage of `\string\tud@if@v@lower'. \MessageBreak%
-          There's no defined macro `\string\tud@v@\@tempa'%
-        }%
-        \endgroup\@firstoftwo%
-      }%
-    }{%
-      \ifnum\tud@v@comp<\csuse{tud@v@\@tempa}\relax%
-        \def\tud@reserved{\endgroup\@firstoftwo}%
-      \else%
-        \def\tud@reserved{\endgroup\@secondoftwo}%
-      \fi%
-    }%
-  \tud@reserved%
+    \tud@v@validate*\tud@res@a%
+      [%
+        Erroneous usage of `\string\tud@if@v@lower' internally. \MessageBreak%
+        Please submit a bug report via\MessageBreak%
+        \TUD@BugReport\MessageBreak%
+        A bugfix is urgently required.%
+      ]%
+      {#1}%
+    \ifnum\tud@v@comp<\tud@res@a\relax%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@v@lower
