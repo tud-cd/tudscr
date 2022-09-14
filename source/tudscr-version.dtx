@@ -54,8 +54,10 @@
 %   von \pkg{docstrip} ermöglicht}^^A
 % \begin{macro}{\TUDScriptVersion}
 % \begin{macro}{\TUDScriptVersionNumber}
+% \begin{macro}{\TUDScriptVersion@Number}
 % \begin{macro}{\TUD@KOMAVersion}
 % \begin{macro}{\TUD@KOMAVersionNumber}
+% \begin{macro}{\TUD@KOMAVersion@Number}
 % Die Klassen und Pakete des \TUDScript-Bundles verwenden \cs{TUD@Version}
 % zur Versionsangabe. Je nachdem, ob \cs{TUD@Version} bereits definiert ist 
 % oder nicht, wird mit \cs{TUD@@Version} die Definition überprüft oder eine 
@@ -101,16 +103,70 @@
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
     \expandafter\@tempa\TUD@Version ? ?\relax\relax{\TUDScriptVersionNumber}%
     \expandafter\@tempa\TUD@KOMAVersion ? ?\relax\relax{\TUD@KOMAVersionNumber}%
+    \def\@tempa#1.#2#3#4\relax#5\relax{\gdef#5{#1.#2#3}}%
+    \expandafter\@tempa%
+      \TUDScriptVersionNumber\relax\TUDScriptVersion@Number\relax%
+    \expandafter\@tempa%
+      \TUD@KOMAVersionNumber\relax\TUD@KOMAVersion@Number\relax%
   \fi%
 \endgroup
 %</identify>
 %    \end{macrocode}
+% \end{macro}^^A \TUD@KOMAVersion@Number
 % \end{macro}^^A \TUD@KOMAVersionNumber
 % \end{macro}^^A \TUD@KOMAVersion
+% \end{macro}^^A \TUDScriptVersion@Number
 % \end{macro}^^A \TUDScriptVersionNumber
 % \end{macro}^^A \TUDScriptVersion
 % \end{macro}^^A \TUD@@Version
 % \end{macro}^^A \TUD@Version
+%
+% \ToDo{tudscr.ins etc. an neue docstrip-Version anpassen}[v2.07]
+% Entwurf für Erweiterung von \file{tudscr.ins}: Platzhalter anstelle von 
+% \cs{TUDexpandVariable} verwenden und mit \cs{replaceAllIn} ersetzen; 
+% Fehler, Warnungen und Infos in |dtx| mit |\TUD@(Error/Warning/Info)(NoLine)?| 
+% definieren und via \app{docstrip} ersetzen.
+%    \begin{macrocode}
+%^^A% same for \processLineX
+%^^A\def\check@normalLine#1\endLine{%
+%^^A  \advance\codeLinesPassed\@ne
+%^^A  \maybeMsg{.}%
+%^^A  \def\inLine{#1}%
+%^^A  \replaceModuleInLine
+%^^A  \let\do\putline@do
+%^^A  \activefiles
+%^^A}
+%^^A\let\TUDreplaceEntity\empty
+%^^A\ifx\check@normalLine\normalLine
+%^^A  \def\normalLine#1\endLine{%
+%^^A    \advance\codeLinesPassed\@ne
+%^^A    \maybeMsg{.}%
+%^^A    \def\inLine{#1}%
+%^^A    \replaceModuleInLine
+%^^A    \TUDreplaceEntity
+%^^A    \let\do\putline@do
+%^^A    \activefiles
+%^^A  }
+%^^A\else
+%^^A  \errmessage{\string\normalLine has changed!}
+%^^A\fi
+%^^A\def\clsfile#1{%
+%^^A  \edef\TUDreplaceEntity{%
+%^^A    \noexpand\replaceAllIn\noexpand\inLine%
+%^^A      {TUD@Error{}}{ClassError{#1}}
+%^^A  }
+%^^A  ...
+%^^A  \file{#1.cls}%
+%^^A}
+%^^A\def\pkgfile#1{%
+%^^A  \edef\TUDreplaceEntity{%
+%^^A    \noexpand\replaceAllIn\noexpand\inLine%
+%^^A      {TUD@Error{}}{PackageError{#1}}
+%^^A  }
+%^^A  ...
+%^^A  \file{#1.sty}%
+%^^A}
+%    \end{macrocode}
 %
 % \iffalse ins:batch + dtx:driver
 %<*ins>
@@ -164,24 +220,30 @@
       \textsf{%
         T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
       }%
-    }\ifcsname xspace\endcsname\xspace\fi%
+    }\ifcsname xspace\endcsname\expandafter\xspace\fi%
   }%
 }{}
 %    \end{macrocode}
 % \end{macro}^^A \TUDScript
 %
-% \begin{macro}{\TUDScriptContact}
 % \begin{macro}{\TUDScriptRepository}
 % \begin{macro}{\TUDScriptForum}
-% Die E"~Mail-Adresse, Repository und Forum für Supportanfragen.
+% \begin{macro}{\TUDScriptContact}
+% \begin{macro}{\TUD@BugReport}
+% Repository, Forum und E"~Mail-Adresse für Supportanfragen.
 %    \begin{macrocode}
-\providecommand*\TUDScriptContact{hanisch.latex@outlook.com}
 \providecommand*\TUDScriptRepository{https://github.com/tud-cd/tudscr}
 \providecommand*\TUDScriptForum{https://latex.wcms-file3.tu-dresden.de/phpBB3/}
+\providecommand*\TUDScriptContact{hanisch.latex@outlook.com}
+\providecommand*\TUD@BugReport{%
+  \TUDScriptRepository\MessageBreak%
+  \TUDScriptForum\MessageBreak\TUDScriptContact%
+}
 %    \end{macrocode}
+% \end{macro}^^A \TUD@BugReport
+% \end{macro}^^A \TUDScriptContact
 % \end{macro}^^A \TUDScriptForum
 % \end{macro}^^A \TUDScriptRepository
-% \end{macro}^^A \TUDScriptContact
 %
 % \iffalse
 %<*class>
