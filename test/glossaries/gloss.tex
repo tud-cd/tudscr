@@ -1,0 +1,278 @@
+\documentclass[english,ngerman]{tudscrreprt}
+\usepackage{iftex}
+\iftutex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
+\fi
+\usepackage{babel}
+\usepackage{xltabular}
+\usepackage{booktabs}
+\usepackage{siunitx}
+
+\AfterPackage*{hyperref}{%
+\usepackage[%
+%  acronym,% Abkürzungen
+  symbols,% Formelzeichen
+  nomain,% kein Glossar
+  nogroupskip,%
+  toc,%
+  section=chapter,%
+  nostyles,%
+  translate=babel,%
+% mit Tex Live einfach verwendbar
+  xindy={language=german-din},
+]{glossaries}
+\makeglossaries
+}% Ende von AfterPackage
+
+\makeatletter
+\newcommand*\glssort@roman{%
+  a,A,b,B,c,C,d,D,e,E,f,F,g,G,h,H,i,I,j,J,k,K,l,L,m,M,
+  n,N,o,O,p,P,q,Q,r,R,s,S,t,T,u,U,v,V,w,W,x,X,y,Y,z,Z%
+}
+\newcommand*\glssort@greek{%
+  \alpha,\Alpha,\beta,\varbeta,\Beta,\gamma,\Gamma,\delta,\Delta,%
+  \epsilon,\varepsilon,\Epsilon,\zeta,\Zeta,\eta,\Eta,\theta,\vartheta,\Theta,%
+  \iota,\Iota,\kappa,\varkappa,\Kappa,\lambda,\Lambda,\mu,\Mu,\nu,\Nu,\xi,\Xi,%
+  \omicron,\Omicron,\pi,\varpi,\Pi,\rho,\varrho,\Rho,\sigma,\varsigma,\Sigma,%
+  \tau,\Tau,\upsilon,\Upsilon,\phi,\varphi,\Phi,\chi,\Chi,\psi,\Psi,%
+  \omega,\varomega,\Omega%
+}
+\newcommand*\diff[1]{\upDelta#1}
+\newcommand*\glssort@accent{%
+  \diff,\acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+  \hat,\widehat,\grave,\tilde,\widetilde,\vec,\mathring,%
+  \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+}
+\newcommand*\glssort@index[3]{%
+  \begingroup%
+    \glssort@sanitize\@tempa{#2}%
+    % erster Token für Vergleich
+    \def\@tempc##1##2\@nil{\def\@tempb{##1}}%
+    \expandafter\@tempc\@tempa\@nil%
+    \@tempswafalse%
+    \@tempcnta=0%
+    % Schleife für Token-Vergleich aus Listen \glssort@roman und \glssort@greek
+    \def\do##1{%
+      \if@tempswa\else%
+        \def\@tempc{##1}%
+        \ifx\@tempb\@tempc\@tempswatrue\fi%
+        \if@tempswa\else\advance\@tempcnta\@ne\fi%
+      \fi%
+    }%
+    \edef\@tempc{\expandonce\glssort@roman,\expandonce\glssort@greek}%
+    \expandafter\docsvlist\expandafter{\@tempc}%
+    \edef\@tempa{%
+      \unexpanded{\edef\@tempa}{%
+        \noexpand\zap@space\detokenize\expandafter{\@tempa}%
+        \space\noexpand\@empty%
+      }%
+    }%
+    \@tempa%
+    \edef\@tempa{%
+      \endgroup%
+      \unexpanded{\def#1}{%
+        \ifnum\@tempcnta<100 0\fi\ifnum\@tempcnta<10 0\fi\the\@tempcnta%
+        \space\@tempa\space<#3>%
+      }%
+    }%
+  \@tempa%
+  \typeout{====== sort index: `#1'}%
+  \typeout{\@spaces\@spaces\@spaces input: `\detokenize{#2}'}%
+}
+\AfterPackage*{glossaries}{%
+  \newcommand*\symbollettergroup{}
+  \newcommand*\newformulasymbol[5][]{%
+    \ifisgreeksymbol{#4}{%
+      \renewcommand*{\symbollettergroup}{greekletters}%
+    }{%
+      \renewcommand*{\symbollettergroup}{romanletters}%
+    }%
+    \begingroup%
+      \def\@tempa{%
+        type=symbols,%
+        parent={\symbollettergroup},%
+        name={#3},%
+        description={\nopostdesc},%
+        symbol={\ensuremath{#4}},%
+        user1={\si{#5}},%
+        #1%
+      }%
+      \glssort@index\@tempb{#4}{#2}%
+      \epreto\@tempa{sort={\@tempb},}%
+      \edef\@tempb{%
+        \endgroup%
+        \unexpanded{\newglossaryentry{#2}}{\expandonce\@tempa}%
+      }%
+    \@tempb%
+  }%
+  \defglsentryfmt[symbols]{%
+    \ifmmode%
+      \glssymbol{\glslabel}%
+    \else%
+      \glsgenentryfmt~\glsentrysymbol{\glslabel}%
+    \fi%
+  }
+  \providecommand*\greeklettersname{Greek letters}
+  \providecommand*\romanlettersname{Roman letters}
+  \newglossaryentry{greekletters}{%
+    type=symbols,%
+    name={\greeklettersname},%
+    description={\nopostdesc},%
+    sort={a}%
+  }
+  \newglossaryentry{romanletters}{%
+    type=symbols,%
+    name={\romanlettersname},%
+    description={\nopostdesc},%
+    sort={b}%
+  }
+  \newglossarystyle{symbxltab}{%
+    \newcommand*\symbollevel{-1}%
+    \renewenvironment{theglossary}{%
+      \xltabular[l]{\linewidth}{ccXl}%
+    }{%
+      \endxltabular%
+    }%
+    \renewcommand*{\glsgroupheading}[1]{}%
+    \renewcommand*{\glsgroupskip}{}%
+    \newcommand*\symbolhead{%
+      \toprule
+      \bfseries Formelzeichen & \bfseries Einheit &
+      \bfseries Bezeichnung %& \bfseries Seite(n)
+      \tabularnewline\midrule
+    }%
+    \renewcommand*{\glossaryheader}{%
+      \endfirsthead%
+      \symbolhead\endhead%
+      \bottomrule\endfoot%
+      \gdef\symbollevel{-1}%
+    }%
+    \renewcommand*{\glossentry}[2]{%
+      \ifglshaschildren{##1}{%
+        \ifnum\symbollevel>0\relax%
+          \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
+        \fi
+        \gdef\symbollevel{0}%
+        \tabularnewline[%
+          \arraystretch\dimexpr-\ht\strutbox-\dp\strutbox\relax%
+        ]%
+%        \multicolumn{4}{@{}l@{}}{\minisec{\glsentryname{##1}}}%mit Seitenangabe
+        \multicolumn{3}{@{}l@{}}{\minisec{\glsentryname{##1}}}%ohne Seitenangabe
+      }{%
+        \GlossariesWarning{%
+          There are no childrens for entry ##1.\MessageBreak
+          Nothing will be printed. Maybe you should\MessageBreak
+          specify ##1 as a child entry.
+        }%
+      }%
+    }%
+    \renewcommand*{\subglossentry}[3]{%
+      \ifnum\symbollevel=0\relax%
+        \tabularnewline[\medskipamount]\symbolhead%
+      \else%
+        \tabularnewline
+      \fi%
+      \gdef\symbollevel{##1}%
+      \glsentryitem{##2}% Entry number if required
+      \glstarget{##2}{\glossentrysymbol{##2}} &
+      \glsentryuseri{##2} &
+      \glossentryname{##2}%
+      %& ##3% mit Seitenangabe
+    }%
+  }
+}% Ende von AfterPackage
+\newcommand*\mushift[1]{\mkern#1mu}
+\newcommand*\barshift[2]{\bar{#1\mushift{#2}}\mushift{-#2}}
+\newcommand*\glssort@sanitize[2]{%
+  \begingroup%
+    \def\do##1{\let##1\@firstofone}%
+    \expandafter\docsvlist\expandafter{\glssort@accent}%
+    \let\boldsymbol\relax%
+    \let\mathrm\@firstofone%
+    \let\mushift\@gobble%
+    \protected@edef\@tempa{\endgroup\unexpanded{\def#1}{#2}}%
+  \@tempa%
+}
+\newcommand*\ifisgreeksymbol[1]{%
+  \begingroup%
+    \glssort@sanitize\@tempa{#1}%
+    \def\@tempb##1##2\@nil{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa\@nil%
+    \edef\@tempb{%
+      \noexpand\in@{,\expandonce\@tempa,}{,\expandonce\glssort@greek,}%
+    }%
+    \@tempb%
+    \ifin@
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+\makeatother
+\usepackage[colorlinks]{hyperref}
+
+\AtBeginDocument{
+\newcommand*\Pteqraw[1]{\tilde{P\mushift{3.5}}\mushift{-3.5}_{\mathrm{t},#1}}
+\newformulasymbol{Pteq}{äquivalente Referenzleistung bezogen auf $r$}
+  {\Pteqraw{r}}{\W}
+\newcommand*\Pteq[1][r]{\glslink{Pteq}{\ensuremath{\Pteqraw{#1}}}}
+\newformulasymbol{aavg}%
+  {mittlere Beschleunigung}{\barshift{a}{3}}{\m\per\square\s}
+\newformulasymbol{A}{Stirnfläche}{A}{\square\metre}
+\newformulasymbol{U}{Spannung}{U}{\V}
+\newformulasymbol{dU}{Spannungshub}{\diff{U}}{\V}
+%\newformulasymbol{Udiff}{Spannungshub}{\diff{U}}{\V}
+\newformulasymbol{eta}{Wirkungsgrad}{\eta}{1}
+\newformulasymbol{thetac}{Temperatur}{\vartheta_\mathrm{c}}{\celsius}
+\newformulasymbol{Func}{Funktionalität}{\Xi}{1}
+\newformulasymbol{fxi}{funktionale Dauer}{\xi}{\hour}
+
+\newformulasymbol{U0}{Ruhespannung}{U_0}{\V}
+\newformulasymbol{Ud}{Zwischenkreisspannung}{U_\mathrm{d}}{\V}
+\newformulasymbol{U0av}{mittlere Ruhespannung}%
+  {\bar{U\mushift{3}}\mushift{-3}_0}{\V}
+
+\newformulasymbol{Uxy1}{Test A}{U_{\bar{\mathrm{x}}\mathrm{y}}}{\V}
+\newformulasymbol{Uxy2}{Test B}{U_{\mathrm{x}\bar{\mathrm{y}}}}{\V}
+\newformulasymbol{Uxy0}{Test C}{U_{\bar{\mathrm{xy}}}}{\V}
+\newformulasymbol{Uxy3}{Test D}{U_{\bar{\mathrm{x}}\bar{\mathrm{y}}}}{\V}
+\newformulasymbol{Uxy}{Test E}{U_{\mathrm{xy}}}{\V}
+}
+\begin{document}
+
+$\bar{U}_0$
+
+$\bar{U\mkern3mu}\mkern-3mu_0$
+
+\gls{Uxy}\gls{Uxy0}\gls{Uxy1}\gls{Uxy2}\gls{Uxy3}
+
+\gls{U0}\gls{Ud}\gls{U0av}
+
+Und im Text:
+Ein Beispiel sind \Pteq, \Pteq[0.5] \Pteq[1] und \Pteq[99].
+
+Also habe ich folgende Fälle für die Formelzeichen
+
+\gls{aavg}
+
+\gls{A}
+
+\gls{U}
+
+\gls{dU}
+
+\gls{eta}
+
+\gls{thetac}
+
+\gls{Func}
+
+\gls{fxi}
+
+\printsymbols[style=symbxltab]
+
+\end{document}
