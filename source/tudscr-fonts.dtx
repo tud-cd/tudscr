@@ -1133,30 +1133,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@fontspec@init
-% \begin{macro}{\tud@x@fontspec@set}
-% \changes{v2.06}{2018/08/31}{neu}^^A
-% Das Paket \pkg{fontspec} ermöglicht es leider nicht, mit \cs{newfontfamily} 
-% bereits definierte Schriftfamilien für die Zuweisung mit \cs{setmainfont} 
-% etc. zu nutzen. Deshalb wird folgendes Hilfsmakro definiert, welches diese 
-% Aufgabe übernimmt.
-%    \begin{macrocode}
-\newcommand*\tud@x@fontspec@set[2]{%
-  \begingroup%
-    \edef\tud@res@a{%
-      \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\renewrobustcmd*%
-          \expandafter\noexpand\csname #1family\endcsname{%
-        \expandafter\noexpand\csname tud@x@fontspec@fam@#2\endcsname%
-      }%
-      \def\expandafter\noexpand\csname #1default\endcsname{\tud@cdfont@fam}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@x@fontspec@set
 % \begin{macro}{\tud@font@set}
 % \changes{v2.04}{2015/03/01}{Unterstützung für das Paket \pkg{mweights}}^^A
 % \begin{macro}{\bfseries@rm}
@@ -1214,15 +1190,6 @@
       \tud@cs@store{mdseries@tt}%
     \fi%
 %    \end{macrocode}
-% Das Paket \pkg{fontspec} definiert u.\,U. die Familienauswahlbefehle um, so
-% dass diese ebenfalls gesichert werden.
-%    \begin{macrocode}
-    \if@tud@x@fontspec@enabled%
-      \tud@cs@store{rmfamily}%
-      \tud@cs@store{sffamily}%
-      \tud@cs@store{ttfamily}%
-    \fi%
-%    \end{macrocode}
 % Danach erfolgt die Definition der Schriften des \CDs. 
 %    \begin{macrocode}
     \tud@cdfont@set%
@@ -1236,8 +1203,8 @@
       \edef\bfseries@tt{\tud@ttfont@bf}%
       \edef\mdseries@tt{\tud@ttfont@md}%
     \fi%
-    \let\bfdefault\tud@cdfont@bf%
-    \let\mddefault\tud@cdfont@md%
+    \edef\bfdefault{\tud@cdfont@bf}%
+    \edef\mddefault{\tud@cdfont@md}%
 %    \end{macrocode}
 % Werden die Schriften des \CDs deaktiviert, wird auf die zu Dokumentbeginn
 % gesicherten Schriften\footnote{mit und ohne Serifen} zurückgeschaltet.
@@ -1261,11 +1228,6 @@
       \tud@cs@restore{mdseries@sf}%
       \tud@cs@restore{bfseries@tt}%
       \tud@cs@restore{mdseries@tt}%
-    \fi%
-    \if@tud@x@fontspec@enabled%
-      \tud@cs@restore{rmfamily}%
-      \tud@cs@restore{sffamily}%
-      \tud@cs@restore{ttfamily}%
     \fi%
     \tud@cdfont@symbols@reset%
   \fi%
@@ -1331,18 +1293,7 @@
     \else%
       \let\tud@cdfont@fam\tud@cdfont@fam@osf%
     \fi%
-%    \end{macrocode}
-% Das Aktivieren der Schriften erfolgt entweder mit dem Paket \pkg{fontspec}
-% oder\dots
-%    \begin{macrocode}
-    \if@tud@x@fontspec@enabled%
-      \tud@x@fontspec@set{sf}{\tud@cdfont@fam}%
-%    \end{macrocode}
-% \dots nach dem NFSS.
-%    \begin{macrocode}
-    \else%
-      \renewcommand*\sfdefault{\tud@cdfont@fam}%
-    \fi%
+    \edef\sfdefault{\tud@cdfont@fam}%
     \tud@cdfont@@set%
   \fi%
 }
@@ -2175,7 +2126,7 @@
 \TUD@key{ttfont}[true]{%
   \TUD@set@numkey{ttfont}{@tempa}{%
     \TUD@bool@numkey,%
-    {roboto}{1},{roboto-mono}{1},{robo}{1},%
+    {roboto}{1},{roboto-mono}{1},{robo}{1},{rb}{1},%
     {lm}{2},{lmtt}{2},{lmodern}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -2225,25 +2176,13 @@
     \TUDoptions{ttfont=lmodern}%
   \fi\fi%
   \ifcase\tud@ttfont@num\relax% false
-    \let\tud@ttfont@fam\ttdefault%
+    \tud@cs@expand\tud@ttfont@fam{ttdefault}%
   \or% roboto
-    \let\tud@ttfont@fam\tud@ttfont@rb%
+    \edef\tud@ttfont@fam{\tud@ttfont@rb}%
   \else% lmodern
-    \let\tud@ttfont@fam\tud@ttfont@lm%
+    \edef\tud@ttfont@fam{\tud@ttfont@lm}%
   \fi%
-  \ifcase\tud@ttfont@num\relax\else% !false
-    \if@tud@x@fontspec@enabled%
-%    \end{macrocode}
-% Das Setzen der TypeWriter-Schriften aus dem Paket \pkg{lmodern} erfolgt nur,
-% wenn diese nicht standardmäßig durch \pkg{fontspec} aktiviert ist.
-%    \begin{macrocode}
-      \ifx\tud@ttfont@fam\ttdefault\else%
-        \tud@x@fontspec@set{tt}{\tud@ttfont@fam}%
-      \fi%
-    \else%
-      \renewcommand*\ttdefault{\tud@ttfont@fam}%
-    \fi%
-  \fi%
+  \edef\ttdefault{\tud@ttfont@fam}%
   \tud@ttfont@@set%
 }
 \newcommand*\tud@ttfont@md{}
@@ -2252,12 +2191,12 @@
 \newcommand*\tud@ttfont@@set{%
   \ifcase\tud@ttfont@num\relax%
     \ifundef\mdseries@tt{%
-      \edef\tud@ttfont@md{\tud@cs@use{mddefault}}%
+      \tud@cs@expand\tud@ttfont@md{mddefault}%
     }{%
       \edef\tud@ttfont@md{\mdseries@tt}%
     }%
     \ifundef\bfseries@tt{%
-      \edef\tud@ttfont@bf{\tud@cs@use{bfdefault}}%
+      \tud@cs@expand\tud@ttfont@bf{bfdefault}%
     }{%
       \edef\tud@ttfont@bf{\bfseries@tt}%
     }%
@@ -2295,15 +2234,14 @@
 %   definiert und \cs{DeclareEncodingSubset} wird verwendet}^^A
 % \begin{macro}{\tud@ttfont@rb@scale}
 % \changes{v2.06}{2018/08/30}{neu}^^A
-% Mit \cs{tud@ttfont@init} erfolgt die Defintion der TypeWriter-Schriften.
+% Mit \cs{tud@ttfont@init} erfolgt die Defintion von \texttt{RobotoMono} als 
+% TypeWriter-Schrift. Diese wird für die Verwendung zusammen mit \OpenSans 
+% etwas kleiner skaliert.
 %    \begin{macrocode}
 \newcommand*\tud@ttfont@init{%
-%    \end{macrocode}
-% Für die \texttt{RobotoMono} wird der Skalierungsfaktor fest definiert.
-%    \begin{macrocode}
-  \newcommand*\tud@ttfont@rb@scale{0.9}%
-  \if@tud@x@fontspec@enabled%
-    \if@tud@ttfont@rb@exist%
+  \if@tud@ttfont@rb@exist%
+    \newcommand*\tud@ttfont@rb@scale{0.9}%
+    \if@tud@x@fontspec@enabled%
       \tud@x@fontspec@init{\tud@ttfont@rb}{%
         Scale={\tud@ttfont@rb@scale},%
         UprightFont={RobotoMono-Regular},%
@@ -2320,34 +2258,11 @@
         FontFace={bx}{it}{RobotoMono-BoldItalic},%
         FontFace={eb}{it}{RobotoMono-BoldItalic}%
       }%
-    \fi%
-%    \end{macrocode}
-% Gewöhnlich ist die Schrift \texttt{lmtt} via \pkg{fontspec} voreingestellt. 
-% Allerdings wird diese von einigen Paketen mit \cs{setmonofont} überschrieben. 
-% Für diesen Fall wird die Schriftfamilie \texttt{lmtt} mit den Mitteln von 
-% \pkg{fontspec} definiert.
-%    \begin{macrocode}
-    \ifx\ttdefault\tud@ttfont@lm\else%
-      \tud@x@fontspec@init{\tud@ttfont@lm}{%
-        UprightFont={LMMono10-Regular},%
-        FontFace={l}{n}{LMMonoLt10-Regular},%
-        FontFace={m}{n}{LMMono10-Regular},%
-        FontFace={b}{n}{LMMonoLt10-Bold},%
-        FontFace={bx}{n}{LMMonoLt10-Bold},%
-        FontFace={l}{it}{LMMonoLt10-Oblique},%
-        FontFace={m}{it}{LMMonoSlant10-Regular},%
-        FontFace={b}{it}{LMMonoLt10-BoldOblique},%
-        FontFace={bx}{it}{LMMonoLt10-BoldOblique}%
-      }%
-    \fi%
-  \else%
+    \else%
 %    \end{macrocode}
 % Existiert das Paket \pkg{roboto-mono}, wird die Schriftfamilie \val{tudtt} 
-% definiert und die passenden Type1-Schriften für diese definiert.
-%    \begin{macrocode}
-    \if@tud@ttfont@rb@exist%
-%    \end{macrocode}
-% Der Skalierungsfaktor für das NFSS gesetzt.
+% mit den passenden Type1-Schriften definiert, wobei der Skalierungsfaktor für 
+% das NFSS gesetzt wird.
 %    \begin{macrocode}
       \edef\tud@ttfont@rb@scale{s*[\tud@ttfont@rb@scale]}%
       \begingroup%
@@ -2772,7 +2687,7 @@
     \let\tud@res@a\@empty%
     \if@tud@lgrgreeks%
       \tud@if@fdfileexists{LGR}{\tud@cs@use{familydefault}}{%
-        \def\tud@res@a{\tud@cs@use{familydefault}}%
+        \tud@cs@expand\tud@res@a{familydefault}%
       }{%
         \tud@if@fdfileexists{LGR}{\tud@math@letters@fam}{%
           \let\tud@res@a\tud@math@letters@fam%
@@ -3037,8 +2952,8 @@
     \tud@cdmath@@init%
 %    \end{macrocode}
 % Die Symbole für aufrechte und kursive griechische Lettern werden definiert. 
-% Da im Paket \pkg{opensans} keine mathematischen Schriftkodierungen enthalten 
-% sind, wird in diesem Fall auf die LGR-Kodierung zurückgegriffen.
+% Da im Paket \pkg{opensans} keine mathematischen Zeichensatzkodierungen 
+% enthalten sind, wird in diesem Fall auf die LGR-Kodierung zurückgegriffen.
 % \ToDo{könnte mit \pkg{opensans-math} raus}[v2.08]
 %    \begin{macrocode}
     \if@tud@cdoldfont@active%
