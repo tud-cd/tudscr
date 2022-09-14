@@ -1931,7 +1931,7 @@
 % angegebene Argument an die zuladende Klasse durchgereicht.
 %    \begin{macrocode}
 %<*package&base>
-\newcommand*\TUD@KOMAoptions[1]{}
+\newcommand*\TUD@KOMAoptions[1]{\KOMAoptions}
 \ifundef\KOMAClassName{%
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
@@ -1941,9 +1941,7 @@
     }%
   }%
   \AfterPackage*{scrextend}{\def\TUD@KOMAoptions{\KOMAoptions}}%
-}{%
-  \def\TUD@KOMAoptions{\KOMAoptions}%
-}
+}{}
 %</package&base>
 %    \end{macrocode}
 % Nach dem Laden einer \TUDScript-Klasse wird der Befehl so angepasst, dass 
@@ -1954,11 +1952,10 @@
 %<*load&class>
 %<*!inherit>
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@KOMA}}
-\AfterClass{\TUD@Class@KOMA}{\let\TUD@KOMAoptions\KOMAoptions}
+\AfterClass{\TUD@Class@KOMA}{\def\TUD@KOMAoptions{\KOMAoptions}}
 %</!inherit>
 %<*inherit>
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
-\AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
 %</inherit>
 %</load&class>
 %    \end{macrocode}
@@ -2092,6 +2089,15 @@
   ]%
 }
 %    \end{macrocode}
+% \begin{macro}{\tud@color}
+% \changes{v2.04}{2015/04/21}{neu}^^A
+% Der Befehl wählt eine in einem Makro gespeicherte Farbe nur aus, wenn dieses 
+% auch tatsächlich definiert ist. Dieser Befehl wird von den \TUDScript-Klassen 
+% für die Umsetzung des Layouts verwendet.
+%    \begin{macrocode}
+\newcommand*\tud@color[1]{\tud@if@strblank{#1}{}{\color{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@color
 %
 % \iffalse
 %</class&body>

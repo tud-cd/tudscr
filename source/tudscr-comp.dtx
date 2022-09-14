@@ -93,110 +93,96 @@
 %<*option>
 % \fi
 %
-% \begin{macro}{\TUD@deprecated@key}
-% \changes{v2.03}{2015/02/05}{neu}^^A
-% \begin{macro}{\TUD@deprecated@cs}
-% \changes{v2.03}{2015/02/05}{neu}^^A
-% \begin{macro}{\TUD@deprecated@@cs}
-% \changes{v2.06}{2018/08/07}{neu}^^A
-% \begin{macro}{\TUD@deprecated@length}
-% \changes{v2.05}{2016/06/20}{neu}^^A
-% Um alte Optionen und Befehle dem Anwender bei der Verwendung kenntlich zu 
-% machen, werden entsprechende Warnungen definiert. Für Optionen wird dabei
-% lediglich die empfohlene Option ausgegeben. Das Ausführen dieser wird später
-% definiert.
-%    \begin{macrocode}
-\newcommand*\TUD@deprecated@key[2]{%
-%<*class>
-  \ClassWarning{\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-  \PackageWarning{tudscrfonts}%
-%</package&fonts>
-  {%
-    The key `#1' is deprecated. It's\MessageBreak%
-    recommended to use `#2'\MessageBreak%
-    instead%
-  }%
-  \TUDoptions{#2}%
-}
-%    \end{macrocode}
-% Bei alten Befehlen wird nach der Warnung die Definition des neuen Befehls auf 
-% den alten überschrieben.
-%    \begin{macrocode}
-\newcommand*\TUD@deprecated@cs[2]{%
-  \begingroup%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\AfterEndPreamble{%
-        \noexpand\TUD@deprecated@@cs{#1}{#2}%
-      }%
-    }%
-  \tud@res@a%
-}
-\newcommand*\TUD@deprecated@@cs[2]{%
-  \ifcsundef{#1}{%
-    \begingroup%
-      \def\tud@res@a{%
-        The command `\@backslashchar#1' is deprecated. \MessageBreak%
-      }%
-      \def\tud@res@b##1@##2\@nil{%
-        \IfArgIsEmpty{##2}{%
-          \appto\tud@res@a{%
-            You should use `\@backslashchar#2' instead%
-          }%
-        }{%
-          \appto\tud@res@a{%
-            You should not use this command. It is substituted\MessageBreak%
-            with `\@backslashchar#2' internally%
-          }%
-        }%
-      }%
-      \tud@res@b#2@\@nil%
-      \edef\tud@res@c{%
-        \endgroup%
-        \noexpand\newrobustcmd\csname #1\endcsname{%
-%<*class>
-          \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
-%</class>
-%<*package&fonts>
-          \noexpand\PackageWarning{tudscrfonts}%
-%</package&fonts>
-          {\tud@res@a}%
-          \noexpand\csletcs{#1}{#2}%
-          \noexpand\csuse{#2}%
-        }%
-      }%
-    \tud@res@c%
-  }{}%
-}
-%<*class>
-\newcommand*\TUD@deprecated@length[1]{%
-  \ifdim#1<\maxdimen\relax%
-    \begingroup%
-      \tud@strlength\tud@res@a{#1}%
-      \edef\tud@res@b{\expandafter\@gobble\string#1}%
-      \ClassWarning{\TUD@Class@Name}{%
-        Setting length `\string#1' is deprecated. \MessageBreak%
-        The option `\tud@res@b=\tud@res@a'\MessageBreak%
-        is used instead%
-      }%
-      \edef\tud@res@a{%
-        \endgroup%
-        \noexpand\TUDoption{\tud@res@b}{\tud@res@a}%
-        \global\noexpand\csletcs{tud@\tud@res@b @dim}{tud@\tud@res@b @dim}%
-      }%
-    \tud@res@a%
-    \global\setlength#1{\maxdimen}%
-  \fi%
-}
-%</class>
-%    \end{macrocode}
-% \end{macro}^^A \TUD@deprecated@length
-% \end{macro}^^A \TUD@deprecated@@cs
-% \end{macro}^^A \TUD@deprecated@cs
-% \end{macro}^^A \TUD@deprecated@key
 %
+% \subsection{Verarbeitung von Versionsangaben}
+%
+% Hier wird alles definiert, was zur Verarbeitung und Validierung von 
+% Versionsangaben sowie Kompatibilitätseinstellungeb benötigt wird.
+% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
+%
+% \begin{macro}{\tud@v@first}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.00}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.01}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.02}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \begin{macro}{\tud@v@2.03}
+% \changes{v2.03}{2015/01/13}{neu}^^A
+% \begin{macro}{\tud@v@2.04}
+% \changes{v2.04}{2015/02/18}{neu}^^A
+% \begin{macro}{\tud@v@2.05}
+% \changes{v2.05}{2015/07/03}{neu}^^A
+% \begin{macro}{\tud@v@2.06}
+% \changes{v2.06}{2018/06/26}{neu}^^A
+% \begin{macro}{\tud@v@2.07}
+% \changes{v2.07}{2020/03/03}{neu}^^A
+% \begin{macro}{\tud@v@last}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \changes{v2.03}{2015/01/13}{angepasst}^^A
+% \changes{v2.04}{2015/02/18}{angepasst}^^A
+% \changes{v2.05}{2015/07/03}{angepasst}^^A
+% \changes{v2.06}{2018/06/26}{angepasst}^^A
+% \begin{macro}{\tud@v@list}
+% \changes{v2.06p}{2022/09/13}{neu}^^A
+% Die Zuordnung der numerischen Kompatibilitätswert zu den einzelnen Versionen.
+% Alle definierten Versionen werden zusätzlich in \cs{tud@v@list} abgelegt.
+%    \begin{macrocode}
+\newcommand*\tud@v@first{0}
+\newcommand*\tud@v@last{0}
+\newcommand*\tud@v@list{}
+\def\tud@res@b#1#2{%
+  \expandafter\newcommand\expandafter*\csname tud@v@#1\endcsname{#2}%
+  \listadd\tud@v@list{#1}%
+  \def\tud@v@last{#2}%
+}
+\@tfor\tud@res@a:=%
+{{2.00}{0}}%
+{{2.01}{0}}%
+{{2.02}{0}}%
+{{2.03}{1}}%
+{{2.04}{2}}%
+{{2.05}{3}}%
+{{2.06}{4}}%
+{{2.07}{5}}%
+\do{\expandafter\tud@res@b\tud@res@a}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@list
+% \end{macro}^^A \tud@v@last
+% \end{macro}^^A \tud@v@2.07
+% \end{macro}^^A \tud@v@2.06
+% \end{macro}^^A \tud@v@2.05
+% \end{macro}^^A \tud@v@2.04
+% \end{macro}^^A \tud@v@2.03
+% \end{macro}^^A \tud@v@2.02
+% \end{macro}^^A \tud@v@2.01
+% \end{macro}^^A \tud@v@2.00
+% \end{macro}^^A \tud@v@first
+% \begin{macro}{\tud@v@get}
+% \changes{v2.05}{2016/05/31}{neu}^^A
+% Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
+% gebracht und an das Makro im ersten Argument übergeben. Damit spielt es keine 
+% Rolle, ob die im zweiten Argument übergebene Versionsnummer mit oder ohne 
+% führendes \enquote*{\texttt{v}} angegeben wird.
+%    \begin{macrocode}
+\newcommand*\tud@v@get[2]{%
+  \begingroup%
+    \def\@tempa{%
+      \kernel@ifnextchar v%
+        {\@tempb}%
+        {\@tempb v}%
+    }%
+    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
+    \@tempa #2\@nil%
+    \edef\tud@reserved{%
+      \endgroup%
+      \unexpanded{\def#1}{\@tempc}%
+    }%
+  \tud@reserved%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@v@get
 % \begin{option}{tudscrver}
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \begin{macro}{\tud@v@comp}
@@ -205,9 +191,10 @@
 % oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
 % Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
 % \opt{tudscrver}|=|\val{\meta{Version}} kann auf das Verhalten einer früheren
-% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
-% \cs{tud@v@comp} gespeichert. In den Makros |\tud@v@|\meta{Version} werden die
-% zugehörigen Nummern gespeichert.
+% Version geschaltet werden. Die somit eingestellte Kompatibilität wird als 
+% numerischer Wert in \cs{tud@v@comp} abgelegt, wobei die Zuordnung von 
+% Versionsnummer und Kompatibilitätswert mit den Makros |\tud@v@|\meta{Version} 
+% erfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@v@comp{\tud@v@last}
 %    \end{macrocode}
@@ -224,11 +211,12 @@
     \PackageWarningNoLine{tudscrfonts}%
 %</package&fonts>
     {%
-      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
-      this value is not supported. Because of this,\MessageBreak%
-      `tudscrver=first' was set%
+      You did set option `tudscrver=\@tempa', but\MessageBreak%
+      this value is not supported. Possible values are:\MessageBreak%
+      \tud@v@list\MessageBreak%
+      Because of this, `tudscrver=first' was set%
     }%
-    \renewcommand*\tud@v@comp{0}%
+    \def\tud@v@comp{0}%
   }{%
 %<*class>
     \ClassInfoNoLine{\TUD@Class@Name}%
@@ -266,78 +254,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@v@comp
 % \end{option}^^A tudscrver
-% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
-% \begin{macro}{\tud@v@first}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.00}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.01}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.02}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \begin{macro}{\tud@v@2.03}
-% \changes{v2.03}{2015/01/13}{neu}^^A
-% \begin{macro}{\tud@v@2.04}
-% \changes{v2.04}{2015/02/18}{neu}^^A
-% \begin{macro}{\tud@v@2.05}
-% \changes{v2.05}{2015/07/03}{neu}^^A
-% \begin{macro}{\tud@v@2.06}
-% \changes{v2.06}{2018/06/26}{neu}^^A
-% \begin{macro}{\tud@v@2.07}
-% \changes{v2.07}{2020/03/03}{neu}^^A
-% \begin{macro}{\tud@v@last}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \changes{v2.03}{2015/01/13}{angepasst}^^A
-% \changes{v2.04}{2015/02/18}{angepasst}^^A
-% \changes{v2.05}{2015/07/03}{angepasst}^^A
-% \changes{v2.06}{2018/06/26}{angepasst}^^A
-% Die numerischen Werte zu den einzelnen Versionen.
-%    \begin{macrocode}
-\csdef{tud@v@first}{0}
-\csdef{tud@v@2.00}{0}
-\csdef{tud@v@2.01}{0}
-\csdef{tud@v@2.02}{0}
-\csdef{tud@v@2.03}{1}
-\csdef{tud@v@2.04}{2}
-\csdef{tud@v@2.05}{3}
-\csdef{tud@v@2.06}{4}
-\csdef{tud@v@2.07}{5}
-\csdef{tud@v@last}{5}
-%    \end{macrocode}
-% \end{macro}^^A \tud@v@last
-% \end{macro}^^A \tud@v@2.07
-% \end{macro}^^A \tud@v@2.06
-% \end{macro}^^A \tud@v@2.05
-% \end{macro}^^A \tud@v@2.04
-% \end{macro}^^A \tud@v@2.03
-% \end{macro}^^A \tud@v@2.02
-% \end{macro}^^A \tud@v@2.01
-% \end{macro}^^A \tud@v@2.00
-% \end{macro}^^A \tud@v@first
-% \begin{macro}{\tud@v@get}
-% \changes{v2.05}{2016/05/31}{neu}^^A
-% Mit \cs{tud@v@get} wird die angegebene Versionsnummer in eine Normalform 
-% gebracht und an das Makro im ersten Argument übergeben. Damit spielt es keine 
-% Rolle, ob die im zweiten Argument übergebene Versionsnummer mit oder ohne 
-% führendes \enquote*{\texttt{v}} angegeben wird.
-%    \begin{macrocode}
-\newcommand*\tud@v@get[2]{%
-  \begingroup%
-    \def\@tempa{%
-      \kernel@ifnextchar v%
-        {\@tempb}%
-        {\@tempb v}%
-    }%
-    \def\@tempb v##1\@nil{\def\@tempc{##1}}%
-    \@tempa #2\@nil%
-    \edef\tud@reserved{%
-      \endgroup%
-      \unexpanded{\def#1}{\@tempc}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@v@get
 % \begin{macro}{\tud@if@v@lower}
 % \changes{v2.03}{2015/01/13}{neu}^^A
 % Mit diesem Befehl können abhängig von der gegebenen Kompatibilitätsversion in 
@@ -373,6 +289,29 @@
 % \end{macro}^^A \tud@if@v@lower
 %
 % \subsection{Veraltete Optionen}
+%
+% \begin{macro}{\TUD@deprecated@key}
+% \changes{v2.03}{2015/02/05}{neu}^^A
+% Um bei der Verwendung veralteter Optionen diese kenntlich zu machen, werden
+% entsprechende Warnungen definiert. Dafür müssen die Schlüssel der alten 
+% Optionen mit diesem Makro ein Mapping auf die gültige Option vornehmen.
+%    \begin{macrocode}
+\newcommand*\TUD@deprecated@key[2]{%
+%<*class>
+  \ClassWarning{\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+  \PackageWarning{tudscrfonts}%
+%</package&fonts>
+  {%
+    The key `#1' is deprecated. It's\MessageBreak%
+    recommended to use `#2'\MessageBreak%
+    instead%
+  }%
+  \TUDoptions{#2}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@deprecated@key
 %
 % \begin{option}{cdfonts}
 % \begin{option}{tudfonts}
@@ -660,55 +599,79 @@
 %
 % \iffalse
 %</option>
-%</class|package&fonts>
 %<*body>
+% \fi
+%
+% \subsection{Veraltete Befehle}
+%
+% \begin{macro}{\TUD@deprecated@cs}
+% \changes{v2.03}{2015/02/05}{neu}^^A
+% \begin{macro}{\TUD@deprecated@@cs}
+% \changes{v2.06}{2018/08/07}{neu}^^A
+% Bei nicht mehr bereitgestellten Befehlen wird nach der Warnung die Definition 
+% des neuen Befehls auf den alten überschrieben. Dabei wird davon ausgegangen, 
+% dass der veraltete Befehl nicht definiert wird. Nur in diesem Fall wird zu 
+% Dokumentbeginn die angepasste Definition gesetzt, um nicht versehentlich 
+% eine durch ein externes Paket oder den Anwender in der Präambel definierten 
+% Befehl zu überschreiben.
+%    \begin{macrocode}
+\newcommand*\TUD@deprecated@cs[2]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\AfterEndPreamble{%
+        \noexpand\TUD@deprecated@@cs{#1}{#2}%
+      }%
+    }%
+  \tud@res@a%
+}
+\newcommand*\TUD@deprecated@@cs[2]{%
+  \ifcsundef{#1}{%
+    \begingroup%
+      \def\tud@res@a{%
+        The command `\@backslashchar#1' is deprecated. \MessageBreak%
+      }%
+%    \end{macrocode}
+% \ToDo{das ist Quark, dann lieber eine Sternversion}[v2.07]
+%    \begin{macrocode}
+      \def\tud@res@b##1@##2\@nil{%
+        \IfArgIsEmpty{##2}{%
+          \appto\tud@res@a{%
+            You should use `\@backslashchar#2' instead%
+          }%
+        }{%
+          \appto\tud@res@a{%
+            You should not use this command. It is substituted\MessageBreak%
+            with `\@backslashchar#2' internally%
+          }%
+        }%
+      }%
+      \tud@res@b#2@\@nil%
+      \edef\tud@res@c{%
+        \endgroup%
+        \noexpand\newrobustcmd\csname #1\endcsname{%
+%<*class>
+          \noexpand\ClassWarning{\noexpand\TUD@Class@Name}%
+%</class>
+%<*package&fonts>
+          \noexpand\PackageWarning{tudscrfonts}%
+%</package&fonts>
+          {\tud@res@a}%
+          \noexpand\csletcs{#1}{#2}%
+          \noexpand\csuse{#2}%
+        }%
+      }%
+    \tud@res@c%
+  }{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@deprecated@@cs
+% \end{macro}^^A \TUD@deprecated@cs
+%
+% \iffalse
 %<*class>
 % \fi
 %
-% \subsection{Veraltete Befehle und Längen}
-%
-% \begin{length}{\footlogoheight}
-% \changes{v2.03}{2015/01/27}{neu}^^A
-% Um die Höhe von Logos im Fußbereich der \pgs{tudheadings}-Seitenstile 
-% einheitlich festzulegen, gab es bis einschließlich der Version~v2.04 die 
-% Länge \cs{footlogoheight} anstelle der Option \opt{footlogoheight}. Sollte 
-% der Anwender die Länge anpassen, wird dies mit \cs{TUD@deprecated@length} an 
-% der entsprechenden Stelle geprüft und die korrespondierende Option auf 
-% diesen Wert gesetzt, wobei eine Warnung erzeugt wird.
-%    \begin{macrocode}
-\tud@newglue\footlogoheight
-\tud@setdim\footlogoheight{\maxdimen}
-%    \end{macrocode}
-% \end{length}^^A \footlogoheight
-% \begin{length}{\pageheadingsvskip}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% \begin{length}{\headingsvskip}
-% \changes{v2.02}{2014/06/23}{neu}^^A
-% Mit diesen Längen konnte der Anwender vor der Version~v2.05 die Überschriften 
-% von Titel, Teilen und Kapiteln vertikal verschieben. Diese Funktionalität 
-% wird seitdem mit den Optionen \opt{headingsvskip} und \opt{pageheadingsvskip} 
-% abgedeckt. Auch hier wird eine Warnung erzeugt, falls der Anwender diesen 
-% Wert ändern sollte.
-%    \begin{macrocode}
-%<*book|report|article>
-\tud@newglue\pageheadingsvskip
-\tud@setdim\pageheadingsvskip{\maxdimen}
-\tud@newglue\headingsvskip
-\tud@setdim\headingsvskip{\maxdimen}
-%</book|report|article>
-%    \end{macrocode}
-% \end{length}^^A \headingsvskip
-% \end{length}^^A \pageheadingsvskip
-% \begin{length}{\chapterheadingvskip}
-% Die Länge \cs{chapterheadingvskip} wird aus Gründen der Kompatibilität zu
-% älteren Versionen definiert.
-%    \begin{macrocode}
-%<*book|report>
-\newcommand*\chapterheadingvskip{}
-\let\chapterheadingvskip\headingsvskip
-%</book|report>
-%    \end{macrocode}
-% \end{length}^^A \chapterheadingvskip
 % \begin{macro}{\professorship}
 % Für die Angabe des Lehrstuhls bzw. der Professur mit kann anstelle von 
 % \cs{chair} als Aliasbefehl auch \cs{professorship} genutzt werden.
@@ -801,7 +764,6 @@
 %
 % \iffalse
 %</class>
-%<*class|package&fonts>
 % \fi
 %
 % \begin{macro}{\textcdfont}
@@ -931,8 +893,90 @@
 % \end{macro}^^A \varGamma
 %
 % \iffalse
-%</class|package&fonts>
 %</body>
+%</class|package&fonts>
+%<*class>
+%<*option>
+% \fi
+%
+% \subsection{Veraltete Längen}
+%
+% \begin{macro}{\TUD@deprecated@length}
+% \changes{v2.05}{2016/06/20}{neu}^^A
+% Die Behandlung von Längen ist etwas spezieller. Weil es sich bei diesen um 
+% Register handelt, kann nicht einfach deren Definition angepasst werden. 
+% Vielmehr ist es notwendig, das Längenregister auf einen spezifischen Wert~-- 
+% hier \cs{maxdimen}~-- zu setzen und bei jeder möglichen Verwendung zu prüfen, 
+% ob das Register in der Zwischenzeit geändert wurde.
+%    \begin{macrocode}
+\newcommand*\TUD@deprecated@length[1]{%
+  \ifdim#1<\maxdimen\relax%
+    \begingroup%
+      \tud@strlength\tud@res@a{#1}%
+      \edef\tud@res@b{\expandafter\@gobble\string#1}%
+      \ClassWarning{\TUD@Class@Name}{%
+        Setting length `\string#1' is deprecated. \MessageBreak%
+        The option `\tud@res@b=\tud@res@a'\MessageBreak%
+        is used instead%
+      }%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\TUDoption{\tud@res@b}{\tud@res@a}%
+        \global\noexpand\csletcs{tud@\tud@res@b @dim}{tud@\tud@res@b @dim}%
+      }%
+    \tud@res@a%
+    \global\setlength#1{\maxdimen}%
+  \fi%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUD@deprecated@length
+%
+% \begin{length}{\footlogoheight}
+% \changes{v2.03}{2015/01/27}{neu}^^A
+% Um die Höhe von Logos im Fußbereich der \pgs{tudheadings}-Seitenstile 
+% einheitlich festzulegen, gab es bis einschließlich der Version~v2.04 die 
+% Länge \cs{footlogoheight} anstelle der Option \opt{footlogoheight}. Sollte 
+% der Anwender die Länge anpassen, wird dies mit \cs{TUD@deprecated@length} an 
+% der entsprechenden Stelle geprüft und die korrespondierende Option auf 
+% diesen Wert gesetzt, wobei eine Warnung erzeugt wird.
+%    \begin{macrocode}
+\tud@newglue\footlogoheight
+\tud@setdim\footlogoheight{\maxdimen}
+%    \end{macrocode}
+% \end{length}^^A \footlogoheight
+% \begin{length}{\pageheadingsvskip}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% \begin{length}{\headingsvskip}
+% \changes{v2.02}{2014/06/23}{neu}^^A
+% Mit diesen Längen konnte der Anwender vor der Version~v2.05 die Überschriften 
+% von Titel, Teilen und Kapiteln vertikal verschieben. Diese Funktionalität 
+% wird seitdem mit den Optionen \opt{headingsvskip} und \opt{pageheadingsvskip} 
+% abgedeckt. Auch hier wird eine Warnung erzeugt, falls der Anwender diesen 
+% Wert ändern sollte.
+%    \begin{macrocode}
+%<*book|report|article>
+\tud@newglue\pageheadingsvskip
+\tud@setdim\pageheadingsvskip{\maxdimen}
+\tud@newglue\headingsvskip
+\tud@setdim\headingsvskip{\maxdimen}
+%</book|report|article>
+%    \end{macrocode}
+% \end{length}^^A \headingsvskip
+% \end{length}^^A \pageheadingsvskip
+% \begin{length}{\chapterheadingvskip}
+% Die Länge \cs{chapterheadingvskip} wird aus Gründen der Kompatibilität zu
+% älteren Versionen definiert.
+%    \begin{macrocode}
+%<*book|report>
+\newcommand*\chapterheadingvskip{}
+\let\chapterheadingvskip\headingsvskip
+%</book|report>
+%    \end{macrocode}
+% \end{length}^^A \chapterheadingvskip
+%
+% \iffalse
+%</option>
+%</class>
 % \fi
 %
 % \section{Das Paket \pkg{tudscrcomp} -- Kompatibilität veralteter Klassen}
@@ -1735,15 +1779,27 @@
 \tud@comp@on@poster@class{%
 \newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
 \newcommand*\footcolumn[2]{%
-  \Ifnumber{#1}{%
-    \ifcase#1\relax%
-      \footcontent{#2}%
-    \or%
-      \footcontent{#2}[*]%
-    \or%
-      \footcontent{*}[{#2}]%
-    \fi%
-  }{}%
+  \begingroup%
+    \def\tud@res@a{%
+      \PackageError{tudscrcomp}{Wrong column for `\string\footcolumn'}{%
+        The command `\string\footcolumn' can only be used\MessageBreak%
+        with `[0,1,2]' in it's first argument.%
+      }%
+    }%
+    \Ifnumber{#1}{%
+      \ifcase#1\relax%
+        \def\tud@res@a{\footcontent{#2}}%
+      \or%
+        \def\tud@res@a{\footcontent{#2}[*]}%
+      \or%
+        \def\tud@res@a{\footcontent{*}[{#2}]}%
+      \fi%
+    }{}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % Um die Option \opt{tudmathfoot} umzusetzen, muss für die Ausgabe des 
