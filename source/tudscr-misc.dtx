@@ -34,7 +34,7 @@
 \endbatchfile
 %</ins>
 %<*dtx>
-\ProvidesFile{tudscr-misc.dtx}[2022/08/09]
+\ProvidesFile{tudscr-misc.dtx}[2022/09/03]
 \RequirePackage{tudscr-gitinfo}
 \documentclass[english,ngerman,xindy]{tudscrdoc}
 \iftutex
@@ -43,8 +43,8 @@
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\usepackage{babel}
 \usepackage{tudscrfonts}
+\usepackage{babel}
 \usepackage[babel]{microtype}
 
 \GitHubBase{\TUDScriptRepository}
@@ -57,14 +57,12 @@
 %</dtx>
 % \fi
 %
-% \selectlanguage{ngerman}
-%
-% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
-% \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
-%
 %
 %
 % \section{Verschiedenes für das \TUDScript-Bundle}
+%
+% \changes{v2.02}{2014/06/23}{Paket \pkg{titlepage} nicht weiter unterstützt}^^A
+% \changes{v2.02}{2014/07/08}{\cs{FamilyKeyState} wird von Optionen genutzt}^^A
 %
 % Alles, wofür sich eine separate Datei nicht lohnt, landet hier.
 % \ToDo{\cs{PreventPackageFromLoading} Pakete scrpage[2] und scrlettr}[v2.07]
@@ -779,7 +777,6 @@
 %
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
-%
 %    \begin{macrocode}
 \PassOptionsToPackage{hyperindex=false}{hyperref}
 \AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
@@ -852,28 +849,41 @@
 %    \begin{macrocode}
 \AfterPackage*{babel}{\RequirePackage{csquotes}}
 %    \end{macrocode}
-% \begin{macro}{\selectlanguage}
+% \begin{macro}{\seename}
+% \begin{macro}{\alsoname}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}
 % \begin{macro}{\enquote}
 %    \begin{macrocode}
 \TUD@UnwindPackage{babel}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `babel' not loaded}%
-  \providecommand*\selectlanguage[1]{}%
-  \providecommand*\glqq{\quotedblbase}%
-  \providecommand*\grqq{\textquotedblleft}%
+%<*class>
+  \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrmanual}%
+%</package>
+    {Package `babel' not loaded}%
   \providecommand*\seename{see}%
   \providecommand*\alsoname{see~also}%
+  \providecommand*\glqq{\quotedblbase}%
+  \providecommand*\grqq{\textquotedblleft}%
 }
 \TUD@UnwindPackage{csquotes}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `csquotes' not loaded}%
+%<*class>
+  \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrmanual}%
+%</package>
+    {Package `csquotes' not loaded}%
   \providecommand\enquote[1]{\emph{#1}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \enquote
 % \end{macro}^^A \grqq
 % \end{macro}^^A \glqq
-% \end{macro}^^A \selectlanguage
+% \end{macro}^^A \alsoname
+% \end{macro}^^A \seename
 %
 % \iffalse
 %<*class&manual>
@@ -1077,7 +1087,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \@tocrmarg
 % \end{macro}^^A \@pnumwidth
-%
 % \begin{macro}{\textsbn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{macro}{\sbnfont}
@@ -1116,18 +1125,29 @@
 % falls die Sprache geladen wurde.
 %    \begin{macrocode}
 \newcommand*\tud@english[1]{%
-  \iflanguageloaded{english}{\foreignlanguage{english}{#1}}{#1}%
+  \tud@language@wrn{english}%
+  \let\tud@english\@firstofone%
+  #1%
 }
-\AfterPackage*{babel}{%
-  \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+\AfterAtEndOfPackage*{babel}{%
+  \AfterEndPreamble{%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  }%
+}
+\AfterAtEndOfPackage*{polyglossia}{%
+  \AfterEndPreamble{%
+    \tud@if@language@loaded{english}{%
+      \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+    }{}%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@english
 % \begin{macro}{\KOMAScript}
 % \begin{macro}{\TUDScript}
-% \begin{macro}{\vTUDScript}
 % \begin{macro}{\vKOMAScript}
-% Für die robuste Verwendung im Text.
+% \begin{macro}{\vTUDScript}
+% Zur robusten Verwendung im Text und Anpassungen für \pkg{hyperref}.
 %    \begin{macrocode}
 \kernel@make@fragile\KOMAScript
 \edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
@@ -1143,11 +1163,11 @@
 % Diese Befehle geben in der Dokumentation die aktuelle Version von \TUDScript
 % sowie die mindestens notwendige Version von \KOMAScript{} aus.
 %    \begin{macrocode}
-\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
 \newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
+\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
 %    \end{macrocode}
-% \end{macro}^^A \vKOMAScript
 % \end{macro}^^A \vTUDScript
+% \end{macro}^^A \vKOMAScript
 % \end{macro}^^A \TUDScript
 % \end{macro}^^A \KOMAScript
 % \begin{macro}{\CD}
@@ -1197,7 +1217,6 @@
 % \end{macro}^^A \TUD
 % \end{macro}^^A \CDs
 % \end{macro}^^A \CD
-%
 % \begin{macro}{\OpenSans}
 % \changes{v2.06}{2018/07/02}{neu}^^A
 % \begin{macro}{\Univers}
@@ -1218,7 +1237,6 @@
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
 % \end{macro}^^A \OpenSans
-%
 % \begin{macro}{\GitHubBase}
 % \changes{v2.07}{2019/11/11}{neu}^^A
 % \begin{macro}{\tud@github@url@base}
