@@ -140,7 +140,7 @@
     \TUDoptions{ToDo=false}%
     \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
   }{%
-    \KOMAoptions{overfullrule}%
+    \TUD@KOMAoptions{overfullrule}%
   }%
   \ifdef\tudprintflag{%
     \ifnum\tud@cd@num>\z@\relax%
@@ -5642,17 +5642,42 @@
 % \end{environment}^^A Hint?
 % \end{environment}^^A Hint*
 % \end{environment}^^A Hint
+% \begin{macro}{\tud@with@batchmode}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% Das Argument wird im temporär aktivierten \cs{batchmode} ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@with@batchmode[1]{%
+  \begingroup
+    \edef\tud@res@a{%
+      \endgroup
+      \batchmode%
+      \unexpanded{#1}%
+      \interactionmode\the\interactionmode\space%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@with@batchmode
 % \begin{macro}{\tud@tut@lst}
 % \changes{v2.02}{2014/10/07}{neu}^^A
 % Damit wird der Quelltext eingezogen ausgegeben.
 %    \begin{macrocode}
 \newcommand*\tud@tut@lst{%
   \begin{quoting}[rightmargin=0pt]%
-  \lstinputlisting[style=tudscr]{\tud@tut@temp.tex}%
+    \tud@with@batchmode{\lstinputlisting[style=tudscr]{\tud@tut@temp.tex}}%
   \end{quoting}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@lst
+% \begin{macro}{\InputCode}
+% \changes{v2.02}{2014/10/21}{neu}^^A
+% Mit \cs{InputCode} kann der Inhalt der letzen \env{Trunk}-Umgebung 
+% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@input} zu prüfen 
+% und zu formatieren.
+%    \begin{macrocode}
+\newcommand*\InputCode{\tud@with@batchmode{\input{\tud@tut@temp.tex}}}
+%    \end{macrocode}
+% \end{macro}^^A \InputCode
 % \begin{macro}{\tud@tut@input}
 % \changes{v2.02}{2014/10/13}{neu}^^A
 % Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
@@ -5697,22 +5722,13 @@
 % diese Konflikte durch eine lokale Redefinition ebensolcher Befehle auflösen
 % (bspw. \cs{let}\cs{newcommand}\cs{renewcommand}).
 %    \begin{macrocode}
-  \@tempa{\input{\tud@tut@temp.tex}}{\Code@Hook}%
+  \@tempa{\InputCode}{\Code@Hook}%
   \global\let\Code@Hook\relax%
   \tud@setdim\leftskip{\@tempdimc}%
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@tut@input
-% \begin{macro}{\InputCode}
-% \changes{v2.02}{2014/10/21}{neu}^^A
-% Mit \cs{InputCode} kann der Inhalt der letzen \env{Trunk}-Umgebung 
-% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@input} zu prüfen 
-% und zu formatieren.
-%    \begin{macrocode}
-\newcommand*\InputCode{\input{\tud@tut@temp.tex}}
-%    \end{macrocode}
-% \end{macro}^^A \InputCode
 % \begin{macro}{\tud@tut@pdf}
 % \changes{v2.02}{2014/10/22}{neu}^^A
 % Die Umgebungen \env{Trunk!} und \env{Hint!} verwenden nach der Ausgabe des
