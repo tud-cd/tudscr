@@ -308,7 +308,7 @@
     contents={%
       \if@tud@foot@colored%
         \let\@tempc\relax%
-        \ifdefvoid{\tud@pagecolor}{%
+        \ifdefvoid\tud@pagecolor{%
           \ifcase\tud@head@bar@num\relax\or% cdhead=litecolor
             \def\@tempc{\color{HKS41!60}}%
           \or% cdhead=barcolor
@@ -339,7 +339,7 @@
       contents={%
         \if@tud@foot@colored%
           \let\@tempc\relax%
-          \ifdefvoid{\tud@pagecolor}{%
+          \ifdefvoid\tud@pagecolor{%
             \ifcase\tud@head@bar@num\relax\or\or% cdhead=barcolor
               \def\@tempc{\color{HKS41!60}}%
             \or% cdhead=color
@@ -544,7 +544,7 @@
     width=\glueexpr\tud@dim@layoutwidth+(\tud@bleedmargin@dim)*2\relax,%
     height=\glueexpr\tud@dim@layoutheight+(\tud@bleedmargin@dim)*2\relax,%
     contents={%
-      \ifdefvoid{\tud@pagecolor}{}{%
+      \ifdefvoid\tud@pagecolor{}{%
         \color{\tud@pagecolor}%
         \rule{\layerwidth}{\layerheight}%
       }%
@@ -691,9 +691,9 @@
 % einige notwendige Makros definiert.
 %    \begin{macrocode}
 \TUD@UnwindPackage{scrlayer-scrpage}{%
-  \ifundef{\if@chapter}{%
+  \ifundef\if@chapter{%
     \newif\if@chapter%
-    \ifundef{\chapter}{\@chapterfalse}{\@chaptertrue}%
+    \ifundef\chapter{\@chapterfalse}{\@chaptertrue}%
   }{}%
   \cslet{ps@tudheadings}{\ps@headings}%
   \cslet{ps@plain.tudheadings}{\ps@plain}%
@@ -752,7 +752,7 @@
 % Zunächst die Einstellungen für Seiten ohne spezielle Hintergrundfarbe für den 
 % Kopf\dots
 %    \begin{macrocode}
-  \ifdefvoid{\tud@pagecolor}{%
+  \ifdefvoid\tud@pagecolor{%
     \ifcase\tud@head@bar@num\relax% cdhead=nocolor
       \renewcommand*\tud@head@logocolor{black}%
       \renewcommand*\tud@head@fontcolor{}%
@@ -998,7 +998,7 @@
 % einen dunklen Seitenhintergrund weiß.
 %    \begin{macrocode}
     \ifnum\tud@head@bar@num>\@ne\relax% cdhead=barcolor/color
-      \ifdefvoid{\tud@pagecolor}{\color{HKS41}}{%
+      \ifdefvoid\tud@pagecolor{\color{HKS41}}{%
         \tud@if@strequal{\tud@pagecolor}{HKS41}{\color{white}}{\color{HKS41}}%
       }%
     \fi%
@@ -1093,6 +1093,9 @@
   \begingroup%
     \setbox\z@\vbox{#3}%
     \tud@setdim\tud@res@glue{\dimexpr\glueexpr#2\relax\relax}%
+%    \end{macrocode}
+% \ToDo{Warnung mit einmaligem Erzeugen der Box sauber implementierbar?}[v2.07]
+%    \begin{macrocode}
     \ifdim\dimexpr\ht\z@+\dp\z@-\tud@res@glue\relax>\p@\relax%
       \edef\tud@res@a{%
         \noexpand\ClassWarning{\noexpand\TUD@Class@Name}{%
@@ -1348,7 +1351,7 @@
   \let\@tempa\tud@ddc@head@num%
   \let\@tempb\tud@ddc@foot@num%
   \if@tud@ddc@auto%
-    \ifdefvoid{\tud@headlogo@filename}{%
+    \ifdefvoid\tud@headlogo@filename{%
       \let\@tempa\tud@ddc@auto@num%
       \let\@tempb\z@%
     }{%
@@ -1363,7 +1366,7 @@
 %    \begin{macrocode}
   \tud@if@v@lower{2.03}{%
     \ifnum\@tempb=\z@\relax%
-      \ifdefvoid{\tud@footlogo@filenames}{}{\let\@tempb\m@ne}%
+      \ifdefvoid\tud@footlogo@filenames{}{\let\@tempb\m@ne}%
     \fi%
   }{}%
 }
@@ -1671,7 +1674,7 @@
     \tud@savelayerbox{head@option}{}%
     \tud@ddc@check%
     \ifcase\@tempa\relax% \tud@ddc@head@num=false
-      \ifdefvoid{\tud@headlogo@filename}{}{%
+      \ifdefvoid\tud@headlogo@filename{}{%
         \protected@edef\tud@headlogo@filename{\tud@headlogo@filename}%
         \trim@spaces@in\tud@headlogo@filename%
         \protected@edef\@tempb{%
@@ -1693,7 +1696,7 @@
       \@tempc{DDC-30}{}%
     \fi%
     \ifnum\@tempa>\z@\relax
-      \ifdefvoid{\tud@headlogo@filename}{}{%
+      \ifdefvoid\tud@headlogo@filename{}{%
         \ClassWarning{\TUD@Class@Name}{%
           Secondary logo `\tud@headlogo@filename'\MessageBreak%
           is overwritten with DDC logo. Maybe you should\MessageBreak%
@@ -1810,6 +1813,9 @@
           {\footnotesize\headmark}%
           \if@twoside\ifodd\value{page}\quad\pagemark\fi\else\quad\pagemark\fi%
         }%
+%    \end{macrocode}
+% Verwendung von \opt{automark}, wenn \opt{manualmark} nicht explizit gesetzt.
+%    \begin{macrocode}
         \ifx\@mkdouble\@gobble\else\KOMAoptions{automark}\fi%
       }%
 %    \end{macrocode}
@@ -2695,12 +2701,12 @@
 }
 \newcommand*\tud@currentpagestyle@value{}
 \newcommand*\tud@currentpagestyle@set{%
-  \ifdefvoid{\tud@currentpagestyle@value}{%
+  \ifdefvoid\tud@currentpagestyle@value{%
     \xdef\tud@currentpagestyle@value{\currentpagestyle}%
   }{}%
 }
 \newcommand*\tud@currentpagestyle@reset{%
-  \ifdefvoid{\tud@currentpagestyle@value}{}{%
+  \ifdefvoid\tud@currentpagestyle@value{}{%
     \expandafter\pagestyle\expandafter{\tud@currentpagestyle@value}%
     \let\tud@currentpagestyle@value\relax%
   }%

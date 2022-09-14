@@ -641,6 +641,7 @@
 % der Division expandiert werden soll, danach folgen Dividend und Divisor. Die 
 % Berechnung erfolgt in einer Gruppe, damit die benötigten Längenregister nach 
 % dieser erhalten bleiben.
+% \ToDo{mit \cs{fpeval} bzw. \cs{dimeval} ersetzen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@divide[3]{%
   \begingroup%
@@ -1812,8 +1813,8 @@
         {\tud@res@b}%
         {\tud@res@b[]}%
     }%
-    \IfFileExists{#1.sty}{%
-      \openin\@inputcheck=#1.sty%
+    \openin\@inputcheck="#1.sty" %
+    \ifeof\@inputcheck\else
       \@tud@res@swatrue%
       \loop%
         \read\@inputcheck to\tud@res@c%
@@ -1826,8 +1827,8 @@
         \ifeof\@inputcheck\@tud@res@swafalse\fi%
         \if@tud@res@swa%
       \repeat%
-      \closein\@inputcheck%
-    }{}%
+    \fi
+    \closein\@inputcheck%
     \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}%
   \tud@res@a%
 }
@@ -1910,7 +1911,7 @@
 %    \begin{macrocode}
 %<*package&base>
 \newcommand*\TUD@KOMAoptions[1]{}
-\ifundef{\KOMAClassName}{%
+\ifundef\KOMAClassName{%
   \renewcommand*\TUD@KOMAoptions[1]{%
     \PackageWarning{tudscrbase}{%
       You should load package `scrextend' right after\MessageBreak%

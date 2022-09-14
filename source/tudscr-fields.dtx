@@ -113,9 +113,21 @@
 %
 % \subsection{Textfelder für die \TUDScript-Klassen}
 %
-% Von den Klassen benötigte Formularfelder werden definiert. Für das Setzen von 
-% Feldern werden mit dem Makro \cs{trim@spaces} aus dem Paket \pkg{trimspaces} 
-% bei einem übergebenen Argument führende und angehängte Leerzeichen beseitigt.
+% Von den Klassen benötigte Formularfelder werden definiert.
+%
+% \begin{macro}{\tud@trim@field}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% Feldinhalte werden gegebenenfalls um führende und angehängte Leerzeichen 
+% befreit. Hierfür wird \cs{trim@spaces@in} aus dem Paket \pkg{trimspaces} 
+% genutzt.
+%    \begin{macrocode}
+\newcommand*\tud@trim@field[2]{%
+  \def#1{#2}%
+  \trim@spaces@in#1%
+  \global\let#1#1%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@trim@field
 % \begin{macro}{\faculty}
 % \begin{field}{\@faculty}
 % \begin{field}{\@facultyfoot}
@@ -211,24 +223,12 @@
 }
 %<*poster>
 \newcommand*\tud@foot@line@write[1]{%
-  \protected@edef\@tempa{\csuse{@#1foot}}%
-  \ifx\@tempa\@empty\else\newline\mbox{\csuse{@#1foot}}\fi%
+  \tud@if@strempty{\csuse{@#1foot}}{}{\newline\csuse{@#1foot}}%
 }
 %</poster>
 %    \end{macrocode}
 % \end{macro}^^A \tud@foot@line@write
 % \end{macro}^^A \tud@head@text@field
-% \begin{macro}{\tud@trim@field}
-% Hiermit werden Feldinhalte gegebenenfalls um unnötige Leerzeichen befreit.
-% \changes{v2.06o}{2022/08/03}{neu}^^A
-%    \begin{macrocode}
-\newcommand*\tud@trim@field[2]{%
-  \def#1{#2}%
-  \trim@spaces@in#1%
-  \global\let#1#1%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@trim@field
 % \begin{macro}{\title}
 % \begin{field}{\@title}
 % \begin{field}{\@@title}
@@ -800,7 +800,7 @@
 % ausgegeben.
 %    \begin{macrocode}
 \newcommand*\tud@date@check{%
-  \ifdefvoid{\@duedate}{%
+  \ifdefvoid\@duedate{%
     \ClassWarning{\TUD@Class@Name}{%
       `\string\date' was not given\MessageBreak%
       Since a thesis is a self-contained work, an end\MessageBreak%
@@ -1123,7 +1123,7 @@
 % Das Feld wird mit \cs{and} terminiert, um der Definition von
 % \cs{tud@multiple@@split} in jedem Fall zu entsprechen.
 %    \begin{macrocode}
-    \edef\@tempa{\csname #1\endcsname\and}%
+    \edef\@tempa{\csuse{#1}\and}%
   \expandafter\endgroup%
   \expandafter\tud@multiple@@split\@tempa\relax%
 }
