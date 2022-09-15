@@ -410,7 +410,7 @@
 %<*option>
 % \fi
 %
-% \section{Verarbeitung von Optionen}
+% \section{Verarbeitung von Optionen und Laden der \KOMAScript"~Klassen}
 % \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach |\begin{document}| mehrere Layoutoptionen 
@@ -535,6 +535,7 @@
 % Hierfür wird der Schlüssel \opt{tudscrver} des Mitglieds \val{.comp} vor 
 % allen anderen Schlüsseln ausgewertet. Danach kann mit \cs{tud@if@v@lower} auf 
 % die gewählte Kompatibilitäsversion getestet werden.
+% \ToDo{in tudscr-comp?}[v2.06]
 %    \begin{macrocode}
 \DeclareOption*{}
 \TUDProcessOptions[.comp]\relax
@@ -565,91 +566,12 @@
 }
 %    \end{macrocode}
 %
-% \iffalse
-%</class&!inherit|package&fonts>
-% \fi
-%
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
-%    \begin{macrocode}
-%<*package&manual>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&manual>
-%<*class&!inherit|package>
-\TUDExecuteOptions{%
-%<*package&fixfonts>
-  headings=heavy%
-%</package&fixfonts>
-%<*class&!inherit>
-%<*book|report|article>
-  cd=true,tudbookmarks=true%
-%</book|report|article>
-%<*poster>
-  cd=bicolor,tudbookmarks=false%
-%</poster>
-%</class&!inherit>
-}
-%</class&!inherit|package>
-%    \end{macrocode}
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
-% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
-% geprüft, ob ein spezielles Papierformat angegeben wurde.
-%    \begin{macrocode}
-%<*package>
-%<*fonts>
-\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
-%</fonts>
-%<*fixfonts>
-\DeclareOption*{%
-  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
-  {tudscrfonts}%
-}
-%</fixfonts>
-%<*comp>
-\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
-%</comp>
-%</package>
-%<*class>
-%<*!inherit>
-\DeclareOption*{\tud@x@scr@checkoptions}
-%</!inherit>
-%<*inherit>
-\DeclareOption*{%
-  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
-  {\TUD@Class@Parent}%
-}
-%</inherit>
-%</class>
-%    \end{macrocode}
-% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
-% bzw. \TUDScript-Elternklasse geladen.
-%    \begin{macrocode}
-\TUDProcessOptions\relax
-%<*class&!inherit>
-\LoadClass{\TUD@Class@KOMA}[%
-%!TUD@KOMAVersion
-]
-%</class&!inherit>
-%<*class&inherit>
-\LoadClass{\TUD@Class@Parent}[%
-%!TUD@Version
-]
-%</class&inherit>
-%    \end{macrocode}
-%
-% \iffalse
-%<*class&!inherit|package&fonts>
-% \fi
-%
 % \subsection{Optionen ohne späte Wahlmöglichkeit}
 %
 % Einige Optionen können nur zum Zeitpunkt des Ladens einer Klasse oder eines 
 % Paketes respektive in der Präambel gesetzt werden. Diese müssen \emph{nach}
 % \cs{TUDProcessOptions} mit \cs{TUD@key@toolate} redefiniert werden.
+% \ToDo{in tudscr-base?}[v2.06]
 %
 % \begin{macro}{\TUD@key@toolate}
 % \changes{v2.06c}{2019/08/20}{neu}^^A
@@ -696,6 +618,97 @@
 %
 % \iffalse
 %</class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Durchreichen von Optionen und Standardeinstellungen}
+%
+% Es werden die Standardeinstellungen ausgeführt.
+%    \begin{macrocode}
+%<*class&!inherit|package&fixfonts>
+\TUDExecuteOptions{%
+%<*class>
+%<*book|report|article>
+  cd=true,tudbookmarks=true%
+%</book|report|article>
+%<*poster>
+  cd=bicolor,tudbookmarks=false%
+%</poster>
+%</class>
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
+}
+%</class&!inherit|package&fixfonts>
+%<*manual>
+%<*class>
+\PassOptionsToClass
+%</class>
+%<*package>
+\TUDoptions
+%</package>
+{%
+  ttfont=roboto,%
+%<*package>
+  headingsvskip=-6ex,%
+%</package>
+  cdfoot=true%
+}
+%<*class>
+{\TUD@Class@Parent}
+%</class>
+\TUD@KOMAoptions{headings=optiontoheadandtoc}
+%</manual>
+%    \end{macrocode}
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
+%    \begin{macrocode}
+%<*package>
+%<*fonts>
+\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
+%</fonts>
+%<*fixfonts>
+\DeclareOption*{%
+  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
+  {tudscrfonts}%
+}
+%</fixfonts>
+%<*comp>
+\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
+%</comp>
+%</package>
+%<*class>
+%<*!inherit>
+\DeclareOption*{\tud@x@scr@checkoptions}
+%</!inherit>
+%<*inherit>
+\DeclareOption*{%
+  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+  {\TUD@Class@Parent}%
+}
+%</inherit>
+%</class>
+%    \end{macrocode}
+%
+% \subsection{Laden der unterlagerten Klassen}
+%
+% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
+% bzw. \TUDScript-Elternklasse geladen.
+%    \begin{macrocode}
+\TUDProcessOptions\relax
+%<*class&!inherit>
+\LoadClass{\TUD@Class@KOMA}[%
+%!TUD@KOMAVersion
+]
+%</class&!inherit>
+%<*class&inherit>
+\LoadClass{\TUD@Class@Parent}[%
+%!TUD@Version
+]
+%</class&inherit>
+%    \end{macrocode}
+%
+% \iffalse
 %</execute>
 %<*manual|doc>
 % \fi
@@ -728,7 +741,7 @@
 %    \begin{macrocode}
 \PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}
-%<!doc>\reversemarginpar
+%<manual>\reversemarginpar
 %    \end{macrocode}
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
 % Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
@@ -743,8 +756,21 @@
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
-\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+\PassOptionsToPackage{%
+  colorlinks,%
+  hyperindex=false%
+}{hyperref}
+\AtBeginDocument{%
+  \bookmarksetup{%
+    open,%
+%<*manual>
+    openlevel=1,%
+%</manual>
+%<*doc>
+    openlevel=2,%
+%</doc>
+  }%
+}
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
@@ -752,46 +778,85 @@
 %    \begin{macrocode}
 \AfterAtEndOfPackage*{hyperref}{%
   \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
-  \hypersetup{colorlinks,linkcolor=blue}%
+  \hypersetup{%
+    linkcolor=blue,%
+    pdfpagelayout=OneColumn%
+  }%
+  \robustify\url%
+  \robustify\nolinkurl%
+  \robustify\href%
+  \robustify\hyperref%
 }
 %    \end{macrocode}
-% \begin{macro}{\hrfn}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
-% Mit diesem Makro können Hyperlinks im Fließtext erzeugt werden, welche 
-% zusätzlich noch die dazugeörige URL als Fußnote anzeigen.
-%    \begin{macrocode}
-\newcommand*\hrfn[2]{%
-  \href{#1}{\trim@spaces{#2}}%
-  \footnote{\strut\url{#1}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \hrfn
-% \begin{macro}{\mailto}
-% Ein Makro zur Angabe einer verlinkten E"~Mail-Adresse.
-%    \begin{macrocode}
-\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}
-%    \end{macrocode}
-% \end{macro}^^A \mailto
 % \begin{macro}{\url}
 % \begin{macro}{\nolinkurl}
-% \begin{macro}{\href}
 % \begin{macro}{\hypersetup}
-% \begin{macro}{\phantomsection}
-% \begin{macro}{\pdfbookmark}
-% \begin{macro}{\currentpdfbookmark}
-% \begin{macro}{\subpdfbookmark}
-% \begin{macro}{\belowpdfbookmark}
+% \begin{macro}{\HyperDestRename}
+% \begin{macro}{\href}
+% \begin{macro}{\hyperdef}
+% \begin{macro}{\hyperref}
+% \begin{macro}{\hypertarget}
+% \begin{macro}{\hyperlink}
+% \begin{macro}{\hyperpage}
+% \begin{macro}{\Hy@raisedlink}
+% \begin{macro}{\@currentHref}
 % Sollte \pkg{hyperref} nicht geladen werden, müssen einige Befehle rudimentär 
 % definiert werden.
 %    \begin{macrocode}
 \TUD@UnwindPackage{hyperref}{%
+%<*class>
+  \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrmanual}%
+%</package>
+  {%
+    Loading the package `hyperref' is strongly\MessageBreak%
+    recommended. At the very least, some essential\MessageBreak%
+    commands are defined as stubs%
+  }%
   \RequirePackage{url}
   \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
   \providerobustcmd*\nolinkurl[1]{\url{#1}}%
-  \providerobustcmd*\href[3][]{#3}%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\phantomsection{}%
+  \providecommand*\HyperDestRename[2]{}%
+  \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\hyperdef[4][]{#4}%
+  \providerobustcmd*\hyperref{%
+    \kernel@ifnextchar[%]
+      {\tud@x@hyperref@a}%
+      {\tud@x@hyperref@b}%
+  }%
+  \newcommand*\tud@x@hyperref@a[2][]{#2}%
+  \newcommand*\tud@x@hyperref@b[4]{#4}%
+  \providecommand*\hypertarget[2]{#2}%
+  \providecommand*\hyperlink[2]{#2}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+  \providecommand*\@currentHref{}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@currentHref
+% \end{macro}^^A \Hy@raisedlink
+% \end{macro}^^A \hyperpage
+% \end{macro}^^A \hyperlink
+% \end{macro}^^A \hypertarget
+% \end{macro}^^A \hyperref
+% \end{macro}^^A \hyperdef
+% \end{macro}^^A \href
+% \end{macro}^^A \HyperDestRename
+% \end{macro}^^A \hypersetup
+% \end{macro}^^A \nolinkurl
+% \end{macro}^^A \url
+% \begin{macro}{\bookmarksetup}
+% \begin{macro}{\pdfbookmark}
+% \begin{macro}{\currentpdfbookmark}
+% \begin{macro}{\subpdfbookmark}
+% \begin{macro}{\belowpdfbookmark}
+% Für \pkg{bookmark} gilt dies ebenso.
+%    \begin{macrocode}
+\TUD@UnwindPackage{bookmark}{%
+  \providecommand*\bookmarksetup[1]{}%
   \providecommand*\pdfbookmark[3][]{}%
   \providecommand*\currentpdfbookmark[2]{}%
   \providecommand*\subpdfbookmark[2]{}%
@@ -802,11 +867,7 @@
 % \end{macro}^^A \subpdfbookmark
 % \end{macro}^^A \currentpdfbookmark
 % \end{macro}^^A \pdfbookmark
-% \end{macro}^^A \phantomsection
-% \end{macro}^^A \hypersetup
-% \end{macro}^^A \href
-% \end{macro}^^A \nolinkurl
-% \end{macro}^^A \url
+% \end{macro}^^A \bookmarksetup
 %
 % Etwas Kleinkram für \pkg{babel} und \pkg{csquotes}. Das letztere Paket dient
 % dem sprachabhängigen Setzen von Anführungszeichen und sollte erst nach 
@@ -814,28 +875,41 @@
 %    \begin{macrocode}
 \AfterPackage*{babel}{\RequirePackage{csquotes}}
 %    \end{macrocode}
-% \begin{macro}{\selectlanguage}
+% \begin{macro}{\seename}
+% \begin{macro}{\alsoname}
 % \begin{macro}{\glqq}
 % \begin{macro}{\grqq}
 % \begin{macro}{\enquote}
 %    \begin{macrocode}
 \TUD@UnwindPackage{babel}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `babel' not loaded}%
-  \providecommand*\selectlanguage[1]{}%
-  \providecommand*\glqq{\quotedblbase}%
-  \providecommand*\grqq{\textquotedblleft}%
+%<*class>
+  \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrmanual}%
+%</package>
+    {Package `babel' not loaded}%
   \providecommand*\seename{see}%
   \providecommand*\alsoname{see\nobreakspace also}%
+  \providecommand*\glqq{\quotedblbase}%
+  \providecommand*\grqq{\textquotedblleft}%
 }
 \TUD@UnwindPackage{csquotes}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `csquotes' not loaded}%
+%<*class>
+  \ClassWarningNoLine{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageWarningNoLine{tudscrmanual}%
+%</package>
+    {Package `csquotes' not loaded}%
   \providecommand\enquote[1]{\emph{#1}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \enquote
 % \end{macro}^^A \grqq
 % \end{macro}^^A \glqq
-% \end{macro}^^A \selectlanguage
+% \end{macro}^^A \alsoname
+% \end{macro}^^A \seename
 %
 % \iffalse
 %<*class&manual>
@@ -1020,7 +1094,6 @@
 % \fi
 %
 % \subsection{Zusätzliche Markup-Befehle}
-% \subsubsection{Textauszeichnung}
 %
 % \begin{macro}{\@pnumwidth}
 % \begin{macro}{\@tocrmarg}
@@ -1032,6 +1105,82 @@
 %    \end{macrocode}
 % \end{macro}^^A \@tocrmarg
 % \end{macro}^^A \@pnumwidth
+% \begin{macro}{\bsc}
+% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
+%   \cs{DeclareRobustCommand}}^^A
+% \begin{macro}{\txb}
+% \changes{v2.06o}{2022/08/03}{neu}^^A
+% Befehle für das Setzen von Backslash und senkrechtem Strich.
+%    \begin{macrocode}
+\newrobustcmd*\bsc{%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+  \textbackslash%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+}
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
+%    \end{macrocode}
+% \end{macro}^^A \txb
+% \end{macro}^^A \bsc
+% \begin{macro}{\hrfn}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
+% Mit diesem Makro können Hyperlinks im Fließtext erzeugt werden, welche 
+% zusätzlich noch die dazugeörige URL als Fußnote anzeigen.
+%    \begin{macrocode}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{\strut\url{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \hrfn
+% \begin{macro}{\mailto}
+% \begin{macro}{\TUDScriptContactTitle}
+% \changes{v2.06o}{2022/08/09}{neu}^^A
+% Befehle zur Angabe einer verlinkten E"~Mail-Adresse.
+%    \begin{macrocode}
+\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef\emailaddress{%
+    \\\expandafter\mailto\expandafter{\TUDScriptContact}%
+  }{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \let\mailto\@firstofone%
+    \let\TUDScriptContactTitle\relax%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \TUDScriptContactTitle
+% \end{macro}^^A \mailto
+% \begin{macro}{\seeref}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
+% statt \cs{seealso} genutzt werden.
+%    \begin{macrocode}
+\NewDocumentCommand\seeref{s m}{%
+  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+}
+%    \end{macrocode}
+% \end{macro}^^A \seeref
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Falls irgendetwas besonders hervorgehoben werden soll.
+%    \begin{macrocode}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Attention
+%
+% \subsubsection{Textauszeichnung}
+%
 % \begin{macro}{\textsbn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \begin{macro}{\sbnfont}
@@ -1070,17 +1219,17 @@
 % falls die Sprache geladen wurde.
 %    \begin{macrocode}
 \newcommand*\tud@english[1]{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Language `english' not loaded}%
+  \tud@language@wrn{english}%
   \let\tud@english\@firstofone%
   #1%
 }
 \AfterAtEndOfPackage*{babel}{%
-  \AtEndPreamble{%
+  \AfterEndPreamble{%
     \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
   }%
 }
 \AfterAtEndOfPackage*{polyglossia}{%
-  \AtEndPreamble{%
+  \AfterEndPreamble{%
     \tud@if@language@loaded{english}{%
       \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
     }{}%
@@ -1182,6 +1331,17 @@
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
 % \end{macro}^^A \OpenSans
+% \begin{macro}{\notudscrartcl}
+%    \begin{macrocode}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
+  Option nicht verf\"ugbar.%
+}
+%    \end{macrocode}
+% \end{macro}^^A \notudscrartcl
+%
+% \subsubsection{Markup für Links}
+%
 % \begin{macro}{\GitHubBase}
 % Angabe der URL des verwendeten GitHub-Repository. Aktuell nicht implementiert.
 %    \begin{macrocode}
@@ -1245,35 +1405,22 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \Forum
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Falls irgendetwas besonders hervorgehoben werden sollte.
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
 %    \begin{macrocode}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \Attention
-% \begin{macro}{\TUDScriptContactTitle}
-% \changes{v2.06o}{2022/08/09}{neu}^^A
-% Die Angabe der E-Mail-Adresse auf dem Titel innerhalb von \cs{author}.
-%    \begin{macrocode}
-\newrobustcmd*\TUDScriptContactTitle{%
-  \ifundef\emailaddress{%
-    \qquad\expandafter\mailto\expandafter{\TUDScriptContact}%
-  }{%
-    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+%<*manual>
+\NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{%
+    {http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf}%
   }%
+  \addto@hook\toks@{{#2}}%
+  \the\toks@\xspace%
 }
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{\let\TUDScriptContactTitle\relax}%
-}
+%</manual>
 %    \end{macrocode}
-% \end{macro}^^A \TUDScriptContactTitle
+% \end{macro}^^A \scrguide
 %
 % \iffalse
 %</body>
