@@ -134,7 +134,6 @@
 % Für die Titelseite werden~-- wie auch durch das Paket \pkg{hyperref}~-- die 
 % Fußnoten mit dem Befehl \cs{tud@x@hyperref@realfootnotes} auf den originalen 
 % Zustand zurückgesetzt.
-% \ToDo{optionales Argument (default=nil) auf integer>0 prüfen}[v2.07]
 % \ToDo{nur als internen Befehl definieren, dazugehörige Option nötig?}[v2.07]
 % \ToDo{\cs{tud@x@hyperref@realfootnotes} prüfen}[v2.07]
 %    \begin{macrocode}
@@ -154,7 +153,6 @@
     \let\@footnotemark\H@@footnotemark%
     \let\@footnotetext\H@@footnotetext%
   }%
-  \pdfstringdefDisableCommands{\let\NoCaseChange\@firstofone}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@x@hyperref@realfootnotes
@@ -446,7 +444,7 @@
 %<*option>
 % \fi
 %
-% \section{Verarbeitung von Optionen}
+% \section{Verarbeitung von Optionen und Laden der \KOMAScript"~Klassen}
 % \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach |\begin{document}| mehrere Layoutoptionen 
@@ -656,32 +654,45 @@
 %</class&!inherit|package&fonts>
 % \fi
 %
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
+% \subsection{Durchreichen von Optionen und Standardeinstellungen}
+%
+% Es werden die Standardeinstellungen ausgeführt.
 %    \begin{macrocode}
-%<*package&manual>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&manual>
-%<*class&!inherit|package>
+%<*class&!inherit|package&fixfonts>
 \TUDExecuteOptions{%
-%<*package&fixfonts>
-  headings=heavy%
-%</package&fixfonts>
-%<*class&!inherit>
+%<*class>
 %<*book|report|article>
   cd=true,tudbookmarks=true%
 %</book|report|article>
 %<*poster>
   cd=bicolor,tudbookmarks=false%
 %</poster>
-%</class&!inherit>
+%</class>
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
 }
-%</class&!inherit|package>
+%</class&!inherit|package&fixfonts>
+%<*manual>
+%<*class>
+\PassOptionsToClass
+%</class>
+%<*package>
+\TUDoptions
+%</package>
+{%
+  ttfont=roboto,%
+%<*package>
+  headingsvskip=-6ex,%
+%</package>
+  cdfoot=true%
+}
+%<*class>
+{\TUD@Class@Parent}
+%</class>
+\TUD@KOMAoptions{headings=optiontoheadandtoc}
+%</manual>
 %    \end{macrocode}
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
 % Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
 % genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
 % geprüft, ob ein spezielles Papierformat angegeben wurde.
@@ -712,6 +723,9 @@
 %</inherit>
 %</class>
 %    \end{macrocode}
+%
+% \subsection{Laden der unterlagerten Klassen}
+%
 % Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
 % bzw. \TUDScript-Elternklasse geladen.
 %    \begin{macrocode}
@@ -761,7 +775,7 @@
 %    \begin{macrocode}
 \PassOptionsToPackage{quiet}{marginnote}
 \RequirePackage{marginnote}
-%<!doc>\reversemarginpar
+%<manual>\reversemarginpar
 %    \end{macrocode}
 % Das Paket \pkg{shellesc} ermöglicht mit dem Befehl \cs{ShellEscape} die 
 % Verwendung von Systembefehlen auf der Kommandozeile unabhängig vom genutzten
@@ -776,8 +790,21 @@
 % Das Paket \pkg{hyperref} wird für alle möglichen Links und Querverweise 
 % geladen, \pkg{bookmark} verbessert das Erstellen der Outline-Einträge.
 %    \begin{macrocode}
-\PassOptionsToPackage{hyperindex=false}{hyperref}
-\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+\PassOptionsToPackage{%
+  colorlinks,%
+  hyperindex=false%
+}{hyperref}
+\AtBeginDocument{%
+  \bookmarksetup{%
+    open,%
+%<*manual>
+    openlevel=1,%
+%</manual>
+%<*doc>
+    openlevel=2,%
+%</doc>
+  }%
+}
 %    \end{macrocode}
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
@@ -785,14 +812,24 @@
 %    \begin{macrocode}
 \AfterAtEndOfPackage*{hyperref}{%
   \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
-  \hypersetup{colorlinks,linkcolor=blue}%
+  \hypersetup{%
+    linkcolor=blue,%
+    pdfpagelayout=OneColumn%
+  }%
 }
 %    \end{macrocode}
 % \begin{macro}{\url}
 % \begin{macro}{\nolinkurl}
 % \begin{macro}{\hypersetup}
-% \begin{macro}{\phantomsection}
+% \begin{macro}{\HyperDestRename}
 % \begin{macro}{\href}
+% \begin{macro}{\hyperdef}
+% \begin{macro}{\hyperref}
+% \begin{macro}{\hypertarget}
+% \begin{macro}{\hyperlink}
+% \begin{macro}{\hyperpage}
+% \begin{macro}{\Hy@raisedlink}
+% \begin{macro}{\@currentHref}
 % Sollte \pkg{hyperref} nicht geladen werden, müssen einige Befehle rudimentär 
 % definiert werden.
 %    \begin{macrocode}
@@ -812,12 +849,32 @@
   \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
   \providerobustcmd*\nolinkurl[1]{\url{#1}}%
   \providecommand*\hypersetup[1]{}%
-  \providecommand*\phantomsection{}%
+  \providecommand*\HyperDestRename[2]{}%
   \providerobustcmd*\href[3][]{#3}%
+  \providecommand*\hyperdef[4][]{#4}%
+  \providerobustcmd*\hyperref{%
+    \kernel@ifnextchar[%]
+      {\tud@x@hyperref@a}%
+      {\tud@x@hyperref@b}%
+  }%
+  \newcommand*\tud@x@hyperref@a[2][]{#2}%
+  \newcommand*\tud@x@hyperref@b[4]{#4}%
+  \providecommand*\hypertarget[2]{#2}%
+  \providecommand*\hyperlink[2]{#2}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+  \providecommand*\@currentHref{}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \@currentHref
+% \end{macro}^^A \Hy@raisedlink
+% \end{macro}^^A \hyperpage
+% \end{macro}^^A \hyperlink
+% \end{macro}^^A \hypertarget
+% \end{macro}^^A \hyperref
+% \end{macro}^^A \hyperdef
 % \end{macro}^^A \href
-% \end{macro}^^A \phantomsection
+% \end{macro}^^A \HyperDestRename
 % \end{macro}^^A \hypersetup
 % \end{macro}^^A \nolinkurl
 % \end{macro}^^A \url
@@ -906,19 +963,12 @@
 \newcommand*\tud@templist{}
 \let\tud@templist\relax
 \newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
-    }%
-  }{%
-    \let\tud@reserved#1%
-    \let\tud@templist\relax%
-    \forlistloop\tud@list@@sort{\tud@reserved}%
-    \let\tud@reserved\relax%
-    \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
-    \let#1\tud@reserved%
-  }%
+  \let\tud@reserved#1%
+  \let\tud@templist\relax%
+  \forlistloop\tud@list@@sort{\tud@reserved}%
+  \let\tud@reserved\relax%
+  \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
+  \let#1\tud@reserved%
 }
 %    \end{macrocode}
 % Hier erfolgt die eigentliche Sortierung der Liste.
@@ -1001,6 +1051,132 @@
 % \end{macro}^^A \tud@list@@sort
 % \end{macro}^^A \tud@list@sort
 %
+% \subsection{Hilfslisten}
+%
+% Mit den nachfolgenden Makros werden Hilfslisten definiert, die am Ende des 
+% Dokumentes in die aux"~Datei geschrieben werden, um dieses beim nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
+% \begin{macro}{\tud@auxlist@register}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
+% diese für die aux"~Datei zu lesen und zu schreiben. Das erste optionale 
+% Argument dient dazu, vor dem eigentlichen Einlesen der Liste diese mit einem 
+% Element zu initialisieren. Das obligatorische Argument enthält den Namen der 
+% Liste. Das nachfolgende optionale Argument wird bei der Verabeitung auf jedes 
+% Listenelement angewendet, bevor es zur Liste hinzugefügt oder mit dieser 
+% verglichen wird.
+%
+% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
+% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
+% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
+% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
+% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
+% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
+% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
+% obwohl diese später der Positivliste hinzugefügt werden könnten.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@auxlist@register{o m !O{\@firstofone}}{%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#2@auxlist@handler\endcsname{#3}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#2@auxlist@positive}}{#2@auxlist@negative}%
+    \tud@auxlist@export{#2}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#1}{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@register
+% \begin{macro}{\tud@auxlist@export}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@import}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
+% Token-Liste umgewandelt.
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
+% gewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \unexpanded{\@tfor\tud@res@c:=}%
+      \expandafter\expandonce\csname #2@auxlist\endcsname%
+    }%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \global\cslet{#2@auxlist}\@empty%
+    \IfValueT{#1}{%
+      \edef\tud@res@c{\tud@res@b{#1}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@import
+% \end{macro}^^A \tud@auxlist@export
+% \begin{macro}{\tud@auxlist@add}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@remove}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \xifinlistcs{\tud@res@a}{#1@auxlist@positive}{}{%
+      \listcsxadd{#1@auxlist@positive}{\tud@res@a}%
+    }%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \xifinlistcs{\tud@res@a}{#1@auxlist@negative}{}{%
+      \listcsxadd{#1@auxlist@negative}{\tud@res@a}%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@forloop}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
+%
 % \iffalse
 %</class&manual>
 % \fi
@@ -1075,6 +1251,18 @@
 %
 % \subsection{Zusätzliche Markup-Befehle}
 %
+% \ToDo{als Makro und innerhalb vom Markup setzen}[v2.06]
+%    \begin{macrocode}
+\AfterEndPreamble{%
+  \robustify\url%
+  \robustify\nolinkurl%
+  \robustify\href%
+  \robustify\hyperref%
+  \robustify\emph%
+  \robustify\dots%
+  \robustify{~}%
+}
+%    \end{macrocode}
 % \begin{macro}{\@pnumwidth}
 % \begin{macro}{\@tocrmarg}
 % Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
@@ -1085,6 +1273,22 @@
 %    \end{macrocode}
 % \end{macro}^^A \@tocrmarg
 % \end{macro}^^A \@pnumwidth
+% \begin{macro}{\slc}
+% \begin{macro}{\bsc}
+% \begin{macro}{\txb}
+% Befehle für das Setzen von Schrägstrich, Backslash und senkrechtem Strich.
+%    \begin{macrocode}
+\newrobustcmd*\slc{\kern.1em/\kern.1em}
+\newrobustcmd*\bsc{%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+  \textbackslash%
+  \ifx\f@family\ttdef@ult\kern-.05em\fi%
+}
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
+%    \end{macrocode}
+% \end{macro}^^A \txb
+% \end{macro}^^A \bsc
+% \end{macro}^^A \slc
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
@@ -1119,6 +1323,21 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \mailto
+% \begin{macro}{\seeplain}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\@seeplain}
+% Der Befehl \cs{seeplain} kann anstelle von \cs{see} bzw. in der Sternversion
+% statt \cs{seealso} genutzt werden.
+%    \begin{macrocode}
+\NewDocumentCommand\seeplain{s m}{%
+  \emph{\mbox{\IfBooleanTF{#1}{\alsoname}{\seename}}}~#2%
+}
+\NewExpandableDocumentCommand\@seeplain{s m}{%
+  \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@seeplain
+% \end{macro}^^A \seeplain
 % \begin{macro}{\Attention}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % Falls irgendetwas besonders hervorgehoben werden soll.
@@ -1291,6 +1510,17 @@
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
 % \end{macro}^^A \OpenSans
+% \begin{macro}{\notudscrartcl}
+%    \begin{macrocode}
+\newcommand*\notudscrartcl{%
+  F\"ur die Klassen \Class{tudscrartcl} sowie \Class{tudscrposter} ist diese %
+  Option nicht verf\"ugbar.%
+}
+%    \end{macrocode}
+% \end{macro}^^A \notudscrartcl
+%
+% \subsubsection{Markup für Links}
+%
 % \begin{macro}{\GitHubBase}
 % \changes{v2.07}{2019/11/11}{neu}^^A
 % \begin{macro}{\tud@github@url@base}
@@ -1446,15 +1676,33 @@
 % in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
 % verlinken.
 %    \begin{macrocode}
-\NewDocumentCommand\Forum{!t' !O{\TUDForum} !d<>}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{\TUDScriptForum\IfValueT{#3}{viewtopic.php?t=#3}}{#2}%
-  \endgroup%
-  \xspace%
+\NewDocumentCommand\Forum{!s !t' !O{\TUDForum} !d<>}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \IfBooleanT{#2}{\toks@{\url}}%
+  \def\@tempa{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
+  \edef\@tempa{{\@tempa\IfValueT{#4}{viewtopic.php?t=#4}}}%
+  \addto@hook@expandafter\toks@{\@tempa}%
+  \IfBooleanF{#2}{\addto@hook\toks@{{#3}}}%
+  \the\toks@\xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Forum
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
+%    \begin{macrocode}
+%<*manual>
+\NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
+  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
+  \addto@hook\toks@{%
+    {http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf}%
+  }%
+  \addto@hook\toks@{{#2}}%
+  \the\toks@\xspace%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \scrguide
 %
 % \subsubsection{Setzen von Schriftzügen}
 %
