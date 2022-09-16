@@ -62,18 +62,20 @@
 \usetikzlibrary{chains}
 \usetikzlibrary{decorations.markings}
 \tikzset{on grid}
-% TODO pst-pdf funktioniert momentan nicht mit hyperref 
-%      github.com/rolfn/pst-pdf/issues/6
-%      --> luapstricks ?
 \usepackage{pstricks,pst-node}
 
-\AfterPackage*{hyperref}{%
+\makeatletter
+\ifnum\pdf@shellescape=\@ne\relax
+\PassOptionsToPackage{automake=immediate}{glossaries}
+\fi
+\makeatother
+\AtEndPreamble{%
   \usepackage[%
-    automake,%
     xindy={language=german-din},%
     acronym,%
     symbols,%
     nomain,%
+    section=subsubsection,% Zurücksetzen der Zähler verhindern
     translate=babel,%
     nogroupskip,%
     nostyles,%
@@ -704,22 +706,18 @@ werden, wie das Paket zu verwenden ist. Für weiterführende Beispiele sollte
 die Dokumentationen zu Rate gezogen werden, welche dahingehend keine Wünsche 
 offen lässt. 
 
-Das Paket \Package{glossaries} sollte immer \emph{nach} \Package{hyperref} 
-geladen werden. Entweder Sie achten explizit darauf oder Sie verwenden den 
-Befehl \Macro{AfterPackage*}(\Package{scrbase}) aus dem \KOMAScript-Bundle. Mit 
-diesem können Sie die Quelltext nach dem Laden eines Paketes ausführen. 
-\Attention{%
-  Es ist allerdings darauf zu achten, dass der Quelltext nur ausgeführt wird, 
-  wenn das avisierte Zielpaket auch tatsächlich geladen wird.
-}
-Falls Sie demnach auf \Package{hyperref} jedoch nicht auf \Package{glossaries} 
-verzichten möchten, sollte der nachfolgende Quelltext am Ende der Präambel 
-eingefügt werden.
-
-Die für \Package{glossaries} verwendeten Optionen werden kurz erläutert.
+Das Paket \Package{glossaries} sollte laut dessen Dokumentation \emph{nach} 
+\Package{hyperref} geladen werden. Um dies nicht zu vergessen oder für den 
+Fall, dass Sie die vorgenommenen Einstellungen in ein eigenes Paket auslagern 
+und dies an beliebiger Stelle innerhaln der Dokumentpräambel laden möchten, 
+kann der Befehl \Macro{AtEndPreamble}(\Package{etoolbox}) aus dem Paket 
+\Package{etoolbox} verwendet werden. Mit diesem wird die Ausführung des im 
+Argument gegebenen Quelltextes an das Ende der Dokumentpräambel direkt vor 
+\Macro*{begin}[\PParameter{document}] verschoben. Nachfolgend werden die für 
+\Package{glossaries} verwendeten Optionen kurz erläutert.
 %
 \begin{Preamble+}
-\AfterPackage*{hyperref}{%
+\AtEndPreamble{%
 \end{Preamble+}
 \begin{Preamble}
 \usepackage[%
@@ -813,12 +811,11 @@ welches alle notwendigen Optionen an die jeweilige Anwendung weiterleitet.
 }
 
 Kann das Skript \File{makeglossaries}(\Package{glossaries}) nicht genutzt 
-werden, kann alternativ dazu die Option \Option{automake}(\Package{glossaries})
-aktiviert werden. Diese sorgt dafür, dass am Ende des \Engine{pdfLaTeX}"~Laufs 
-der Aufruf von \Application{xindy} oder \Application{makeindex} direkt erfolgt. 
-Soll \Application{xindy} verwendet werden, sind dafür allerdings erweiterte 
-Schreibrechte notwendig, weshalb für diese Variante \Engine{pdfLaTeX} mit der 
-Option \Option{-{}-shell-escape}(\Engine{pdfLaTeX}) respektive 
+werden, steht alternativ dazu die Option \Option{automake}(\Package{glossaries})
+bereit. Mit dieser erfolgt der Aufruf von \Application{xindy} beziehungsweise 
+\Application{makeindex} direkt. Soll \Application{xindy} verwendet werden, sind 
+dafür allerdings erweiterte Schreibrechte notwendig, weshalb \Engine{pdfLaTeX} 
+hierfür mit der Option \Option{-{}-shell-escape}(\Engine{pdfLaTeX}) respektive 
 \Option{-{}-enable-write18}(\Engine{pdfLaTeX}) aufgerufen werden muss. Für 
 \Application{xindy} ist außerdem die Angabe der Sprache über die Option 
 \Option*{xindy=\PParameter{language=\dots}} zwingend notwendig. 
@@ -843,12 +840,8 @@ optionsabhängigen Stildateien für \Application{makeindex} respektive
 \begin{Preamble}
 ]{glossaries}
 \makeglossaries
-\end{Preamble}
-\begin{Preamble+}
-}% Ende von AfterPackage
 
-\AfterPackage*{glossaries}{%
-\end{Preamble+}
+\end{Preamble}
 %
 Damit wäre der erste Teil zur Initialisierung überstanden und wir können zum 
 eigentlichen Problem kommen. Wie wird nun ein Abkürzungs- und/oder 
@@ -1261,7 +1254,7 @@ erscheinen würde. In hier vorgestellten Fall werden der Kopf mit dem Makro
 einem möglichen Seitenumbruch zu Beginn und am Ende auf jeder Seite gesetzt.
 %
 \begin{Preamble+}
-}% Ende von AfterPackage
+}% Ende von AtEndPreamble
 
 \end{Preamble+}
 %
