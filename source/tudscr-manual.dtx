@@ -5620,25 +5620,34 @@
 %
 % Falls innerhalb eines Tutorials das Paket \pkg{pstricks} verwendet wird, muss
 % dafür Sorge getragen werden, dass die automatische Kompilierung reibungslos
-% mit \pkg{auto-pst-pdf} funktioniert.
+% mit \pkg{auto-pst-pdf} funktioniert. Aktuell gibt es beim Zusammenspiel von 
+% \pkg{hyperref} und \pkg{preview} Probleme. Relevante Bugreports sind unter
+% \href{https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44578}{auctex\#44578} und
+% \GitHubRepo(rolfn/pst-pdf)<6> zu finden. Der folgende Workaround deaktiviert 
+% im DVI-Modus einfach das Paket \pkg{hyperref}. Alternativ könnte eventuell
+% auch \app{luapstricks} genutzt werden.
 %    \begin{macrocode}
 \AfterPackage*{pstricks}{%
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{%
-      \PassOptionsToPackage{off}{auto-pst-pdf}%
-    }{}%
-  \else%
-    \PassOptionsToPackage{off}{auto-pst-pdf}%
-  \fi%
-  \RequirePackage{auto-pst-pdf}
+  \ifpdf
+    \def\@tempa{off}%
+    \ifnum\pdf@shellescape=\@ne\relax
+      \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{}{%
 %    \end{macrocode}
-% Nach dem Paket \pkg{auto-pst-pdf} seine Arbeit verrichtet hat, werden alle 
-% etwaigen temporär erzeugten Dateien radikal gelöscht.
+% Da kleinere Beispieldokumente (\file{\string\tud@tut@temp-standalone.tex}) 
+% separat kompiliert werden, erstellt \pkg{auto-pst-pdf} auch für diese die 
+% entsprechenden Hilfsdateien. Deshalb werden diese hier rigoros gelöscht,
+% nachdem \pkg{auto-pst-pdf} seine Arbeit verrichtet hat.
 %    \begin{macrocode}
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \edef\@tempa{\app@exe{\app@rm "*\app@suffix*"}}%
-    \@tempa%
-  \fi%
+        \def\@tempa{on,runs=2,cleanup={}}%
+        \AfterReadingMainAux{\app@exe{\app@rm "*-\app@suffix*"}}%
+      }%
+    \fi
+    \PassOptionsToPackage{\@tempa}{auto-pst-pdf}%
+  \else
+    \disable@package@load{hyperref}{}%
+    \disable@package@load{bookmark}{}%
+  \fi
+  \RequirePackage{auto-pst-pdf}%
 }
 %    \end{macrocode}
 %
