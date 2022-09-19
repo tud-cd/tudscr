@@ -375,6 +375,7 @@
 % lassen. Prinzipiell könnte hierfür auch das Paket \pkg{float} zum Einsatz
 % kommen. Ursprünglich stammt die Idee aus \cls{tudmathposter} und wurde hier 
 % generalisiert implementiert.
+% \ToDo{Vergleich mit \env{figure-} und \env{table-} aus \KOMAScript}[v2.07]
 %    \begin{macrocode}
 %<*poster>
 \newcommand*\tud@here@begin[1]{%
@@ -733,6 +734,7 @@
 %    \begin{macrocode}
 \RequirePackage{xspace}
 \xspaceaddexceptions{"=}
+\AtBeginDocument{\robustify{~}}
 %    \end{macrocode}
 % Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
 % für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
@@ -890,7 +892,7 @@
 %</package>
     {Package `babel' not loaded}%
   \providecommand*\seename{see}%
-  \providecommand*\alsoname{see\nobreakspace also}%
+  \providecommand*\alsoname{see~also}%
   \providecommand*\glqq{\quotedblbase}%
   \providecommand*\grqq{\textquotedblleft}%
 }
@@ -1105,13 +1107,12 @@
 %    \end{macrocode}
 % \end{macro}^^A \@tocrmarg
 % \end{macro}^^A \@pnumwidth
+% \begin{macro}{\slc}
 % \begin{macro}{\bsc}
-% \changes{v2.02}{2014/07/22}{\cs{newrobustcmd} aus \pkg{etoolbox} anstatt
-%   \cs{DeclareRobustCommand}}^^A
 % \begin{macro}{\txb}
-% \changes{v2.06o}{2022/08/03}{neu}^^A
-% Befehle für das Setzen von Backslash und senkrechtem Strich.
+% Befehle für das Setzen von Schrägstrich, Backslash und senkrechtem Strich.
 %    \begin{macrocode}
+\newrobustcmd*\slc{\kern.1em/\kern.1em}
 \newrobustcmd*\bsc{%
   \ifx\f@family\ttdef@ult\kern-.05em\fi%
   \textbackslash%
@@ -1121,6 +1122,7 @@
 %    \end{macrocode}
 % \end{macro}^^A \txb
 % \end{macro}^^A \bsc
+% \end{macro}^^A \slc
 % \begin{macro}{\hrfn}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % \changes{v2.04}{2015/02/18}{Schriftgröße mit \cs{scalebox}}^^A
@@ -1255,10 +1257,16 @@
 }
 %    \end{macrocode}
 % Diese Befehle geben in der Dokumentation die aktuelle Version von \TUDScript
-% sowie die mindestens notwendige Version von \KOMAScript{} aus.
+% sowie die mindestens notwendige Version von \KOMAScript{} aus. Sollte es 
+% notwendig sein, auf die Hauptversion zu verweisen, ist die Sternversion
+% zu verwenden.
 %    \begin{macrocode}
-\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
-\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
+\NewExpandableDocumentCommand\vKOMAScript{s m}{%
+  \IfArgIsEmpty{#2}{}{#2~}v\csuse{TUD@KOMAVersion\IfBooleanT{#1}{@}Number}%
+}
+\NewExpandableDocumentCommand\vTUDScript{s m}{%
+  \IfArgIsEmpty{#2}{}{#2~}v\csuse{TUDScriptVersion\IfBooleanT{#1}{@}Number}%
+}
 %    \end{macrocode}
 % \end{macro}^^A \vTUDScript
 % \end{macro}^^A \vKOMAScript
@@ -1317,9 +1325,9 @@
 % \begin{macro}{\DIN}
 % Für die Nennung der Schriften spezielle Markos bereitgestellt.
 %    \begin{macrocode}
-\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace Sans}\xspace}
+\newrobustcmd*\OpenSans{\textcdbn{Open~Sans}\xspace}
 \newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
-\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace Bold}\xspace}
+\newrobustcmd*\DIN{\textcdbi{DIN~Bold}\xspace}
 \AfterPackage*{hyperref}{%
   \pdfstringdefDisableCommands{%
     \def\OpenSans{Open Sans{}}%
