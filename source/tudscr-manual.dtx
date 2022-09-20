@@ -2797,8 +2797,8 @@
 %   \item[\val{3}:] keine Ausgabe, Erzeugen eines nach oben verschobenen Labels
 % \end{description}
 % Normalerweise kommt die erste Variante zum Einsatz. Die zweite Variante wird 
-% genutzt, wenn mit mit der Umgebung \env{Cessation} zwar eine Ausgabe aber kein 
-% Label erstellt werden soll. Dies wird verwendet, um bei der Beschreibung 
+% genutzt, wenn mit mit der Umgebung \env{Cessation} zwar eine Ausgabe aber 
+% kein Label erstellt werden soll. Dies wird verwendet, um bei der Beschreibung 
 % veralteter Werte oder Parameter diese im Kontext ihrer Option oder Umgebung
 % bzw. ihres Befehls anzugeben.
 %
@@ -3789,7 +3789,7 @@
       \IfValueTF{#5}{%
         \addto@hook\toks@{#5}%
       }{%
-        \addto@hook\toks@{\emph{neu}}%
+        \addto@hook\toks@{neu}%
       }%
     }{%
       \addto@hook@expandafter\toks@{\@tempb}%
@@ -3906,9 +3906,9 @@
 %    \begin{macrocode}
       \tud@if@strblank{#5}{%
         \if@tud@obsolete%
-          \appto\tud@idx@fmt{: \emph{entf\"allt}}%
+          \appto\tud@idx@fmt{: entf\"allt}%
         \else%
-          \appto\tud@idx@fmt{: \emph{neu}}%
+          \appto\tud@idx@fmt{: neu}%
         \fi%
 %    \end{macrocode}
 % Existiert ein Eintrag, wird dieser für Schlüssel und Format verwendet.
@@ -3997,26 +3997,52 @@
 %
 % \subsection{Deklarationsumgebungen für die Klasse \cls{tudscrmanual}}
 %
-% Die Umgebungen \env{Declaration}, \env{DeclareEntity*} sowie \env{Cessation} 
-% und \env{Entity} werden für die Beschreibung von Optionen, Umgebungen, 
+% Die Umgebungen \env{Declaration}, \env{Declaration*} und \env{Cessation} 
+% sowie \env{DeclareEntity}, \env{DeclareEntity*} werden wie auch der Befehl 
+% \cs{InlineDeclaration} für die Beschreibung von Optionen, Umgebungen, 
 % Befehlen etc. verwendet, welche von \TUDScript oder einer anderen Entität dem
 % Anwender zur Verfügung gestellt werden.
 %
 % Anschließend folgen einige Umgebungen, mit welchen bestimmte Aspekte oder 
 % Pakete im Handbuch erläutert werden.
 %
-% \begin{environment}{Declaration}
-% \begin{environment}{Cessation}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@declaration@list}
+% \begin{macro}{\if@tud@declare}
 % \begin{macro}{\if@tud@obsolete}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Es werden einige Hilfsmakros für die Ausgabe einer Deklaration sowie der 
-% dazugehörigen Änderungsliste initialisiert.
+% \begin{macro}{\if@tud@openindex}
+% \begin{macro}{\tud@declaration@list}
+% \begin{macro}{\tud@declare@num}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
+% Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
+% Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die
+% Befehle für das Markup in der Ausgabe als Deklaration oder anderweiteig
+% erfolgt. Der Schalter \cs{if@tud@openindex} wird zu Beginn einer Deklaration 
+% auf \val{true} gesetzt und vor dem Beenden auf \val{false}. Damit wird 
+% bestimmt, ob ein öffnender oder ein schließender Indexeintrag erzeugt werden 
+% soll.
 %    \begin{macrocode}
+\tud@newif\if@tud@declare
+\tud@newif\if@tud@obsolete
+\tud@newif\if@tud@openindex
 \newcommand*\tud@declaration@list{}
 \let\tud@declaration@list\relax
 %    \end{macrocode}
+% Der Zähler \cs{tud@declare@num} bestimmt innerhalb einer Deklaration, wie 
+% das Markup erfolgen soll. Die möglichen Werte sind bei der Beschreibung von
+% \cs{Process@@MarkupDeclare} zu finden.
+%    \begin{macrocode}
+\tud@newcount\tud@declare@num
+%    \end{macrocode}
+% \end{macro}^^A \tud@declare@num
+% \end{macro}^^A \tud@declaration@list
+% \end{macro}^^A \if@tud@openindex
+% \end{macro}^^A \if@tud@obsolete
+% \end{macro}^^A \if@tud@declare
+% \begin{environment}{Declaration}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{environment}{Declaration*}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
 % Die \env{Declaration}-Umgebung dient zur Deklaration von Optionen, Umgebungen,
 % Befehlen, Parametern, Bezeichnern, Längen, Schriftelementen und Farben. Diese 
 % werden mit den entsprechenden Auszeichnungsbefehlen als obligatorisches 
@@ -4029,115 +4055,152 @@
 % Voraussetzungen. Diese wird in der Form \oarg{Bedingung:Voreinstellung}
 % angegeben. Das letzte Argument ist ebenfalls optional, wird aber in der Form
 % \marg{Zusatz} angegeben und enthält ggf. zusätzliche Informationen.
-%
-% Die Umgebung \env{Cessation} hat eine ganz ähnliche Funktion, wird allerdings
-% für die Deklaration veralteter Befehle, Umgebungen, Optionen etc. verwendet.
-% Da sich beide Umgebungen stark ähneln, werden zum Start bzw. zum Abschluss
-% die Makros \cs{tud@declare@start} bzw. \cs{tud@declare@end} aufgerufen. Zu 
-% Beginn wird nichts weiter ausgegeben sondern lediglich alle übergebenen
-% Argumente in jeweiligen Listen gesammelt. Die eigentliche Ausgabe der 
-% Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist} bezieungsweise 
-% \cs{printobsoletelist}. 
+% \ToDo{doc überprüfen}[v2.06]
+% \ToDo{alle Umgebungen bzgl noindentafter und \cs{unksip} prüfen}[v2.06]
+% \ToDo{\env{Declaration*} umbenennen und zu \env{Cessation} verschieben}[v2.06]
 %    \begin{macrocode}
-\NewDocumentEnvironment{Declaration}{o m o o g}{%
-  \listadd\tud@declaration@list{#2}%
-  \tud@declare@start[#1]{#2}[#3][#4](#5)%
+\NewDocumentEnvironment{Declaration}{m d() d<> o}{%
+  \listadd\tud@declaration@list{#1}%
+  \tud@declare@start[{#4}]{#1}(#2){#3}%
 }{%
-  \tud@declare@end{#2}{\printdeclarationlist}%
+  \tud@declare@end{#1}%
+}
+\NewDocumentEnvironment{Declaration*}{m d() d<>}{%
+  \@tud@obsoletetrue
+  \listadd\tud@declaration@list{%
+    \tud@declare@num=\@ne\relax%
+    #1%
+    \tud@declare@num=\z@\relax%
+  }%
+  \tud@declare@start{#1}(#2){#3}%
+  \@tud@obsoletefalse
+}{%
+  \@tud@obsoletetrue
+  \tud@declare@end{#1}%
+  \@tud@obsoletefalse
 }
 %    \end{macrocode}
-% Für die Umgebung \env{Cessation} sieht die Eingabe etwas anders aus. Das erste 
-% obligatorische Argument sollte eine Versionsnummer enthalten, ab wann die 
-% Deklaration veraltet ist. Das erste optionale Argument wird genutzt, wenn 
+% \end{environment}^^A Declaration*
+% \end{environment}^^A Declaration
+% \begin{environment}{Cessations}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
+% \begin{environment}{Cessation}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@cessations@version}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
+% Die Umgebung \env{Cessations} dient als Mantel für konsekutive Umgebungen 
+% \env{Cessation}. Für diese wird die relevante Versionsnummer gesetzt. 
+% Weiterhin wird ein Link in der Änderungsliste erzeugt und über das optionale 
+% Argument können allgemeine Änderungsnotizen erzeugt werden.
+%    \begin{macrocode}
+\newcommand*\tud@cessations@version{}
+\AtBeginDocument{\undef\tud@cessations@version}
+\NewDocumentEnvironment{Cessations}{m o}{%
+  \ifundef\tud@cessations@version{%
+    \tud@v@validate\tud@cessations@version{#1}%
+    \edef\tud@cessations@version{v\tud@cessations@version}%
+  }{%
+    \ClassError{tudscrmanual}{Nested environment `Cessations'}{%
+      The environment `Cessations' must not be nested, but\MessageBreak%
+      Version `\tud@cessations@version' is currently processed.
+    }%
+    \undef\tud@cessations@version%
+  }%
+  \ifundef\tud@cessations@version{}{%
+    \begingroup%
+      \edef\tud@res@a{%
+        \unexpanded{Anpassungen f\"ur \TUDScript~}\tud@cessations@version%
+      }%
+      \edef\tud@lbl@tmp{sec:cessations:\tud@cessations@version}%
+      \let\tud@res@b\@empty%
+      \IfValueT{#2}{%
+        \def\do##1{%
+          \eappto\tud@res@b{\tud@cessations@version:}%
+          \appto\tud@res@b{##1;}%
+        }%
+        \dossvlist{#2}%
+      }%
+      \edef\tud@res@a{%
+        \endgroup%
+        \noexpand\subsection[nonumber=true]{%
+          \expandonce\tud@res@a%
+          \noexpand\label{\tud@lbl@tmp}%
+          \noexpand\index[changelog]{\tud@cessations@version!%
+            Allgemein!"!@\noexpand\hyperref[\tud@lbl@tmp]{%
+              \unexpanded{Anpassungen gegen\"uber der vorhergehenden Version}%
+            }%
+          }%
+          \noexpand\ChangedAt*{\expandonce\tud@res@b}%
+        }%
+      }%
+    \tud@res@a%
+  }%
+}{}
+%    \end{macrocode}
+% Die Umgebung \env{Cessation} ist ähnlich zu \env{Declaration}, wird allerdings
+% für die Deklaration veralteter Befehle, Umgebungen, Optionen etc. verwendet.
+% \ToDo{doc überprüfen}[v2.06]
+% Für diese sieht die Eingabe etwas anders aus. Das 
+% erste obligatorische Argument sollte eine Versionsnummer enthalten, ab wann
+% die Deklaration veraltet ist. Das erste optionale Argument wird genutzt, wenn 
 % für eine weiterhin gültige Deklaration lediglich ein bestimmter Wert 
 % entfällt. Wird das erste Argument leer gelassen, erfolgt lediglich die 
 % Ausgabe der Deklaration ohne einen Eintrag in die Änderungsliste. Dies ist 
 % für Umgebungen und Befehle gedacht, bei denen lediglich ein oder mehrere 
 % Parameter geändert wurden bzw. entfallen.
 %    \begin{macrocode}
-\tud@newif\if@tud@obsolete
-\NewDocumentEnvironment{Cessation}{m o m o o g}{%
-  \@tud@obsoletetrue%
-  \tud@if@strblank{#1}{%
-%    \end{macrocode}
-% Ohne Versionsnummer erfolgt die Ausgabe ohne Label. Für den Eintrag wird auch 
-% keine Änderungsnotiz erzeugt.
-%    \begin{macrocode}
-    \listadd\tud@declaration@list{%
-      \tud@declare@num=\@ne\relax%
-      #3%
-      \tud@declare@num=\z@\relax%
+\NewDocumentEnvironment{Cessation}{o m d() d<> d''}{%
+  \ifundef\tud@cessations@version{%
+    \ClassError{tudscrmanual}{Missing environment `Cessations'}{%
+      The environment `Cessation' must be nested\MessageBreak%
+      within environment `Cessations'!%
     }%
-    \tud@declare@start{#3}[{#4}][{#5}](#6)%
+    \edef\tud@cessations@version{v\TUDScriptVersion@Number}%
+  }{}%
+  \@tud@obsoletetrue%
+  \listadd\tud@declaration@list{#2}%
+%    \end{macrocode}
+% Ohne eine zusätzliche Angabe im optionalen Argument |<>| wird standardmäßig
+% der Entfall der Deklaration angegeben. Alternativ dazu kann im ersten 
+% Argument der Versionsangabe mit einem Dopppelpunkt von dieser getrennt eine 
+% neue bzw. aktuell gültige Deklaration als Querverweis angegeben werden.
+% \ToDo{doc überprüfen}[v2.06]
+%    \begin{macrocode}
+  \let\tud@res@d\@empty
+  \IfValueTF{#5}{%
+    \tud@declare@start{#2}(#3){#5}%
   }{%
-    \listadd\tud@declaration@list{#3}%
+    \toks@{\tud@declare@start{#2}(#3)}%
+    \def\tud@res@d{entf\"allt}%
+    \IfValueT{#4}{\appto\tud@res@d{, \seeref{#4'page'}}}%
+    \addto@hook@expandafter\toks@{\expandafter{\tud@res@d}}%
+    \the\toks@%
+  }%
 %    \end{macrocode}
 % Wurde ein optionales Argument angegeben, bezieht sich der Änderungseintrag 
 % auf ebendieses Argument, die eigentliche, obsolete Deklaration wird als 
 % Untereintrag genutzt.
 %    \begin{macrocode}
-    \IfValueTF{#2}{%
-      \Changed@At@CreateList[#2]{#1!#3}%
-    }{%
-      \Changed@At@CreateList[#3]{#1}%
-    }%
-    \IfValueTF{#6}{%
-      \tud@declare@start{#3}[{#4}][{#5}](#6)%
-%    \end{macrocode}
-% Ohne eine zusätzliche Angabe imletzten optionalen Argument wird standardmäßig
-% der Entfall der Deklaration angegeben. Alternativ dazu kann im ersten 
-% Argument der Versionsangabe mit einem Dopppelpunkt von dieser getrennt eine 
-% neue bzw. aktuell gültige Deklaration als Querverweis angegeben werden.
-%    \begin{macrocode}
-    }{%
-      \toks@{\tud@declare@start{#3}[{#4}][{#5}]}%
-      \def\@tempa{\emph{entf\"allt}}%
-      \in@{:}{#1}%
-      \ifin@%
-        \def\@tempb##1:##2\@nil{%
-          \IfArgIsEmpty{##2}{}{%
-            \def\@tempa{\seeref{##2'page'}}%
-          }%
-        }%
-        \@tempb#1\@nil%
-      \fi%
-      \addto@hook@expandafter\toks@{\expandafter(\@tempa)}%
-      \the\toks@%
-    }%
+  \IfValueTF{#1}{%
+    \Changed@At@CreateList[#1]{\tud@cessations@version!#2}%
+  }{%
+    \Changed@At@CreateList[#2]{\tud@cessations@version}%
   }%
   \@tud@obsoletefalse%
+  \RenewDocumentCommand\printdeclarationlist{o d()}{%
+    \@tud@obsoletetrue%
+    \tud@print@declarationlist*[{##1}](##2)%
+    \@tud@obsoletefalse%
+  }%
 }{%
   \@tud@obsoletetrue%
-  \tud@declare@end{#3}{\printobsoletelist}%
+  \tud@declare@end{#2}%
   \@tud@obsoletefalse%
 }
 %    \end{macrocode}
-% \end{macro}^^A \if@tud@obsolete
-% \end{macro}^^A \tud@declaration@list
-% \end{environment}^^A Obsolete
-% \end{environment}^^A Declaration
-% \begin{macro}{\if@tud@declare}
-% \begin{macro}{\tud@declare@num}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\if@tud@openindex}
-% Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
-% Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
-% Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die
-% Befehle für das Markup in der Ausgabe als Deklaration oder anderweitig
-% erfolgt. Zusätzlich wird mit \cs{tud@declare@num} definiert, wie genau das 
-% Markup sich darstellen soll. Die möglichen Werte sind bei der Beschreibung
-% von \cs{Process@@MarkupDeclare} zu finden. Der Schalter \cs{if@tud@openindex} 
-% wird zu Beginn einer Deklaration auf \val{true} gesetzt und vor dem Beenden
-% auf \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender
-% Indexeintrag erzeugt werden soll.
-%    \begin{macrocode}
-\tud@newif\if@tud@declare
-\tud@newcount\tud@declare@num
-\tud@newif\if@tud@openindex
-%    \end{macrocode}
-% \end{macro}^^A \if@tud@openindex
-% \end{macro}^^A \tud@declare@num
-% \end{macro}^^A \if@tud@declare
+% \end{macro}^^A \tud@cessations@version
+% \end{environment}^^A Cessation
+% \end{environment}^^A Cessations
 % \begin{macro}{\tud@preset@list}
 % \begin{macro}{\if@tud@preset@list}
 % \begin{macro}{\tud@additional@list}
@@ -4160,9 +4223,12 @@
 % \begin{macro}{\tud@declare@end}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Dies sind die Makros für die eigentliche Abarbeitung der Deklarationsbefehle 
-% zu Beginn und Ende der Umgebungen \env{Declaration} und \env{Cessation}.
+% zu Beginn und Ende der Umgebungen \env{Declaration}, \env{Declaration*} und 
+% \env{Cessation}. Zu Beginn wird nichts weiter ausgegeben sondern lediglich 
+% alle übergebenen Argumente in jeweiligen Listen gesammelt. Die eigentliche 
+% Ausgabe der Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist}.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@start{o m r[] r[] r()}{%
+\NewDocumentCommand\tud@declare@start{o m >{\AP@PresetParser}r() m}{%
 %    \end{macrocode}
 % Die optional angegebenen Änderungen werden mit \cs{Changed@At@CreateList} in 
 % der Liste \cs{tud@changedat@list} gesichert und später sowohl für die
@@ -4174,21 +4240,16 @@
 %    \begin{macrocode}
   \IfValueTF{#3}{%
     \@tud@preset@listtrue%
-    \def\@tempa{Voreinstellung\IfArgIsEmpty{#3}{}{: \PValue{#3}}}%
-    \IfValueT{#4}{%
-      \def\@tempb[##1:##2]{##1: \PValue{##2}}%
-      \eappto\@tempa{ | \expandonce{\@tempb[#4]}}%
-    }%
-    \listeadd\tud@preset@list{\expandonce\@tempa}%
+    \listadd\tud@preset@list{#3}%
   }{%
     \listadd\tud@preset@list{\relax}%
   }%
 %    \end{macrocode}
 % \dots sowie zusätliche Informationen.
 %    \begin{macrocode}
-  \IfValueTF{#5}{%
+  \IfValueTF{#4}{%
     \@tud@additional@listtrue%
-    \listadd\tud@additional@list{(#5)}%
+    \listadd\tud@additional@list{#4}%
     \in@{\Environment}{#2}%
     \ifin@\listadd\tud@additional@list{\tabularnewline}\fi%
   }{%
@@ -4206,12 +4267,12 @@
 % (\cs{@tud@openindexfalse}, siehe \cs{Process@Index}). Dafür werden die Makros 
 % für die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
-\newcommand*\tud@declare@end[2]{%
+\newcommand*\tud@declare@end[1]{%
   \ifx\tud@declaration@list\relax\else%
-    \ClassError{tudscrmanual}{\string#2\space is missing}{%
+    \ClassError{tudscrmanual}{\string\printdeclarationlist\space is missing}{%
       \string\tud@declaration@list\space is not empty. Did you\MessageBreak%
       forget to print this list with\MessageBreak%
-      \string#2?%
+      \string\printdeclarationlist?%
     }%
   \fi%
   \vskip-\lastskip%
@@ -4221,7 +4282,114 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@end
 % \end{macro}^^A \tud@declare@start
+% \begin{macro}{\AP@PresetParser}
+% \changes{v2.06p}{2022/09/21}{neu}^^A
+% \begin{macro}{\tud@preset@parser@bar}
+% \changes{v2.06p}{2022/09/21}{neu}^^A
+% \begin{macro}{\tud@preset@parser@colon}
+% \changes{v2.06p}{2022/09/21}{neu}^^A
+% Mit diesem Makro die für Deklarationen angegebenen Voreinstellungen |d()| 
+% im zweiten Argument ausgewertet sowie formatiert und das Ergebnis in das 
+% Makro im ersten Argument geschrieben. Dabie ist die angabe von bedingten 
+% Voreinstellunen möglich. Das übergebene Format sollte dabei der Form 
+% [\meta{Text}|:|]\meta{Einst.}[\verb+|+\meta{Bedingung}|:|\meta{Einst.}]
+% enstprechen, wobei die optionalen Teile zu beachten sind. Entfällt die Angabe 
+% von \meta{Text} wird stattdessen \enquote{Voreinstellungen} ausgegeben. Der 
+% Teil für bedingte Voreinstellungen ist optional. Sollte dieser verwendet 
+% werden, muss dies vollständig mit \verb+|+\meta{Bedingung}|:|\meta{Einst.} 
+% erfolgen.
+%    \begin{macrocode}
+\newcommand*\AP@PresetParser[1]{%
+  \begingroup
+    \let\tud@res@a\@empty
+    \def\tud@res@b{#1}%
+    \let\tud@res@c\@empty
+    \let\tud@res@d\@empty
+%    \end{macrocode}
+% Zur Überprüfung, ob die Angabe vollständig war, wird ein Zähler verwendet, 
+% welcher für jedes benötigte und angegebene Feld dekrementiert wird.
+%    \begin{macrocode}
+    \trim@spaces@in\tud@res@b%
+    \ifx\tud@res@b\@empty\tud@res@cnt=\z@\else\tud@res@cnt=\tw@\fi
+    \@expandtwoargs\in@{|}{\expandonce\tud@res@b}%
+    \ifin@
+      \advance\tud@res@cnt\tw@
+      \expandafter\tud@preset@parser@bar\tud@res@b\@nil\tud@res@b\tud@res@c%
+    \fi
+    \@expandtwoargs\in@{:}{\expandonce\tud@res@b}%
+    \ifin@
+      \expandafter\tud@preset@parser@colon\tud@res@b\@nil\tud@res@a\tud@res@b%
+    \else
+      \def\tud@res@a{Voreinstellung}%
+    \fi
+    \@expandtwoargs\in@{:}{\expandonce\tud@res@c}%
+    \ifin@
+      \expandafter\tud@preset@parser@colon\tud@res@c\@nil\tud@res@c\tud@res@d%
+    \fi
+%    \end{macrocode}
+% In den temporären Makros sind jetzt in der entsprechenden Reihenfolge die 
+% Werte der maximal vier Bestandteile der Angabe zu Voreinstellungen gesetzt.
+% Für jedes gefüllte Feld wird bei der Auswertung der Zähler dekrementiert.
+%    \begin{macrocode}
+    \trim@spaces@in\tud@res@a%
+    \trim@spaces@in\tud@res@b%
+    \trim@spaces@in\tud@res@c%
+    \trim@spaces@in\tud@res@d%
+    \ifx\tud@res@b\@empty\else
+      \advance\tud@res@cnt\m@ne
+      \ifx\tud@res@a\@empty\else\advance\tud@res@cnt\m@ne\fi
+      \eappto\tud@res@a{%
+        \ifx\tud@res@a\@empty\else:\space\fi
+        \noexpand\PValue{\expandonce\tud@res@b}%
+      }%
+    \fi
+    \ifx\tud@res@d\@empty\else
+      \advance\tud@res@cnt\m@ne
+      \ifx\tud@res@c\@empty\else\advance\tud@res@cnt\m@ne\fi
+      \eappto\tud@res@c{%
+        \ifx\tud@res@c\@empty\else:\space\fi
+        \noexpand\PValue{\expandonce\tud@res@d}%
+      }%
+    \fi
+    \edef\tud@res@a{%
+      \endgroup
+      \unexpanded{\def\ProcessedArgument}{%
+        \expandonce\tud@res@a%
+        \ifx\tud@res@c\@empty\else\noexpand\txb\expandonce\tud@res@c\fi
+      }%
+      \ifnum\tud@res@cnt>\z@\noexpand\@firstofone\else\noexpand\@gobble\fi
+    }%
+%    \end{macrocode}
+% Sollten nicht alle nötigen Felder gesetzt gewesen sein, erfolgt eine Warnung.
+%    \begin{macrocode}
+  \tud@res@a{%
+    \ClassWarning{tudscrmanual}{%
+      Wrong format for (conditional) preset. Given is\MessageBreak%
+      `#1'\MessageBreak%
+      but should be `prefixtext:preset|condition:preset'\MessageBreak%
+      whereas the conditional part needs both elements%
+    }%
+  }%
+}
+%    \end{macrocode}
+% Die Hilfsmakros, um die Argumentbestandteile an |:| und \verb+|+ zu trennen.
+%    \begin{macrocode}
+\newcommand*\tud@preset@parser@bar{}
+\def\tud@preset@parser@bar#1|#2\@nil#3#4{%
+  \def#3{#1}%
+  \def#4{#2}%
+}
+\newcommand*\tud@preset@parser@colon{}
+\def\tud@preset@parser@colon#1:#2\@nil#3#4{%
+  \def#3{#1}%
+  \def#4{#2}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@preset@parser@colon
+% \end{macro}^^A \tud@preset@parser@bar
+% \end{macro}^^A \AP@PresetParser
 % \begin{macro}{\printdeclarationlist}
+% \begin{macro}{\tud@print@declarationlist}
 % \begin{length}{\tud@lastskip}
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\index}
@@ -4247,7 +4415,10 @@
 \pretocmd\label{%
   \tud@lastskip=\lastskip%
 }{}{\tud@patch@wrn{label}}
-\NewDocumentCommand\printdeclarationlist{!s !o !d()}{%
+\NewDocumentCommand\printdeclarationlist{o d()}{%
+  \tud@print@declarationlist[{#1}](#2)%
+}
+\NewDocumentCommand\tud@print@declarationlist{!s o d()}{%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
       \vskip\medskipamount%
@@ -4332,7 +4503,7 @@
 % Zum Schluss wird das optionale Argument (in runden Klammern) neben der
 % Deklarationsbox ausgegeben.
 %    \begin{macrocode}
-    \IfValueT{#2}{#2}%
+    \IfValueT{#3}{#3}%
     \par\nobreak%
     \vskip\medskipamount%
     \@afterindentfalse\@afterheading%
@@ -4342,19 +4513,8 @@
 % \end{macro}^^A \label
 % \end{macro}^^A \index
 % \end{length}^^A \tud@lastskip
+% \end{macro}^^A \tud@print@declarationlist
 % \end{macro}^^A \printdeclarationlist
-% \begin{macro}{\printobsoletelist}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% Damit werden Deklarationen der Umgebung \env{Cessation} ausgegeben.
-%    \begin{macrocode}
-\newcommand*\printobsoletelist{%
-  \@tud@obsoletetrue%
-  \printdeclarationlist*%
-  \@tud@obsoletefalse%
-}
-%    \end{macrocode}
-% \end{macro}^^A \printobsoletelist
-%
 % \begin{macro}{\InlineDeclaration}
 % \changes{v2.07}{2019/09/22}{neu}^^A
 % \begin{macro}{\Inline@Declaration}
@@ -4513,6 +4673,7 @@
 % \emph{nach} diesem ein optionales für die Liste selbst verwendbar ist. Das 
 % obligatorische Argument wird in \cs{tud@values} gesichert und sollte die 
 % genauer zu beschreibende Option bzw. das Makro etc. enthalten.
+% \ToDo{grab body; optional öffnenden und schließenden Indexexintrag}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@values{}
 \NewDocumentEnvironment{values}{m !o}{%
@@ -4666,6 +4827,7 @@
 % Hiermit können ein oder mehrere Pakete erläutert werden. Des Weiteren werden 
 % Textanker definiert, auf die im Zweifelsfall in der Dokumentation verlinkt 
 % wird.
+% \ToDo{grab body; optional öffnenden und schließenden Indexexintrag}[v2.06]
 %    \begin{macrocode}
 \NewDocumentCommand\tud@item@packages{r[] !d() !d<>}{%
 %    \end{macrocode}
