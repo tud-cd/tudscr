@@ -71,7 +71,8 @@
 % von einigen Anwenderleitfäden bzw. Tutorials erzeugt. Da es zwischen der
 % Klasse und dem Paket es eine große Menge an Überschneidungen gibt, basieren
 % diese auf der gleichen Quelldatei.
-% \ToDo{guards überarbeiten, korrelierenden Quelltext zusammenhalten}[v2.07]
+% \ToDo{guards überarbeiten, korrelierenden Quelltext zusammenhalten}[v2.06]
+% \ToDo{Argumente \val{''} und \val{<>} ableichen; konsistente Inhalte}[v2.06]
 %    \begin{macrocode}
 %<*package&identify>
 \ProvidesPackage{tudscrmanual}[%
@@ -289,15 +290,13 @@
 % \end{macro}^^A \tud@addtocontents@special
 % \end{macro}^^A \tud@addtocontents@hook
 %
-%
-%
 % \subsection{Notwendige Pakete, Einstellungen und abgeleitete Befehle}
 %
 % Mit dem Paket \pkg{morewrites} lassen sich Probleme mit zu wenig verfügbaren 
 % Streams für das Schreiben externer Datein beheben. Hintergrund ist die
 % Verwendung des Paketes \pkg{glossaries} in einem der Tutorials, welches eine
 % Vielzahl solcher Streams benötigt.
-% \ToDo{noch notwendig?}[v2.07]
+% \ToDo{noch notwendig?}[v2.06]
 %    \begin{macrocode}
 %<*package>
 \RequirePackage{morewrites}
@@ -305,6 +304,7 @@
 %    \end{macrocode}
 %
 % \subsubsection{Makro- und Microtypografie}
+%
 % Für den zweispaltigen Satz im Index.
 %    \begin{macrocode}
 \RequirePackage{multicol}
@@ -315,19 +315,11 @@
 \setstretch{1.1}
 %    \end{macrocode}
 %
-% \iffalse
-%</body>
-% \fi
-%
 % Zitate mit Beachtung der Absatzeinstellungen.
 %    \begin{macrocode}
-%<option>\PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-%<body>\RequirePackage{quoting}
+\RequirePackage{quoting}
+\quotingsetup{vskip=\smallskipamount}
 %    \end{macrocode}
-%
-% \iffalse
-%<*body>
-% \fi
 %
 % Automatisierte Datumsformatierung.
 %    \begin{macrocode}
@@ -338,12 +330,10 @@
 %    \begin{macrocode}
 \RequirePackage{ragged2e}
 %    \end{macrocode}
-% Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt\dots
+% Die Fußnoten werden nicht mit jedem Kapitel zurückgesetzt und im Flattersatz 
+% ausgegeben.
 %    \begin{macrocode}
 \@removefromreset{footnote}{chapter}
-%    \end{macrocode}
-% \dots und im Flattersatz ausgegeben.
-%    \begin{macrocode}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
 %    \end{macrocode}
 % Unterdrücken von Absatzeinzügen nach bestimmten Umgebungen.
@@ -357,8 +347,6 @@
   \let\ellipsispunctuation\relax%
 }
 %    \end{macrocode}
-%
-%
 %
 % \subsubsection{Tabellen, Listen und Auflistungen}
 %
@@ -383,7 +371,7 @@
 % \end{macro}^^A \forssvlist
 % \end{macro}^^A \dossvlist
 % Das Paket \pkg{enumitem} erlaubt das Beeinflussen der Standardlisten und die 
-% Ableitung neuer Listen aus diesen. Mit \cs{setlist\{noitemsep\}} werden die 
+% Ableitung neuer Listen aus diesen. Mit \cs{setlist}|{noitemsep}| werden die 
 % zusätzlichen Zwischenräume innerhalb der Listen beseitigt. Weiterhin wird 
 % linksbündiger Flattersatz für die Standardlisten aktiviert.
 %    \begin{macrocode}
@@ -410,8 +398,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@list@create
 %
-%
-%
 % \subsubsection{Grafiken \& Co.}
 %
 % \ToDo{welche Pakete sind für Klasse oder Paket zwingend notwendig?}[v2.06]
@@ -422,7 +408,6 @@
 %    \begin{macrocode}
 \RequirePackage{pdfpages}
 %    \end{macrocode}
-%
 %
 % \subsubsection{Formatierung von Gleitobjekten}
 %
@@ -441,9 +426,9 @@
 %
 % \subsubsection{Kompilieren externer Quelldateien}
 %
-% \ToDo{shell-Kram raus, Tutorials/Examples über \app{make} erstellen}[v2.07]
 % Das Paket \pkg{filemod} wird genutzt, um externer Dateien nur zu kompilieren,
 % wenn dies aufgrund einer Änderung auch notwendig ist.
+% \ToDo{shell-Kram raus, Tutorials/Examples über \app{make} erstellen}[v2.07]
 % \ToDo{\pkg{filemod} raus, \cs{pdf@filemoddate} direkt verwenden}[v2.06]
 %    \begin{macrocode}
 \RequirePackage{filemod}
@@ -486,102 +471,17 @@
     \renewcommand*\tud@latex@ext{lualatex\space}
   \fi
 \fi
-\appto\tud@latex@ext{-synctex=1\space}
+\appto\tud@latex@ext{-synctex=1\space-interaction=batchmode\space}
 %    \end{macrocode}
 % \end{macro}^^A \tud@latex@ext
 %
-%
-%
-% \subsubsection{Einbinden von Quelltexten}
-%
-% Sowohl im Handbuch als auch in den Tutorials werden Quelltextauszüge für das 
-% bessere Verständnis des Anwenders angegeben. Um diese darzustellen wird das 
-% Paket \pkg{listings} verwendet.
-%    \begin{macrocode}
-\RequirePackage{listings}
-\lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifundef\setstretch{}{\setstretch{1}},%
-  keywordstyle=,%
-  columns=fullflexible,keepspaces,%
-  aboveskip=\smallskipamount,%
-  belowskip=\smallskipamount,%
-  language=[LaTeX]TeX,%
-  texcl,%
-}
-%    \end{macrocode}
-%
-% \begin{environment}{Code}
-% Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
-% Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele 
-% ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung innerhalb
-% von \env{Example} oder \env{quoting} zu verwenden, um den Quelltext etwas
-% abzuheben.
-%    \begin{macrocode}
-\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
-\NoIndentAfterEnv{Code}
-%    \end{macrocode}
-% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
-% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
-% zurückgesetzt.
-%    \begin{macrocode}
-\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
-\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-%    \end{macrocode}
-% \end{environment}^^A Code
-%
-% \iffalse
-%</body>
-% \fi
-%
 % \subsubsection{Querverweise und Anpassungen für das Paket \pkg{hyperref}}
-%
-% Verbesserte Referenzierungen auf Seiten.
-%    \begin{macrocode}
-%<option>\PassOptionsToPackage{nospace}{varioref}
-%<body>\RequirePackage{varioref}
-%    \end{macrocode}
-%
-% \iffalse
-%<*body>
-% \fi
-%
-% \begin{macro}{\fullref}
-% Ein Makro zur vollständigen Referenzierungen inklusive der relevanten Seite.
-%    \begin{macrocode}
-\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
-%    \end{macrocode}
-% \end{macro}^^A \fullref
-% Um ungewünschten vertikalen Leerraum vor und nach Überschriften zu vermeiden, 
-% werden die Befehle \cs{label} und \cs{index} innerhalb des obligatorischen 
-% Argumentes von Gliederungsbefehlen genutzt (\GitHubRepo(latex3/latex2e)<307>).
-% Damit diese nicht im durch \cs{newlabel} erzeugten Label auftauchen, muss 
-% durch \pkg{nameref} explizit \cs{GetTitleStringExpand} verwendet werden.
-%    \begin{macrocode}
-\RequirePackage{nameref}
-\AfterPackage*{nameref}{%
-  \patchcmd\NR@gettitle{%
-    \GetTitleString%
-  }{%
-    \GetTitleStringExpand%
-  }{}{\tud@patch@wrn{NR@gettitle}}%
-}
-%    \end{macrocode}
 %
 % Es folgen einige Befehle, die an das Paket \pkg{hyperref} gekoppelt sind. 
 % Sobald das Paket geladen wurde, werden die Makros mit der jeweiligen
 % Funktionalität definiert.
-% \begin{macro}{\tud@currentHref}
-% Einige Befehle und Umgebungen von Drittpaketen ändern bei deren Aufruf die 
-% Definition von \cs{currentHref}, was bei Querverweisen gegebenenfalls zu 
-% falschen Einträgen führt. Hierfür wird \cs{tud@currentHref} definiert, um die 
-% jeweils aktuelle Definition von \cs{currentHref} zu sichern und nach den 
-% fraglichen Befehlen und Umgebungen zurückzusetzen.
 %    \begin{macrocode}
-\newcommand*\tud@currentHref{}
-%    \end{macrocode}
-% \end{macro}^^A \tud@currentHref
-%    \begin{macrocode}
-\AfterPackage*{hyperref}{%
+\AfterAtEndOfPackage*{hyperref}{%
 %    \end{macrocode}
 % \begin{macro}{\autorefname}
 % \begin{macro}{\auto@refname}
@@ -787,6 +687,56 @@
 % \end{macro}^^A \tud@@@hypertarget
 % \end{macro}^^A \tud@@hypertarget
 % \end{macro}^^A \tud@hypertarget
+% \begin{macro}{\tud@currentHref}
+% Einige Befehle und Umgebungen von Drittpaketen ändern bei deren Aufruf die 
+% Definition von \cs{currentHref}, was bei Querverweisen gegebenenfalls zu 
+% falschen Einträgen führt. Hierfür wird \cs{tud@currentHref} definiert, um die 
+% jeweils aktuelle Definition von \cs{currentHref} zu sichern und nach den 
+% fraglichen Befehlen und Umgebungen zurückzusetzen.
+%    \begin{macrocode}
+\newcommand*\tud@currentHref{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@currentHref
+% \begin{macro}{\fullref}
+% Ein Makro zur vollständigen Referenzierungen inklusive der relevanten Seite.
+%    \begin{macrocode}
+\RequirePackage[nospace]{varioref}
+\renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
+%    \end{macrocode}
+% \end{macro}^^A \fullref
+% Um ungewünschten vertikalen Leerraum vor und nach Überschriften zu vermeiden, 
+% werden die Befehle \cs{label} und \cs{index} innerhalb des obligatorischen 
+% Argumentes von Gliederungsbefehlen genutzt (\GitHubRepo(latex3/latex2e)<307>).
+% Damit diese nicht im durch \cs{newlabel} erzeugten Label auftauchen, muss 
+% durch \pkg{nameref} explizit \cs{GetTitleStringExpand} verwendet werden.
+%    \begin{macrocode}
+\RequirePackage{nameref}
+\AfterPackage*{nameref}{%
+  \patchcmd\NR@gettitle{%
+    \GetTitleString%
+  }{%
+    \GetTitleStringExpand%
+  }{}{\tud@patch@wrn{NR@gettitle}}%
+}
+%    \end{macrocode}
+%
+% \subsubsection{Einbinden von Quelltexten}
+%
+% Sowohl im Handbuch als auch in den Tutorials werden Quelltextauszüge für das 
+% bessere Verständnis des Anwenders angegeben. Um diese darzustellen wird das 
+% Paket \pkg{listings} verwendet.
+%    \begin{macrocode}
+\RequirePackage{listings}
+\lstdefinestyle{tudscr}{%
+  basicstyle=\ttfamily\ifundef\setstretch{}{\setstretch{1}},%
+  keywordstyle=,%
+  columns=fullflexible,keepspaces,%
+  aboveskip=\smallskipamount,%
+  belowskip=\smallskipamount,%
+  language=[LaTeX]TeX,%
+  texcl,%
+}
+%    \end{macrocode}
 %
 % \iffalse
 %</body>
@@ -955,7 +905,6 @@
 %<*body>
 % \fi
 %
-%
 % \begin{macro}{\ToDo}
 % \changes{v2.02}{2014/07/10}{Verwendung von \pkg{todonotes}}^^A
 % \changes{v2.03}{2015/01/25}{Ausgabe auf bestimmten Typ beschränkbar}^^A
@@ -971,9 +920,9 @@
 % \val{doc}, \val{imp} und \val{rls} beinhalten, welche für eine spezifische
 % farbliche Kodierung sorgen, um die Aufgaben zu kategorisieren.
 %
-% Sollte das Paket \pkg{todonotes} nicht geladen werden, erfolgt die Definition 
-% der beiden nachfolgend implemtierten Befehle als Dummy.
-% Laden des Paketes und minimale Breite der Randnotiz.
+% Für die Randnotizen wird eine minimale Breite festgelegt. Sollte das Paket 
+% \pkg{todonotes} nicht geladen werden, erfolgt die Definition der nachfolgend 
+% implementierten Befehle als Dummy.
 %    \begin{macrocode}
 \RequirePackage{todonotes}
 \AtEndPreamble{%
@@ -982,13 +931,22 @@
   \fi%
 }
 \TUD@UnwindPackage{todonotes}{%
-  \RenewDocumentCommand\ToDo{s o m !o}{}%
   \renewcommand*\ListOfToDo{}%
+  \RenewDocumentCommand\ToDo{s o m !o}{}%
+}
+\newcommand*\ListOfToDo{%
+  \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
+}
+%    \end{macrocode}
+% Hilfmakro zur Ausführung des Befehle \cs{todo} aus dem Paket \pkg{todonotes}.
+%    \begin{macrocode}
+\newcommand*\@ToDo[2]{%
+  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
 }
 %    \end{macrocode}
 % Nun folgt die Definition des eigentlichen Befehls. Dabei wird zu Beginn
 % \cs{@currentHref} gesichert und am Ende wiederhergestellt.
-% \ToDo{\texttt{s o D()\{default\} m}; auch für \cls{tudscrdoc}}[v2.07]
+% \ToDo{\texttt{s o D()\{default\} m}; auch für \cls{tudscrdoc}}[v2.06]
 %    \begin{macrocode}
 \NewDocumentCommand\ToDo{s O{default} m !o}{%
   \ifnum\tud@todo@num>\z@\relax%
@@ -1149,19 +1107,6 @@
     \global\let\@currentHref\tud@currentHref%
   \fi%
   \ignorespaces%
-}
-%    \end{macrocode}
-% Hilfmakro zur Ausführung des Befehle \cs{todo} aus dem Paket \pkg{todonotes}.
-%    \begin{macrocode}
-\newcommand*\@ToDo[2]{%
-  \expandafter\todo\expandafter[\expandafter{#1}]{\trim@spaces{#2}\strut}%
-}
-%    \end{macrocode}
-% Zum Schluss wird der Befehl \cs{ListOfToDo} definiert, der die Liste der noch 
-% zu erledigenden Punkte ausgibt.
-%    \begin{macrocode}
-\newcommand*\ListOfToDo{%
-  \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \ListOfToDo
@@ -1780,16 +1725,18 @@
 %    \begin{macrocode}
 \newcommand*\suffixsize{\scriptsize}
 \AtBeginDocument{%
-  \begingroup%
+  \begingroup
+    \ifcsundef{tiny }{\let\tud@res@a\tiny}{\letcs\tud@res@a{tiny }}%
     \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@a{#4}}%
-    \expandafter\tud@res@c\tiny\@nil%
+    \expandafter\tud@res@c\tud@res@a\@nil%
+    \ifcsundef{scriptsize }{\let\tud@res@b\scriptsize}{\letcs\tud@res@b{scriptsize }}%
     \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@b{#3}}%
-    \expandafter\tud@res@c\scriptsize\@nil%
-    \xdef\suffixsize{%
+    \expandafter\tud@res@c\tud@res@b\@nil%
+    \protected\xdef\suffixsize{%
       \unexpanded{\@setfontsize\suffixsize}%
         {\expandonce\tud@res@a}{\expandonce\tud@res@b}%
     }%
-  \endgroup%
+  \endgroup
 }
 \newrobustcmd*\suffix[1]{%
   \begingroup%
@@ -2303,6 +2250,7 @@
 % Die Auszeichnung und der Indexeintrag einer \LaTeX-Zählers.
 %    \begin{macrocode}
 \NewMarkupCommand\Counter[idx=misc]'dic'{Z\"ahler}
+%    \end{macrocode}
 % \end{macro}^^A \Counter
 % \begin{macro}{\Term}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
@@ -3980,8 +3928,9 @@
 %
 % \subsection{Deklarationsumgebungen für die Klasse \cls{tudscrmanual}}
 %
-% Die Umgebungen \env{Declaration} und \env{Declaration*} sowie \env{Cessation}
-% und \env{Entity} werden für die Beschreibung von Optionen, Umgebungen,
+% Die Umgebungen \env{Declaration}, \env{Declaration*} und \env{Cessation} 
+% sowie \env{DeclareEntity}, \env{DeclareEntity*} werden wie auch der Befehl 
+% \cs{InlineDeclaration} für die Beschreibung von Optionen, Umgebungen, 
 % Befehlen etc. verwendet, welche von \TUDScript oder einer anderen Entität dem
 % Anwender zur Verfügung gestellt werden.
 %
@@ -4000,15 +3949,6 @@
 % Voraussetzungen. Diese wird in der Form \oarg{Bedingung:Voreinstellung}
 % angegeben. Das letzte Argument ist ebenfalls optional, wird aber in der Form
 % \marg{Zusatz} angegeben und enthält ggf. zusätzliche Informationen.
-%
-% Die Umgebung \env{Cessation} hat eine ganz ähnliche Funktion, wird allerdings
-% für die Deklaration veralteter Befehle, Umgebungen, Optionen etc. verwendet.
-% Da sich beide Umgebungen stark ähneln, werden zum Start bzw. zum Abschluss
-% die Makros \cs{tud@declare@start} bzw. \cs{tud@declare@end} aufgerufen. Zu 
-% Beginn wird nichts weiter ausgegeben sondern lediglich alle übergebenen
-% Argumente in jeweiligen Listen gesammelt. Die eigentliche Ausgabe der 
-% Deklaration erfolgt mit dem Befehl \cs{printdeclarationlist} bezieungsweise 
-% \cs{printobsoletelist}. 
 %    \begin{macrocode}
 \NewDocumentEnvironment{Declaration}{m d== d() d<> o}{%
   \tud@declare@start[{#5}]{#1}=#2=[track](#3)<#4>%
@@ -4024,12 +3964,15 @@
 % \end{environment}^^A Declaration*
 % \end{environment}^^A Declaration
 % \begin{environment}{Cessations}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
 % \begin{environment}{Cessation}
+% \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@cessations@version}
+% \changes{v2.06p}{2022/09/22}{neu}^^A
 %    \begin{macrocode}
 \newcommand*\tud@cessations@version{}
 \AtBeginDocument{\undef\tud@cessations@version}
-\NewDocumentEnvironment{Cessations}{m !o}{%
+\NewDocumentEnvironment{Cessations}{m o}{%
   \ifundef\tud@cessations@version{%
     \def\tud@cessations@version{#1}%
     \tud@v@validate{\tud@cessations@version}%
@@ -4642,21 +4585,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@special@end
 % \end{macro}^^A \tud@declare@special@start
-% \begin{macro}{\seeplain}
-% \changes{v2.05}{2015/11/02}{neu}^^A
-% \begin{macro}{\@seeplain}
-% Der Befehl \cs{seeplain} kann anstelle von \cs{see} bzw. in der Sternversion
-% statt \cs{alsosee} genutzt werden. 
-%    \begin{macrocode}
-\NewDocumentCommand\seeplain{s m}{%
-  \mbox{\emph{\IfBooleanTF{#1}{\alsoname}{\seename}}}\nobreakspace#2%
-}
-\NewExpandableDocumentCommand\@seeplain{s m}{%
-  \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
-}
-%    \end{macrocode}
-% \end{macro}^^A \@seeplain
-% \end{macro}^^A \seeplain
 % \begin{macro}{\tud@ref@get}
 %    \begin{macrocode}
 \newcommand*\tud@ref@get[4]{%
@@ -7263,18 +7191,95 @@
 %
 % \subsection{Erläuterungen und weiterführende Ergänzungen im Handbuch}
 %
-% \begin{macro}{\scrguide}
+% \begin{macro}{\HyperTutorial}
+% \changes{v2.02}{2014/08/22}{neu}^^A
+% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
+% \begin{macro}{\tud@bash@write}
+% Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
+% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Um mit verschachtelten
+% Aufrufen von \app{pdflatex} umgehen zu können, wird das ganze Prozedere in
+% ein Skript ausgelagert. Somit können die Aufrufe von \app{pdflatex} für die
+% Tutorials aus dem entsprechenden Ordner und mit den notwendigen Optionen
+% erfolgen.
 %    \begin{macrocode}
-\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
-  \begingroup%
-    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
-    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
-    \tud@res@a{#1}%
-  \endgroup%
-  \xspace%
+%<class>\tud@newwrite\tud@bash@write
+\newcommand*\HyperTutorial[1]{%
+%<*class>
+  \ifnum\pdf@shellescape=\@ne\relax%
+    \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
+      \let\tud@res@a\@empty%
+      \ifdef\tudfinalflag{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef\tudprintflag{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
+      \appto\tud@res@a{\noexpand\input{#1.tex}}%
+%    \end{macrocode}
+% Komplette Ausgabe loggen.
+%    \begin{macrocode}
+      \def\tud@res@b{biber --nolog -V #1 > #1.blg}%
+      \def\tud@res@c##1{\immediate\write\tud@bash@write{##1}}%
+      \immediate\openout\tud@bash@write=tutorials.sh\relax%
+      \tud@res@c{cd tutorials}%
+      \tud@res@c{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \ifwindows%
+        \tud@res@c{if exist #1.bcf \tud@res@b}%
+      \else%
+        \tud@res@c{[ -f #1.bcf ] && \tud@res@b}%
+      \fi%
+      \tud@res@c{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@c{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \ifwindows%
+        \tud@res@c{if exist #1.ist makeglossaries #1}%
+      \else%
+        \tud@res@c{[ -f #1.ist ] && makeglossaries #1}%
+      \fi%
+      \ifwindows%
+        \tud@res@c{if exist #1.xdy makeglossaries #1}%
+      \else%
+        \tud@res@c{[ -f #1.xdy ] && makeglossaries #1}%
+      \fi%
+      \tud@res@c{\tud@latex@ext "\tud@res@a"}%
+      \tud@res@c{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \tud@res@c{\tud@latex@ext -shell-escape "\tud@res@a"}%
+      \immediate\closeout\tud@bash@write%
+%    \end{macrocode}
+% Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
+%    \begin{macrocode}
+      \ifwindows%
+        \ShellEscape{rename tutorials.sh tutorials.bat}%
+        \ShellEscape{tutorials.bat}%
+        \ShellEscape{del tutorials.bat}%
+      \else%
+        \ShellEscape{bash tutorials.sh}%
+        \ShellEscape{rm tutorials.sh}%
+      \fi%
+    }%
+  \fi%
+%    \end{macrocode}
+% Hyperlink und verlinkter Indexeintrag.
+% \ToDo{verwenden von SuppressMarkupSuffix im Index}[v2.07]
+%^^A \index[files]{#2.pdf Tutorial@\Tutorial{#2}{\suffix{Tutorial}}}%
+%    \begin{macrocode}
+  \IfFileExists{tutorials/#1.pdf}{%
+    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+  }{%
+    \tud@shellescape@wrn{tutorials/#1.pdf}%
+    \Tutorial{#1}%
+  }%
+%</class>
+%    \end{macrocode}
+% Der Befehl für die Querverweise innerhalb von Tutorials.
+%    \begin{macrocode}
+%<*package>
+  \IfFileExists{#1.pdf}{%
+    \href[pdfnewwindow]{#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+  }{%
+    \tud@shellescape@wrn{#1.pdf}%
+    \Tutorial{#1}%
+  }%
+%</package>
 }
 %    \end{macrocode}
-% \end{macro}^^A \scrguide
+% \end{macro}^^A \tud@bash@write
+% \end{macro}^^A \HyperTutorial
 %
 % \subsubsection{Tabelle mit abschließender Mehrspaltenzellen}
 %
@@ -7329,10 +7334,33 @@
 % \end{macro}^^A \if@tud@code@used
 % \end{environment}^^A Example
 %
-% \subsection{Einbinden und Verlinkungen externer Dateien}
+% \subsection{Kompilierung und Einbindung von \LaTeX-Quelltexten}
 %
 % Hier werden allerlei Befehle und Umgebungen für die Formatierung, Ausgabe und 
 % Ausführung von Quelltextauszügen mit dem Paket \pkg{listings} definiert.
+%
+% \begin{environment}{Code}
+% Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
+% Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele 
+% ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung innerhalb
+% von \env{Example} oder \env{quoting} zu verwenden, um den Quelltext etwas
+% abzuheben.
+%    \begin{macrocode}
+\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
+\NoIndentAfterEnv{Code}
+%    \end{macrocode}
+% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
+% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
+% zurückgesetzt.
+%    \begin{macrocode}
+\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
+\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
+%    \end{macrocode}
+% \end{environment}^^A Code
+%
+% \iffalse
+%<*class>
+% \fi
 %
 % \begin{macro}{\IncludeExample}
 % \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
@@ -7341,7 +7369,6 @@
 % \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl wird lediglich für 
 % die Klasse \cls{tudscrmanual} benötigt.
 %    \begin{macrocode}
-%<*class>
 \newcommand*\IncludeExample[2][1]{%
   \begingroup%
     \lstinputlisting[style=tudscr]{examples/#2}%
@@ -7416,95 +7443,15 @@
     }%
   \endgroup%
 }
-%</class>
 %    \end{macrocode}
 % \end{macro}^^A \IncludeExample
-% \begin{macro}{\HyperTutorial}
-% \changes{v2.02}{2014/08/22}{neu}^^A
-% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
-% \begin{macro}{\tud@bash@write}
-% Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
-% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Um mit verschachtelten
-% Aufrufen von \app{pdflatex} umgehen zu können, wird das ganze Prozedere in
-% ein Skript ausgelagert. Somit können die Aufrufe von \app{pdflatex} für die
-% Tutorials aus dem entsprechenden Ordner und mit den notwendigen Optionen
-% erfolgen.
-%    \begin{macrocode}
-%<class>\tud@newwrite\tud@bash@write
-\newcommand*\HyperTutorial[1]{%
-%<*class>
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
-      \let\tud@res@a\@empty%
-      \ifdef\tudfinalflag{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
-      \ifdef\tudprintflag{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
-      \appto\tud@res@a{\noexpand\input{#1.tex}}%
-      \immediate\openout\tud@bash@write=tutorials.sh\relax%
-      \def\tud@res@b##1{\immediate\write\tud@bash@write{##1}}%
-      \tud@res@b{cd tutorials}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \ifwindows%
-        \tud@res@b{if exist #1.bcf biber #1}%
-      \else%
-        \tud@res@b{[ -f #1.bcf ] && biber #1}%
-      \fi%
-      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \ifwindows%
-        \tud@res@b{if exist #1.ist makeglossaries #1}%
-      \else%
-        \tud@res@b{[ -f #1.ist ] && makeglossaries #1}%
-      \fi%
-      \ifwindows%
-        \tud@res@b{if exist #1.xdy makeglossaries #1}%
-      \else%
-        \tud@res@b{[ -f #1.xdy ] && makeglossaries #1}%
-      \fi%
-      \tud@res@b{\tud@latex@ext "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \tud@res@b{\tud@latex@ext -shell-escape "\tud@res@a"}%
-      \immediate\closeout\tud@bash@write%
-%    \end{macrocode}
-% Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
-%    \begin{macrocode}
-      \ifwindows%
-        \ShellEscape{rename tutorials.sh tutorials.bat}%
-        \ShellEscape{tutorials.bat}%
-        \ShellEscape{del tutorials.bat}%
-      \else%
-        \ShellEscape{bash tutorials.sh}%
-        \ShellEscape{rm tutorials.sh}%
-      \fi%
-    }%
-  \fi%
-%    \end{macrocode}
-% Hyperlink und verlinkter Indexeintrag.
-% \ToDo{verwenden von SuppressMarkupSuffix im Index}[v2.07]
-%^^A \index[files]{#2.pdf Tutorial@\Tutorial{#2}{\suffix{Tutorial}}}%
-%    \begin{macrocode}
-  \IfFileExists{tutorials/#1.pdf}{%
-    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
-  }{%
-    \tud@shellescape@wrn{tutorials/#1.pdf}%
-    \Tutorial{#1}%
-  }%
-%</class>
-%<*package>
-  \IfFileExists{#1.pdf}{%
-    \href[pdfnewwindow]{#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
-  }{%
-    \tud@shellescape@wrn{#1.pdf}%
-    \Tutorial{#1}%
-  }%
-%</package>
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@bash@write
-% \end{macro}^^A \HyperTutorial
 %
 % \iffalse
+%</class>
 %<*package>
 % \fi
+%
+% \subsection{Kompilierung und Einbindung von \LaTeX-Quelltextfragmenten}
 %
 % Für den Anwender werden im \TUDScript-Bundle einige Tutorials mit Hinweisen 
 % zur Nutzung von \LaTeX{} bereitgestellt. Innerhalb dieser werden Auszüge von
@@ -7538,7 +7485,6 @@
 % \end{macro}^^A \tud@read
 % \end{macro}^^A \tud@write@b
 % \end{macro}^^A \tud@write@a
-%
 % \begin{macro}{\tud@tut@temp}
 % \changes{v2.05}{2016/05/01}{neu}^^A
 % \begin{macro}{\tud@tut@inputtostream}
@@ -8120,25 +8066,34 @@
 %
 % Falls innerhalb eines Tutorials das Paket \pkg{pstricks} verwendet wird, muss
 % dafür Sorge getragen werden, dass die automatische Kompilierung reibungslos
-% mit \pkg{auto-pst-pdf} funktioniert.
+% mit \pkg{auto-pst-pdf} funktioniert. Aktuell gibt es beim Zusammenspiel von 
+% \pkg{hyperref} und \pkg{preview} Probleme. Relevante Bugreports sind unter
+% \href{https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44578}{auctex\#44578} und
+% \GitHubRepo(rolfn/pst-pdf)<6> zu finden. Der folgende Workaround deaktiviert 
+% im DVI-Modus einfach das Paket \pkg{hyperref}. Alternativ könnte eventuell
+% auch \app{luapstricks} genutzt werden.
 %    \begin{macrocode}
 \AfterPackage*{pstricks}{%
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{%
-      \PassOptionsToPackage{off}{auto-pst-pdf}%
-    }{}%
-  \else%
-    \PassOptionsToPackage{off}{auto-pst-pdf}%
-  \fi%
-  \RequirePackage{auto-pst-pdf}
+  \ifpdf
+    \def\@tempa{off}%
+    \ifnum\pdf@shellescape=\@ne\relax
+      \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{}{%
 %    \end{macrocode}
-% Nach dem Paket \pkg{auto-pst-pdf} seine Arbeit verrichtet hat, werden alle 
-% etwaigen temporär erzeugten Dateien radikal gelöscht.
+% Da kleinere Beispieldokumente (\file{\string\tud@tut@temp-standalone.tex}) 
+% separat kompiliert werden, erstellt \pkg{auto-pst-pdf} auch für diese die 
+% entsprechenden Hilfsdateien. Deshalb werden diese hier rigoros gelöscht,
+% nachdem \pkg{auto-pst-pdf} seine Arbeit verrichtet hat.
 %    \begin{macrocode}
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \edef\@tempa{\app@exe{\app@rm "*\app@suffix*"}}%
-    \@tempa%
-  \fi%
+        \def\@tempa{on,runs=2,cleanup={}}%
+        \AfterReadingMainAux{\app@exe{\app@rm "*-\app@suffix*"}}%
+      }%
+    \fi
+    \PassOptionsToPackage{\@tempa}{auto-pst-pdf}%
+  \else
+    \disable@package@load{hyperref}{}%
+    \disable@package@load{bookmark}{}%
+  \fi
+  \RequirePackage{auto-pst-pdf}%
 }
 %    \end{macrocode}
 %
@@ -8412,7 +8367,6 @@
 %<*option>
 % \fi
 %
-%
 % \subsection{Optionen für die finale Ausgabe}
 %
 % \begin{option}{final}
@@ -8438,11 +8392,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tudprintflag
-% \end{macro}^^A \tudfinalflag
-% \end{option}^^A print
-% \end{option}^^A final
-%
 % Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
 % vor einem externen \app{pdflatex}-Aufruf die Flags \cs{tudfinalflag} und/oder
 % \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur
@@ -8472,33 +8421,25 @@
     \AfterEndPreamble{\hypersetup{hidelinks}}%
   }{}%
   \TUD@key@toolate{cd}%
+%<*class> 
+  \ClassInfoNoLine{tudscrmanual}%
+%</class>
+%<*package>
+  \PackageInfoNoLine{tudscrmanual}%
+%</package>
+  {%
+    Output mode:%
+    \space`\ifdefined\tudfinalflag\else non-\fi final'%
+    \space`\ifdefined\tudprintflag\else non-\fi print'%
+  }%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tudprintflag
+% \end{macro}^^A \tudfinalflag
+% \end{option}^^A print
+% \end{option}^^A final
 %
 % \iffalse
-%<*class>
-% \fi
-%
-% \minisec{Standardoptionen der Klasse \cls{tudscrmanual}}
-%
-% Es werden einige Optionen für das Handbuch standardmäßig aktiviert. Dazu 
-% werden diese an die entsprechende Elternklasse übergeben.
-% \ToDo{Standardoptionen entweder hier oder in tudscr-misc}[v2.06]
-%    \begin{macrocode}
-\PassOptionsToClass{%
-  ttfont=roboto,%
-  cd=color,%
-  cdfoot=true,%
-  chapterpage=true,%
-  chapterprefix=true,%
-  headings=optiontoheadandtoc,%
-  captions=tableheading,%
-  numbers=noenddot,%
-}{\TUD@Class@Parent}
-%    \end{macrocode}
-%
-% \iffalse
-%</class>
 %</option>
 %<*body>
 % \fi

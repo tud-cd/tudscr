@@ -444,7 +444,7 @@
 %<*option>
 % \fi
 %
-% \section{Verarbeitung von Optionen}
+% \section{Verarbeitung von Optionen und Laden der \KOMAScript"~Klassen}
 % \subsection{Sukkzessives Abarbeiten von Optionen im Dokument}
 %
 % Werden mit \cs{TUDoptions} nach |\begin{document}| mehrere Layoutoptionen 
@@ -569,6 +569,7 @@
 % Hierfür wird der Schlüssel \opt{tudscrver} des Mitglieds \val{.comp} vor 
 % allen anderen Schlüsseln ausgewertet. Danach kann mit \cs{tud@if@v@lower} auf 
 % die gewählte Kompatibilitäsversion getestet werden.
+% \ToDo{in tudscr-comp?}[v2.06]
 %    \begin{macrocode}
 \DeclareOption*{}
 \TUDProcessOptions[.comp]\relax
@@ -599,91 +600,12 @@
 }
 %    \end{macrocode}
 %
-% \iffalse
-%</class&!inherit|package&fonts>
-% \fi
-%
-% Es werden die Standardoptionen ausgeführt. Für die Klasse \cls{tudscrposter} 
-% werden die Farben aktiviert.
-%    \begin{macrocode}
-%<*package&manual>
-\KOMAoptions{headings=small}
-\TUDoptions{cdfoot=true}
-%</package&manual>
-%<*class&!inherit|package>
-\TUDExecuteOptions{%
-%<*class&!inherit>
-%<*book|report|article>
-  cd=true,tudbookmarks=true%
-%</book|report|article>
-%<*poster>
-  cd=bicolor,tudbookmarks=false%
-%</poster>
-%</class&!inherit>
-%<*package&fixfonts>
-  headings=heavy%
-%</package&fixfonts>
-}
-%</class&!inherit|package>
-%    \end{macrocode}
-%
-% \subsection{Durchreichen von Optionen und Standardoptionen}
-%
-% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
-% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
-% geprüft, ob ein spezielles Papierformat angegeben wurde.
-%    \begin{macrocode}
-%<*package>
-%<*fonts>
-\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
-%</fonts>
-%<*fixfonts>
-\DeclareOption*{%
-  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
-  {tudscrfonts}%
-}
-%</fixfonts>
-%<*comp>
-\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
-%</comp>
-%</package>
-%<*class>
-%<*!inherit>
-\DeclareOption*{\tud@x@scr@checkoptions}
-%</!inherit>
-%<*inherit>
-\DeclareOption*{%
-  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
-  {\TUD@Class@Parent}%
-}
-%</inherit>
-%</class>
-%    \end{macrocode}
-% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
-% bzw. \TUDScript-Elternklasse geladen.
-%    \begin{macrocode}
-\TUDProcessOptions\relax
-%<*class&!inherit>
-\LoadClass{\TUD@Class@KOMA}[%
-%!TUD@KOMAVersion
-]
-%</class&!inherit>
-%<*class&inherit>
-\LoadClass{\TUD@Class@Parent}[%
-%!TUD@Version
-]
-%</class&inherit>
-%    \end{macrocode}
-%
-% \iffalse
-%<*class&!inherit|package&fonts>
-% \fi
-%
 % \subsection{Optionen ohne späte Wahlmöglichkeit}
 %
 % Einige Optionen können nur zum Zeitpunkt des Ladens einer Klasse oder eines 
 % Paketes respektive in der Präambel gesetzt werden. Diese müssen \emph{nach}
 % \cs{TUDProcessOptions} mit \cs{TUD@key@toolate} redefiniert werden.
+% \ToDo{in tudscr-base?}[v2.06]
 %
 % \begin{macro}{\TUD@key@toolate}
 % \changes{v2.06c}{2019/08/20}{neu}^^A
@@ -730,6 +652,96 @@
 %
 % \iffalse
 %</class&!inherit|package&fonts>
+% \fi
+%
+% \subsection{Durchreichen von Optionen und Standardeinstellungen}
+%
+% Es werden die Standardeinstellungen ausgeführt.
+%    \begin{macrocode}
+%<*class&!inherit|package&fixfonts>
+\TUDExecuteOptions{%
+%<*class>
+%<*book|report|article>
+  cd=true,tudbookmarks=true%
+%</book|report|article>
+%<*poster>
+  cd=bicolor,tudbookmarks=false%
+%</poster>
+%</class>
+%<*package&fixfonts>
+  headings=heavy%
+%</package&fixfonts>
+}
+%</class&!inherit|package&fixfonts>
+%<*manual>
+%<*class>
+\PassOptionsToClass
+%</class>
+%<*package>
+\TUDoptions
+%</package>
+{%
+  ttfont=roboto,%
+%<*package>
+  headingsvskip=-6ex,%
+%</package>
+  cdfoot=true%
+}
+%<*class>
+{\TUD@Class@Parent}
+%</class>
+%</manual>
+%    \end{macrocode}
+% Durchreichen aller Klassenoptionen an die \KOMAScript-Klasse bzw. an die
+% genutzte \TUDScript-Elternklasse. Für Klassen wird vor dem Durchreichen noch 
+% geprüft, ob ein spezielles Papierformat angegeben wurde.
+%    \begin{macrocode}
+%<*package>
+%<*fonts>
+\DeclareOption*{\expandafter\TUD@KOMAoptions\expandafter{\CurrentOption}}
+%</fonts>
+%<*fixfonts>
+\DeclareOption*{%
+  \expandafter\PassOptionsToPackage\expandafter{\CurrentOption}%
+  {tudscrfonts}%
+}
+%</fixfonts>
+%<*comp>
+\DeclareOption*{\expandafter\TUDoptions\expandafter{\CurrentOption}}
+%</comp>
+%</package>
+%<*class>
+%<*!inherit>
+\DeclareOption*{\tud@x@scr@checkoptions}
+%</!inherit>
+%<*inherit>
+\DeclareOption*{%
+  \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
+  {\TUD@Class@Parent}%
+}
+%</inherit>
+%</class>
+%    \end{macrocode}
+%
+% \subsection{Laden der unterlagerten Klassen}
+%
+% Nach der Auswerung der Optionen wird die korrespondierende \KOMAScript-Klasse 
+% bzw. \TUDScript-Elternklasse geladen.
+%    \begin{macrocode}
+\TUDProcessOptions\relax
+%<*class&!inherit>
+\LoadClass{\TUD@Class@KOMA}[%
+%!TUD@KOMAVersion
+]
+%</class&!inherit>
+%<*class&inherit>
+\LoadClass{\TUD@Class@Parent}[%
+%!TUD@Version
+]
+%</class&inherit>
+%    \end{macrocode}
+%
+% \iffalse
 %</execute>
 %<*manual|doc>
 % \fi
@@ -860,8 +872,8 @@
 % \end{macro}^^A \hypersetup
 % \end{macro}^^A \nolinkurl
 % \end{macro}^^A \url
-% \begin{macro}{\pdfbookmark}
 % \begin{macro}{\bookmarksetup}
+% \begin{macro}{\pdfbookmark}
 % \begin{macro}{\currentpdfbookmark}
 % \begin{macro}{\subpdfbookmark}
 % \begin{macro}{\belowpdfbookmark}
@@ -1333,6 +1345,34 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \mailto
+% \begin{macro}{\seeplain}
+% \changes{v2.05}{2015/11/02}{neu}^^A
+% \begin{macro}{\@seeplain}
+% Der Befehl \cs{seeplain} kann anstelle von \cs{see} bzw. in der Sternversion
+% statt \cs{seealso} genutzt werden.
+%    \begin{macrocode}
+\NewDocumentCommand\seeplain{s m}{%
+  \mbox{\emph{\IfBooleanTF{#1}{\alsoname}{\seename}}}\nobreakspace#2%
+}
+\NewExpandableDocumentCommand\@seeplain{s m}{%
+  \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
+}
+%    \end{macrocode}
+% \end{macro}^^A \@seeplain
+% \end{macro}^^A \seeplain
+% \begin{macro}{\Attention}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% Falls irgendetwas besonders hervorgehoben werden soll.
+%    \begin{macrocode}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Attention
 %
 % \subsubsection{Textauszeichnung}
 %
@@ -1488,19 +1528,6 @@
 % \end{macro}^^A \DIN
 % \end{macro}^^A \Univers
 % \end{macro}^^A \OpenSans
-% \begin{macro}{\Attention}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% Falls irgendetwas besonders hervorgehoben werden sollte.
-%    \begin{macrocode}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \Attention
 %
 % \subsubsection{Markup für Links}
 %
@@ -1676,30 +1703,34 @@
 % in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
 % verlinken.
 %    \begin{macrocode}
-\NewDocumentCommand\Forum{!o !d<>}{%
+\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
   \begingroup%
-    \def\tud@res@a{\TUDScriptForum}%
-    \IfValueTF{#1}%
-      {\def\tud@res@c{#1}}
-      {\def\tud@res@c{\TUDForum}}%
-    \IfValueT{#2}{%
-      \edef\tud@res@b{\trim@spaces{#2}}%
-      \tud@remove@enfold@char\tud@res@b{/}%
-      \Ifnumber{\tud@res@b}{%
-        \IfValueF{#1}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
-        \eappto\tud@res@a{viewtopic.php?t=\tud@res@b}%
-      }{%
-        \eappto\tud@res@a{\tud@res@b}%
-      }%
-    }%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\href{\tud@res@a}{\noexpand\mbox{\tud@res@c}}%
+      \noexpand\href%
+        {\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}%
+        {\noexpand\mbox{#1}}%
     }%
   \tud@res@a\xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Forum
+% \begin{macro}{\scrguide}
+% \changes{v2.02}{2014/09/04}{neu}^^A
+% \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
+%    \begin{macrocode}
+%<*manual>
+\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
+  \begingroup%
+    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
+    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
+    \tud@res@a{#1}%
+  \endgroup%
+  \xspace%
+}
+%</manual>
+%    \end{macrocode}
+% \end{macro}^^A \scrguide
 %
 % \subsubsection{Setzen von Logos}
 %
