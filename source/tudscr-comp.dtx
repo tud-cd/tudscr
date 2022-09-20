@@ -205,9 +205,10 @@
 % oder unerwünscht, weil diese beispielsweise das Ausgabeergebnis verändern.
 % Standardmäßig werden die Klassen in der aktuellen Version geladen. Mit 
 % \opt{tudscrver}|=|\val{\meta{Version}} kann auf das Verhalten einer früheren
-% Version geschaltet werden. Die eingestellte Kompatibilität wird als Zahl in 
-% \cs{tud@v@comp} gespeichert. In den Makros |\tud@v@|\meta{Version} werden die
-% zugehörigen Nummern gespeichert.
+% Version geschaltet werden. Die somit eingestellte Kompatibilität wird als 
+% numerischer Wert in \cs{tud@v@comp} abgelegt, wobei die Zuordnung von 
+% Versionsnummer und Kompatibilitätswert mit den Makros |\tud@v@|\meta{Version} 
+% erfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@v@comp{\tud@v@last}
 %    \end{macrocode}
@@ -224,11 +225,12 @@
     \PackageWarningNoLine{tudscrfonts}%
 %</package&fonts>
     {%
-      You have set option `tudscrver' to `\@tempa', but\MessageBreak%
-      this value is not supported. Because of this,\MessageBreak%
-      `tudscrver=first' was set%
+      You did set option `tudscrver=\@tempa', but\MessageBreak%
+      this value is not supported. Possible values are:\MessageBreak%
+      \tud@v@list\MessageBreak%
+      Because of this, `tudscrver=first' was set%
     }%
-    \renewcommand*\tud@v@comp{0}%
+    \def\tud@v@comp{0}%
   }{%
 %<*class>
     \ClassInfoNoLine{\TUD@Class@Name}%
@@ -266,7 +268,6 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@v@comp
 % \end{option}^^A tudscrver
-% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
 % \begin{macro}{\tud@v@first}
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \begin{macro}{\tud@v@2.00}
@@ -283,30 +284,38 @@
 % \changes{v2.05}{2015/07/03}{neu}^^A
 % \begin{macro}{\tud@v@2.06}
 % \changes{v2.06}{2018/06/26}{neu}^^A
-% \begin{macro}{\tud@v@2.07}
-% \changes{v2.07}{2022/08/30}{neu}^^A
 % \begin{macro}{\tud@v@last}
 % \changes{v2.02}{2014/08/22}{neu}^^A
 % \changes{v2.03}{2015/01/13}{angepasst}^^A
 % \changes{v2.04}{2015/02/18}{angepasst}^^A
 % \changes{v2.05}{2015/07/03}{angepasst}^^A
 % \changes{v2.06}{2018/06/26}{angepasst}^^A
-% \changes{v2.07}{2022/08/30}{angepasst}^^A
-% Die numerischen Werte zu den einzelnen Versionen.
+% \begin{macro}{\tud@v@list}
+% \changes{v2.06p}{2022/09/13}{neu}^^A
+% Die Zuordnung der numerischen Kompatibilitätswert zu den einzelnen Versionen.
+% Alle definierten Versionen werden zusätzlich in \cs{tud@v@list} abgelegt.
+% \ToDo{Für jede neue Version der entsprechende Befehl}[Release]
 %    \begin{macrocode}
-\csdef{tud@v@first}{0}
-\csdef{tud@v@2.00}{0}
-\csdef{tud@v@2.01}{0}
-\csdef{tud@v@2.02}{0}
-\csdef{tud@v@2.03}{1}
-\csdef{tud@v@2.04}{2}
-\csdef{tud@v@2.05}{3}
-\csdef{tud@v@2.06}{4}
-\csdef{tud@v@2.07}{5}
-\csdef{tud@v@last}{5}
+\newcommand*\tud@v@first{0}
+\newcommand*\tud@v@last{0}
+\newcommand*\tud@v@list{}
+\def\tud@res@b#1#2{%
+  \expandafter\newcommand\expandafter*\csname tud@v@#1\endcsname{#2}%
+  \listadd\tud@v@list{#1}%
+  \def\tud@v@last{#2}%
+}
+\@tfor\tud@res@a:=%
+{{2.00}{0}}%
+{{2.01}{0}}%
+{{2.02}{0}}%
+{{2.03}{1}}%
+{{2.04}{2}}%
+{{2.05}{3}}%
+{{2.06}{4}}%
+\do{\expandafter\tud@res@b\tud@res@a}
 %    \end{macrocode}
+% \end{macro}^^A \tud@v@list
 % \end{macro}^^A \tud@v@last
-% \end{macro}^^A \tud@v@2.07
 % \end{macro}^^A \tud@v@2.06
 % \end{macro}^^A \tud@v@2.05
 % \end{macro}^^A \tud@v@2.04

@@ -539,11 +539,35 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@remove@spaces@within
 %
-% \subsubsection{Test auf eine verwendbare Sprache}
+% \subsubsection{Test auf verfügbare Sprachen}
 %
+% Aktuell gibt es leider keine gemeinsame Schnittstelle für die Sprachpakete 
+% \pkg{babel} und \pkg{polyglossia}, weshalb hier einige notwendige Befehle 
+% definiert werden, um möglichst beide Pakete zu unterstützen.
+%
+% \begin{macro}{\tud@language@wrn}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% Warnung für den Fall, dass eine gesuchte respektive angeforderte Sprache 
+% nicht verfügbar ist.
+%    \begin{macrocode}
+\newcommand*\tud@language@wrn[1]{%
+  \PackageWarning{tudscrbase}{%
+    Loading either package `babel' or `polyglossia'\MessageBreak%
+    with appropriate settings is required. Language\MessageBreak%
+    `#1' is not available%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@language@wrn
 % \begin{macro}{\tud@if@language@loaded}
 % \begin{macro}{\tud@language@loaded}
-% Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist.
+% Hiermit kann getestet werden, ob das Argument als Sprache nutzbar ist. Für 
+% \pkg{babel} ist zu beachten, dass einfache Trennmuster für mehrere Sprachen 
+% via \cs{foreignlanguage} oder \env{hyphenrules} auch verfügbar sind, wenn 
+% diese nicht explizit geladen werden. Werden jedoch zusätzliche Funktionen wie 
+% beispielsweise sprachabhängige Bezeichner benötigt, muss die entsprechende 
+% Sprache explizit geladen werden. Das Paket \pkg{polyglossia} erfordert immer 
+% die Konfiguration einer Sprache, wenn diese auch genutzt werden soll.
 %    \begin{macrocode}
 \newcommand*\tud@language@loaded{}
 \newcommand*\tud@if@language@loaded[1]{%
@@ -559,6 +583,52 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@language@loaded
 % \end{macro}^^A \tud@if@language@loaded
+% \begin{macro}{\tud@if@language@main}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% Das Paket \pkg{babel} unterscheidet traditionell nicht zwischen Hauptsprachen 
+% und deren Derivaten. Seit geraumer Zeit unterstützt es jedoch die Nomenklatur 
+% von \pkg{polyglossia}. Dies wird hier genutzt, um auf die aktive Hauptsprache 
+% eines prüfen zu können.
+%    \begin{macrocode}
+\newcommand*\tud@if@language@main[3]{\tud@language@wrn{#1}#3}
+\AfterPackage*{babel}{
+  \def\tud@if@language@main#1{%
+    \begingroup%
+      \tud@strlowercase\tud@res@a{#1}%
+      \def\tud@res@c##1{%
+        \getlocaleproperty*\tud@res@b\bbl@main@language{identification/##1}%
+        \ifx\tud@res@b\relax\else\tud@strlowercase\tud@res@b{\tud@res@b}\fi%
+      }%
+      \tud@res@c{name.polyglossia}%
+      \ifx\tud@res@b\relax%
+        \tud@res@c{name.english}%
+        \protected@expandtwoargs\in@{\tud@res@a}{\tud@res@b}%
+        \ifin@%
+          \aftergroup\@firstoftwo%
+        \else%
+          \aftergroup\@secondoftwo%
+        \fi%
+      \else%
+        \tud@if@strequal{\tud@res@b}{\tud@res@a}%
+          {\aftergroup\@firstoftwo}%
+          {\aftergroup\@secondoftwo}%
+      \fi%
+    \endgroup%
+  }%
+}
+\AfterPackage*{polyglossia}{%
+  \def\tud@if@language@main#1{%
+    \begingroup%
+      \tud@strlowercase\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@b{\mainlanguagename}%
+      \tud@if@strequal{\tud@res@b}{\tud@res@a}%
+        {\aftergroup\@firstoftwo}%
+        {\aftergroup\@secondoftwo}%
+    \endgroup%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@language@main
 %
 % \subsubsection{Division für rationale Zahlen}
 %
