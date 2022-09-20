@@ -90,20 +90,68 @@
 %
 % \subsection{Patches für den \Lettering{LaTeX}"~Kernel}
 %
-% \ToDo{Das muss dokumentiert werden!}[v2.07]
+% Für Inhaltsverzeichnis sowie~-- insbesondere im Hinblick auf Kolumnentitel~-- 
+% Ausgaberoutine sind Anpassungen notwendig, weshalb hierfür entsprechende 
+% Hooks definiert werden.
+% \begin{macro}{\addtocontents}
+% \begin{macro}{\tud@addtocontents@hook}
+% \changes{v2.06p}{2022/09/27}{neu}^^A
+% \begin{macro}{\tud@addtocontents@initialize}
+% \changes{v2.06p}{2022/09/27}{neu}^^A
+% Mit \cs{tud@addtocontents@initialize} kann Code unmittelbar vor dem Erzeugen 
+% von Einträgen für Inhaltsverzeichnis und~-- falls die Sternversion genutzt 
+% wird~-- PDF-Outline ausgeführt werden.
 %    \begin{macrocode}
-\NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
+\newcommand*\tud@addtocontents@hook{}
+\let\tud@addtocontents@hook\relax
 \patchcmd\addtocontents{%
   \let\index\@gobble\let\glossary\@gobble%
 }{%
-  \let\index\@gobbleopt@one\let\glossary\@gobbleopt@one%
-}{}{\tud@patch@wrn{addtocontents}}%
+  \let\index\@gobble\let\glossary\@gobble%
+  \tud@addtocontents@hook%
+}{}{\tud@patch@wrn{addtocontents}}
+\NewDocumentCommand\tud@addtocontents@initialize{s m}{%
+  \appto\tud@addtocontents@hook{#2}%
+  \IfBooleanT{#1}{%
+    \AfterPackage*{hyperref}{\pdfstringdefDisableCommands{#2}}%
+    \AfterPackage*{nameref}{\GetTitleStringDisableCommands{#2}}%
+  }%
+}
+\@onlypreamble\tud@addtocontents@initialize
+%    \end{macrocode}
+% \end{macro}^^A \tud@addtocontents@initialize
+% \end{macro}^^A \tud@addtocontents@hook
+% \end{macro}^^A \addtocontents
+% \begin{macro}{\@outputpage}
+% \begin{macro}{\tud@outputpage@hook}
+% \changes{v2.06p}{2022/09/27}{neu}^^A
+% \begin{macro}{\tud@outputpage@initialize}
+% \changes{v2.06p}{2022/09/27}{neu}^^A
+% Mit \cs{tud@outputpage@initialize} kann Code unmittelbar vor dem Aufruf der 
+% Ausgaberoutine ausgeführt werden.
+%    \begin{macrocode}
+\newcommand*\tud@outputpage@hook{}
+\let\tud@outputpage@hook\relax
 \patchcmd\@outputpage{%
   \let\index\@gobble\let\glossary\@gobble%
 }{%
-  \let\index\@gobbleopt@one\let\glossary\@gobbleopt@one%
+  \let\index\@gobble\let\glossary\@gobble%
+  \tud@outputpage@hook%
 }{}{\tud@patch@wrn{@outputpage}}
+\newcommand*\tud@outputpage@initialize[1]{\appto\tud@outputpage@hook{#1}}
+\@onlypreamble\tud@outputpage@initialize
 %    \end{macrocode}
+% \end{macro}^^A \tud@outputpage@initialize
+% \end{macro}^^A \tud@outputpage@hook
+% \end{macro}^^A \@outputpage
+% \begin{macro}{\@gobbleopt@one}
+% \changes{v2.06p}{2022/09/27}{neu}^^A
+% Ein expandierbares Makrodefinition, um temporär Befehle mit einem optionalen 
+% gefolgt von einem obligatorischen Argument unschädlich zu machen.
+%    \begin{macrocode}
+\NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
+%    \end{macrocode}
+% \end{macro}^^A \@gobbleopt@one
 %
 % \subsection{Notwendige Pakete, Einstellungen und abgeleitete Befehle}
 %
@@ -151,6 +199,7 @@
 % Verschiedenste Symbole aus dem \Lettering{LaTeX}-Universum.
 %    \begin{macrocode}
 \RequirePackage{hologo}
+\robustify\hologo
 %    \end{macrocode}
 % Unterdrücken von Absatzeinzügen nach bestimmten Umgebungen.
 %    \begin{macrocode}
@@ -370,6 +419,21 @@
     }%
     \expandafter\docsvlist\expandafter{\tud@localization@@german}%
   \endgroup%
+}
+%    \end{macrocode}
+% Um ungewünschten vertikalen Leerraum vor und nach Überschriften zu vermeiden, 
+% werden die Befehle \cs{label} und \cs{index} innerhalb des obligatorischen 
+% Argumentes von Gliederungsbefehlen genutzt (\GitHubRepo(latex3/latex2e)<307>).
+% Damit diese nicht im durch \cs{newlabel} erzeugten Label auftauchen, muss 
+% \cs{GetTitleStringExpand} durch \pkg{nameref} verwendet werden, wobei zu 
+% diesem Zeitpunkt beide Befehle zu einer leeren Ausgabe expandieren sollten.
+%    \begin{macrocode}
+\AfterPackage*{nameref}{%
+  \patchcmd\NR@gettitle{%
+    \GetTitleString%
+  }{%
+    \GetTitleStringExpand%
+  }{}{\tud@patch@wrn{NR@gettitle}}%
 }
 %    \end{macrocode}
 % \begin{macro}{\autoref}
@@ -891,6 +955,7 @@
     \fi%
   }{}{\tud@patch@wrn{theindex}}%
 \fi%
+\tud@addtocontents@initialize*{\let\index\@gobbleopt@one}
 %    \end{macrocode}
 % \end{environment}^^A theindex
 %
@@ -1018,6 +1083,56 @@
 % \end{macro}^^A \tud@xdy@mdfive
 % \end{macro}^^A \tud@xdy@settings
 % \end{macro}^^A \makexdyindex
+%
+% \iffalse
+%<*class>
+% \fi
+%
+% \begin{macro}{\tud@index@csv}
+% \changes{v2.06p}{2022/10/05}{neu}^^A
+% \begin{macro}{\tud@index@@csv}
+% \begin{macro}{\tud@index@@@csv}
+% Eine kommaseparierte Liste von Schlagworten im zweiten Argument wird für 
+% Einträge in den allgemeinen Index an das Makro des ersten Argumentes 
+% angehangen.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@index@csv{m m}{%
+  \begingroup
+    \let#1\relax
+    \protected@edef\tud@res@a{%
+      \noexpand\forcsvlist{\tud@index@@csv\noexpand#1}{#2}%
+    }%
+    \tud@res@a%
+    \protected@edef\tud@res@a{%
+      \endgroup
+      \unexpanded{\def#1}{\expandonce#1}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@index@@csv{m >{\TrimSpaces}m}{%
+  \IfArgIsEmpty{#2}{}{%
+    \in@{|}{#2}%
+    \ifin@
+      \tud@index@@@csv#1#2\@nil%
+    \else
+      \tud@index@@@csv#1#2|\@nil%
+    \fi
+  }%
+}
+\newcommand*\tud@index@@@csv{}
+\def\tud@index@@@csv#1#2|#3\@nil{%
+  \protected@eappto#1{%
+    \noexpand\index{\trim@spaces{#2}\IfArgIsEmpty{#3}{}{|#3}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@index@@@csv
+% \end{macro}^^A \tud@index@@csv
+% \end{macro}^^A \tud@index@csv
+%
+% \iffalse
+%</class>
+% \fi
 %
 % \subsubsection{Indexverweise}
 %
@@ -1444,6 +1559,8 @@
   \let\PBoolean\@empty%
   \let\PLength\@empty%
   \let\textOR\@empty%
+  \let\hologo\@firstofone%
+  \let\hologoRobust\@firstofone%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Parameter@Expandable
@@ -2622,10 +2739,8 @@
 % Elemente. Das obligatorische Argument ist das auszuzeichnende Element selbst,
 % welches im weiteren Verlauf der Abarbeitung expandiert wird. Darauf folgen 
 % mehrere optionale Argumente. Mit |=|\meta{Wert}|=| kann ein Wert für einen
-% Schlüssel angegeben werden, was aktuell von \cs{Option} und \cs{Key} genutzt
-% wird. Darauf folgend kann in einem ordinären optionalen Argument ein Suffix
-% für die Fließtextausgabe angegeben werden, was von \cs{Distribution}  sowie
-% \cs{Environment}, \cs{Macro} und \cs{Color} verwendet wird.
+% Schlüssel angegeben werden. Darauf folgend kann in einem ordinären optionalen 
+% Argument ein Suffix für die Fließtextausgabe angegeben werden.
 %
 % Mit dem optionalen Argument in runden Klammern kann eine Klasse oder ein 
 % Paket aus dem \TUDScript-Bundle angegeben werden, auf welche sich das
@@ -3627,7 +3742,7 @@
     \let\ChangedAt\@ChangedAt%
   }%
 }
-\BeforeStartingTOC{\let\ChangedAt\@ChangedAt}
+\tud@addtocontents@initialize*{\let\ChangedAt\@ChangedAt}
 %    \end{macrocode}
 % \end{length}^^A \tud@dim@changedatvskip
 % \end{macro}^^A \@ChangedAt
@@ -3810,6 +3925,38 @@
 % \end{macro}^^A \Changed@At@@CreateList
 % \end{macro}^^A \Changed@At@CreateList
 %
+% \begin{macro}{\tud@chg@entry@validate}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Der Befehl teilt das Argument \meta{Version}|:|\meta{Text} aus dem dritten 
+% Argument und schreibt das Ergebnis in die übergebenen Makros der ersten 
+% beiden Argumente. Dabei wird der vordere Teil auf eine gültige Versionsangabe 
+% geprüft.
+%    \begin{macrocode}
+\newcommand*\tud@chg@entry@validate[3]{%
+  \begingroup%
+    \in@{:}{#3}%
+    \ifin@%
+      \def\tud@res@c##1:##2\@nil{%
+        \def\tud@res@a{##1}%
+        \def\tud@res@b{##2}%
+        \trim@spaces@in\tud@res@b%
+      }%
+      \tud@res@c#3\@nil%
+    \else%
+      \def\tud@res@a{#3}%
+      \let\tud@res@b\@empty%
+    \fi%
+    \tud@v@validate\tud@res@a{\tud@res@a}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{v\tud@res@a}%
+      \unexpanded{\def#2}{\expandonce\tud@res@b}%
+    }%
+  \tud@res@c%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@chg@entry@validate
+%
 % \subsubsection{Erzeugen der Änderungseinträge}
 %
 % Mit den nachfolgenden Makros erfolgt das eigentliche Eintragen der 
@@ -3924,9 +4071,13 @@
 %    \end{macrocode}
 % Existiert das vierte Argument nicht, handelt es sich um einen allgemeinen 
 % Eintrag in der Änderungshistorie. Dieser wird direkt ausgeführt.
+% \ToDo{temporären Workaround auflösen; mit Index zusammenführen?!}[v2.06]
 %    \begin{macrocode}
     }{%
-      \index[changelog]{#1!#2!#3}%
+      \def\tud@idx@fmt{#3}%
+      \tud@replace@@in\tud@idx@fmt{"=}{""=}%
+      \tud@replace@@in\tud@idx@fmt{"~}{""~}%
+      \index[changelog]{#1!#2!\tud@idx@fmt}%
     }%
   }%
 %    \end{macrocode}
@@ -3939,6 +4090,47 @@
 % \end{macro}^^A \Changed@At@@CreateEntry
 % \end{macro}^^A \Changed@At@CreateEntry
 %
+% \subsubsection{Spezielle Einträge für die Änderungsliste}
+%
+% \begin{macro}{\Changed@At@Special}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Hiermit lassen sich zusätzliche Einträge am Ende der Änderungsliste für die 
+% angegebene Version erstellen.
+% \ToDo{temporären Workaround auflösen; mit Index zusammenführen?!}[v2.06]
+%    \begin{macrocode}
+\NewDocumentCommand\Changed@At@Special{o m d<> m}{%
+  \begingroup%
+    \def\do##1{%
+      \tud@chg@entry@validate\tud@res@a\tud@res@b{##1}%
+      \IfValueTF{#3}%
+        {\def\tud@res@c{#2\detokenize{@}\hyperref[{#3}]{#2}}}%
+        {\def\tud@res@c{#2}}%
+      \tud@unique@xadd\tud@changedat@list{\tud@res@a}%
+      \tud@replace@@in\tud@res@b{"=}{""=}%
+      \tud@replace@@in\tud@res@b{"~}{""~}%
+      \index[{changes-\tud@res@a}]{\tud@res@c!\tud@res@b}%
+    }%
+    \dossvlist{#4}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\printchangedatlist\IfValueT{#1}{\unexpanded{[{#1}]}}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Changed@At@Special
+%
+% \begin{macro}{\Hint}
+% Erstellen von Einträgen für den Abschnitt \enquote{Tipps \& Tricks}. Diese 
+% erhalten einen separaten Abschnitt in der Änderungsliste.
+%    \begin{macrocode}
+\NewDocumentCommand\Hint{O{\expandonce\@currentlabelname} m}{%
+  \Changed@At@Special{Tipps \& Tricks}<sec:tips>%
+    {#2:#1\detokenize{@}\hyperref{}{}{\@currentHref}{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Hint
+%
 % \subsubsection{Ausgabe der Änderungsnotizen}
 %
 % Ähnlich wie für den Index wird auch für die Änderungsliste bei der Ausgabe 
@@ -3949,7 +4141,7 @@
 % Damit werden Änderungsnotizen der Umgebungen \env{DeclareEntity} und 
 % \env{DeclareEntity*} ausgegeben.
 %    \begin{macrocode}
-\NewDocumentCommand\printchangedatlist{!s !O{\z@}}{%
+\NewDocumentCommand\printchangedatlist{s !O{\z@}}{%
   \print@changedatlist{#1}{#2}%
 }
 %    \end{macrocode}
@@ -4222,6 +4414,7 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@declare@end}
 % \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@declare@index}
 % Dies sind die Makros für die eigentliche Abarbeitung der Deklarationsbefehle 
 % zu Beginn und Ende der Umgebungen \env{Declaration}, \env{Declaration*} und 
 % \env{Cessation}. Zu Beginn wird nichts weiter ausgegeben sondern lediglich 
@@ -4268,6 +4461,9 @@
 % für die Angabe obligatorischer und optionaler Parameter lokal umdefiniert.
 %    \begin{macrocode}
 \newcommand*\tud@declare@end[1]{%
+  \ifvmode\removelastskip\else\@killglue\fi
+  \tud@declare@index%
+  \global\let\tud@declare@index\@empty%
   \ifx\tud@declaration@list\relax\else%
     \ClassError{tudscrmanual}{\string\printdeclarationlist\space is missing}{%
       \string\tud@declaration@list\space is not empty. Did you\MessageBreak%
@@ -4275,11 +4471,24 @@
       \string\printdeclarationlist?%
     }%
   \fi%
-  \vskip-\lastskip%
   \@tud@declaretrue\@tud@openindexfalse#1\@tud@declarefalse%
-  \pagebreak[1]%
+  \par%
 }
 %    \end{macrocode}
+% Das automatische Setzen von Indexeinträgen über Seitenbreische ist aufgrund 
+% \href{https://tex.stackexchange.com/q/384931}{eines Bugs von \app{texindy}} 
+% nicht ohne weiteres möglich. Als Workaround werden alle Indexeinträge einer 
+% Deklaration via \cs{tud@print@declarationlist} in \cs{tud@declare@index} 
+% gespeichert und über den Haken \val{shipout/after} bei der Ausgabe einer 
+% Seite erzeugt. Beim Beenden einer Deklaration wird \cs{tud@declare@index} 
+% wieder geleert. Dies erzeugt zwar etwas mehr Indexeinträge als eigentlich 
+% notwendig, erlaubt \app{texindy} das selbstständige Bilden der gewünschten 
+% Seitenbereiche.
+%    \begin{macrocode}
+\newcommand*\tud@declare@index{}
+\AddToHook{shipout/after}{\tud@declare@index}
+%    \end{macrocode}
+% \end{macro}^^A \tud@declare@index
 % \end{macro}^^A \tud@declare@end
 % \end{macro}^^A \tud@declare@start
 % \begin{macro}{\AP@PresetParser}
@@ -4390,38 +4599,20 @@
 % \end{macro}^^A \AP@PresetParser
 % \begin{macro}{\printdeclarationlist}
 % \begin{macro}{\tud@print@declarationlist}
-% \begin{length}{\tud@lastskip}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\index}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\label}
-% \changes{v2.05}{2015/11/01}{neu}^^A
 % Mit dem Befehl \cs{printdeclarationlist} erfolgt die eingentliche Ausgabe 
 % aller Deklarationen. Zweck ist es, mehrere \env{Declaration}-Umgebungen 
 % ineinander verschachteln zu können und eine Ausgabe aller auf einmal zu 
 % erzeugen. Die durch die ggf. nacheinander folgenden Deklarationen wurden in 
 % entsprechenden Listen gesammelt und werden hier jetzt formatiert ausgegben.
-%
-% Da die Verwendung der Befehle \cs{index} und \cs{label} nach Überschriften 
-% dazu führt, dass \cs{addvspace} nicht mehr richtig verendet werden kann, 
-% wird hier etwas gebastelt, damit das trotzdem funktioniert. Dabei wird 
-% einfach bei der verwendung der genannten Befehle der zuvor gesetzte vertikale 
-% Abstand in \cs{tud@lastskip} gesichert.
 %    \begin{macrocode}
-\tud@newglue\tud@lastskip
-\pretocmd\index{%
-  \tud@lastskip=\lastskip%
-}{}{\tud@patch@wrn{index}}
-\pretocmd\label{%
-  \tud@lastskip=\lastskip%
-}{}{\tud@patch@wrn{label}}
 \NewDocumentCommand\printdeclarationlist{o d()}{%
   \tud@print@declarationlist[{#1}](#2)%
 }
-\NewDocumentCommand\tud@print@declarationlist{!s o d()}{%
+\NewDocumentCommand\tud@print@declarationlist{s o d()}{%
+  \tud@setglue\tud@res@glue{\medskipamount}%
   \ifx\tud@declaration@list\relax\else%
     \ifhmode%
-      \vskip\medskipamount%
+      \vskip\tud@res@glue%
     \else%
 %    \end{macrocode}
 % Im vertikalen modus wird dann einfach vom eigentlich gewünschten Abstand der 
@@ -4429,18 +4620,9 @@
 % Sollte dann noch ein positiver Wert bestehen, wird dieser einfach zusätzlich
 % gesetzt.
 %    \begin{macrocode}
-      \tud@setglue\@tempskipa{\medskipamount-\tud@lastskip}%
-      \ifdim\@tempskipa>\z@\relax%
-        \addpenalty{\@beginparpenalty}%
-        \addvspace{\@tempskipa}%
-      \fi%
+      \addpenalty{\@beginparpenalty}%
+      \addvspace{\tud@res@glue}%
     \fi%
-%    \end{macrocode}
-% Anschließend wird die Länge auf jeden Fall zurückgesetzt.
-%    \begin{macrocode}
-    \global\tud@lastskip=\z@%
-    \@afterindentfalse\@afterheading%
-    \@tud@declaretrue\@tud@openindextrue%
 %    \end{macrocode}
 % Die deklarierten Optionen, Umgebungen, Befehle etc. werden umrahmt. Dabei
 % erfolgt die Ausgabe mithilfe einer Box, um die Größe des Deklarationsrahmens
@@ -4451,6 +4633,8 @@
 % später noch benötigt, deshalb wird diese in einer Box gesetzt.
 % \ToDo{Größe der Box direkt annschließend in tud@res@... sichern}[v2.06]
 %    \begin{macrocode}
+    \@tud@declaretrue\@tud@openindextrue%
+    \noindent\null%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
     \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
     \sbox\z@{%
@@ -4459,9 +4643,18 @@
         \forlistloop\@tempa{\tud@declaration@list}%
         \hline%
       \end{tabular}%
-      \IfValueT{#2}{\zap@space#2 \@empty}%
     }\usebox\z@%
     \@tud@declarefalse%
+%    \end{macrocode}
+% Erzeugen der Indexeinträge. Solange die Deklaration aktiv ist, werden diese 
+% über den Haken \val{shipout/after} bei der Ausgabe jeder Seite gesetzt.
+%    \begin{macrocode}
+    \let\tud@declare@index\@empty
+    \IfValueT{#2}{%
+      \tud@index@csv\tud@declare@index{#2}%
+      \tud@declare@index%
+    }%
+    \global\let\tud@declare@index\tud@declare@index
 %    \end{macrocode}
 % Danach werden ggf. die Voreinstellungen und Zusatzinformationen in etwas 
 % kleinerer Schrift gesetzt.
@@ -4510,9 +4703,6 @@
   \fi%
 }
 %    \end{macrocode}
-% \end{macro}^^A \label
-% \end{macro}^^A \index
-% \end{length}^^A \tud@lastskip
 % \end{macro}^^A \tud@print@declarationlist
 % \end{macro}^^A \printdeclarationlist
 % \begin{macro}{\InlineDeclaration}
