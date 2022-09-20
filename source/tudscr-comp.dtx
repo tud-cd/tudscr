@@ -1190,9 +1190,9 @@
 % Hier erfolgt die notwendige Anpassungen der internen Gliederungsbefehle.
 %    \begin{macrocode}
 \AtEndPreamble{%
-  \ifundef{\if@chapter}{%
+  \ifundef\if@chapter{%
     \newif\if@chapter%
-    \ifundef{\chapter}{\@chapterfalse}{\@chaptertrue}%
+    \ifundef\chapter{\@chapterfalse}{\@chaptertrue}%
   }{}%
   \if@chapter%
     \pretocmd\tud@chapter@pre{%
@@ -1226,7 +1226,7 @@
 % Eine rudimentäre Umgebung für ein Glossar.
 %    \begin{macrocode}
 \AfterEndPreamble{%
-  \ifundef{\theglossary}{%
+  \ifundef\theglossary{%
     \providecommand*\glossaryname{Glossar}%
     \newenvironment{theglossary}[1][]{%
       \PackageWarning{tudscrcomp}{%
@@ -1654,7 +1654,7 @@
 % damit dieser Befehl irgendwo innerhalb der Präambel definiert werden kann.
 %    \begin{macrocode}
 \preto\tud@cdgeometry@init{%
-  \ifundef{\schnittrand}{}{%
+  \ifundef\schnittrand{}{%
     \TUDoptions{cropmargin=\schnittrand}%
     \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
       \PackageErrorNoLine{tudscrcomp}{%
@@ -1745,20 +1745,27 @@
 \tud@comp@on@poster@class{%
 \newcommand*\fusszeile[2][]{\footcontent[{#1}]{#2}}
 \newcommand*\footcolumn[2]{%
-  \Ifnumber{#1}{%
-    \ifcase#1\relax%
-      \footcontent{#2}%
-    \or%
-      \footcontent{#2}[*]%
-    \or%
-      \footcontent{*}[{#2}]%
-    \else%
+  \begingroup%
+    \def\tud@res@a{%
       \PackageError{tudscrcomp}{Wrong column for `\string\footcolumn'}{%
         The command `\string\footcolumn' can only be used\MessageBreak%
         with `[0,1,2]' in it's first argument.%
       }%
-    \fi%
-  }{}%
+    }%
+    \Ifnumber{#1}{%
+      \ifcase#1\relax%
+        \def\tud@res@a{\footcontent{#2}}%
+      \or%
+        \def\tud@res@a{\footcontent{#2}[*]}%
+      \or%
+        \def\tud@res@a{\footcontent{*}[{#2}]}%
+      \fi%
+    }{}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
 % Um die Option \opt{tudmathfoot} umzusetzen, muss für die Ausgabe des 

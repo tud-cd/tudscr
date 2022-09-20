@@ -478,7 +478,7 @@
     \tud@if@strequal{\tud@pagecolor}{HKS41}{\color{white}}{}%
   }{}{\tud@patch@wrn{normalcolor}}%
   \AtBeginDocument{%
-    \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
+    \ifdefvoid\tud@pagecolor{}{\sbox\z@{\color{\tud@pagecolor}}}%
     \normalcolor%
   }%
 }
@@ -516,7 +516,7 @@
 % \ToDo{angucken, was soll das genau?}[v2.07]
 %    \begin{macrocode}
   \tud@if@preamble{}{%
-    \ifdefvoid{\tud@pagecolor}{}{\sbox\z@{\color{\tud@pagecolor}}}%
+    \ifdefvoid\tud@pagecolor{}{\sbox\z@{\color{\tud@pagecolor}}}%
     \normalcolor%
   }%
 }
@@ -769,7 +769,6 @@
 % \changes{v2.06o}{2022/08/02}{Sternversion für Leerraum ohne \cs{strut}}^^A
 % \begin{macro}{\tud@sec@@format}
 % \begin{macro}{\tud@sec@@@format}
-% \begin{macro}{\tud@sec@uppercase}
 % \begin{macro}{\if@tud@sec}
 % \changes{v2.06o}{2022/08/02}{neu}^^A
 % Mit \cs{tud@sec@fontface} wird die Schriftart für Überschriften im 
@@ -791,13 +790,15 @@
       \fontseriesforce{\tud@cdfont@ebf}%
     \fi%
   \else%
-    \fontfamily{\tud@cdfont@fam}%
-    \if@tud@heavyheadings%
-      \let\bfdefault\tud@cdfont@ebf%
-    \else%
-      \let\bfdefault\tud@cdfont@bf%
-    \fi%
-    \fontseriesforce{\bfdefault}%
+    \tud@if@v@lower{2.06}{}{%
+      \fontfamily{\tud@cdfont@fam}%
+      \if@tud@heavyheadings%
+        \let\bfdefault\tud@cdfont@ebf%
+      \else%
+        \let\bfdefault\tud@cdfont@bf%
+      \fi%
+      \fontseriesforce{\bfdefault}%
+    }%
   \fi%
   \selectfont%
 }
@@ -865,8 +866,7 @@
 % Für die alten Schriften hat der Befehl eine erweiterte Funktionalität, wenn 
 % die Schriftfamilie \DIN aktiv ist, welche für Überschriften einzusetzen ist.
 % Das \CD verlangt dabei, dass zwingend Majuskeln zu verwenden sind. Hierfür 
-% wird der Befehl \cs{MakeTextUppercase} aus dem Paket \pkg{textcase} genutzt, 
-% der den internen \LaTeX"~Befehl \cs{MakeUppercase} verbessert.
+% wird der Befehl \cs{MakeUppercase} aus dem \LaTeX"~Kernel genutzt.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \def\tud@sec@@@@format#1{\tud@ifdin{\MakeUppercase{#1}}{#1}}%
@@ -874,7 +874,6 @@
 %<package&fixfonts>}
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@sec
-% \end{macro}^^A \tud@sec@uppercase
 % \end{macro}^^A \tud@sec@@@format
 % \end{macro}^^A \tud@sec@@format
 % \end{macro}^^A \tud@sec@format

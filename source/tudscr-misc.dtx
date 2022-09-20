@@ -1595,7 +1595,7 @@
         \edef\tud@res@b{\trim@spaces{#3}}%
         \tud@remove@enfold@char\tud@res@b{/}%
         \Ifnumber{\tud@res@b}{%
-          \IfValueF{#1}{\eappto\tud@res@c{\#\tud@res@b}}%
+          \IfValueF{#1}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
           \eappto\tud@github@url@base{/issues/\tud@res@b}%
         }{%
           \eappto\tud@github@url@base{/\tud@res@b}%
@@ -1676,13 +1676,25 @@
 % in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
 % verlinken.
 %    \begin{macrocode}
-\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
+\NewDocumentCommand\Forum{!o !d<>}{%
   \begingroup%
+    \def\tud@res@a{\TUDScriptForum}%
+    \IfValueTF{#1}%
+      {\def\tud@res@c{#1}}
+      {\def\tud@res@c{\TUDForum}}%
+    \IfValueT{#2}{%
+      \edef\tud@res@b{\trim@spaces{#2}}%
+      \tud@remove@enfold@char\tud@res@b{/}%
+      \Ifnumber{\tud@res@b}{%
+        \IfValueF{#1}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
+        \eappto\tud@res@a{viewtopic.php?t=\tud@res@b}%
+      }{%
+        \eappto\tud@res@a{\tud@res@b}%
+      }%
+    }%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \noexpand\href%
-        {\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}%
-        {\noexpand\mbox{#1}}%
+      \noexpand\href{\tud@res@a}{\noexpand\mbox{\tud@res@c}}%
     }%
   \tud@res@a\xspace%
 }

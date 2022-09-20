@@ -1,7 +1,25 @@
 \RequirePackage{booktabs,tabu,longtable}
-\PassOptionsToPackage{symbols}{glossaries}
+\PassOptionsToPackage{acronym,symbols}{glossaries}
 
 \AfterPackage*{glossaries}{%
+  \newglossarystyle{acrotabu}{%
+    \renewenvironment{theglossary}{%
+%      \begin{tabu}spread 0pt{@{}lX<{\strut}l@{}}% mit Seitenangabe
+      \begin{tabu}{@{}lX<{\strut}@{}}% ohne Seitenangabe
+    }{%
+      \end{tabu}\par\bigskip%
+    }%
+    \renewcommand*{\glossaryheader}{}%
+    \renewcommand*{\glsgroupheading}[1]{}%
+    \renewcommand*{\glsgroupskip}{}%
+    \renewcommand*{\glossentry}[2]{%
+      \glsentryitem{##1}% Entry number if required
+      \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
+      \glsentrydesc{##1}%
+%      & ##2% mit Seitenangabe
+      \tabularnewline%
+    }
+  }
   \newcommand*\symbollettergroup{}
   \newcommand*{\newformulasymbol}[5][]{%
     \ifisgreeksymbol{#4}{%
@@ -29,6 +47,18 @@
   }
   \providecommand*\greeklettersname{Greek letters}
   \providecommand*\romanlettersname{Roman letters}
+  \providecaptionname{%
+    american,australian,british,canadian,english,newzealand%
+  }{\greeklettersname}{Greek letters}
+  \providecaptionname{%
+    german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+  }{\greeklettersname}{Griechische Symbole}
+  \providecaptionname{%
+    american,australian,british,canadian,english,newzealand%
+  }{\romanlettersname}{Roman letters}
+  \providecaptionname{%
+    german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
+  }{\romanlettersname}{Lateinische Symbole}
   \newglossaryentry{greekletters}{%
     type=symbols,%
     name={\greeklettersname},%
@@ -43,12 +73,12 @@
   }
   \newglossarystyle{symbsplitlongtabu}{%
     \newcommand*\symbollevel{-1}%
-%    \renewenvironment{theglossary}{%
-%%      \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}% mit Seitenangabe
-%      \begin{longtabu}[l]{ccX<{\strut}}% ohne Seitenangabe
-%    }{%
-%      \end{longtabu}%
-%    }%
+    \renewenvironment{theglossary}{%
+%      \begin{longtabu}spread 0pt[l]{ccX<{\strut}l}% mit Seitenangabe
+      \begin{longtabu}[l]{ccX<{\strut}}% ohne Seitenangabe
+    }{%
+      \end{longtabu}%
+    }%
     \renewcommand*{\glsgroupheading}[1]{}%
     \renewcommand*{\glsgroupskip}{}%
     \newcommand*\symbolhead{%
@@ -97,36 +127,37 @@
     }%
   }
 }% Ende von AfterPackage
-
-  \newcommand*\greeksymbollist{}
-  \def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
-  \forcsvlist{\@tempa}{%
-    \alpha,\beta,\varbeta,\gamma,\delta,\epsilon,\varepsilon,\zeta,%
-    \eta,\theta,\vartheta,\iota,\kappa,\varkappa,\lambda,\mu,\nu,%
-    \xi,\omicron,\pi,\varpi,\rho,\varrho,\sigma,\varsigma,\tau,%
-    \upsilon,\phi,\varphi,\chi,\psi,\omega,%
-    \Alpha,\Beta,\Gamma,\Delta,\Epsilon,\Zeta,\Eta,\Theta,\Iota,%
-    \Kappa,\Lambda,\Mu,\Nu,\Xi,\Omicron,\Pi,\Rho,\Sigma,\Tau,\Upsilon,%
-    \Phi,\Chi,\Psi,\Omega%
-  }
-  \newcommand*\ifisgreeksymbol[1]{%
-    \begingroup%
-      \def\@tempa##1{\let##1\@firstofone}%
-      \forcsvlist{\@tempa}{%
-        \acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
-        \hat,\widehat,\grave,\tilde,\widetilde,\vec,%
-        \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
-      }%
-      \def\boldsymbol{}%
-      \protected@edef\@tempa{#1}%
-      \def\@tempb##1_##2\relax{\def\@tempa{##1}}%
-      \expandafter\@tempb\@tempa_\relax\relax%
-      \def\@tempb##1^##2\relax{\def\@tempa{##1}}%
-      \expandafter\@tempb\@tempa^\relax\relax%
-      \expandafter\ifinlist\expandafter{\@tempa}{\greeksymbollist}{%
-        \aftergroup\@firstoftwo%
-      }{%
-        \aftergroup\@secondoftwo%
-      }%
-    \endgroup%
-  }
+\makeatletter
+\newcommand*\greeksymbollist{}
+\def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
+\forcsvlist{\@tempa}{%
+  \alpha,\beta,\varbeta,\gamma,\delta,\epsilon,\varepsilon,\zeta,%
+  \eta,\theta,\vartheta,\iota,\kappa,\varkappa,\lambda,\mu,\nu,%
+  \xi,\omicron,\pi,\varpi,\rho,\varrho,\sigma,\varsigma,\tau,%
+  \upsilon,\phi,\varphi,\chi,\psi,\omega,%
+  \Alpha,\Beta,\Gamma,\Delta,\Epsilon,\Zeta,\Eta,\Theta,\Iota,%
+  \Kappa,\Lambda,\Mu,\Nu,\Xi,\Omicron,\Pi,\Rho,\Sigma,\Tau,\Upsilon,%
+  \Phi,\Chi,\Psi,\Omega%
+}
+\newcommand*\ifisgreeksymbol[1]{%
+  \begingroup%
+    \def\@tempa##1{\let##1\@firstofone}%
+    \forcsvlist{\@tempa}{%
+      \acute,\bar,\breve,\check,\dot,\ddot,\dddot,\ddddot,%
+      \hat,\widehat,\grave,\tilde,\widetilde,\vec,%
+      \Acute,\Bar,\Breve,\Check,\Dot,\Ddot,\Hat,\Grave,\Tilde,\Vec%
+    }%
+    \def\boldsymbol{}%
+    \protected@edef\@tempa{#1}%
+    \def\@tempb##1_##2\relax{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa_\relax\relax%
+    \def\@tempb##1^##2\relax{\def\@tempa{##1}}%
+    \expandafter\@tempb\@tempa^\relax\relax%
+    \expandafter\ifinlist\expandafter{\@tempa}{\greeksymbollist}{%
+      \aftergroup\@firstoftwo%
+    }{%
+      \aftergroup\@secondoftwo%
+    }%
+  \endgroup%
+}
+\makeatother
