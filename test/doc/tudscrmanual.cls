@@ -8,15 +8,17 @@
 %%
 %% tudscr-version.dtx  (with options: `class,manual,identify,inherit')
 %% tudscr-base.dtx  (with options: `class,manual,inherit,load')
+%% tudscr-misc.dtx  (with options: `class,manual,option')
 %% tudscr-manual.dtx  (with options: `class,manual,option')
 %% tudscr-misc.dtx  (with options: `class,manual,inherit,execute')
+%% tudscr-misc.dtx  (with options: `class,manual,body')
 %% tudscr-manual.dtx  (with options: `class,manual,body')
 %% tudscr-fields.dtx  (with options: `class,manual,body')
 %% tudscr-localization.dtx  (with options: `class,manual,body')
 %% tudscr-texindy.dtx  (with options: `class,manual')
 %% 
 %% TUD-Script -- Corporate Design of Technische Universitaet Dresden
-%%               2021/06/10 v2.07 TUD-Script
+%%               2022/09/01 v2.06p TUD-Script
 %% 
 %% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
 %%               https://github.com/tud-cd/tudscr
@@ -25,19 +27,19 @@
 %% This file was generated from file(s) of the TUD-Script bundle.
 %% ----------------------------------------------------------------------------
 %% 
-%% This work may be distributed and/or modified under the conditions
-%% of the LaTeX Project Public License, version 1.3c of the license.
-%% The latest version of this license is in
-%%               https://www.latex-project.org/lppl.txt
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or
+%% any later version. The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
 %% and version 1.3c or later is part of all distributions of
-%% LaTeX 2005/12/01 or later and of this work.
+%% LaTeX version 2008-05-04 or later.
 %% 
-%% This work has the LPPL maintenance status "author-maintained".
+%% This work has the LPPL maintenance status "maintained".
 %% 
 %% The current maintainer and author of this work is Falk Hanisch.
 %% 
-%%%% From File: tudscr-version.dtx 2021/03/31 01:29:04 83e7294
-\NeedsTeXFormat{LaTeX2e}[2021-06-01]
+%%%% From File: tudscr-version.dtx (no git version info was found)
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \begingroup
   \catcode`\@11\relax%
   \ifx\TUD@Version\@undefined%
@@ -58,7 +60,7 @@
       \fi%
     }%
   \fi%
-  \TUD@@Version{2021/07/16 v2.07 TUD-Script}{2021/06/25 v3.34 KOMA-Script}%
+  \TUD@@Version{2022/09/01 v2.06p TUD-Script}{2022/05/01 v3.36 KOMA-Script}%
   \ifx\TUDScriptVersion\@undefined%
     \xdef\TUDScriptVersion{\TUD@Version}%
     \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
@@ -81,7 +83,7 @@
 \newcommand*\TUD@ProvidesWrapperClass[3]
 {%
   \ProvidesClass{#1}[%
-  2021/07/16 v2.07 TUD-Script
+  2022/09/01 v2.06p TUD-Script
     #3 (#2)%
   ]%
   \newcommand*\TUD@Class@Parent{#2}%
@@ -101,41 +103,83 @@
   \typeout{+------------------------------------------------------------------}%
 }
 \TUD@ProvidesWrapperClass{tudscrmanual}{tudscrreprt}{manual class}
-%%%% From File: tudscr-base.dtx 2021/01/18 15:24:43 7ad44a9
+%%%% From File: tudscr-base.dtx (no git version info was found)
 \RequirePackage{tudscrbase}[%
-  2021/07/16 v2.07 TUD-Script
+  2022/09/01 v2.06p TUD-Script
 ]
 \renewcommand*\TUD@KOMAoptions[1]{\PassOptionsToClass{#1}{\TUD@Class@Parent}}
 \AfterClass{\TUD@Class@Parent}{\let\TUD@KOMAoptions\KOMAoptions}
-%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
+%%%% From File: tudscr-misc.dtx (no git version info was found)
 \RequirePackage{scrhack}[%
-  2021/06/25 v3.34 KOMA-Script
+  2022/05/01 v3.36 KOMA-Script
 ]
-\RequirePackage{xspace}[2014/10/28]
+\RequirePackage{xspace}
 \xspaceaddexceptions{"=}
 \PassOptionsToPackage{quiet}{marginnote}
-\RequirePackage{marginnote}[2018/08/09]
+\RequirePackage{marginnote}
 \reversemarginpar
-\RequirePackage{shellesc}[2019/11/08]
-\RequirePackage{pdftexcmds}[2020/06/27]
-\newcommand*\hrfn[2]{\href{#1}{\trim@spaces{#2}}\footnote{\url{#1}}}
-\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}%
+\RequirePackage{shellesc}
+\RequirePackage{pdftexcmds}
+\PassOptionsToPackage{%
+  destlabel=true,%
+  colorlinks,%
+  hyperindex=false%
+}{hyperref}
+\AfterPackage*{bookmark}{\bookmarksetup{open,openlevel=1}}
+\AfterAtEndOfPackage*{hyperref}{%
+  \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
+  \hypersetup{%
+    linkcolor=HKS44,%
+    urlcolor=HKS33,%
+    citecolor=HKS57,%
+    filecolor=HKS65,%
+    pdfpagelayout=OneColumn%
+  }%
+}
 \TUD@UnwindPackage{hyperref}{%
-  \RequirePackage{url}[2013/09/16]%
+  \ClassWarningNoLine{\TUD@Class@Name}%
+  {%
+    Loading the package `hyperref' is strongly\MessageBreak%
+    recommended. At the very least, some essential\MessageBreak%
+    commands are defined as stubs%
+  }%
+  \RequirePackage{url}
   \providerobustcmd*\url[1]{\texttt{\detokenize{#1}}}%
   \providerobustcmd*\nolinkurl[1]{\url{#1}}%
+  \providecommand*\hypersetup[1]{}%
   \providerobustcmd*\href[3][]{#3}%
+  \providerobustcmd*\hyperref{%
+    \kernel@ifnextchar[%]
+      {\tud@x@hyperref@a}%
+      {\tud@x@hyperref@b}%
+  }%
+  \newcommand*\tud@x@hyperref@a[2][]{#2}%
+  \newcommand*\tud@x@hyperref@b[4]{#4}%
+  \providecommand*\HyperDestRename[2]{}%
+  \providecommand*\Hy@raisedlink[1]{#1}%
+  \providecommand*\hyperpage[1]{#1}%
+  \providecommand*\hypertarget[2]{#2}%
+  \providecommand*\hyperlink[2]{#2}%
+}
+\TUD@UnwindPackage{bookmark}{%
+  \providecommand*\bookmarksetup[1]{}%
+  \providecommand*\pdfbookmark[3][]{}%
+  \providecommand*\currentpdfbookmark[2]{}%
+  \providecommand*\subpdfbookmark[2]{}%
+  \providecommand*\belowpdfbookmark[2]{}%
 }
 \AfterPackage*{babel}{\RequirePackage{csquotes}}
 \TUD@UnwindPackage{babel}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `babel' not loaded}%
+  \ClassWarningNoLine{\TUD@Class@Name}%
+    {Package `babel' not loaded}%
+  \providecommand*\seename{see}%
+  \providecommand*\alsoname{see\nobreakspace also}%
   \providecommand*\glqq{\quotedblbase}%
   \providecommand*\grqq{\textquotedblleft}%
-  \providecommand*\seename{siehe}%
-  \providecommand*\alsoname{siehe\nobreakspace auch}%
 }
 \TUD@UnwindPackage{csquotes}{%
-  \ClassWarningNoLine{\TUD@Class@Name}{Package `csquotes' not loaded}%
+  \ClassWarningNoLine{\TUD@Class@Name}%
+    {Package `csquotes' not loaded}%
   \providecommand\enquote[1]{\emph{#1}}%
 }
 \newcommand*\tud@unique@add[2]{%
@@ -216,21 +260,14 @@
 \tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@sorted{}
 \newcommand*\tud@list@sort[1]{%
-  \ifdefvoid{#1}{%
-    \ClassWarning{\TUD@Class@Name}{%
-      The given list \string#1\space\MessageBreak%
-      is empty, nothing to sort here%
+  \begingroup%
+    \let\tud@list@sorted\@empty%
+    \forlistloop\tud@list@@sort{#1}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
     }%
-  }{%
-    \begingroup%
-      \let\tud@list@sorted\@empty%
-      \forlistloop\tud@list@@sort{#1}%
-      \edef\tud@res@c{%
-        \endgroup%
-        \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
-      }%
-    \tud@res@c%
-  }%
+  \tud@res@c%
 }
 \newcommand*\tud@list@@sort[1]{%
   \@tud@list@sortedfalse%
@@ -314,22 +351,11 @@
     }%
   \tud@res@a%
 }
-%%%% From File: tudscr-manual.dtx 2020/01/14 17:13:34 e5e3ff2
-\PassOptionsToPackage{babel}{microtype}
+%%%% From File: tudscr-manual.dtx (no git version info was found)
 \PassOptionsToPackage{vskip=\smallskipamount}{quoting}
-\PassOptionsToPackage{open,openlevel=0}{bookmark}
-\PassOptionsToPackage{%
-  hyperindex=false,%
-  colorlinks,%
-  linkcolor=HKS44,%
-  urlcolor=HKS33,%
-  citecolor=HKS57,%
-  filecolor=HKS65,%
-  destlabel=true,%pdfview=FitH,%
-}{hyperref}
 \PassOptionsToPackage{nospace}{varioref}
 \PassOptionsToPackage{obeyFinal}{todonotes}
-\ifdef{\tudprintflag}{%
+\ifdef\tudprintflag{%
   \PassOptionsToPackage{color=white}{todonotes}%
 }{%
   \PassOptionsToPackage{colorinlistoftodos}{todonotes}%
@@ -347,7 +373,7 @@
     \let\tud@todo@type@use\tud@todo@type@default%
   \else%
     \begingroup%
-      \tud@lowerstring\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@a{#1}%
       \protected@expandtwoargs\in@{=}{\tud@res@a}%
       \ifin@%
         \def\tud@res@b##1=##2\@nil{%
@@ -369,8 +395,8 @@
             \FamilyKeyStateProcessed%
           \else%
             \ClassError{tudscrmanual}{Wrong ToDo type(s) `\tud@res@b'}{%
-              The given type(s) %
-              `ToDo={\ifcase\tud@res@c only\or not\fi=\tud@res@b}' %
+              The given type(s)\MessageBreak%
+              `ToDo={\ifcase\tud@res@c only\or not\fi=\tud@res@b}'\MessageBreak%
               are invalid.%
             }%
           \fi%
@@ -445,11 +471,6 @@
   \tud@res@a%
 }
 \TUDExecuteOptions{ToDo=true}
-\newcommand*\tud@xdy@settings{}
-% PENDING locale-Einstellung in Abhängigkeit der Hauptsprache! 
-\edef\tud@xdy@settings{texindy -M \@currname-ind.xdy -L german-din}
-\newcommand*\tud@xdy@log{}
-\edef\tud@xdy@log{\jobname.xlg}
 \newcommand*\tud@index@name{\jobname}
 \newcommand*\tud@index@title{\indexname}
 \newcommand*\tud@index@ref{\tud@index@title}
@@ -458,11 +479,6 @@
 \newcommand*\tud@index@list{}
 \NewDocumentCommand\tud@index@make{O{\jobname} d() m}{%
   \begingroup%
-    \def\tud@res@a##1{%
-      \addto@hook@expandafter\tud@toks@{%
-        \expandafter\def\expandafter##1\expandafter{##1}%
-      }%
-    }%
     \edef\tud@index@name{#1}%
     \IfValueTF{#2}{%
       \def\tud@index@ref{#2}%
@@ -471,6 +487,11 @@
     }%
     \def\tud@index@title{#3}%
     \tud@toks@{}%
+    \def\tud@res@a##1{%
+      \addto@hook@expandafter\tud@toks@{%
+        \expandafter\def\expandafter##1\expandafter{##1}%
+      }%
+    }%
     \tud@res@a\tud@index@name%
     \tud@res@a\tud@index@ref%
     \tud@res@a\tud@index@title%
@@ -483,7 +504,7 @@
 }
 \tud@index@make(Allgemeiner Index){Allgemeines}
 \tud@index@make[options]{Klassen- und Paketoptionen}
-\tud@index@make[macros](Index der Befehle und Umgebungen)%
+\tud@index@make[macros](Index der Befehle und Umgebungen)
   {Befehle und Umgebungen mit zugeh\"origen Parametern}
 \tud@index@make[terms](Index der Bezeichner){Sprachabh\"angige Bezeichner}
 \tud@index@make[elements]{Seitenstile, Schriftelemente und Farben}
@@ -491,19 +512,22 @@
 \tud@index@make[files]{Klassen, Pakete und Dateien}
 \newcommand*\tud@changes@list{}
 \NewDocumentCommand\tud@changes@make{m}{%
-  \tud@unique@add\tud@changes@list{changes-#1}%
+  \tud@unique@add\tud@changes@list{changes-v#1}%
 }
-\tud@changes@make{v2.00}
-\tud@changes@make{v2.01}
-\tud@changes@make{v2.02}
-\tud@changes@make{v2.03}
-\tud@changes@make{v2.04}
-\tud@changes@make{v2.05}
-\tud@changes@make{v2.06}
-\tud@changes@make{v2.07}
-\let\makeindex\@empty
-\@onlypreamble\makeindex
-\newcommand*\tud@index@mdfive{}
+\AfterClass{\TUD@Class@Parent}{\forlistloop\tud@changes@make{\tud@v@list}}
+\newcommand*\tud@xdy@settings{}
+\edef\tud@xdy@settings{texindy -M \@currname.\@currext-ind.xdy}
+\AtEndDocument{%
+  \tud@if@language@main{german}{%
+    \appto\tud@xdy@settings{ -L german-din}%
+  }{}%
+  \eappto\tud@xdy@settings{%
+    \space-C \ifundef\inputencodingname{utf8}{\inputencodingname}%
+  }%
+}
+\newcommand*\tud@xdy@mdfive{}
+\newcommand*\tud@xdy@log{}
+\edef\tud@xdy@log{\jobname.xlg}
 \if@filesw
   \tud@newwrite\@indexfile%
   \immediate\openout\@indexfile=\jobname.idx%
@@ -511,78 +535,49 @@
   \BeforeClosingMainAux{%
     \immediate\closeout\@indexfile%
     \@tud@res@swafalse%
-    \ifundef\pdf@filemdfivesum{%
-      \@tud@res@swatrue%
-      \let\tud@index@mdfive\@empty%
-      \let\tud@res@a\@empty%
-    }{%
-      \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
-      \ifnum\pdf@strcmp{\tud@res@a}{\tud@index@mdfive}=\z@\else%
-        \@tud@res@swatrue%
-      \fi%
+    \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
+    \edef\tud@res@b{\pdf@filemdfivesum{\tud@xdy@log}}%
+    \edef\tud@res@c{%
+      splitindex%
+        \space-m\space'\tud@xdy@settings\space2>\string&1'%
+        \space\jobname.idx%
     }%
-    \if@tud@res@swa%
+    \ifnum\pdf@strcmp{\tud@res@a}{\tud@xdy@mdfive}=\z@\else%
       \ifnum\pdf@shellescape=\@ne\relax%
-        \ifundef\inputencodingname{%
-          \appto\tud@xdy@settings{ -C utf8}%
-        }{%
-          \eappto\tud@xdy@settings{ -C \inputencodingname}%
-        }%
-        \edef\tud@res@c{\pdf@filemdfivesum{\tud@xdy@log}}%
-        \edef\tud@res@b{%
-          splitindex%
-            \space-m\space'\tud@xdy@settings\space2>\string&1'%
-            \space\jobname.idx%
-        }%
+        \ClassInfo{tudscrmanual}%
+          {invoking: \tud@res@c}%
         \begingroup%
           \everyeof{\noexpand}%
           \endlinechar=\m@ne%
-          \ClassInfo{tudscrmanual}{calling splitindex:}%
-          \ClassInfo{tudscrmanual}{\tud@res@b}%
-          \edef\tud@res@b{%
+          \edef\tud@res@c{%
             \noexpand\@@input\string|%
-              \string"\tud@res@b\space>\tud@xdy@log\string"\space%
+              \string"\tud@res@c\space>\tud@xdy@log\string"\space%
           }%
-          \tud@res@b%
+          \tud@res@c%
         \endgroup%
-        % DOC wenn erfolgreich, hat sich das log geändert (temporäre Module)
-        \ifnum\pdf@strcmp{\tud@res@c}{\pdf@filemdfivesum{\tud@xdy@log}}=\z@%
+        \ifnum\pdf@strcmp{\pdf@filemdfivesum{\tud@xdy@log}}{\tud@res@b}=\z@%
           \ClassWarningNoLine{tudscrmanual}%
           {%
-            \tud@res@b\MessageBreak%
+            \tud@res@c\MessageBreak%
             was called but there is no result%
           }%
-          \@tud@res@swafalse%
+        \else%
+          \let\tud@xdy@mdfive\tud@res@a%
         \fi%
       \else%
         \ClassWarningNoLine{tudscrmanual}%
         {%
           The index file `\jobname.idx' has changed. Run again\MessageBreak%
-          with --shell-escape flag enabled%
+          with --shell-escape flag enabled or just call\MessageBreak%
+          \tud@res@c%
         }%
-        \@tud@res@swafalse%
-      \fi%
-      % DOC Zurücksetzen auf bisherige Prüfsumme
-      \if@tud@res@swa\else%
-        \let\tud@res@a\tud@index@mdfive%
       \fi%
     \fi%
-    % DOC muss in jedem Fall geschrieben werden
-    \immediate\write\@mainaux{\string\gdef\string\tud@index@mdfive{\tud@res@a}}%
+    \immediate\write\@mainaux{%
+      \string\gdef\string\tud@xdy@mdfive{\tud@xdy@mdfive}%
+    }%
   }%
 \fi
-\tud@newif\if@tud@index@note
-\TUD@key{indexnote}[true]{%
-  \TUD@set@ifkey{indexnote}{@tud@index@note}{#1}%
-}
-\AtEndPreamble{%
-  \TUD@key@toolate{indexnote}%
-  \if@tud@index@note%
-    \AtBeginDocument{\setlength\marginparpush{\z@}}%
-  \else%
-    \let\tud@index@note@write\@gobbletwo%
-  \fi%
-}
 \TUD@key{final}[true]{%
   \TUD@set@ifkey{final}{@tempswa}{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
@@ -603,19 +598,18 @@
 {%
   \TUD@key@toolate{final}%
   \TUD@key@toolate{print}%
-  \ifdef{\tudfinalflag}{%
+  \ifdef\tudfinalflag{%
     \TUDoptions{ToDo=false}%
     \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
-    \TUDoptions{indexnote=false}%
-    \TUD@key{indexnote}{\FamilyKeyStateProcessed}%
   }{%
     \KOMAoptions{overfullrule}%
   }%
-  \ifdef{\tudprintflag}{%
+  \ifdef\tudprintflag{%
     \ifnum\tud@cd@num>\z@\relax%
       \TUDoptions{cd=true}%
     \fi%
-    \ifundef{\hypersetup}{}{\hypersetup{hidelinks}}%
+    \PassOptionsToPackage{hidelinks}{hyperref}%
+    \AfterEndPreamble{\hypersetup{hidelinks}}%
   }{}%
   \TUD@key@toolate{cd}%
 }
@@ -629,18 +623,38 @@
   captions=tableheading,%
   numbers=noenddot,%
 }{\TUD@Class@Parent}
-%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
+%%%% From File: tudscr-misc.dtx (no git version info was found)
 \DeclareOption*{%
   \expandafter\PassOptionsToClass\expandafter{\CurrentOption}%
   {\TUD@Class@Parent}%
 }
 \TUDProcessOptions\relax
 \LoadClass{\TUD@Class@Parent}[%
-  2021/07/16 v2.07 TUD-Script
+  2022/09/01 v2.06p TUD-Script
 ]
-%%%% From File: tudscr-misc.dtx 2021/06/10 01:08:07 fb873a0
-\renewcommand*\@pnumwidth{2.1em}%
-\renewcommand*\@tocrmarg{3.1em}%
+%%%% From File: tudscr-misc.dtx (no git version info was found)
+\renewcommand*\@pnumwidth{2.1em}
+\renewcommand*\@tocrmarg{3.1em}
+\newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
+\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
+\newcommand*\hrfn[2]{%
+  \href{#1}{\trim@spaces{#2}}%
+  \footnote{\strut\url{#1}}%
+}
+\newrobustcmd*\mailto[1]{\mbox{\href{mailto:#1}{\nolinkurl{#1}}}}
+\newrobustcmd*\TUDScriptContactTitle{%
+  \ifundef\emailaddress{%
+    \qquad\expandafter\mailto\expandafter{\TUDScriptContact}%
+  }{%
+    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \let\mailto\@firstofone%
+    \let\TUDScriptContactTitle\relax%
+  }%
+}
 \newcommand*\textsbn{}
 \newrobustcmd*\sbnfont{\sffamily\bfseries\upshape}
 \DeclareTextFontCommand\textsbn{\sbnfont}
@@ -650,12 +664,208 @@
 \newcommand*\textttit{}
 \newrobustcmd*\ttitfont{\ttfamily\itshape}
 \DeclareTextFontCommand\textttit{\ttitfont}
+\newcommand*\tud@english[1]{%
+  \tud@language@wrn{english}%
+  \let\tud@english\@firstofone%
+  #1%
+}
+\AfterAtEndOfPackage*{babel}{%
+  \AfterEndPreamble{%
+    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+  }%
+}
+\AfterAtEndOfPackage*{polyglossia}{%
+  \AfterEndPreamble{%
+    \tud@if@language@loaded{english}{%
+      \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
+    }{}%
+  }%
+}
+\kernel@make@fragile\KOMAScript
+\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
+\robustify\KOMAScript
+\robustify\TUDScript
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\KOMAScript{KOMA-Script{}}%
+    \def\TUDScript{TUD-Script{}}%
+  }%
+}
+\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
+\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
+\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
+\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
+\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
+\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
+\newcommand*\TUDCD{\CD der \TnUD}
+\newcommand*\TUDCDs{\CDs der \TnUD}
+\newrobustcmd*\TUDForum{%
+  \mbox{T\kern.05em U\kern.05em D-\Logo{LaTeX}-Forum}\xspace%
+}
+\newrobustcmd*\DDC{%
+  \mbox{%
+    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
+    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
+  }\xspace%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\CD{Corporate Design{}}%
+    \def\CDs{Corporate Designs{}}%
+    \def\TUD{Technische Universit\"at Dresden{}}%
+    \def\TnUD{Technischen Universit\"at Dresden{}}%
+    \def\TUDForum{TUD-LaTeX-Forum{}}%
+    \def\DDC{DRESDEN-concept{}}%
+  }%
+}
+\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace Sans}\xspace}
+\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
+\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace Bold}\xspace}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \def\OpenSans{Open Sans{}}%
+    \def\Univers{Univers{}}%
+    \def\DIN{DIN Bold{}}%
+  }%
+}
+\newcommand*\Attention[2][\z@]{%
+  \marginnote{%
+    \tud@setdim\fboxsep{0.25em}%
+    \fbox{Achtung!}%
+  }[{#1}]%
+  \emph{\trim@spaces{#2}}%
+}
+\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#4}}%
+    \def\tud@res@b##1#3/##2#3/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{##1}%
+      }{%
+        \def\tud@res@a{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
+    \tud@remove@enfold@char\tud@res@a{/}%
+    \edef\tud@res@b{%
+      \endgroup%
+      \unexpanded{\def#1}{#2#3/\tud@res@a}%
+    }%
+  \tud@res@b%
+}
+\newcommand*\tud@github@url@normalize[2]{%
+  \tud@url@normalize#1{github.com}{#2}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\newcommand*\GitHubBase[1]{%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
+}
+\newcommand*\tud@github@url@error{%
+  \ClassError{\TUD@Class@Name}%
+    {GitHub repository missing}%
+    {%
+      No default GitHub repository was set with\MessageBreak%
+      `\detokenize{\GitHubBase{<url>}}'. You should either\MessageBreak%
+      set a default one or pass it as argument.%
+    }%
+}
+\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
+  \begingroup%
+    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
+    \ifx\tud@github@url@base\relax%
+      \def\tud@res@a{%
+        \endgroup%
+        \tud@github@url@error%
+      }%
+    \else%
+      \IfValueTF{#1}{%
+        \def\tud@res@c{#1}%
+      }{%
+        \expandafter\filename@parse\expandafter{\tud@github@url@base}%
+        \protected@edef\tud@res@c{%
+          \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
+        }%
+      }%
+      \IfValueT{#3}{%
+        \edef\tud@res@b{\trim@spaces{#3}}%
+        \tud@remove@enfold@char\tud@res@b{/}%
+        \Ifnumber{\tud@res@b}{%
+          \IfValueF{#1}{\eappto\tud@res@c{\#\tud@res@b}}%
+          \eappto\tud@github@url@base{/issues/\tud@res@b}%
+        }{%
+          \eappto\tud@github@url@base{/\tud@res@b}%
+        }%
+      }%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
+      }%
+    \fi%
+  \tud@res@a\xspace%
+}
+\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
+  \begingroup%
+    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
+    \ifx\tud@github@url@base\relax%
+      \def\tud@res@a{%
+        \endgroup%
+        \tud@github@url@error%
+      }%
+    \else%
+      \IfValueTF{#3}{%
+        \appto\tud@github@url@base{/releases/download/#3/#4}%
+      }{%
+        \appto\tud@github@url@base{/releases/latest/download/#4}%
+      }%
+      \IfBooleanTF{#1}{%
+        \def\tud@res@c{\File*{#4}}%
+      }{%
+        \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
+        \index{Dateien}%
+      }%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
+      }%
+    \fi%
+  \tud@res@a\xspace%
+}
+\newcommand*\tud@ctan@url@normalize[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
+\NewDocumentCommand\CTAN{!o !d<>}{%
+  \begingroup%
+    \tud@ctan@url@normalize\tud@res@b{\IfValueT{#2}{#2}}%
+    \IfValueTF{#1}{%
+      \def\tud@res@c{#1}%
+    }{%
+      \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
+    }%
+  \tud@res@a\xspace%
+}
+\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\href%
+        {\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}%
+        {\noexpand\mbox{#1}}%
+    }%
+  \tud@res@a\xspace%
+}
 \newrobustcmd*\Logo[1]{%
   \ifcsundef{tud@logo@#1}{%
-    \ClassError{\TUD@Class@Name}{logo `#1' missing}{%
-      The necessary macro `\@backslashchar tud@logo@#1'\MessageBreak%
-      was never defined.%
-    }%
+    \ClassError{\TUD@Class@Name}%
+      {logo `#1' missing}%
+      {%
+        The necessary macro `\string\tud@logo@#1'\MessageBreak%
+        was never defined.%
+      }%
   }{%
     \mbox{\csuse{tud@logo@#1}}%
   }%
@@ -827,197 +1037,7 @@
   }%
   X\@%
 }
-\newcommand*\tud@english[1]{#1}
-\AtBeginDocument{%
-  \iflanguageloaded{english}{%
-    \renewcommand*\tud@english[1]{\foreignlanguage{english}{#1}}%
-  }{}%
-}
-\NewDocumentCommand\tud@url@normalize{m O{https://} m m}{%
-  \begingroup%
-    \edef\tud@res@a{\trim@spaces{#4}}%
-    \def\tud@res@b##1#3/##2#3/##3\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
-      }{%
-        \def\tud@res@a{##2}%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a #3/#3/\@nil%
-    \tud@remove@enfold@char\tud@res@a{/}%
-    \edef\tud@res@b{%
-      \endgroup%
-      \unexpanded{\def#1}{#2#3/\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\newcommand*\tud@github@url@normalize[2]{%
-  \tud@url@normalize#1{github.com}{#2}%
-}
-\newcommand*\tud@github@url@base{}
-\let\tud@github@url@base\relax
-\newcommand*\GitHubBase[1]{%
-  \tud@github@url@normalize\tud@github@url@base{#1}%
-}
-\newcommand*\tud@github@url@error{%
-  \ClassError{\TUD@Class@Name}{GitHub repository missing}{%
-    No default GitHub repository was set with\MessageBreak%
-    `\detokenize{\GitHubBase{<url>}}'. You should either\MessageBreak%
-    set a default one or pass it as argument.%
-  }%
-}
-\NewDocumentCommand\GitHubRepo{!o !d() !d<>}{%
-  \begingroup%
-    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
-    \ifx\tud@github@url@base\relax%
-      \def\tud@res@a{%
-        \endgroup%
-        \tud@github@url@error%
-      }%
-    \else%
-      \IfValueTF{#1}{%
-        \def\tud@res@c{#1}%
-      }{%
-        \expandafter\filename@parse\expandafter{\tud@github@url@base}%
-        \protected@edef\tud@res@c{%
-          \tud@english{GitHub-Repository\nobreakspace\textsbn{\filename@base}}%
-        }%
-      }%
-      \IfValueT{#3}{%
-        \edef\tud@res@b{\trim@spaces{#3}}%
-        \tud@remove@enfold@char\tud@res@b{/}%
-        \Ifnumber{\tud@res@b}{%
-          \IfValueF{#1}{\eappto\tud@res@c{\#\tud@res@b}}%
-          \eappto{\tud@github@url@base}{/issues/\tud@res@b}%
-        }{%
-          \eappto{\tud@github@url@base}{/\tud@res@b}%
-        }%
-      }%
-      \protected@edef\tud@res@a{%
-        \endgroup%
-        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
-      }%
-    \fi%
-  \tud@res@a\xspace%
-}
-\NewDocumentCommand\GitHubDownload{s d() d<> m}{%
-  \begingroup%
-    \IfValueT{#2}{\tud@github@url@normalize\tud@github@url@base{#2}}%
-    \ifx\tud@github@url@base\relax%
-      \def\tud@res@a{%
-        \endgroup%
-        \tud@github@url@error%
-      }%
-    \else%
-      \IfValueTF{#3}{%
-        \appto\tud@github@url@base{/releases/download/#3/#4}%
-      }{%
-        \appto\tud@github@url@base{/releases/latest/download/#4}%
-      }%
-      \IfBooleanTF{#1}{%
-        \def\tud@res@c{\File*{#4}}%
-      }{%
-        \def\tud@res@c{\InlineDeclaration{\File''{#4}}}%
-        \index{Dateien}%
-      }%
-      \protected@edef\tud@res@a{%
-        \endgroup%
-        \noexpand\href{\tud@github@url@base}{\noexpand\mbox{\tud@res@c}}%
-      }%
-    \fi%
-  \tud@res@a\xspace%
-}
-\newcommand*\tud@ctan@url@normalize[2]{%
-  \tud@url@normalize#1{ctan.org}{#2}%
-}
-\NewDocumentCommand\CTAN{!o !d<>}{%
-  \begingroup%
-    \tud@ctan@url@normalize\tud@res@b{\IfValueT{#2}{#2}}%
-    \IfValueTF{#1}{%
-      \def\tud@res@c{#1}%
-    }{%
-      \def\tud@res@c{\tud@english{Comprehensive TeX Archive Network (CTAN)}}%
-    }%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\href{\tud@res@b}{\noexpand\mbox{\tud@res@c}}%
-    }%
-  \tud@res@a\xspace%
-}
-\newcommand*\TUDForum{%
-  \mbox{T\kern.05em U\kern.05em D-\Logo{LaTeX}-Forum}\xspace%
-}
-\NewDocumentCommand\Forum{!O{\TUDForum} !d<>}{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \noexpand\href%
-        {\TUDScriptForum\IfValueT{#2}{viewtopic.php?t=#2}}%
-        {\noexpand\mbox{#1}}%
-    }%
-  \tud@res@a\xspace%
-}
-\newcommand*\Attention[2][\z@]{%
-  \marginnote{%
-    \tud@setdim\fboxsep{0.25em}%
-    \fbox{Achtung!}%
-  }[{#1}]%
-  \emph{\trim@spaces{#2}}%
-}
-\newrobustcmd*\TUDScriptContactTitle{%
-  \ifundef{\emailaddress}{%
-    \footnote{\scriptsize\expandafter\mailto\expandafter{\TUDScriptContact}}%
-  }{%
-    \expandafter\emailaddress\expandafter{\TUDScriptContact}%
-  }%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{\let\TUDScriptContactTitle\relax}%
-}
-\kernel@make@fragile\KOMAScript
-\edef\KOMAScript{\noexpand\mbox{\expandonce\KOMAScript}\noexpand\xspace}
-\robustify\KOMAScript
-\robustify\TUDScript
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\KOMAScript{KOMA-Script{}}%
-    \def\TUDScript{TUD-Script{}}%
-  }%
-}
-\newcommand*\vTUDScript{v\TUDScriptVersionNumber}
-\newcommand*\vKOMAScript{v\TUD@KOMAVersionNumber}
-\newrobustcmd*\CD{\tud@english{Corporate Design}\xspace}
-\newrobustcmd*\CDs{\tud@english{Corporate Designs}\xspace}
-\newrobustcmd*\TUD{Technische Universit\"at Dresden\xspace}
-\newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
-\newcommand*\TUDCD{\CD der \TnUD}
-\newcommand*\TUDCDs{\CDs der \TnUD}
-\newrobustcmd*\DDC{%
-  \mbox{%
-    D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
-    D\kern.05em E\kern.05em N\kern.1em-\kern.1em concept%
-  }\xspace%
-}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\CD{Corporate Design{}}%
-    \def\CDs{Corporate Designs{}}%
-    \def\TUD{Technische Universit\"at Dresden{}}%
-    \def\TnUD{Technischen Universit\"at Dresden{}}%
-    \def\DDC{DRESDEN-concept{}}%
-  }%
-}
-\newrobustcmd*\OpenSans{\textcdbn{Open\nobreakspace Sans}\xspace}
-\newrobustcmd*\Univers{\textcdbi{Univers}\xspace}
-\newrobustcmd*\DIN{\textcdbi{DIN\nobreakspace Bold}\xspace}
-\AfterPackage*{hyperref}{%
-  \pdfstringdefDisableCommands{%
-    \def\OpenSans{Open Sans{}}%
-    \def\Univers{Univers{}}%
-    \def\DIN{DIN Bold{}}%
-  }%
-}
-%%%% From File: tudscr-manual.dtx 2020/11/11 22:13:36 968380d
+%%%% From File: tudscr-manual.dtx (no git version info was found)
 \NewDocumentCommand\tud@v@to@number{s m m}{%
   \begingroup%
     \edef\tud@res@a{%
@@ -1138,26 +1158,24 @@
   \let\index\@gobble\let\glossary\@gobble%
   \tud@addtocontents@hook%
 }{}{\tud@patch@wrn{addtocontents}}
-\RequirePackage{multicol}[2019/12/09]
-\RequirePackage{setspace}[2011/12/19]
+\RequirePackage{multicol}
+\RequirePackage{setspace}
 \setstretch{1.1}
-\TUD@UnwindPackage*{hyperref}{\RequirePackage{microtype}[2021/03/14]}
-\RequirePackage{quoting}[2014/01/28]
-\RequirePackage{isodate}[2010/01/03]
-\RequirePackage{ragged2e}[2021/02/05]
+\RequirePackage{quoting}
+\RequirePackage{isodate}
+\RequirePackage{ragged2e}
 \@removefromreset{footnote}{chapter}
 \renewcommand*\raggedfootnote{\tud@RaggedRight}%
-\RequirePackage{noindentafter}[2021/05/14]
-\RequirePackage{units}[1998/08/04]
+\RequirePackage{noindentafter}
 \AtEndPreamble{%
-  \RequirePackage{ellipsis}[2020/05/22]%
+  \RequirePackage{ellipsis}
   \let\ellipsispunctuation\relax%
 }
-\RequirePackage{tabularx}[2020/01/15]
-\RequirePackage{booktabs}[2020/01/12]
+\RequirePackage{tabularx}
+\RequirePackage{booktabs}
 \DeclareListParser{\dossvlist}{;}
 \DeclareListParser*{\forssvlist}{;}
-\RequirePackage{enumitem}[2019/06/20]
+\RequirePackage{enumitem}
 \setlist{%
   before*={\endgraf\tud@RaggedRight},%
   partopsep=0pt,noitemsep%
@@ -1171,10 +1189,10 @@
     #1%
   }%
 }
-\RequirePackage{tikz}[2021/05/15]
-\RequirePackage{pdfpages}[2021/03/06]
-\RequirePackage{caption}[2020/10/26]
-\RequirePackage{floatrow}[2008/08/02]
+\RequirePackage{tikz}
+\RequirePackage{pdfpages}
+\RequirePackage{caption}
+\RequirePackage{floatrow}
 \DeclareCaptionSubType[alph]{figure}
 \DeclareCaptionSubType[alph]{table}
 \captionsetup{font=sf,labelfont=bf,labelsep=space}
@@ -1182,8 +1200,8 @@
 \captionsetup[subfloat]{labelformat=brace,list=off}
 \KOMAoption{captions}{tableheading,figuresignature}
 \floatsetup[table]{style=plaintop}
-\RequirePackage{filemod}[2011/09/19]
-\RequirePackage{ifplatform}[2017/10/13]
+\RequirePackage{filemod}
+\RequirePackage{ifplatform}
 \newcommand*\tud@shellescape@wrn[1]{%
   \ClassWarning{tudscrmanual}%
   {%
@@ -1201,9 +1219,9 @@
   \fi
 \fi
 \appto\tud@latex@ext{-synctex=1\space}
-\RequirePackage{listings}[2020/03/24]
+\RequirePackage{listings}
 \lstdefinestyle{tudscr}{%
-  basicstyle=\ttfamily\ifundef{\setstretch}{}{\setstretch{1}},%
+  basicstyle=\ttfamily\ifundef\setstretch{}{\setstretch{1}},%
   keywordstyle=,%
   columns=fullflexible,keepspaces,%
   aboveskip=\smallskipamount,%
@@ -1215,9 +1233,9 @@
 \NoIndentAfterEnv{Code}
 \BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
 \AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-\RequirePackage{varioref}[2020/08/11]
+\RequirePackage{varioref}
 \renewrobustcmd*\fullref[1]{\hyperref[{#1}]{\autoref*{#1}\space\vpageref{#1}}}
-\RequirePackage{nameref}[2021/04/02]
+\RequirePackage{nameref}
 \AfterPackage*{nameref}{%
   \patchcmd\NR@gettitle{%
     \GetTitleString%
@@ -1228,7 +1246,7 @@
 \newcommand*\tud@currentHref{}
 \AfterPackage*{hyperref}{%
   \newcommand*\autorefname[1][current]{%
-    \Ifstr{#1}{current}{%
+    \tud@if@strequal{#1}{current}{%
       \expandafter\HyPsd@@autorefname\@currentHref\@nil%
     }{%
       \auto@refname\HyPsd@@autorefname{#1}%
@@ -1245,53 +1263,42 @@
   }%
   \newcommand*\auto@@refname{}%
   \def\auto@@refname#1#2#3#4#5\@nil#6\@nil{#6#4.\@nil}%
-  \renewcaptionname{ngerman}{\sectionautorefname}{Unterkapitel}%
-  \renewcaptionname{ngerman}{\subsectionautorefname}{Abschnitt}%
-  \renewcaptionname{ngerman}{\subsubsectionautorefname}{Unterabschnitt}%
+  \begingroup%
+    \def\do#1{%
+      \tud@if@language@loaded{#1}{%
+        \renewcaptionname{#1}{\subsectionautorefname}{Abschnitt}%
+        \renewcaptionname{#1}{\subsubsectionautorefname}{Abschnitt}%
+        \renewcaptionname{#1}{\subparagraphautorefname}{Absatz}%
+      }{}%
+    }%
+    \expandafter\docsvlist\expandafter{\tud@localization@@german}%
+  \endgroup%
 }
 \TUD@UnwindPackage{hyperref}{%
-  \ClassWarningNoLine{tudscrmanual}%
-  {%
-    Loading the package `hyperref' is strongly\MessageBreak%
-    recommended. At the very least, some essential\MessageBreak%
-    commands are defined as stubs%
-  }%
-  \providecommand*\hypersetup[1]{}%
-  \providecommand*\bookmarksetup[1]{}%
-  \providecommand*\pdfbookmark[3][]{}%
-  \providecommand*\currentpdfbookmark[2]{}%
-  \providecommand*\HyperDestRename[2]{}%
-  \providerobustcmd*\hyperref{%
-    \kernel@ifnextchar[%]
-      {\tud@x@hyperref@a}%
-      {\tud@x@hyperref@b}%
-  }%
-  \newcommand*\tud@x@hyperref@a[2][]{#2}%
-  \newcommand*\tud@x@hyperref@b[4]{#4}%
-  \providecommand*\hypertarget[2]{#2}%
-  \providecommand*\hyperlink[2]{#2}%
-  \providecommand*\Hy@raisedlink[1]{#1}%
-  \providecommand*\hyperpage[1]{#1}%
   \providerobustcmd*\autoref{??\xspace\kernel@ifstar{\ref}{\ref}}%
   \providerobustcmd*\autorefname[1][]{??\xspace}%
   \tud@localization@german{\partautorefname}{Teil}%
   \tud@localization@german{\chapterautorefname}{Kapitel}%
-  \tud@localization@german{\sectionautorefname}{Unterkapitel}%
+  \tud@localization@german{\sectionautorefname}{Abschnitt}%
   \tud@localization@german{\subsectionautorefname}{Abschnitt}%
-  \tud@localization@german{\subsubsectionautorefname}{Unterabschnitt}%
+  \tud@localization@german{\subsubsectionautorefname}{Abschnitt}%
+  \tud@localization@german{\paragraphautorefname}{Absatz}%
+  \tud@localization@german{\subparagraphautorefname}{Absatz}%
+  \tud@localization@german{\appendixautorefname}{Anhang}%
+  \tud@localization@german{\figureautorefname}{Abbildung}%
+  \tud@localization@german{\tableautorefname}{Tabelle}%
+  \tud@localization@german{\pageautorefname}{Seite}%
   \tud@localization@english{\partautorefname}{Part}%
   \tud@localization@english{\chapterautorefname}{chapter}%
   \tud@localization@english{\sectionautorefname}{section}%
   \tud@localization@english{\subsectionautorefname}{subsection}%
   \tud@localization@english{\subsubsectionautorefname}{subsubsection}%
-}
-\newcommand*\hypertargetraised[1]{%
-  \begingroup%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\Hy@raisedlink{\noexpand\hypertarget{#1}{}}%
-    }%
-  \tud@res@a%
+  \tud@localization@english{\paragraphautorefname}{paragraph}%
+  \tud@localization@english{\subparagraphautorefname}{subparagraph}%
+  \tud@localization@english{\appendixautorefname}{Appendix}%
+  \tud@localization@english{\figureautorefname}{Figure}%
+  \tud@localization@english{\tableautorefname}{Table}%
+  \tud@localization@english{\pageautorefname}{page}%
 }
 \NewDocumentCommand\tud@hypertarget{m d'' d<> m}{%
   \begingroup%
@@ -1342,8 +1349,14 @@
     }%
   \tud@res@a%
 }
-% PENDING \tudhyperref > \tudmanualref für treatise.tex überarbeiten
-% \href[pdfnewwindow]{./test.pdf#sec:general}{text}
+\newcommand*\hypertargetraised[1]{%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Hy@raisedlink{\noexpand\hypertarget{#1}{}}%
+    }%
+  \tud@res@a%
+}
 \newrobustcmd*\tud@hyperlink[3]{%
   \begingroup%
     \edef\tud@res@a{%
@@ -1352,7 +1365,7 @@
     }%
   \tud@res@a{#3}{#2}%
 }
-\RequirePackage{todonotes}[2021/06/04]
+\RequirePackage{todonotes}
 \AtEndPreamble{%
   \ifdim\marginparwidth<2cm\relax%
     \tud@setdim\marginparwidth{2cm}%
@@ -1362,7 +1375,6 @@
   \RenewDocumentCommand\ToDo{s o m !o}{}%
   \renewcommand*\ListOfToDo{}%
 }
-% TODO > s o[#4] d()[#2] m; in tudscrdoc übernehmen
 \NewDocumentCommand\ToDo{s O{default} m !o}{%
   \ifnum\tud@todo@num>\z@\relax%
     \global\let\tud@currentHref\@currentHref%
@@ -1480,129 +1492,176 @@
 \newcommand*\ListOfToDo{%
   \ifnum\tud@todo@num>\z@\relax\cleardoublepage\listoftodos\fi%
 }
-\newrobustcmd*\txb{{\raise.05em\hbox{\kern.05em\textbar\kern.05em}}}
-\newrobustcmd*\bsc{\kern-.05em\@backslashchar\kern-.05em}
-% DOC r'' : dlicn -> declare, inline, index, changelog, normal text
-\newcommand*\tud@markup@list{}
-\NewDocumentCommand\Markup@Format@Set{m r() O{} D<>{} d|| r'' m}{%
-  \tud@toks@{{#1}{{#2{#3##1}\IfValueT{##2}{\PValue{=}##2}}\IfValueT{##3}{##3}}}%
-  \ifcsundef{Markup@Format@@Inline@@#1}{%
-    \expandafter\Markup@Inline@Format@Set\the\tud@toks@%
-  }{}%
-  \ifcsundef{Markup@Format@@InlineDeclare@@#1}{%
-    \expandafter\Markup@InlineDeclare@Format@Set\the\tud@toks@%
-  }{}%
-  \ifcsundef{Markup@Format@@Declare@@#1}{%
-    \def\@tempa{[{#4}]}%
-    \expandafter\expandafter\expandafter\Markup@Declare@Format@Set%
-      \expandafter\@tempa\the\tud@toks@%
-  }{}%
-  \IfValueT{#5}{%
-    \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
-    \csdef{Markup@Format@@Index@@#1}{#5}%
-  }%
-  \Markup@Suffix@Format@Set{#1}{#6}{\suffix{#7}}%
-}
-\@onlypreamble\Markup@Format@Set
-\newcommand*\Markup@Inline@Format@Set[2]{%
-  \expandafter\newcommand\csname Markup@Format@@Inline@@#1\endcsname{}%
-  \csdef{Markup@Format@@Inline@@#1}##1=##2=[##3]{%
-    \mbox{#2\Markup@Suffix@Select{#1}}%
-  }%
-}
-\@onlypreamble\Markup@Inline@Format@Set
-\newcommand*\Markup@InlineDeclare@Format@Set[2]{%
-  \expandafter\newcommand\csname Markup@Format@@InlineDeclare@@#1\endcsname{}%
-  \csdef{Markup@Format@@InlineDeclare@@#1}##1=##2=[##3]{%
-    \mbox{#2\Markup@Suffix@@Select{l}{#1}}%
-  }%
-}
-\@onlypreamble\Markup@InlineDeclare@Format@Set
-\newcommand*\Markup@Declare@Format@Set[3][]{%
-  \expandafter\newcommand\csname Markup@Format@@Declare@@#2\endcsname{}%
-  \csdef{Markup@Format@@Declare@@#2}##1=##2=[##3]{%
-    \mbox{#1#3\Markup@Suffix@@Select{d}{#2}}%
-  }%
-}
-\@onlypreamble\Markup@Declare@Format@Set
-\newcommand*\Markup@Suffix@Format@Set[3]{%
-  \expandafter\newcommand\csname Markup@Format@@Suffix@@#1\endcsname{}%
-  \csdef{Markup@Format@@Suffix@@#1}{{#2}{#3}}%
-}
-\@onlypreamble\Markup@Suffix@Format@Set
-% DOC Markup Index: 1 default=true 0 default=false -1 no -2/-3 index/changelog
-\tud@newcount\tud@index@mode@num
-\tud@index@mode@num=\@ne\relax%
-\newenvironment{NoIndexDefault}{%
-  \tud@index@mode@num=\z@\relax%
-  \ignorespaces%
-}{%
-  \aftergroup\ignorespaces%
-}
-\newcommand*\Markup@Suffix@Select[1]{%
+\newcommand*\tud@specialurl@wrapper[2]{%
   \begingroup%
-    \tud@index@mode@num=\numexpr\tud@index@mode@num+3\relax%
-    \ifcase\tud@index@mode@num\relax%
-      \def\tud@res@a{c}%
-    \or%
-      \def\tud@res@a{i}%
-    \else%
-      \def\tud@res@a{n}%
+    \protected@edef\tud@res@a{#2}%
+    \let\tud@res@c\@empty%
+    \ifx\tud@res@a\@empty\else%
+      \expandafter\tud@specialurl@resolve\expandafter\tud@res@b\tud@res@a::\@nil%
+      \ifnum\tud@res@b<\z@\relax\else%
+        \def\tud@res@d##1:##2\@nil{\def\tud@res@c{##2}}%
+        \expandafter\tud@res@d\tud@res@a\@nil%
+        \ifx\tud@res@c\@empty\else%
+          \ifcase\tud@res@b\relax% CTAN
+            \tud@ctan@url@normalize\tud@res@c{pkg/\tud@res@c}%
+          \or% CTANinfo
+            \tud@ctan@url@normalize\tud@res@c{tex-archive/info/\tud@res@c}%
+          \or% GH
+            \tud@github@url@normalize\tud@res@c{\tud@res@c}%
+          \fi%
+        \fi%
+      \fi%
+      \ifx\tud@res@c\@empty%
+        \ClassWarning{tudscrmanual}{%
+          The given special link `#2' \MessageBreak%
+          could not be resolved%
+        }%
+      \fi%
     \fi%
-    \expandafter\Markup@Suffix@@Select\expandafter{\tud@res@a}{#1}%
-  \endgroup%
-}
-\newcommand*\Markup@Suffix@@Select[3][\@firstofone]{%
-  \begingroup%
-    \protected@edef\tud@res@a{\csuse{Markup@Format@@Suffix@@#3}}%
-    \@expandtwoargs\in@{#2}{\expandafter\@firstoftwo\tud@res@a}%
-    \ifin@%
-      \protected@edef\tud@res@b{%
-        \def\noexpand\tud@res@b{\expandafter\@secondoftwo\tud@res@a}%
-      }%
-      \tud@res@b%
-    \else%
-      \let\tud@res@b\@empty%
-    \fi%
-    \protected@edef\tud@res@c{%
+    \edef\tud@res@a{%
       \endgroup%
-      \unexpanded{#1}{\tud@res@b}%
+      \unexpanded{\def#1}{%
+        \ifx\tud@res@c\@empty%
+          \noexpand\@firstofone%
+        \else%
+          \noexpand\href{\tud@res@c}%
+        \fi%
+      }%
     }%
-  \tud@res@c%
+  \tud@res@a%
 }
-% DOC größer als \tiny, kleiner als \scriptsize
-\newcommand*\suffixsize{\scriptsize}
-\AtBeginDocument{%
+\newcommand*\tud@specialurl@resolve{}
+\def\tud@specialurl@resolve#1#2:#3:#4\@nil{%
   \begingroup%
-    \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@a{#4}}%
-    \expandafter\tud@res@c\tiny\@nil%
-    \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@b{#3}}%
-    \expandafter\tud@res@c\scriptsize\@nil%
-    \xdef\suffixsize{%
-      \unexpanded{\@setfontsize\suffixsize}%
-        {\expandonce\tud@res@a}{\expandonce\tud@res@b}%
+    \FamilyKeyStateUnknownValue%
+    \IfArgIsEmpty{#3}{}{%
+      \TUD@set@numkey{}{tud@res@a}{%
+        {ctan}{0},{ctaninfo}{1},{gh}{2},{url}{3}%
+      }{#2}%
     }%
-  \endgroup%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
+      \def\tud@res@a{-1}%
+      \FamilyKeyStateProcessed%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
 }
-\NewDocumentCommand\suffix{s t' O{\suffixsize} m}{%
+\newcommand*\tud@specialurl@validate[1]{%
   \begingroup%
-    \IfBooleanT{#1}{\let\Markup@Suffix@Select\@gobble}%
-    \nobreakspace#3\IfBooleanTF{#2}{\textlangle#4\textrangle}{(#4)}%
+    \protected@edef\tud@res@a{%
+      \unexpanded{\tud@specialurl@resolve\tud@res@a}#1::\noexpand\@nil%
+    }%
+    \tud@res@a%
+    \ifnum\tud@res@a<\z@\relax%
+      \ClassWarning{tudscrmanual}{%
+        Special link `#1' invalid, permitted are:\MessageBreak%
+        CTAN[info]:... GH:... URL:...
+      }%
+      \aftergroup\@gobble%
+    \else%
+      \aftergroup\@firstofone%
+    \fi%
   \endgroup%
 }
-\NewExpandableDocumentCommand\@suffix{s t' o m}{#4}%
-\NewExpandableDocumentCommand\@@suffix{s t' o m}{}%
-\newrobustcmd*\idxsuffix{\suffix*'}
-\NewDocumentCommand\nosuffix{m}{%
+\newcommand*\tud@param@list{}
+\NewDocumentCommand\NewParameterCommand{s m m m m}{%
+  \edef\tud@res@a{\expandafter\@gobble\string#2}%
+  \listeadd\tud@param@list{\tud@res@a}%
+  \edef\tud@res@b{\expandafter\noexpand\csname @\tud@res@a\endcsname}%
+  \expandafter\NewExpandableDocumentCommand\tud@res@b{#3}{#5}%
+  \NewDocumentCommand#2{#3}{#4}%
+}
+\@onlypreamble\NewParameterCommand
+\NewDocumentCommand\P@Braces{s m}{%
+  \mbox{%
+    \texttt{\IfBooleanTF{#1}{\lbrack}{\textbraceleft}}%
+    #2%
+    \texttt{\IfBooleanTF{#1}{\rbrack}{\textbraceright}}%
+  }%
+}
+\newcommand*\tud@if@param@special[1]{%
   \begingroup%
-    \let\suffix\@@suffix#1%
+    \protected@edef\tud@res@b{#1}%
+    \def\tud@res@a{<p:special>}%
+    \edef\PSet##1{\tud@res@a}%
+    \edef\PMisc{\tud@res@a}%
+    \edef\PBoolean{\tud@res@a}%
+    \edef\PLength{\tud@res@a}%
+    \protected@edef\tud@res@b{\tud@res@b}%
+    \ifx\tud@res@a\tud@res@b%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
   \endgroup%
 }
-\NewExpandableDocumentCommand\@nosuffix{m}{#1}
+\newcommand*\Parameter@Expandable{%
+  \begingroup%
+    \def\tud@res@a{\endgroup}%
+    \def\tud@res@b##1{\appto\tud@res@a{\csletcs{##1}{@##1}}}%
+    \forlistloop\tud@res@b{\tud@param@list}%
+  \tud@res@a%
+}
+\NewParameterCommand\PName{s m}{%
+  \tud@if@strblank{#2}{%
+    \ClassWarning{tudscrmanual}%
+      {The argument of `\string\PName' should not be empty}%
+  }{}%
+  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{<#2>}}%
+}{<8:#2>}
+\NewParameterCommand\PValue{s m}{%
+  \tud@if@strblank{#2}{%
+    \ClassWarning{tudscrmanual}%
+      {The argument of `\string\PValue' should not be empty}%
+  }{}%
+  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{#2}}%
+}{<9:#2>}
+\NewParameterCommand\MPName{m}{\P@Braces{\PName{#1}}}{\@PName{#1}}
+\NewParameterCommand\MPValue{m}{\P@Braces{\PValue{#1}}}{\@PValue{#1}}
+\NewParameterCommand\MList{}{\MPName{Parameterliste}}{\@PName{Parameterliste}}
+\NewParameterCommand\OPName{m}{\P@Braces*{\PName{#1}}}{\@PName{#1}}
+\NewParameterCommand\OPValue{m}{\P@Braces*{\PValue{#1}}}{\@PValue{#1}}
+\NewParameterCommand\OList{}{\OPName{Parameterliste}}{\@PName{Parameterliste}}
+\NewParameterCommand\OPList{m}{%
+  \P@Braces*{%
+    \PName{#1}%
+    \texttt{\txb\kern-.5em\txb}%
+    \PName{Parameterliste}%
+  }%
+}{\@PName{Parameterliste}}
+\NewParameterCommand*\PMisc{}{\PName{Einstellung}}{<0:misc>}
+\NewParameterCommand*\PBoolean{}{\PName{Ein-Aus-Wert}}{<1:boolean>}
+\NewParameterCommand*\PLength{}{\PName{L\"ange}}{<2:length>}
+\NewParameterCommand*\PSet{m}{\PName{#1}}{<3:#1>}
+\NewDocumentCommand\PValue@Enfold{s t' m}{%
+  \begingroup%
+    \protected@edef\tud@res@a{#3}%
+    \trim@spaces@in\tud@res@a%
+    \ifx\tud@res@a\@empty%
+      \let\tud@res@b\relax%
+    \else%
+      \Parameter@Expandable%
+      \protected@edef\tud@res@b{\tud@res@a}%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \IfBooleanTF{#2}{\noexpand\@firstofone}{\unexpanded{\def#3}}{%
+        \ifx\tud@res@a\tud@res@b%
+          \noexpand\PValue\IfBooleanT{#1}{*}%
+        \else%
+          \expandafter\@firstofone%
+        \fi%
+        {\expandonce\tud@res@a}%
+      }%
+    }%
+  \tud@res@a%
+}
 \newcommand*\tud@markup@lvl{}
 \let\tud@markup@lvl\relax
 \TUD@key[.markup]{lvl}{%
-% DOC lvl=3>1..2 eigenes Level > Entitäten nutzbar mit Level von..bis
   \begingroup%
     \def\tud@res@d##1>##2>##3\@nil{%
       \Ifisinteger{##1}{%
@@ -1701,6 +1760,7 @@
     \tud@markup@type@num=\@tempa\relax%
   \fi%
 }
+\newcommand*\tud@markup@list{}
 \NewDocumentCommand\NewMarkupCommand{s m O{} D(){\texttt} D<>{} D''{ic} m}{%
   \begingroup%
     \TUDExecuteOptions[.markup]{#3}%
@@ -1712,7 +1772,7 @@
     \eappto\tud@res@c{\unexpanded{\listadd\tud@markup@list}{\tud@res@d}}%
     \eappto\tud@res@c{%
       \unexpanded{\newcommand*}%
-      \csname Entity@Level@@\tud@res@d\endcsname{\tud@markup@lvl}%
+      \csname Entity@@Level@@\tud@res@d\endcsname{\tud@markup@lvl}%
     }%
     \tud@toks@{\Markup@Format@Set}%
     \addto@hook@expandafter\tud@toks@{\expandafter{\tud@res@d}}%
@@ -1760,8 +1820,122 @@
   \tud@res@c%
 }
 \@onlypreamble\NewMarkupCommand
-% PENDING prüfen, wo \\tud@res[^\{]*## wirklich sinnvoll
-% TODO def tud@res@... in separate Makros auslagern
+\NewDocumentCommand\Markup@Format@Set{m r() O{} D<>{} d|| r'' m}{%
+  \tud@toks@{{#1}{{#2{#3##1}\IfValueT{##2}{\PValue{=}##2}}\IfValueT{##3}{##3}}}%
+  \ifcsundef{Markup@Format@@Inline@@#1}{%
+    \expandafter\Markup@Inline@Format@Set\the\tud@toks@%
+  }{}%
+  \ifcsundef{Markup@Format@@InlineDeclare@@#1}{%
+    \expandafter\Markup@InlineDeclare@Format@Set\the\tud@toks@%
+  }{}%
+  \ifcsundef{Markup@Format@@Declare@@#1}{%
+    \def\@tempa{[{#4}]}%
+    \expandafter\expandafter\expandafter\Markup@Declare@Format@Set%
+      \expandafter\@tempa\the\tud@toks@%
+  }{}%
+  \IfValueT{#5}{%
+    \expandafter\newcommand\csname Markup@Format@@Index@@#1\endcsname{}%
+    \csdef{Markup@Format@@Index@@#1}{#5}%
+  }%
+  \Markup@Suffix@Format@Set{#1}{#6}{\suffix{#7}}%
+}
+\@onlypreamble\Markup@Format@Set
+\newcommand*\Markup@Inline@Format@Set[2]{%
+  \expandafter\newcommand\csname Markup@Format@@Inline@@#1\endcsname{}%
+  \csdef{Markup@Format@@Inline@@#1}##1=##2=[##3]{%
+    \mbox{#2\Markup@Suffix@Select{#1}}%
+  }%
+}
+\@onlypreamble\Markup@Inline@Format@Set
+\newcommand*\Markup@InlineDeclare@Format@Set[2]{%
+  \expandafter\newcommand\csname Markup@Format@@InlineDeclare@@#1\endcsname{}%
+  \csdef{Markup@Format@@InlineDeclare@@#1}##1=##2=[##3]{%
+    \mbox{#2\Markup@Suffix@@Select{l}{#1}}%
+  }%
+}
+\@onlypreamble\Markup@InlineDeclare@Format@Set
+\newcommand*\Markup@Declare@Format@Set[3][]{%
+  \expandafter\newcommand\csname Markup@Format@@Declare@@#2\endcsname{}%
+  \csdef{Markup@Format@@Declare@@#2}##1=##2=[##3]{%
+    \mbox{#1#3\Markup@Suffix@@Select{d}{#2}}%
+  }%
+}
+\@onlypreamble\Markup@Declare@Format@Set
+\newcommand*\Markup@Suffix@Format@Set[3]{%
+  \expandafter\newcommand\csname Markup@Format@@Suffix@@#1\endcsname{}%
+  \csdef{Markup@Format@@Suffix@@#1}{{#2}{#3}}%
+}
+\@onlypreamble\Markup@Suffix@Format@Set
+\tud@newcount\tud@index@mode@num
+\tud@index@mode@num=\@ne\relax%
+\newenvironment{NoIndexDefault}{%
+  \tud@index@mode@num=\z@\relax%
+  \ignorespaces%
+}{%
+  \aftergroup\ignorespaces%
+}
+\newcommand*\Markup@Suffix@Select[1]{%
+  \begingroup%
+    \tud@index@mode@num=\numexpr\tud@index@mode@num+3\relax%
+    \ifcase\tud@index@mode@num\relax%
+      \def\tud@res@a{c}%
+    \or%
+      \def\tud@res@a{i}%
+    \else%
+      \def\tud@res@a{n}%
+    \fi%
+    \expandafter\Markup@Suffix@@Select\expandafter{\tud@res@a}{#1}%
+  \endgroup%
+}
+\newcommand*\Markup@Suffix@@Select[3][\@firstofone]{%
+  \begingroup%
+    \protected@edef\tud@res@a{\csuse{Markup@Format@@Suffix@@#3}}%
+    \@expandtwoargs\in@{#2}{\expandafter\@firstoftwo\tud@res@a}%
+    \ifin@%
+      \protected@edef\tud@res@b{%
+        \def\noexpand\tud@res@b{\expandafter\@secondoftwo\tud@res@a}%
+      }%
+      \tud@res@b%
+    \else%
+      \let\tud@res@b\@empty%
+    \fi%
+    \protected@edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{#1}{\tud@res@b}%
+    }%
+  \tud@res@c%
+}
+\newcommand*\suffixsize{\scriptsize}
+\AtBeginDocument{%
+  \begingroup%
+    \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@a{#4}}%
+    \expandafter\tud@res@c\tiny\@nil%
+    \def\tud@res@c#1#2#3#4\@nil{\def\tud@res@b{#3}}%
+    \expandafter\tud@res@c\scriptsize\@nil%
+    \xdef\suffixsize{%
+      \unexpanded{\@setfontsize\suffixsize}%
+        {\expandonce\tud@res@a}{\expandonce\tud@res@b}%
+    }%
+  \endgroup%
+}
+\newrobustcmd*\suffix[1]{%
+  \begingroup%
+    \nobreakspace\suffixsize(#1)%
+  \endgroup%
+}
+\newrobustcmd*\idxsuffix[1]{%
+  \begingroup%
+    \let\Markup@Suffix@Select\@gobble%
+    \nobreakspace\suffixsize\textlangle#1\textrangle%
+  \endgroup%
+}
+\newrobustcmd*\nosuffix[1]{%
+  \begingroup%
+    \let\suffix\@gobble%
+    \let\idxsuffix\@gobble%
+    #1%
+  \endgroup%
+}
 \newcommand*\AP@MarkupKey[2]{%
   \begingroup%
     \AP@MarkupDefault{#1}{#2}%
@@ -1781,7 +1955,6 @@
           \def\tud@res@d{####1}%
           \trim@spaces@in\tud@res@d%
           \edef\ProcessedArgument{{\expandonce\tud@res@d}}%
-          % TODO warum hier nicht \AP@MarkupValue?
           \in@{=}{####2}%
           \ifin@%
             \tud@res@b####2\@nil%
@@ -1802,9 +1975,6 @@
     }%
   \tud@res@a%
 }
-% TODO prüfen, ob etwas wie =\PMisc aa= angegeben wurde
-% (Validierung: expandieren zu <p:...> oder leer?)
-% > \AP@ValidateValue verwenden, wo notwendig!
 \newcommand*\AP@MarkupValue[2]{%
   \begingroup%
     \AP@MarkupDefault{#1}{#2}%
@@ -1816,6 +1986,37 @@
           \PValue@Enfold\tud@res@c%
           \def\tud@res@d{####1}%
           \trim@spaces@in\tud@res@d%
+%%    \def\tud@res@c##1{%
+%%      \tud@ifstrbool{##1}
+%%        {\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+%%      \if@tud@res@swa%
+%%        \tud@if@strequal{##1}{true}{\@tud@res@swafalse}{}%
+%%        \tud@if@strequal{##1}{false}{\@tud@res@swafalse}{}%
+%%        \if@tud@res@swa%
+%%          \ClassWarning{tudscrmanual}{%
+%%            Boolean values should only be referred with\MessageBreak%
+%%            'true/false' but '##1' was used%
+%%          }%
+%%        \fi%
+%%      \fi%
+%%    }%
+%% TODO use to validate =...= within Value Processors (Parameter@Gobble)?
+%%      \ifx\tud@res@a\tud@res@b\else%
+%%        \def\tud@res@c##1<##2>##3\@nil{%
+%%          \@tud@res@swafalse%
+%%          \IfArgIsEmpty{##1}{}{\@tud@res@swatrue}%
+%%          \IfArgIsEmpty{##3}{}{\@tud@res@swatrue}%
+%%          \if@tud@res@swa%
+%%            \ClassWarning{tudscrmanual}{%
+%%              Enfolding text removed from parameter macro\MessageBreak%
+%%              \detokenize\expandafter{\tud@res@a}%
+%%            }%
+%%          \fi%
+%%          \def\tud@res@c##1####1##3\@nil{\def\tud@res@a{####1}}%
+%%          \expandafter\tud@res@c\tud@res@a\@nil%
+%%        }%
+%%        \expandafter\tud@res@c\tud@res@b\@nil%
+%%      \fi%
           \edef\ProcessedArgument{%
             {\expandonce\tud@res@d}=\expandonce\tud@res@c=\unexpanded{##2}%
           }%
@@ -1843,7 +2044,7 @@
           \ifin@%
             \def\tud@res@b####1/####2\@nil{%
               \begingroup%
-                \let\suffix\@suffix%
+                \let\suffix\@firstofone%
                 \Markup@Suffix@@Select[\edef\tud@res@c]{}{KeyVal@Parameter}%
                 \trim@spaces@in\tud@res@c%
                 \eappto\tud@res@c{: \csname #1\endcsname*{####1}}%
@@ -1885,31 +2086,45 @@
     }%
   \tud@res@a%
 }
-% TODO sollte raus!
 \NewDocumentCommand\Markup@Expandable{!s}{%
   \begingroup%
     \def\tud@res@a{\endgroup}%
-    \def\tud@res@b##1{\appto\tud@res@a{\csletcs{##1}{@##1}}}%
-    \forlistloop\tud@res@b{\tud@markup@list}%
+    \def\do##1{\appto\tud@res@a{\csletcs{##1}{@##1}}}%
+    \dolistloop{\tud@markup@list}%
   \tud@res@a%
-  % TODO wo ist das notwendig? dort dann direkt den benötigten Teil aufrufen
   \IfBooleanF{#1}{%
     \Markup@@Expandable%
     \Parameter@Expandable%
     \Misc@Expandable%
   }%
 }
-\newcommand*\Markup@Gobble{%
-  \begingroup%
-    \def\tud@res@a{\endgroup}%
-    \forlistloop{\Markup@@@Gobble\tud@res@a}{\tud@markup@list}%
-  \tud@res@a%
+\newcommand*\Markup@@Expandable{%
+  \def\KOMAScript{KOMA-Script\space}%
+  \def\TUDScript{TUD-Script\space}%
+  \def\CD{Corporate Design\space}%
+  \def\CDs{Corporate Designs\space}%
+  \def\TUD{Technische Universit\"at Dresden\space}%
+  \def\TnUD{Technischen Universit\"at Dresden\space}%
+  \def\DDC{DRESDEN-concept\space}%
+  \def\OpenSans{Open Sans\space}%
+  \def\Univers{Univers\space}%
+  \def\DIN{DIN Bold\space}%
 }
-\newcommand*\Markup@@@Gobble[2]{\appto#1{\csletcs{#2}{#2@Gobble}}}
-\newcommand*\Markup@Gobble@Extra{}
-\def\Markup@Gobble@Extra#1|#2\relax{#1}
-\newcommand*\tud@markup@detokenize[2]{%
-  \detokenize\expandafter{\@backslashchar#1{#2}}%
+\newcommand*\Misc@Expandable{%
+  \def\suffix##1{\space##1}%
+  \def\idxsuffix##1{\space##1}%
+  \let\nosuffix\@firstofone%
+  \let\seeplain\@seeplain%
+  \let\Logo\@firstofone%
+  \let\emph\@firstofone%
+  \let\texttt\@firstofone%
+  \def~{\space}%
+  \def\nobreakspace{\space}%
+  \def\dots{...}%
+  \def\_{_}%
+}
+\AfterPackage*{hyperref}{%
+  \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Expandable}%
 }
 \NewDocumentCommand\tud@if@markup{s m}{%
   \begingroup%
@@ -1931,9 +2146,98 @@
     \fi%
   \endgroup%
 }
+\newcommand*\Markup@Gobble{%
+  \begingroup%
+    \def\tud@res@a{\endgroup}%
+    \def\do##1{\appto\tud@res@a{\csletcs{##1}{##1@Gobble}}}%
+    \dolistloop{\tud@markup@list}%
+  \tud@res@a%
+}
+\newcommand*\Markup@Gobble@Extra{}
+\def\Markup@Gobble@Extra#1|#2\relax{#1}
+\newcommand*\tud@markup@detokenize[2]{%
+  \detokenize\expandafter{\@backslashchar#1{#2}}%
+}
+\NewMarkupCommand\Distribution[%
+  lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
+](\textsbn){Distribution}
+\NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{\Logo{TeXLive}\IfBooleanT{#1}{\nobreakspace Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{\Logo{MacTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
+  \Distribution|#2|'#3'{\Logo{MiKTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\NewDocumentCommand\DistributionGeneral{!s !d||}{%
+  \Logo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
+  \DistributionGeneral@IndexEntry{#2}\xspace%
+}
+\newcommand*\@DistributionGeneral{LaTeX-Distribution}%
+\NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
+  \begingroup%
+    \tud@idx@attribute@get\tud@res@a{#1}%
+    \ifx\tud@res@a\relax\else%
+      \ifx\tud@res@a\@empty\else%
+        \preto\tud@res@a{|}%
+      \fi%
+      \epreto\tud@res@a{\DistributionGeneral@@IndexEntry}%
+      \expandafter\index\expandafter{\tud@res@a}%
+    \fi%
+  \endgroup%
+}
+\newcommand*\DistributionGeneral@@IndexEntry{}
+\edef\DistributionGeneral@@IndexEntry{%
+  \detokenize\expandafter{\@DistributionGeneral @{\DistributionGeneral}}%
+}
+\NewMarkupCommand\Format[lvl=1](\sbnfont\Logo){Textsatzsystem}
+\NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
+\NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
+\NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
+\NewMarkupCommand\Option[idx=options,type=value]'c'{Option}
+\Markup@InlineDeclare@Format@Set{Environment}{%
+  \texttt{%
+    \bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}%
+    \dots%
+    \bsc{}end\textbraceleft#1\textbraceright%
+  }%
+}
+\Markup@Declare@Format@Set{Environment}{%
+  \begin{tabular}[t]{@{}l@{}}%
+  \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
+  \tabularnewline\texttt{\quad\raisebox{-.3\dp\@arstrutbox}[0pt][0pt]{\vdots}}%
+  \tabularnewline\texttt{\bsc{}end\textbraceleft#1\textbraceright}%
+  \end{tabular}%
+}
+\NewMarkupCommand\Environment[idx=macros,type=param]{Umgebung}
+\NewMarkupCommand*\Macro[idx=macros,type=param]'c'{Befehl}
+\NewMarkupCommand\KeyVal@Parameter[idx=macros](\textttit)<\quad>''{Parameter}
+\NewMarkupCommand*\Length[idx=misc]'dic'{L\"ange}
+\NewMarkupCommand\Counter[idx=misc]'dic'{Z\"ahler}
+\NewMarkupCommand*\Term[idx=terms]'dc'{Bezeichner}
+\NewMarkupCommand\PageStyle[idx=elements]'dic'{Seitenstil}
+\NewMarkupCommand\Font[idx=elements]'dic'{Schriftelement}
+\NewMarkupCommand\Color[idx=elements]'dic'{Farbe}
+\NewMarkupCommand\Application[lvl=0](\textsbi){Anwendungssoftware}
+\NewMarkupCommand\Tutorial[lvl=-2>0..1,idx=files](\textsbn){Tutorial}
+\NewMarkupCommand\File[lvl=-2>0..1,idx=files](\texttt)'c'{Datei}
+\NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
+\newcommand*\tud@ety@crnt{}
+\newcommand*\tud@ety@dflt{\Bundle{tudscr}}
+\newcommand*\tud@ety@gnrl{+general+}
+\NewDocumentEnvironment{Entity}{m}{%
+  \Entity@Level@@Validate{1}{2}{#1}{\Markup@Main@Get\tud@ety@crnt{#1}}%
+  \ignorespaces%
+}{%
+  \aftergroup\ignorespaces%
+}
 \newcommand*\Entity@Level@Get[2]{%
   \begingroup%
-    \edef\tud@res@a{\csuse{Entity@Level@@#2}}%
+    \edef\tud@res@a{\csuse{Entity@@Level@@#2}}%
     \edef\tud@res@a{%
       \endgroup%
       \unexpanded{\def#1}{\expandafter\@firstoftwo\tud@res@a}%
@@ -1942,7 +2246,7 @@
 }
 \newcommand*\Entity@Level@Validate[2]{%
   \begingroup%
-    \edef\tud@res@a{\csuse{Entity@Level@@#1}}%
+    \edef\tud@res@a{\csuse{Entity@@Level@@#1}}%
     \edef\tud@res@a{\expandafter\@secondoftwo\tud@res@a}%
     \edef\tud@res@a{%
       \endgroup%
@@ -1954,7 +2258,7 @@
   \begingroup%
     \tud@if@markup{#3}{%
       \Markup@Split@Get*\tud@res@a{#3}%
-      \edef\tud@res@b{\csuse{Entity@Level@@\expandafter\@firstoftwo\tud@res@a}}%
+      \edef\tud@res@b{\csuse{Entity@@Level@@\expandafter\@firstoftwo\tud@res@a}}%
       \edef\tud@res@b{%
         \noexpand\If@Entity@Level@Valid@TF{#1}{#2}{%
           \expandafter\@firstoftwo\tud@res@b%
@@ -1986,7 +2290,7 @@
 \newcommand*\Entity@Level@@@Validate[4]{%
   \begingroup%
     \edef\tud@res@a{\expandafter\expandafter\expandafter\@firstoftwo%
-      \csname Entity@Level@@#4\endcsname%
+      \csname Entity@@Level@@#4\endcsname%
     }%
     \If@Entity@Level@Valid@TF{#2}{#3}{\tud@res@a}{%
       \def\tud@res@b{\MessageBreak\tud@markup@detokenize{#4}{...}}%
@@ -1999,7 +2303,6 @@
     }%
   \tud@res@a%
 }
-% DOC min max level
 \newcommand*\If@Entity@Level@Valid@TF[3]{%
   \begingroup%
     \@tud@res@swatrue%
@@ -2011,6 +2314,405 @@
       \aftergroup\@secondoftwo%
     \fi%
   \endgroup%
+}
+\tud@auxlist@register*{tud@ety@declare}
+\newrobustcmd*\Entity@Declare[3]{%
+  \tud@auxlist@add{tud@ety@declare}{\noexpand\tud@ety@aux@declare{#1}{#2}{#3}}%
+}
+\newrobustcmd*\tud@ety@aux@declare[3]{%
+  \begingroup%
+    \tud@if@strequal{\tud@ety@gnrl}{#3}{%
+      \def\tud@res@a{\tud@ety@gnrl}%
+    }{%
+      \def\tud@res@a{#3}%
+    }%
+    \ifcsundef{Entity@@Declared@@#1@#2}{%
+      \csxdef{Entity@@Declared@@#1@#2}{\expandonce\tud@res@a}%
+    }{%
+      \csxappto{Entity@@Declared@@#1@#2}{,\expandonce\tud@res@a}%
+    }%
+  \endgroup%
+}
+\@onlypreamble\tud@ety@aux@declare
+\NewDocumentCommand\DefaultEntity{m d'' m}{%
+  \begingroup%
+    \ifundef\Default@Entity@Parent{\let\Default@Entity@Parent\@empty}{}%
+    \tud@if@markup{#1}{%
+      \Markup@Main@Get\tud@res@a{#1}%
+      \protected@edef\tud@res@b{#2}%
+      \IfValueF{#2}{%
+        \Markup@Split@Get\tud@res@c{\tud@res@a}%
+        \def\tud@res@d##1##2{%
+          \tud@if@strequal{Bundle}{##1}{\def\tud@res@b{CTAN:##2}}{}%
+        }%
+        \expandafter\tud@res@d\tud@res@c%
+      }%
+      \edef\tud@res@a{%
+        \noexpand\Default@Entity{\expandonce\tud@res@a}'\expandonce\tud@res@b'%
+      }%
+      \tud@res@a{#3}%
+    }{}%
+  \endgroup%
+}
+\@onlypreamble\DefaultEntity
+\GetDocumentCommandArgSpec\DefaultEntity
+\expandafter\NewExpandableDocumentCommand\expandafter%
+    \Default@@Entity\expandafter{%
+  \ArgumentSpecification%
+}{}
+\NewDocumentCommand\Default@Entity{m r'' m}{%
+  \tud@toks@{}%
+  \protected@edef\tud@res@a{#3}%
+  \@for\tud@res@a:=\tud@res@a\do{%
+    \trim@spaces@in\tud@res@a%
+    \ifx\tud@res@a\@empty\else%
+      \begingroup%
+        \let\DefaultEntity\Default@@Entity%
+%% \GetDocumentCommandArgSpec\DefaultEntity
+%% \expandafter\DeclareExpandableDocumentCommand\expandafter\DefaultEntity%
+%%  \expandafter{\ArgumentSpecification}{}
+        \protected@edef\tud@res@b{\tud@res@a}%
+        \trim@spaces@in\tud@res@b%
+        \def\tud@res@c##1##2##3\@nil{##2}%
+        \protected@edef\tud@res@d{%
+          \endgroup%
+          \ifx\tud@res@b\@empty%
+            \unexpanded{\addto@hook\tud@toks@}{%
+              \begingroup%
+                \unexpanded{\def\Default@Entity@Parent}{#1}%
+                \expandonce\tud@res@a%
+              \endgroup%
+            }%
+            \unexpanded{\def\tud@res@a}{%
+              \expandafter\tud@res@c\tud@res@a\@nil%
+            }%
+          \fi%
+        }%
+      \tud@res@d%
+      \tud@if@markup{\tud@res@a}{%
+        \Markup@Main@Get\tud@res@a{\tud@res@a}%
+        \Markup@Split@@Get\tud@res@b{\tud@res@a}%
+        \edef\tud@res@c{\expandafter\@firstoftwo\tud@res@b}%
+        \expandafter\Entity@Level@Validate\expandafter{\tud@res@c}{#1}{%
+          \def\tud@res@d##1##2{##1@##2}%
+          \edef\tud@res@d{Entity@@Default@@\expandafter\tud@res@d\tud@res@b}%
+          \ifcsdef{\tud@res@d}{%
+            \Entity@Level@Get\tud@res@c{\tud@res@c}%
+            \ifnum\tud@res@c<\thr@@\relax%
+              \ClassWarning{tudscrmanual}{%
+                The default entity `\csuse{\tud@res@d}'\MessageBreak%
+                for `\tud@res@a' is overwritten\MessageBreak%
+                with `\detokenize{#1}'%
+              }%
+              \csgdef{\tud@res@d}{#1}%
+            \else%
+              \csgappto{\tud@res@d}{,#1}%
+            \fi%
+          }{%
+            \csgdef{\tud@res@d}{#1}%
+          }%
+        }%
+      }{}%
+    \fi%
+  }%
+  \IfValueT{#2}{\DefaultEntityLink{#1}(\Default@Entity@Parent)'#2'}%
+  \the\tud@toks@%
+}
+\NewDocumentCommand\DefaultEntityLink{m d() r''}{%
+  \begingroup%
+    \tud@if@markup{#1}{%
+      \tud@specialurl@validate{#3}{%
+        \begingroup%
+          \Markup@Split@Get\tud@res@a{#1}%
+          \protected@edef\tud@res@b{\IfValueTF{#2}{#2}{}}%
+          \edef\tud@res@b{%
+            \unexpanded{\Entity@Get\tud@res@b}%
+            \ifx\tud@res@b\@empty\else(\expandonce\tud@res@b)\fi%
+            \expandonce\tud@res@a%
+          }%
+          \tud@res@b%
+          \edef\tud@res@b{%
+            \unexpanded{\tud@lbl@@get\tud@lbl@tmp}{%
+              \expandonce\tud@res@a(\expandonce\tud@res@b)%
+            }%
+          }%
+          \tud@res@b%
+          \edef\tud@res@a{Entity@@Link@@\tud@lbl@tmp}%
+          \ifcsdef{\tud@res@a}{%
+            \ClassWarning{tudscrmanual}{%
+              The default URL '\csuse{\tud@res@a}'\MessageBreak%
+              for `\detokenize{#1}' is overwritten\MessageBreak%
+              with '#3'%
+            }%
+          }{}%
+          \csxdef{\tud@res@a}{#3}%
+        \endgroup%
+      }%
+    }{}%
+  \endgroup%
+}
+\@onlypreamble\DefaultEntityLink
+\NewDocumentCommand\Entity@Get{s m d() m m}{%
+  \begingroup%
+    \Parameter@Expandable%
+    \Misc@Expandable%
+    \letcs\tud@res@b{Entity@@Declared@@#4@#5}%
+    \letcs\tud@res@c{Entity@@Default@@#4@#5}%
+    \@tud@res@swafalse%
+    \let\tud@res@a\@empty%
+    \IfValueT{#3}{%
+      \@tud@res@swatrue%
+      \protected@edef\tud@res@d{#3}%
+      \@for\tud@res@d:=\tud@res@d\do{%
+        \trim@spaces@in\tud@res@d%
+        \ifx\tud@res@d\@empty\else%
+          \tud@if@strequal{!}{\tud@res@d}{%
+            \let\tud@res@d\tud@ety@crnt%
+          }{%
+            \tud@if@strequal{*}{\tud@res@d}{%
+              \ifundef\tud@res@c{%
+                \let\tud@res@d\@empty%
+                \ClassWarning{tudscrmanual}{%
+                  There is no default entity for\MessageBreak%
+                  `\tud@markup@detokenize{#4}{#5}'%
+                }%
+              }{%
+                \let\tud@res@d\tud@res@c%
+              }%
+            }{}%
+          }%
+          \eappto\tud@res@a{%
+            \ifx\tud@res@a\@empty\else,\fi\expandonce\tud@res@d%
+          }%
+        \fi%
+      }%
+    }%
+    \ifx\tud@res@a\@empty%
+      \if@tud@res@swa%
+        \ClassWarning{tudscrmanual}{Setting an empty entity is not possible}%
+        \@tud@res@swafalse%
+      \fi%
+      \let\tud@res@a\tud@ety@crnt%
+    \fi%
+    \let\tud@ety@found\@empty%
+    \let\tud@ety@fallback\@empty%
+    \ifnum\tud@declare@mode@num=\z@\relax%
+      \let\tud@ety@valid\@empty%
+      \ifundef\tud@res@b{}{\let\tud@ety@valid\tud@res@b}%
+      \ifundef\tud@res@c{}{\eappto\tud@ety@valid{,\expandonce\tud@res@c}}%
+      \@for\tud@res@d:=\tud@res@a\do{%
+        \trim@spaces@in\tud@res@d%
+        \ifx\tud@res@d\@empty\else%
+          \protected@expandtwoargs\in@%
+              {,\detokenize\expandafter{\tud@res@d},}%
+              {,\detokenize\expandafter{\tud@ety@valid},}%
+          \ifin@%
+            \eappto\tud@ety@found{%
+              \ifx\tud@ety@found\@empty\else,\fi\expandonce\tud@res@d%
+            }%
+          \else%
+            \if@tud@res@swa%
+              \ClassWarning{tudscrmanual}{%
+                The entity `\detokenize\expandafter{\tud@res@d}'\MessageBreak%
+                for `\tud@markup@detokenize{#4}{#5}' was never set%
+              }%
+              \eappto\tud@ety@fallback{%
+                \ifx\tud@ety@fallback\@empty\else,\fi\expandonce\tud@res@d%
+              }%
+            \fi%
+          \fi%
+        \fi%
+      }%
+      \ifx\tud@ety@found\@empty%
+        \ifundef\tud@res@b{%
+          \ifundef\tud@res@c{}{\let\tud@ety@found\tud@res@c}%
+        }{\let\tud@ety@found\tud@res@b}%
+      \fi%
+    \else%
+      \let\tud@ety@found\tud@res@a%
+      \if@tud@res@swa\else%
+        \ifundef\tud@res@c{}{%
+          \ifx\tud@ety@found\@empty%
+            \let\tud@ety@found\tud@res@c%
+          \fi%
+          \ifx\tud@ety@found\tud@res@c\else%
+            \ifnum\tud@declare@mode@num>\z@\relax%
+              \ClassWarning{tudscrmanual}{%
+                The entity for `\tud@markup@detokenize{#4}{#5}'\MessageBreak%
+                should be given explicitly or by value:\MessageBreak%
+                (*) for \tud@res@c\MessageBreak%
+                (!) for \tud@ety@crnt%
+              }%
+            \fi%
+          \fi%
+        }%
+      \fi%
+    \fi%
+    \let\tud@ety@valid\@empty%
+    \@for\tud@res@d:=\tud@ety@found\do{%
+      \trim@spaces@in\tud@res@d%
+      \ifx\tud@res@d\@empty\else%
+        \@tud@res@swafalse%
+        \tud@if@strequal{\tud@ety@gnrl}{\tud@res@d}{%
+          \@tud@res@swatrue%
+          \def\tud@res@d{\tud@ety@gnrl}%
+        }{%
+          \Entity@Level@Validate{#4}{\tud@res@d}{%
+            \@tud@res@swatrue%
+            \Markup@Main@Get\tud@res@d{\tud@res@d}%
+          }%
+        }%
+        \if@tud@res@swa%
+          \protected@expandtwoargs\in@%
+              {,\detokenize\expandafter{\tud@res@d},}%
+              {,\detokenize\expandafter{\tud@ety@valid},}%
+          \ifin@\else%
+            \eappto\tud@ety@valid{%
+              \ifx\tud@ety@valid\@empty\else,\fi\expandonce\tud@res@d%
+            }%
+          \fi%
+        \fi%
+      \fi%
+    }%
+    \ifx\tud@ety@fallback\@empty%
+      \ifx\tud@ety@valid\@empty%
+        \IfBooleanF{#1}{%
+          \ifnum\tud@declare@mode@num>\m@ne\relax%
+            \Entity@Level@Get\tud@res@a{#4}%
+            \ifnum\tud@res@a>\@ne\relax%
+              \ClassWarning{tudscrmanual}{%
+                No entity could be found for\MessageBreak%
+                `\tud@markup@detokenize{#4}{#5}'%
+              }%
+            \fi%
+          \fi%
+        }%
+        \def\tud@ety@valid{\tud@ety@gnrl}%
+      \fi%
+    \else%
+      \ifx\tud@ety@valid\@empty%
+        \ClassWarning{tudscrmanual}{%
+          No entity could be validated for\MessageBreak%
+          `\tud@markup@detokenize{#4}{#5}', so using given\MessageBreak%
+          `\expandonce\tud@ety@fallback' instead%
+        }%
+        \let\tud@ety@valid\tud@ety@fallback%
+      \else%
+        \ClassWarning{tudscrmanual}{%
+          Valid entity `\expandonce\tud@ety@valid'\MessageBreak%
+          found for `\tud@markup@detokenize{#4}{#5}', dropping\MessageBreak%
+          `\expandonce\tud@ety@fallback'%
+        }%
+      \fi%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#2}{\expandonce\tud@ety@valid}%
+    }%
+  \tud@res@a%
+}
+\tud@newif\if@tud@ety@seek
+\newcommand*\tud@ety@encountered{}
+\NewDocumentCommand\Entity@Seek{d() m m m}{%
+  \@tud@ety@seektrue%
+  \let\tud@ety@encountered\@empty%
+  \@whilesw\if@tud@ety@seek\fi{%
+    \Entity@@Seek(#1){#2}{#3}{#4}%
+  }%
+}
+\NewDocumentCommand\Entity@@Seek{d() m m m}{%
+  \begingroup%
+    \tud@declare@mode@num=\z@\relax%
+    \if@tud@ety@seek%
+      \IfValueTF{#1}{%
+        \protected@edef\tud@res@a{#1}%
+      }{%
+        \Entity@Get*\tud@res@a{#2}{#3}%
+      }%
+      \tud@if@strequal{\tud@ety@gnrl}{\tud@res@a}{\let\tud@res@a\@empty}{}%
+      \ifx\tud@res@a\@empty\else%
+        \protected@expandtwoargs\in@{,}{\tud@res@a}%
+        \ifin@%
+          \ClassWarning{tudscrmanual}{%
+            Multiple entities for `\tud@markup@detokenize{#2}{#3}'\MessageBreak%
+            (\tud@res@a),\MessageBreak%
+            resolution was not successful%
+          }%
+          \let\tud@res@a\@empty%
+        \else%
+          \Markup@Split@Get\tud@res@b{\tud@res@a}%
+        \fi%
+      \fi%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \if@tud@ety@seek%
+        \ifx\tud@res@a\@empty%
+          \noexpand\@tud@ety@seekfalse%
+        \else%
+          \unexpanded{\def\tud@ety@encountered}{\expandonce\tud@res@a}%
+          \unexpanded{#4}%
+          \noexpand\Entity@@Seek\expandonce\tud@res@b{\unexpanded{#4}}%
+        \fi%
+      \fi%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\Entity@Link@Get{m m}{%
+  \tud@truncate@value#1{#2}%
+  \letcs#1{Entity@@Link@@#1}%
+  \ifundef#1{\let#1\@empty}{}%
+}
+\NewDocumentCommand\Entity@Link@Seek{m d'' d<> d() m m}{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \@tud@res@swatrue%
+    \Entity@Level@Get\tud@res@d{#5}%
+    \ifnum\tud@res@d>\tw@\relax%
+      \IfValueF{#2}{\@tud@res@swafalse}%
+    \fi%
+    \if@tud@res@swa%
+      \IfValueT{#3}{\Entity@Link@Get\tud@res@a{#3}}%
+      \ifx\tud@res@a\@empty%
+        \def\tud@res@b{{#5}{#6}}%
+        \Entity@Seek(#4){#5}{#6}{%
+          \Entity@Link@@Seek\tud@res@a{\tud@res@b}{\tud@ety@encountered}%
+          \Markup@Split@@Get\tud@res@b{\tud@ety@encountered}%
+        }%
+        \ifx\tud@res@a\@empty%
+          \Entity@Link@@Seek\tud@res@a{\tud@res@b}{\tud@ety@gnrl}%
+        \fi%
+      \fi%
+      \IfValueT{#2}{%
+        \tud@if@strequal{*}{#2}{%
+          \ifx\tud@res@a\@empty%
+            \ClassWarning{tudscrmanual}{%
+              There is no default link for\MessageBreak%
+              `\tud@markup@detokenize{#5}{#6}'%
+            }%
+          \fi%
+        }{%
+          \ifx\tud@res@a\@empty%
+            \tud@specialurl@validate{#2}{\edef\tud@res@a{#2}}%
+          \else%
+            \ClassWarning{tudscrmanual}{%
+              The special link '#2' was not used as\MessageBreak%
+              a default one '\tud@res@a'\MessageBreak exists%
+            }%
+          \fi%
+        }%
+      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\Entity@Link@@Seek[3]{%
+  \expandafter\tud@lbl@@get\expandafter#1\expandafter{#2(#3)}%
+  \Entity@Link@Get#1{#1}%
+  \ifx#1\@empty\else\@tud@ety@seekfalse\fi%
 }
 \newcommand*\tud@lbl@tmp{}
 \NewDocumentCommand\tud@lbl@get{m m}{%
@@ -2055,7 +2757,6 @@
         \let\tud@res@a\tud@res@b%
       \fi%
     \fi%
-    % TODO separates Makro?
     \let\Logo\@firstofone%
     \def~{\space}%
     \def\nobreakspace{\space}%
@@ -2078,8 +2779,8 @@
     }%
   \tud@res@a{#3}{#2}%
 }
-\tud@auxlist@register(\detokenize\expandafter){tud@lbl@alias}
 \newcommand*\tud@lbl@alias@values{}
+\tud@auxlist@register(\detokenize\expandafter){tud@lbl@alias}
 \NewDocumentCommand\tud@lbl@declare{s d'' d== m}{%
   \begingroup%
     \protected@edef\tud@res@a{#4}%
@@ -2128,9 +2829,8 @@
         \unexpanded{\def\tud@res@b}{\expandonce\tud@res@b}%
       }%
     \tud@res@a%
-% PENDING für tutorials notwendig?, darf keine relevanz für manual haben
-%        \def\tud@res@a##1:##2:##3\@nil{\tud@hypertarget{##3:##2:##3}}%
-%        \expandafter\tud@res@a\tud@lbl@tmp\@nil%
+%%    \def\tud@res@a##1:##2:##3\@nil{\tud@hypertarget{##3:##2:##3}}%
+%%    \expandafter\tud@res@a\tud@lbl@tmp\@nil%
     \tud@auxlist@remove{tud@lbl@alias}{\tud@res@a}%
     \tud@hypertarget{#1}'#2'<\tud@res@b>{\tud@res@a}%
   \endgroup%
@@ -2169,218 +2869,17 @@
 }
 \NewExpandableDocumentCommand\@tudmarkuplabel{o m}{}
 \tud@addtocontents@special*{\let\tudmarkuplabel\@tudmarkuplabel}
-\tud@newif\if@tud@markup@output\@tud@markup@outputtrue
-\TUD@key[.declare]{output}[true]{%
-  \TUD@set@ifkey{output}{@tud@markup@output}{#1}%
-}
-\tud@newif\if@tud@declare@track
-\TUD@key[.declare]{track}[true]{%
-  \TUD@set@ifkey{track}{@tud@declare@track}{#1}%
-}
-\tud@newcount\tud@declare@label@mode@num
-\TUD@key[.declare]{label}[true]{%
-  \TUD@set@numkey{label}{@tempa}{%
-    \TUD@bool@numkey,{alias}{1},{noalias}{2}%
-  }{#1}%
-  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@declare@label@mode@num=\@tempa\relax%
-  \fi%
-}
-\TUD@key[.declare]{index}[true]{%
-  \TUD@set@ifkey{index}{@tempswa}{#1}%
-  \if@tempswa%
-    \tud@index@mode@num=\@ne\relax%
-  \else%
-    \tud@index@mode@num=\m@ne\relax%
-  \fi%
-}
-\tud@newcount\tud@declare@mode@num
-\TUD@key[.declare]{inline}[true]{%
-  \TUD@set@ifkey{inline}{@tempswa}{#1}%
-  \if@tempswa%
-    \tud@declare@mode@num=\tw@%
-  \else%
-    \tud@declare@mode@num=\@ne%
-  \fi%
-}
-\NewDocumentCommand\tud@declare@open{m D=={} r[]}{%
-  \let\tud@declare@result@list\@empty%
-  \begingroup%
-    \tud@@declare{#3}%
-    \protected@edef\tud@lbl@alias@values{#2}%
-    #1%
-    \if@tud@declare@track%
-      \aftergroup\@tud@declare@tracktrue%
-    \else%
-      \aftergroup\@tud@declare@trackfalse%
-    \fi%
-  \endgroup%
-}
-\NewDocumentCommand\tud@declare@close{m r[]}{%
-  \begingroup%
-    \tud@@declare*{#2}%
-    #1%
-  \endgroup%
-}
-\NewDocumentCommand\tud@@declare{s m}{%
-  \TUDExecuteOptions[.declare]{output,label,index,track=false,inline=false}%
-  \begingroup%
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\TUDExecuteOptions[.declare]{#2}%
-    }%
-  \tud@res@a%
-  \IfBooleanT{#1}{%
-    \TUDExecuteOptions[.declare]{output=false,label=false}%
-    \tud@declare@mode@num=-\tud@declare@mode@num\relax%
-  }%
-}
-% TODO Spezialattribut für \PSet \PMisc \PBoolean \PLength
-\newcommand*\tud@param@list{}
-%\newcommand*\tud@param@special@list{}
-\NewDocumentCommand\NewParameterCommand{s m m m m}{%
-  \edef\tud@res@a{\expandafter\@gobble\string#2}%
-  \listeadd\tud@param@list{\tud@res@a}%
-%  \IfBooleanT{#1}{\listeadd\tud@param@special@list{\tud@res@a}}%
-  \edef\tud@res@b{\expandafter\noexpand\csname @\tud@res@a\endcsname}%
-  \expandafter\NewExpandableDocumentCommand\tud@res@b{#3}{#5}%
-  \NewDocumentCommand#2{#3}{#4}%
-}
-\@onlypreamble\NewParameterCommand
-% TODO von \Markup@Expandable trennen
-\newcommand*\Parameter@Expandable{%
-  \begingroup%
-    \def\tud@res@a{\endgroup}%
-    \def\tud@res@b##1{\appto\tud@res@a{\csletcs{##1}{@##1}}}%
-    \forlistloop\tud@res@b{\tud@param@list}%
-  \tud@res@a%
-}
-\NewDocumentCommand\P@Braces{s m}{%
-  \mbox{%
-    \texttt{\IfBooleanTF{#1}{\lbrack}{\textbraceleft}}%
-    #2%
-    \texttt{\IfBooleanTF{#1}{\rbrack}{\textbraceright}}%
-  }%
-}
-\NewParameterCommand\PName{s m}{%
-  \tud@if@strblank{#2}{%
-    \ClassWarning{tudscrmanual}%
-      {The argument of `\string\PName' should not be empty}%
-  }{}%
-  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{<#2>}}%
-}{<8:#2>}
-\NewParameterCommand\PValue{s m}{%
-  \mbox{\IfBooleanTF{#1}{\textttit}{\texttt}{#2}}%
-}{<9:#2>}
-% TODO prüfen mit Parameter@Gobble
-% TODO use to validate =...= within Value Processors?
-%      \ifx\tud@res@a\tud@res@b\else%
-%        \def\tud@res@c##1<##2>##3\@nil{%
-%          \@tud@res@swafalse%
-%          \IfArgIsEmpty{##1}{}{\@tud@res@swatrue}%
-%          \IfArgIsEmpty{##3}{}{\@tud@res@swatrue}%
-%          \if@tud@res@swa%
-%            \ClassWarning{tudscrmanual}{%
-%              Enfolding text removed from parameter macro\MessageBreak%
-%              \detokenize\expandafter{\tud@res@a}%
-%            }%
-%          \fi%
-%          \def\tud@res@c##1####1##3\@nil{\def\tud@res@a{####1}}%
-%          \expandafter\tud@res@c\tud@res@a\@nil%
-%        }%
-%        \expandafter\tud@res@c\tud@res@b\@nil%
-%      \fi%
-\NewDocumentCommand\PValue@Enfold{s t' m}{%
-  \begingroup%
-    \protected@edef\tud@res@a{#3}%
-    \trim@spaces@in\tud@res@a%
-    \ifx\tud@res@a\@empty%
-      \let\tud@res@b\relax%
-    \else%
-      \Parameter@Expandable%
-      \protected@edef\tud@res@b{\tud@res@a}%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \IfBooleanTF{#2}{\noexpand\@firstofone}{\unexpanded{\def#3}}{%
-        \ifx\tud@res@a\tud@res@b%
-          \noexpand\PValue\IfBooleanT{#1}{*}%
-        \else%
-          \expandafter\@firstofone%
-        \fi%
-        {\expandonce\tud@res@a}%
-      }%
-    }%
-  \tud@res@a%
-}
-\NewParameterCommand\MPName{m}{\P@Braces{\PName{#1}}}{\@PName{#1}}
-\NewParameterCommand\MPValue{m}{\P@Braces{\PValue{#1}}}{\@PValue{#1}}
-\NewParameterCommand\MList{}{\MPName{Parameterliste}}{\@PName{Parameterliste}}
-\NewParameterCommand\OPName{m}{\P@Braces*{\PName{#1}}}{\@PName{#1}}
-\NewParameterCommand\OPValue{m}{\P@Braces*{\PValue{#1}}}{\@PValue{#1}}
-\NewParameterCommand\OList{}{\OPName{Parameterliste}}{\@PName{Parameterliste}}
-\NewParameterCommand\OPList{m}{%
-  \P@Braces*{%
-    \PName{#1}%
-    \texttt{\txb\kern-.5em\txb}%
-    \PName{Parameterliste}%
-  }%
-}{\@PName{Parameterliste}}
-% TODO \PSet > \PSpecial oder \SPset, \SPmisc, ...
-\NewParameterCommand*\PMisc{}{\PName{Einstellung}}{<0:misc>}
-\NewParameterCommand*\PBoolean{}{\PName{Ein-Aus-Wert}}{<1:boolean>}
-\NewParameterCommand*\PLength{}{\PName{L\"ange}}{<2:length>}
-% TODO Varianten mit "Wert" und "Einstellung"? (\SPmisc, \SPset)
-\NewParameterCommand*\PSet{m}{\PName{#1}}{<3:#1>}
-% TODO \tud@if@param@special aus expandierbaren Versionen ableiten
-% TODO -NoValue- --> weder noch?
-\newcommand*\tud@if@param@special[1]{%
-  \begingroup%
-    \protected@edef\tud@res@b{#1}%
-    \def\tud@res@a{<p:special>}%
-    \edef\PSet##1{\tud@res@a}%
-    \edef\PMisc{\tud@res@a}%
-    \edef\PBoolean{\tud@res@a}%
-    % TODO ist \PLength wirklich Spezialparameter?
-    \edef\PLength{\tud@res@a}%
-    \protected@edef\tud@res@b{\tud@res@b}%
-    \ifx\tud@res@a\tud@res@b%
-      \aftergroup\@firstoftwo%
-    \else%
-      \aftergroup\@secondoftwo%
-    \fi%
-  \endgroup%
-}
-% TODO noch notwendig?
-\newcommand*\Misc@Expandable{%
-  \def\suffix{\space\@suffix}%
-  \let\nosuffix\@nosuffix%
-  \let\seeplain\@seeplain%
-  \let\Logo\@firstofone%
-  \let\emph\@firstofone%
-  \let\texttt\@firstofone%
-  \let\NoCaseChange\@firstofone%
-  \def~{\space}%
-  \def\nobreakspace{\space}%
-  \def\dots{...}%
-  \def\_{_}%
-}
-\AfterPackage*{hyperref}{%
-  \expandafter\pdfstringdefDisableCommands\expandafter{\Markup@Expandable}%
-}
-\NewDocumentCommand\Process@Invalid@Arg{m m}{%
-  \ClassWarning{tudscrmanual}{Using #1 with #2\MessageBreak is not possible}%
-}
-% TODO robustify markup?! \_ \dots ...
-% TODO geht das nach csname? oder doch mit token-register arbeiten?
-% TODO was davon ist notwendig?
 \newcommand*\tud@idx@robustify{%
   \robustify\nobreakspace%
   \robustify{\dots}%
   \robustify{\_}%
   \robustify\texttt%
   \robustify\emph%
-  \ifdef\hyperref{\robustify\hyperref}{}%
+}
+\newcommand\Process@Output[1]{#1}
+\NewDocumentCommand\Process@Invalid@Arg{m m}{%
+  \ClassWarning{tudscrmanual}%
+    {Using #1 with #2\MessageBreak is not possible}%
 }
 \NewDocumentCommand\Process@Markup{o m m d// d== o r|| r'' r()}{%
   \begingroup%
@@ -2402,7 +2901,6 @@
     }%
   \tud@res@a%
 }
-\newcommand\Process@Output[1]{#1}%
 \NewDocumentCommand\Process@@Markup{o m m r// r== r[] r|| r'' r()}{%
   \begingroup%
     \tud@idx@robustify%
@@ -2525,7 +3023,6 @@
     }%
   \tud@res@a%
 }
-% TODO \suffix{Bundle} anhängen, wenn nicht ety@crn & @dflt?!
 \NewDocumentCommand\Markup@Inline@Wrapper{m m m r'' m}{%
   \begingroup%
     \let\tud@output@wrapper\relax%
@@ -2552,10 +3049,8 @@
             \let\tud@lbl@tmp\@empty%
           }%
         }%
-        % DOC erster Eintrag, ggf. kombiniertes Label!
         \ifx\tud@lbl@found\relax%
           \let\tud@lbl@found\tud@lbl@tmp%
-          % DOC \tud@res@a enthält bundle und label für hyperlink
           \def\tud@res@a{<##1>(##2)}%
         \else%
           \ifx\tud@lbl@tmp\@empty\else%
@@ -2570,7 +3065,7 @@
       \ifx\tud@res@b\@empty\else%
         \def\tud@output@wrapper{\@firstofone}%
         \ClassWarning{tudscrmanual}{%
-          A specific entity (single or valid combination) is\MessageBreak% 
+          A specific entity (single or valid combination) is\MessageBreak%
           needed for `\tud@markup@detokenize{#2}{#3}'%
           \tud@res@b%
         }%
@@ -2592,7 +3087,6 @@
     }%
   \tud@res@a%
 }
-% DOC found cnt ref input ety markup value
 \NewDocumentCommand\Markup@Inline@@Wrapper{r<> m d'' r<> d() m m}{%
   \begingroup%
     \def\tud@lbl@found{#1}%
@@ -2630,10 +3124,8 @@
       \or% page
         \def\tud@res@a{\vpageref}%
       \fi%
-      % DOC nur Hyperlinks auf Element, die nicht gerade deklariert werden
       \tud@truncate@value\tud@lbl@tmp{\tud@lbl@found}%
       \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
-        % DOC \tud@hyperlink liest im zweiten argument zusätzlichen text
         \def\tud@res@b{\@swaptwoargs}%
       }{%
         \edef\tud@res@b{\noexpand\tud@hyperlink{\tud@lbl@found}}%
@@ -2732,50 +3224,6 @@
 }{%
   \tud@toks@{[{#1}]{#2}{#3}/#4/=#5=[{#6}]|#7|'#8'(#9)}%
 }
-% DOC Sternversion ersetzt nur -No-Value-
-\NewDocumentCommand\Markup@Replace{s m d== o d|| d'' m}{%
-  \begingroup%
-    \protected@edef\tud@res@a{#7}%
-    \GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
-    \expandafter\DeclareDocumentCommand\expandafter\tud@res@b\expandafter{%
-      \ArgumentSpecification%
-    }{%
-      \tud@toks@{[{##1}]{##2}{##3}/##4/}%
-      \Markup@@Replace{#1}{==}{#3}{##5}%
-      \Markup@@Replace{#1}{[]}{#4}{##6}%
-      \Markup@@Replace{#1}{||}{#5}{##7}%
-      \Markup@@Replace{#1}{''}{#6}{##8}%
-      \addto@hook\tud@toks@{(##9)}%
-    }%
-    \expandafter\tud@res@b\tud@res@a%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#2}{\the\tud@toks@}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Markup@@Replace{m m m m}{%
-  \begingroup%
-    \tud@if@nil{#3}{%
-      \def\tud@res@a{\@nil}%
-    }{%
-      \def\tud@res@a{#4}%
-      \IfValueT{#3}{%
-        \IfBooleanTF{#1}{%
-          \IfValueF{#4}{\def\tud@res@a{#3}}%
-        }{%
-          \def\tud@res@a{#3}%
-        }%
-      }%
-    }%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\addto@hook\tud@toks@}{%
-        \@firstoftwo#2\expandonce\tud@res@a\@secondoftwo#2%
-      }%
-    }%
-  \tud@res@a%
-}
 \NewDocumentCommand\Markup@Outer@Get{m m}{%
   \begingroup%
     \protected@edef\tud@res@a{\noexpand\Markup@Outer@@Get\expandonce{#2}}%
@@ -2873,38 +3321,6 @@
     \expandafter\Markup@Split@@Get#2\@nil%
   \tud@res@a%
 }
-\newcommand*\tud@chk@key{}
-\newcommand*\tud@chk@val{}
-\GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
-\expandafter\NewDocumentCommand\expandafter\@Markup@Check\expandafter{%
-  \ArgumentSpecification%
-}{%
-  \def\tud@chk@key{#4}%
-  \def\tud@chk@val{#5}%
-}
-\NewDocumentCommand\@Markup@@Check{m m}{%
-  \begingroup%
-    \@tud@res@swafalse%
-    \IfValueTF{#1}{%
-      \IfValueTF{#2}{%
-        \def\do##1{%
-          \tud@if@strequal{#1}{\trim@spaces{##1}}{%
-            \@tud@res@swatrue%
-            \listbreak%
-          }{}%
-        }%
-        \docsvlist{#2}%
-      }{%
-        \@tud@res@swatrue%
-      }%
-    }{}%
-    \if@tud@res@swa%
-      \aftergroup\@firstoftwo%
-    \else%
-      \aftergroup\@secondoftwo%
-    \fi%
-  \endgroup%
-}
 \NewDocumentCommand\If@Markup@Key@TF{o m}{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
@@ -2939,621 +3355,80 @@
     }%
   \tud@res@a%
 }
-\tud@auxlist@register*{tud@ety@declare}
-\newrobustcmd*\Entity@Declare[3]{%
-  \tud@auxlist@add{tud@ety@declare}{\noexpand\tud@ety@declare{#1}{#2}{#3}}%
-}
-\newrobustcmd*\tud@ety@declare[3]{%
-  \begingroup%
-    \tud@if@strequal{\tud@ety@gnrl}{#3}{%
-      \def\tud@res@a{\tud@ety@gnrl}%
-    }{%
-      \def\tud@res@a{#3}%
-    }%
-    \ifcsundef{Entity@Declared@@#1@#2}{%
-      \csxdef{Entity@Declared@@#1@#2}{\expandonce\tud@res@a}%
-    }{%
-      \csxappto{Entity@Declared@@#1@#2}{,\expandonce\tud@res@a}%
-    }%
-  \endgroup%
-}
-\@onlypreamble\tud@ety@declare
-\NewDocumentCommand\DistributionGeneral{!s !d||}{%
-  \Logo{LaTeX}\mbox{-}Distribution\IfBooleanT{#1}{en}%
-  \DistributionGeneral@IndexEntry{#2}\xspace%
-}
-\newcommand*\@DistributionGeneral{LaTeX-Distribution}%
-\NewDocumentCommand\DistributionGeneral@IndexEntry{m}{%
-  \begingroup%
-    \tud@idx@markup@get\tud@res@a{#1}%
-    \ifx\tud@res@a\relax\else%
-      \ifx\tud@res@a\@empty\else%
-        \preto\tud@res@a{|}%
-      \fi%
-      \epreto\tud@res@a{\DistributionGeneral@@IndexEntry}%
-      \expandafter\index\expandafter{\tud@res@a}%
-    \fi%
-  \endgroup%
-}
-\newcommand*\DistributionGeneral@@IndexEntry{}
-\edef\DistributionGeneral@@IndexEntry{%
-  \detokenize\expandafter{\@DistributionGeneral @{\DistributionGeneral}}%
-}
-\NewMarkupCommand\Distribution[%
-  lvl=0,idx=true:\DistributionGeneral@@IndexEntry%
-](\textsbn){Distribution}
-\NewDocumentCommand\TeXLive{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{TeXLive}\IfBooleanT{#1}{\nobreakspace Portable}}%
-  \DistributionGeneral@IndexEntry{#2}\xspace%
-}
-\NewDocumentCommand\MacTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{MacTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
-  \DistributionGeneral@IndexEntry{#2}\xspace%
-}
-\NewDocumentCommand\MiKTeX{!t' !d|| !d''}{%
-  \Distribution|#2|'#3'{\Logo{MiKTeX}\IfBooleanT{#1}{\nobreakspace Portable}}%
-  \DistributionGeneral@IndexEntry{#2}\xspace%
-}
-\NewMarkupCommand\Format[lvl=1](\sbnfont\Logo){Textsatzsystem}
-\NewMarkupCommand\Bundle[lvl=1,idx=false](\textsbn){Bundle}
-\NewMarkupCommand\Class[lvl=2,idx=files](\textsbn){Klasse}
-\NewMarkupCommand\Package[lvl=2,idx=files](\textsbn){Paket}
-\NewMarkupCommand\Option[idx=options,type=value]'c'{Option}
-\Markup@InlineDeclare@Format@Set{Environment}{%
-  \texttt{%
-    \bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}%
-    \dots%
-    \bsc{}end\textbraceleft#1\textbraceright%
-  }%
-}
-\Markup@Declare@Format@Set{Environment}{%
-  \begin{tabular}[t]{@{}l@{}}%
-  \texttt{\bsc{}begin\textbraceleft#1\textbraceright\IfValueT{#3}{#3}}%
-  \tabularnewline\texttt{\quad\raisebox{-.3\dp\@arstrutbox}[0pt][0pt]{\vdots}}%
-  \tabularnewline\texttt{\bsc{}end\textbraceleft#1\textbraceright}%
-  \end{tabular}%
-}
-\NewMarkupCommand\Environment[idx=macros,type=param]{Umgebung}
-\NewMarkupCommand*\Macro[idx=macros,type=param]'c'{Befehl}
-% TODO undef \KeyVal@Parameter damit nicht direkt verwendbar?
-% URGENT wie idx, ety, lvl setzen?
-\NewMarkupCommand\KeyVal@Parameter[idx=macros](\textttit)<\quad>''{Parameter}
-\NewMarkupCommand*\Term[idx=terms]'dc'{Bezeichner}
-\NewMarkupCommand*\Length[idx=misc]'dic'{L\"ange}
-\NewMarkupCommand\Counter[idx=misc]'dic'{Z\"ahler}
-\NewMarkupCommand\PageStyle[idx=elements]'dic'{Seitenstil}
-\NewMarkupCommand\Font[idx=elements]'dic'{Schriftelement}
-\NewMarkupCommand\Color[idx=elements]'dic'{Farbe}
-\NewMarkupCommand\Application[lvl=0](\textsbi){Anwendungssoftware}
-\NewMarkupCommand\Tutorial[lvl=-2>0..1,idx=files](\textsbn){Tutorial}
-\NewMarkupCommand\File[lvl=-2>0..1,idx=files](\texttt)'c'{Datei}
-\NewDocumentCommand\Path{>{\AP@Underscore}m}{\mbox{\texttt{#1}}}
-\AfterPackage*{textcase}{%
-  \newcommand*\tud@@nocasechange[1]{\NoCaseChange{\the\toks@{#1}}}%
-  \newcommand*\tud@nocasechange[1]{%
-    \def#1##1##{\NoCaseChange{\toks@{\noexpand#1##1}}\tud@@nocasechange}%
-  }%
-  \def\tud@res@a#1{%
-    \eappto\tud@x@textcase@uclcnotmath{%
-      \noexpand\tud@nocasechange\expandafter\noexpand\csname#1\endcsname%
-    }%
-  }%
-  \forlistloop\tud@res@a{\tud@markup@list}%
-  \appto\tud@x@textcase@uclcnotmath{\tud@nocasechange\Logo}%
-}
-\newcommand*\tud@ety@gnrl{+general+}
-\newcommand*\tud@ety@dflt{\Bundle{tudscr}}
-\newcommand*\tud@ety@crnt{}
-\NewDocumentCommand\DefaultEntity{m d'' m}{%
-  \begingroup%
-    \ifundef\Default@Entity@Parent{\let\Default@Entity@Parent\@empty}{}%
-    \tud@if@markup{#1}{%
-      \Markup@Main@Get\tud@res@a{#1}%
-      \protected@edef\tud@res@b{#2}%
-      \IfValueF{#2}{%
-        \Markup@Split@Get\tud@res@c{\tud@res@a}%
-        \def\tud@res@d##1##2{%
-          \tud@if@strequal{Bundle}{##1}{\def\tud@res@b{CTAN:##2}}{}%
-        }%
-        \expandafter\tud@res@d\tud@res@c%
-      }%
-      \edef\tud@res@a{%
-        \noexpand\Default@Entity{\expandonce\tud@res@a}'\expandonce\tud@res@b'%
-      }%
-      \tud@res@a{#3}%
-    }{}%
-  \endgroup%
-}
-\GetDocumentCommandArgSpec\DefaultEntity
-\expandafter\NewExpandableDocumentCommand\expandafter%
-    \Default@@Entity\expandafter{%
+\newcommand*\tud@chk@key{}
+\newcommand*\tud@chk@val{}
+\GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
+\expandafter\NewDocumentCommand\expandafter\@Markup@Check\expandafter{%
   \ArgumentSpecification%
-}{}
-\NewDocumentCommand\Default@Entity{m r'' m}{%
-  \tud@toks@{}%
-  \protected@edef\tud@res@a{#3}%
-  \@for\tud@res@a:=\tud@res@a\do{%
-    \trim@spaces@in\tud@res@a%
-    \ifx\tud@res@a\@empty\else%
-      \begingroup%
-        \let\DefaultEntity\Default@@Entity%
-        \protected@edef\tud@res@b{\tud@res@a}%
-        \trim@spaces@in\tud@res@b%
-        \def\tud@res@c##1##2##3\@nil{##2}%
-        \protected@edef\tud@res@d{%
-          \endgroup%
-          \ifx\tud@res@b\@empty%
-            \unexpanded{\addto@hook\tud@toks@}{%
-              \begingroup%
-                \unexpanded{\def\Default@Entity@Parent}{#1}%
-                \expandonce\tud@res@a%
-              \endgroup%
-            }%
-            \unexpanded{\def\tud@res@a}{%
-              \expandafter\tud@res@c\tud@res@a\@nil%
-            }%
-          \fi%
-        }%
-      \tud@res@d%
-      \tud@if@markup{\tud@res@a}{%
-        \Markup@Main@Get\tud@res@a{\tud@res@a}%
-        \Markup@Split@@Get\tud@res@b{\tud@res@a}%
-        \edef\tud@res@c{\expandafter\@firstoftwo\tud@res@b}%
-        \expandafter\Entity@Level@Validate\expandafter{\tud@res@c}{#1}{%
-          \def\tud@res@d##1##2{##1@##2}%
-          \edef\tud@res@d{Entity@Default@@\expandafter\tud@res@d\tud@res@b}%
-          \ifcsdef{\tud@res@d}{%
-            \Entity@Level@Get\tud@res@c{\tud@res@c}%
-            \ifnum\tud@res@c<\thr@@\relax%
-              \ClassWarning{tudscrmanual}{%
-                The default entity `\csuse{\tud@res@d}'\MessageBreak%
-                for `\tud@res@a' is overwritten\MessageBreak%
-                with `\detokenize{#1}'%
-              }%
-              \csgdef{\tud@res@d}{#1}%
-            \else%
-              \csgappto{\tud@res@d}{,#1}%
-            \fi%
-          }{%
-            \csgdef{\tud@res@d}{#1}%
-          }%
-        }%
-      }{}%
-    \fi%
-  }%
-  \IfValueT{#2}{\DefaultEntityLink{#1}(\Default@Entity@Parent)'#2'}%
-  \the\tud@toks@%
+}{%
+  \def\tud@chk@key{#4}%
+  \def\tud@chk@val{#5}%
 }
-\@onlypreamble\DefaultEntity
-\NewDocumentCommand\Entity@Get{s m d() m m}{%
+\NewDocumentCommand\@Markup@@Check{m m}{%
   \begingroup%
-    \Parameter@Expandable%
-    \Misc@Expandable%
-    \letcs\tud@res@b{Entity@Declared@@#4@#5}%
-    \letcs\tud@res@c{Entity@Default@@#4@#5}%
-    % DOC Schalter, ob #3 nicht leer gesetzt
     \@tud@res@swafalse%
-    \let\tud@res@a\@empty%
-    \IfValueT{#3}{%
-      \protected@edef\tud@res@d{#3}%
-      \@for\tud@res@d:=\tud@res@d\do{%
-        \trim@spaces@in\tud@res@d%
-        \ifx\tud@res@d\@empty\else%
-          \tud@if@strequal{!}{\tud@res@d}{%
-            \let\tud@res@d\tud@ety@crnt%
-          }{%
-            \tud@if@strequal{*}{\tud@res@d}{%
-              \ifundef\tud@res@c{%
-                \let\tud@res@d\@empty%
-                \ClassWarning{tudscrmanual}{%
-                  There is no default entity for\MessageBreak%
-                  `\tud@markup@detokenize{#4}{#5}'%
-                }%
-              }{%
-                \let\tud@res@d\tud@res@c%
-              }%
-            }{}%
-          }%
-          \eappto\tud@res@a{%
-            \ifx\tud@res@a\@empty\else,\fi\expandonce\tud@res@d%
-          }%
-        \fi%
-      }%
-      \@tud@res@swatrue%
-    }%
-    \ifx\tud@res@a\@empty%
-      \if@tud@res@swa%
-        \ClassWarning{tudscrmanual}{Setting an empty entity is not possible}%
-        \@tud@res@swafalse%
-      \fi%
-      \let\tud@res@a\tud@ety@crnt%
-    \fi%
-    \let\tud@ety@found\@empty%
-    \let\tud@ety@fallback\@empty%
-    \ifnum\tud@declare@mode@num=\z@\relax%
-      \let\tud@ety@valid\@empty%
-      \ifundef\tud@res@b{}{\let\tud@ety@valid\tud@res@b}%
-      \ifundef\tud@res@c{}{\eappto\tud@ety@valid{,\expandonce\tud@res@c}}%
-      \@for\tud@res@d:=\tud@res@a\do{%
-        \trim@spaces@in\tud@res@d%
-        \ifx\tud@res@d\@empty\else%
-          \protected@expandtwoargs\in@%
-              {,\detokenize\expandafter{\tud@res@d},}%
-              {,\detokenize\expandafter{\tud@ety@valid},}%
-          \ifin@%
-            \eappto\tud@ety@found{%
-              \ifx\tud@ety@found\@empty\else,\fi\expandonce\tud@res@d%
-            }%
-          \else%
-            \if@tud@res@swa%
-              \ClassWarning{tudscrmanual}{%
-                The entity `\detokenize\expandafter{\tud@res@d}'\MessageBreak%
-                for `\tud@markup@detokenize{#4}{#5}' was never set%
-              }%
-              \eappto\tud@ety@fallback{%
-                \ifx\tud@ety@fallback\@empty\else,\fi\expandonce\tud@res@d%
-              }%
-            \fi%
-          \fi%
-        \fi%
-      }%
-      \ifx\tud@ety@found\@empty%
-        \ifundef\tud@res@b{%
-          \ifundef\tud@res@c{}{\let\tud@ety@found\tud@res@c}%
-        }{\let\tud@ety@found\tud@res@b}%
-      \fi%
-    \else%
-      \let\tud@ety@found\tud@res@a%
-      \if@tud@res@swa\else%
-        \ifundef\tud@res@c{}{%
-          % DOC \tud@res@a ggf. leer, wenn \tud@ety@crnt leer
-          \ifx\tud@ety@found\@empty%
-            \let\tud@ety@found\tud@res@c%
-          \fi%
-          \ifx\tud@ety@found\tud@res@c\else%
-            \ifnum\tud@declare@mode@num>\z@\relax%
-              \ClassWarning{tudscrmanual}{%
-                The entity for `\tud@markup@detokenize{#4}{#5}'\MessageBreak%
-                should be given explicitly or by value:\MessageBreak%
-                (*) for \tud@res@c\MessageBreak%
-                (!) for \tud@ety@crnt%
-              }%
-            \fi%
-          \fi%
-        }%
-      \fi%
-    \fi%
-    \let\tud@ety@valid\@empty%
-    \@for\tud@res@d:=\tud@ety@found\do{%
-      \trim@spaces@in\tud@res@d%
-      \ifx\tud@res@d\@empty\else%
-        \@tud@res@swafalse%
-        \tud@if@strequal{\tud@ety@gnrl}{\tud@res@d}{%
-          \@tud@res@swatrue%
-          \def\tud@res@d{\tud@ety@gnrl}%
-        }{%
-          \Entity@Level@Validate{#4}{\tud@res@d}{%
+    \IfValueTF{#1}{%
+      \IfValueTF{#2}{%
+        \def\do##1{%
+          \tud@if@strequal{#1}{\trim@spaces{##1}}{%
             \@tud@res@swatrue%
-            \Markup@Main@Get\tud@res@d{\tud@res@d}%
-          }%
-        }%
-        \if@tud@res@swa%
-          \protected@expandtwoargs\in@%
-              {,\detokenize\expandafter{\tud@res@d},}%
-              {,\detokenize\expandafter{\tud@ety@valid},}%
-          \ifin@\else%
-            \eappto\tud@ety@valid{%
-              \ifx\tud@ety@valid\@empty\else,\fi\expandonce\tud@res@d%
-            }%
-          \fi%
-        \fi%
-      \fi%
-    }%
-    \ifx\tud@ety@fallback\@empty%
-      \ifx\tud@ety@valid\@empty%
-        \IfBooleanF{#1}{%
-          \ifnum\tud@declare@mode@num>\m@ne\relax%
-            \Entity@Level@Get\tud@res@a{#4}%
-            \ifnum\tud@res@a>\@ne\relax%
-              \ClassWarning{tudscrmanual}{%
-                No entity could be found for\MessageBreak%
-                `\tud@markup@detokenize{#4}{#5}'%
-              }%
-            \fi%
-          \fi%
-        }%
-        \def\tud@ety@valid{\tud@ety@gnrl}%
-      \fi%
-    \else%
-      \ifx\tud@ety@valid\@empty%
-        \ClassWarning{tudscrmanual}{%
-          No entity could be validated for\MessageBreak%
-          `\tud@markup@detokenize{#4}{#5}', so using given\MessageBreak%
-          `\expandonce\tud@ety@fallback' instead%
-        }%
-        \let\tud@ety@valid\tud@ety@fallback%
-      \else%
-        \ClassWarning{tudscrmanual}{%
-          Valid entity `\expandonce\tud@ety@valid'\MessageBreak%
-          found for `\tud@markup@detokenize{#4}{#5}', dropping\MessageBreak%
-          `\expandonce\tud@ety@fallback'%
-        }%
-      \fi%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#2}{\expandonce\tud@ety@valid}%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\DefaultEntityLink{m d() r''}{%
-  \begingroup%
-    \tud@if@markup{#1}{%
-      \tud@specialurl@validate{#3}{%
-        \begingroup%
-          \Markup@Split@Get\tud@res@a{#1}%
-          \protected@edef\tud@res@b{\IfValueTF{#2}{#2}{}}%
-          \edef\tud@res@b{%
-            \unexpanded{\Entity@Get\tud@res@b}%
-            \ifx\tud@res@b\@empty\else(\expandonce\tud@res@b)\fi%
-            \expandonce\tud@res@a%
-          }%
-          \tud@res@b%
-          \edef\tud@res@b{%
-            \unexpanded{\tud@lbl@@get\tud@lbl@tmp}{%
-              \expandonce\tud@res@a(\expandonce\tud@res@b)%
-            }%
-          }%
-          \tud@res@b%
-          \edef\tud@res@a{Entity@Link@@\tud@lbl@tmp}%
-          \ifcsdef{\tud@res@a}{%
-            \ClassWarning{tudscrmanual}{%
-              The default URL '\csuse{\tud@res@a}'\MessageBreak%
-              for `\detokenize{#1}' is overwritten\MessageBreak%
-              with '#3'%
-            }%
+            \listbreak%
           }{}%
-          \csxdef{\tud@res@a}{#3}%
-        \endgroup%
+        }%
+        \docsvlist{#2}%
+      }{%
+        \@tud@res@swatrue%
       }%
     }{}%
-  \endgroup%
-}
-\@onlypreamble\DefaultEntityLink
-\tud@newif\if@tud@ety@seek
-\newcommand*\tud@ety@encountered{}
-\NewDocumentCommand\Entity@Seek{d() m m m}{%
-  \@tud@ety@seektrue%
-  \let\tud@ety@encountered\@empty%
-  \@whilesw\if@tud@ety@seek\fi{%
-    \Entity@@Seek(#1){#2}{#3}{#4}%
-  }%
-}
-\NewDocumentCommand\Entity@@Seek{d() m m m}{%
-  \begingroup%
-    \tud@declare@mode@num=\z@\relax%
-    \if@tud@ety@seek%
-      \IfValueTF{#1}{%
-        \protected@edef\tud@res@a{#1}%
-      }{%
-        \Entity@Get*\tud@res@a{#2}{#3}%
-      }%
-      \tud@if@strequal{\tud@ety@gnrl}{\tud@res@a}{\let\tud@res@a\@empty}{}%
-      \ifx\tud@res@a\@empty\else%
-        \protected@expandtwoargs\in@{,}{\tud@res@a}%
-        \ifin@%
-          \ClassWarning{tudscrmanual}{%
-            Multiple entities for `\tud@markup@detokenize{#2}{#3}'\MessageBreak%
-            (\tud@res@a),\MessageBreak%
-            resolution was not successful%
-          }%
-          \let\tud@res@a\@empty%
-        \else%
-          \Markup@Split@Get\tud@res@b{\tud@res@a}%
-        \fi%
-      \fi%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \if@tud@ety@seek%
-        \ifx\tud@res@a\@empty%
-          \noexpand\@tud@ety@seekfalse%
-        \else%
-          \unexpanded{\def\tud@ety@encountered}{\expandonce\tud@res@a}%
-          \unexpanded{#4}%
-          \noexpand\Entity@@Seek\expandonce\tud@res@b{\unexpanded{#4}}%
-        \fi%
-      \fi%
-    }%
-  \tud@res@a%
-}
-\NewDocumentCommand\Entity@Label@Seek{m d() m m}{%
-  \begingroup%
-    \def\tud@res@b{{#3}{#4}}%
-    \Entity@Seek(#2){#3}{#4}{%
-      \Entity@Label@@Seek\tud@res@a{\tud@res@b}{\tud@ety@encountered}%
-      \Markup@Split@@Get\tud@res@b{\tud@ety@encountered}%
-    }%
-    \ifx\tud@res@a\@empty%
-      \Entity@Label@@Seek\tud@res@a{\tud@res@b}{\tud@ety@gnrl}%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\Entity@Label@@Seek[3]{%
-  \expandafter\tud@lbl@@get\expandafter#1\expandafter{#2(#3)}%
-  \tud@if@lbl@exists{#1}{\@tud@ety@seekfalse}{\let#1\@empty}%
-}
-\NewDocumentCommand\Entity@Link@Seek{m d'' d<> d() m m}{%
-  \begingroup%
-    \let\tud@res@a\@empty%
-    \@tud@res@swatrue%
-    % DOC lvl>2 nur, wenn '...' gegeben
-    \Entity@Level@Get\tud@res@d{#5}%
-    \ifnum\tud@res@d>\tw@\relax%
-      \IfValueF{#2}{\@tud@res@swafalse}%
-    \fi%
     \if@tud@res@swa%
-      \IfValueT{#3}{\Entity@Link@Get\tud@res@a{#3}}%
-      \ifx\tud@res@a\@empty%
-        \def\tud@res@b{{#5}{#6}}%
-        \Entity@Seek(#4){#5}{#6}{%
-          \Entity@Link@@Seek\tud@res@a{\tud@res@b}{\tud@ety@encountered}%
-          \Markup@Split@@Get\tud@res@b{\tud@ety@encountered}%
-        }%
-        \ifx\tud@res@a\@empty%
-          \Entity@Link@@Seek\tud@res@a{\tud@res@b}{\tud@ety@gnrl}%
-        \fi%
-      \fi%
-      \IfValueT{#2}{%
-        \tud@if@strequal{*}{#2}{%
-          \ifx\tud@res@a\@empty%
-            \ClassWarning{tudscrmanual}{%
-              There is no default link for\MessageBreak%
-              `\tud@markup@detokenize{#5}{#6}'%
-            }%
-          \fi%
-        }{%
-          \ifx\tud@res@a\@empty%
-            \tud@specialurl@validate{#2}{\edef\tud@res@a{#2}}%
-          \else%
-            \ClassWarning{tudscrmanual}{%
-              The special link '#2' was not used as\MessageBreak%
-              a default one '\tud@res@a'\MessageBreak exists%
-            }%
-          \fi%
-        }%
-      }%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\Entity@Link@@Seek[3]{%
-  \expandafter\tud@lbl@@get\expandafter#1\expandafter{#2(#3)}%
-  \Entity@Link@Get#1{#1}%
-  \ifx#1\@empty\else\@tud@ety@seekfalse\fi%
-}
-\NewDocumentCommand\Entity@Link@Get{m m}{%
-  \tud@truncate@value#1{#2}%
-  \letcs#1{Entity@Link@@#1}%
-  \ifundef#1{\let#1\@empty}{}%
-}
-\newcommand*\tud@specialurl@wrapper[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#2}%
-    \let\tud@res@c\@empty%
-    \ifx\tud@res@a\@empty\else%
-      \expandafter\tud@specialurl@resolve\expandafter\tud@res@b\tud@res@a::\@nil%
-      \ifnum\tud@res@b<\z@\relax\else%
-        \def\tud@res@d##1:##2\@nil{\def\tud@res@c{##2}}%
-        \expandafter\tud@res@d\tud@res@a\@nil%
-        \ifx\tud@res@c\@empty\else%
-          \ifcase\tud@res@b\relax% CTAN
-            \tud@ctan@url@normalize\tud@res@c{pkg/\tud@res@c}%
-          \or% CTANinfo
-            \tud@ctan@url@normalize\tud@res@c{tex-archive/info/\tud@res@c}%
-          \or% GH
-            \tud@github@url@normalize\tud@res@c{\tud@res@c}%
-          \fi%
-        \fi%
-      \fi%
-      \ifx\tud@res@c\@empty%
-        \ClassWarning{tudscrmanual}{%
-          The given special link `#2' \MessageBreak%
-          could not be resolved%
-        }%
-      \fi%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{%
-        \ifx\tud@res@c\@empty%
-          \noexpand\@firstofone%
-        \else%
-          \noexpand\href{\tud@res@c}%
-        \fi%
-      }%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@specialurl@resolve{}
-\def\tud@specialurl@resolve#1#2:#3:#4\@nil{%
-  \begingroup%
-    \FamilyKeyStateUnknownValue%
-    \IfArgIsEmpty{#3}{}{%
-      \TUD@set@numkey{}{tud@res@a}{%
-        {ctan}{0},{ctaninfo}{1},{gh}{2},{url}{3}%
-      }{#2}%
-    }%
-    \ifx\FamilyKeyState\FamilyKeyStateProcessed\else%
-      \def\tud@res@a{-1}%
-      \FamilyKeyStateProcessed%
-    \fi%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@specialurl@validate[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \unexpanded{\tud@specialurl@resolve\tud@res@a}#1::\noexpand\@nil%
-    }%
-    \tud@res@a%
-    \ifnum\tud@res@a<\z@\relax%
-      \ClassWarning{tudscrmanual}{%
-        Special link `#1' invalid, permitted are:\MessageBreak%
-        CTAN[info]:... GH:... URL:...
-      }%
-      \aftergroup\@gobble%
+      \aftergroup\@firstoftwo%
     \else%
-      \aftergroup\@firstofone%
+      \aftergroup\@secondoftwo%
     \fi%
   \endgroup%
 }
-\AtEndOfClass{\InputIfFileExists{tudscrmanual.cfg}{}{}}
-\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
+\NewDocumentCommand\Markup@Replace{s m d== o d|| d'' m}{%
   \begingroup%
-    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
-    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
-    \tud@res@a{#1}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{#7}%
+    \GetDocumentCommandArgSpec\Process@Markup% o m m d// d== o r|| r'' r()
+    \expandafter\DeclareDocumentCommand\expandafter\tud@res@b\expandafter{%
+      \ArgumentSpecification%
+    }{%
+      \tud@toks@{[{##1}]{##2}{##3}/##4/}%
+      \Markup@@Replace{#1}{==}{#3}{##5}%
+      \Markup@@Replace{#1}{[]}{#4}{##6}%
+      \Markup@@Replace{#1}{||}{#5}{##7}%
+      \Markup@@Replace{#1}{''}{#6}{##8}%
+      \addto@hook\tud@toks@{(##9)}%
+    }%
+    \expandafter\tud@res@b\tud@res@a%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#2}{\the\tud@toks@}%
+    }%
+  \tud@res@a%
 }
-% TODO noch notwendig?
-\newcommand*\Markup@@Expandable{%
-  \def\KOMAScript{KOMA-Script\space}%
-  \def\TUDScript{TUD-Script\space}%
-  \def\CD{Corporate Design\space}%
-  \def\CDs{Corporate Designs\space}%
-  \def\TUD{Technische Universit\"at Dresden\space}%
-  \def\TnUD{Technischen Universit\"at Dresden\space}%
-  \def\DDC{DRESDEN-concept\space}%
-  \def\OpenSans{Open Sans\space}%
-  \def\Univers{Univers\space}%
-  \def\DIN{DIN Bold\space}%
-}
-%\AfterPackage*{hyperref}{%
-%  \pdfstringdefDisableCommands{%
-%    \def\DDC{DRESDEN-concept}%
-%    \def\TUDScript{TUD-Script}%
-%    \def\KOMAScript{KOMA-Script}%
-%  }%
-%}
-% PENDING --> Tutorial: Entity pflicht bzw. warnung, wenn nicht?
-%     direkten link ins handbuch setzen? (xr-hyper, um label zu prüfen?)
-\NewDocumentEnvironment{Entity}{m}{%
-  \Entity@Level@@Validate{1}{2}{#1}{\Markup@Main@Get\tud@ety@crnt{#1}}%
-  \ignorespaces%
-}{%
-  \aftergroup\ignorespaces%
+\NewDocumentCommand\Markup@@Replace{m m m m}{%
+  \begingroup%
+    \tud@if@nil{#3}{%
+      \def\tud@res@a{\@nil}%
+    }{%
+      \def\tud@res@a{#4}%
+      \IfValueT{#3}{%
+        \IfBooleanTF{#1}{%
+          \IfValueF{#4}{\def\tud@res@a{#3}}%
+        }{%
+          \def\tud@res@a{#3}%
+        }%
+      }%
+    }%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\addto@hook\tud@toks@}{%
+        \@firstoftwo#2\expandonce\tud@res@a\@secondoftwo#2%
+      }%
+    }%
+  \tud@res@a%
 }
 \NewDocumentEnvironment{Declaration}{m d== d() d<> o}{%
   \tud@declare@start[{#5}]{#1}=#2=[track](#3)<#4>%
@@ -3629,6 +3504,342 @@
 }{%
   \tud@declare@end{#1}[index=false]%
 }
+\tud@newcount\tud@declare@mode@num
+\TUD@key[.declare]{inline}[true]{%
+  \TUD@set@ifkey{inline}{@tempswa}{#1}%
+  \if@tempswa%
+    \tud@declare@mode@num=\tw@%
+  \else%
+    \tud@declare@mode@num=\@ne%
+  \fi%
+}
+\TUD@key[.declare]{index}[true]{%
+  \TUD@set@ifkey{index}{@tempswa}{#1}%
+  \if@tempswa%
+    \tud@index@mode@num=\@ne\relax%
+  \else%
+    \tud@index@mode@num=\m@ne\relax%
+  \fi%
+}
+\tud@newcount\tud@declare@label@mode@num
+\TUD@key[.declare]{label}[true]{%
+  \TUD@set@numkey{label}{@tempa}{%
+    \TUD@bool@numkey,{alias}{1},{noalias}{2}%
+  }{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \tud@declare@label@mode@num=\@tempa\relax%
+  \fi%
+}
+\tud@newif\if@tud@markup@output\@tud@markup@outputtrue
+\TUD@key[.declare]{output}[true]{%
+  \TUD@set@ifkey{output}{@tud@markup@output}{#1}%
+}
+\tud@newif\if@tud@declare@track
+\TUD@key[.declare]{track}[true]{%
+  \TUD@set@ifkey{track}{@tud@declare@track}{#1}%
+}
+\newcommand*\tud@declare@process@list{}
+\newcommand*\tud@declare@result@list{}
+\NewDocumentCommand\tud@@declare{s m}{%
+  \TUDExecuteOptions[.declare]{output,label,index,track=false,inline=false}%
+  \begingroup%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\TUDExecuteOptions[.declare]{#2}%
+    }%
+  \tud@res@a%
+  \IfBooleanT{#1}{%
+    \TUDExecuteOptions[.declare]{output=false,label=false}%
+    \tud@declare@mode@num=-\tud@declare@mode@num\relax%
+  }%
+}
+\NewDocumentCommand\tud@declare@open{m D=={} r[]}{%
+  \let\tud@declare@result@list\@empty%
+  \begingroup%
+    \tud@@declare{#3}%
+    \protected@edef\tud@lbl@alias@values{#2}%
+    #1%
+    \if@tud@declare@track%
+      \aftergroup\@tud@declare@tracktrue%
+    \else%
+      \aftergroup\@tud@declare@trackfalse%
+    \fi%
+  \endgroup%
+}
+\NewDocumentCommand\tud@declare@close{m r[]}{%
+  \begingroup%
+    \tud@@declare*{#2}%
+    #1%
+  \endgroup%
+}
+\NewDocumentCommand\tud@declare@start{%
+  s o m d== r[] >{\AP@PresetParser}r() r<>%
+}{%
+  \begingroup%
+    \tud@toks@{}%
+    \def\tud@res@c{\endgroup}%
+    \Entity@Level@@Validate{3}{3}{#3}{%
+      \IfValueT{#2}{%
+        \tud@ref@get\tud@res@a{\IfBooleanTF{#1}{discontinued}{new}}%
+          {\IfValueTF{#7}{#7}{}}{|\@nil|'\@nil'}%
+        \edef\tud@res@a{[{#1}]:\expandonce\tud@res@a:{\unexpanded{#2}}}%
+        \addto@hook@expandafter\tud@toks@{\expandafter[\tud@res@a]}%
+      }%
+      \IfValueT{#6}{\addto@hook\tud@toks@{(#6)}}%
+      \IfValueT{#7}{%
+        \tud@ref@get\tud@res@a{\IfBooleanTF{#1}{discontinued}{see}}%
+          {#7}{||'page'}%
+        \addto@hook@expandafter\tud@toks@{\expandafter<\tud@res@a>}%
+      }%
+      \addto@hook\tud@toks@{{\tud@declare@open{#3}=#4=[{#5}]}}%
+      \eappto\tud@res@c{%
+        \unexpanded{\listadd\tud@declare@process@list}{{\the\tud@toks@}}%
+      }%
+    }%
+  \tud@res@c%
+  \let\printdeclarationlist\tud@print@declarationlist%
+}
+\NewDocumentCommand\tud@declare@end{m r[]}{%
+  \ifvmode\else\@killglue\fi%
+  \tud@declare@check%
+  \tud@declare@close{#1}[{#2}]%
+  \par%
+}
+\newcommand*\AP@PresetParser[1]{%
+  \begingroup%
+    \protected@edef\tud@res@b{\noexpand\tud@res@c#1\noexpand\@nil}%
+    \protected@expandtwoargs\in@{|}{#1}%
+    \ifin@%
+      \def\tud@res@c##1|##2\@nil{%
+        \def\tud@res@a{##1}%
+        \protected@expandtwoargs\in@{:}{##2}%
+        \ifin@%
+          \def\tud@res@b####1:####2\@nil{%
+            \let\tud@res@b\@empty%
+            \protected@edef\tud@res@c{####2}%
+            \@for\tud@res@c:=\tud@res@c\do{%
+              \trim@spaces@in\tud@res@c%
+              \eappto\tud@res@b{%
+                \ifx\tud@res@b\@empty\else,\space\fi%
+                \unexpanded{\PValue@Enfold*'}{\expandonce\tud@res@c}%
+              }%
+            }%
+            \preto\tud@res@b{\txb####1:\space}%
+          }%
+          \tud@res@b##2\@nil%
+        \else%
+          \let\tud@res@b\relax%
+        \fi%
+      }%
+    \else%
+      \def\tud@res@c##1\@nil{%
+        \def\tud@res@a{#1}%
+        \let\tud@res@b\@empty%
+      }%
+    \fi%
+    \tud@res@b%
+    \protected@expandtwoargs\in@{:}{\tud@res@a}%
+    \ifin@\else%
+      \preto\tud@res@a{Voreinstellung:}%
+    \fi%
+    \def\tud@res@c##1:##2\@nil{%
+      \let\tud@res@a\@empty%
+      \protected@edef\tud@res@c{##2}%
+      \@for\tud@res@c:=\tud@res@c\do{%
+        \trim@spaces@in\tud@res@c%
+        \eappto\tud@res@a{%
+          \ifx\tud@res@a\@empty\else,\space\fi%
+          \ifin@%
+            \expandafter\@firstofone%
+          \else%
+            \unexpanded{\PValue@Enfold*'}%
+          \fi%
+          {\expandonce\tud@res@c}%
+        }%
+      }%
+      \ifx\tud@res@a\@empty%
+        \def\tud@res@a{##1}%
+      \else%
+        \preto\tud@res@a{##1:\space}%
+      \fi%
+    }%
+    \expandafter\tud@res@c\tud@res@a\@nil%
+    \ifx\tud@res@b\relax%
+      \ClassError{tudscrmanual}{Wrong format for (conditional) preset}{%
+        The format `[(text:)preset|condition:preset]' is needed,\MessageBreak%
+        but `[#1]' was given.%
+      }%
+      \let\tud@res@b\@empty%
+    \fi%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def\ProcessedArgument}{%
+        \expandonce\tud@res@a\expandonce\tud@res@b%
+      }%
+    }%
+  \tud@res@c%
+}
+\newcommand*\tud@declaration@inner@list{}
+\newcommand*\tud@declaration@label@list{}
+\newcommand*\printdeclarationlist{}
+\AtBeginDocument{\undef\printdeclarationlist}
+\newcommand*\tud@declare@check{%
+  \ifundef\printdeclarationlist{}{%
+    \ClassError{tudscrmanual}{\string\printdeclarationlist\space missing}{%
+      The command \string\printdeclarationlist\space must\MessageBreak%
+      be used right after the last declaration environment.%
+    }%
+    \gundef\printdeclarationlist%
+    \global\let\tud@declaration@inner@list\@empty%
+  }%
+}
+\newcommand\Process@@Output{}
+\NewDocumentCommand\tud@print@declarationlist{!o !+d()}{%
+  \tud@setglue\tud@res@glue{\medskipamount*3/2}%
+  \ifhmode%
+    \vskip\tud@res@glue%
+  \else%
+    \addpenalty{\@beginparpenalty}%
+    \addvspace{\tud@res@glue}%
+  \fi%
+  \noindent\null%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
+    \def\do##1{\tud@declare@process@eval\tud@res@a\tud@res@b##1}%
+    \dolistloop{\tud@declare@process@list}%
+    \sbox\z@{%
+      \begin{tabular}[t]{|l|@{}l@{}l@{}}%
+        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
+        \tud@res@a%
+        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
+      \end{tabular}%
+      \IfValueT{#1}{\zap@space#1 \@empty}%
+    }%
+    \raisebox{\dimexpr\ht\strutbox\relax}{%
+      \usebox\z@%
+      \IfValueT{#2}{%
+        \hskip.75em%
+        \begin{minipage}%
+            [t][\dimexpr\ht\z@+\dp\z@-2\arrayrulewidth\relax][c]%
+            {\the\dimexpr\textwidth-\wd\z@-.75em\relax}%
+          #2%
+        \end{minipage}%
+      }%
+    }%
+    \edef\tud@res@c{%
+      \endgroup%
+      \expandonce\tud@res@b%
+      \noexpand\tud@print@changedatlist[-\arrayrulewidth]%
+    }%
+  \tud@res@c%
+  \gundef\printdeclarationlist%
+  \par\nobreak%
+  \vskip\glueexpr\medskipamount\relax%
+  \@afterindentfalse\@afterheading%
+}
+\NewDocumentCommand\tud@declare@process@eval{m m o d() d<> m}{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \def\Process@Output##1{\gdef\Process@@Output{##1}}%
+    #6%
+    \ifx\Process@@Output\@empty\else%
+      \edef\tud@res@a{\expandonce\Process@@Output&}%
+      \global\let\Process@@Output\@empty%
+      \IfValueT{#4}{%
+        \appto\tud@res@a{\hskip.75em\relax\small\ignorespaces#4}%
+      }%
+      \appto\tud@res@a{&}%
+      \IfValueT{#5}{%
+        \appto\tud@res@a{\hskip.75em\relax\small\ignorespaces#5}%
+      }%
+      \appto\tud@res@a{\tabularnewline}%
+    \fi%
+    \let\tud@res@b\@empty%
+    \def\do##1{\tud@declare@result@eval\tud@res@b[{#3}]##1}%
+    \dolistloop{\tud@declare@result@list}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\appto#1}{\expandonce\tud@res@a}%
+      \unexpanded{\appto#2}{\expandonce\tud@res@b}%
+    }%
+  \tud@res@c%
+}
+\NewDocumentCommand\tud@declare@result@eval{m o m m}{%
+  \IfValueT{#2}{\tud@chg@appto#1#2{#3}{#4}}%
+  \if@tud@declare@track%
+    \tud@truncate@value\tud@lbl@tmp{#4}%
+    \eappto#1{%
+      \unexpanded{\listadd\tud@declaration@label@list}{\tud@lbl@tmp}%
+    }%
+    \appto#1{\listadd\tud@declaration@inner@list{#3}}%
+  \fi%
+}
+\NewDocumentCommand\tud@chg@appto{m o d:: m m m}{%
+  \IfArgIsEmpty{#5}{}{%
+    \appto#1{\Changed@At@Process[{#2}]<{#5}{#6}>:#3:{#4}}%
+  }%
+}
+\NewDocumentCommand\InlineDeclaration{s m}{%
+  \IfBooleanT{#1}{%
+    \ClassWarning{tudscrmanual}{%
+      There is no starred variant for \string\InlineDeclaration%
+    }%
+  }%
+  \Inline@Declaration{#2}%
+}
+\NewDocumentCommand\Inline@Declaration{s t' o d== m}{%
+  \begingroup%
+    \tud@declare@special@start[{#3}]{#5}=#4=%
+      [inline\IfBooleanT{#1}{,output=false}\IfBooleanT{#2}{,label=noalias}]%
+    \tud@declare@special@end{#5}[inline]%
+  \endgroup%
+  \null%
+}
+\NewDocumentEnvironment{DeclareEntity}{m !o}{%
+  \tud@declare@special@start*[{#2}]{#1}[output=false]%
+  \begin{Entity}{#1}%
+}{%
+  \end{Entity}%
+  \tud@declare@special@end{#1}[]%
+}
+\NewDocumentEnvironment{DeclareEntity*}{m !o}{%
+  \tud@declare@special@start*[{#2}]{#1}[output=false]%
+}{%
+  \tud@declare@special@end{#1}[]%
+}
+\NewDocumentCommand\tud@declare@special@start{s o m d== r[]}{%
+  \tud@declare@open{#3}=#4=[{#5}]%
+  \IfValueT{#2}{%
+    \IfBooleanTF{#1}{%
+      \Changed@At@Process(#3):neuer Bestandteil von \TUDScript:{#2}%
+    }{%
+      \begingroup%
+        \let\tud@res@a\@empty%
+        \def\tud@res@b##1##2{%
+          \appto\tud@res@a{\Changed@At@Process<##2>:##1:{#2}}%
+        }%
+        \tud@ref@get\tud@res@c{new}{}{|\@nil|'\@nil'}%
+        \edef\tud@res@c{%
+          \noexpand\forlistloop{\noexpand\tud@res@b{\expandonce\tud@res@c}}%
+        }%
+        \tud@res@c{\tud@declare@result@list}%
+        \edef\tud@res@a{%
+          \endgroup%
+          \expandonce\tud@res@a%
+        }%
+      \tud@res@a%
+    }%
+    \tud@print@changedatlist%
+  }%
+  \tud@lbl@get\tud@lbl@tmp{#3}%
+  \listeadd\tud@declaration@label@list{\tud@lbl@tmp}%
+  \ignorespaces%
+}
+\NewDocumentCommand\tud@declare@special@end{m r[]}{%
+  \tud@declare@close{#1}[{#2}]%
+  \ignorespaces%
+}
 \NewDocumentCommand\seeplain{s m}{%
   \mbox{\emph{\IfBooleanTF{#1}{\alsoname}{\seename}}}\nobreakspace#2%
 }
@@ -3640,7 +3851,6 @@
     \def\tud@res@d{#3}%
     \protected@edef\tud@res@a{#3}%
     \let\tud@res@b\@empty%
-    % DOC !<ref>!:... als marker
     \in@{:}{#3}%
     \ifin@%
       \def\tud@res@c##1:##2\@nil{%
@@ -3729,289 +3939,6 @@
       \unexpanded{\def#1}{\expandonce\tud@res@d}%
     }%
   \tud@res@c%
-}
-\newcommand*\AP@PresetParser[1]{%
-  \begingroup%
-    \protected@edef\tud@res@b{\noexpand\tud@res@c#1\noexpand\@nil}%
-    \protected@expandtwoargs\in@{|}{#1}%
-    \ifin@%
-      \def\tud@res@c##1|##2\@nil{%
-        \def\tud@res@a{##1}%
-        \protected@expandtwoargs\in@{:}{##2}%
-        \ifin@%
-          \def\tud@res@b####1:####2\@nil{%
-            \let\tud@res@b\@empty%
-            \protected@edef\tud@res@c{####2}%
-            \@for\tud@res@c:=\tud@res@c\do{%
-              \trim@spaces@in\tud@res@c%
-              \eappto\tud@res@b{%
-                \ifx\tud@res@b\@empty\else,\space\fi%
-                \unexpanded{\PValue@Enfold*'}{\expandonce\tud@res@c}%
-              }%
-            }%
-            \preto\tud@res@b{\txb####1:\space}%
-          }%
-          \tud@res@b##2\@nil%
-        \else%
-          \let\tud@res@b\relax%
-        \fi%
-      }%
-    \else%
-      \def\tud@res@c##1\@nil{%
-        \def\tud@res@a{#1}%
-        \let\tud@res@b\@empty%
-      }%
-    \fi%
-    \tud@res@b%
-    \protected@expandtwoargs\in@{:}{\tud@res@a}%
-    \ifin@\else%
-      \preto\tud@res@a{Voreinstellung:}%
-    \fi%
-    \def\tud@res@c##1:##2\@nil{%
-      \let\tud@res@a\@empty%
-      \protected@edef\tud@res@c{##2}%
-      \@for\tud@res@c:=\tud@res@c\do{%
-        \trim@spaces@in\tud@res@c%
-        \eappto\tud@res@a{%
-          \ifx\tud@res@a\@empty\else,\space\fi%
-          \ifin@%
-            \expandafter\@firstofone%
-          \else%
-            \unexpanded{\PValue@Enfold*'}%
-          \fi%
-          {\expandonce\tud@res@c}%
-        }%
-      }%
-      \ifx\tud@res@a\@empty%
-        \def\tud@res@a{##1}%
-      \else%
-        \preto\tud@res@a{##1:\space}%
-      \fi%
-    }%
-    \expandafter\tud@res@c\tud@res@a\@nil%
-    \ifx\tud@res@b\relax%
-      \ClassError{tudscrmanual}{Wrong format for (conditional) preset}{%
-        The format `[(text:)preset|condition:preset]' is needed,\MessageBreak%
-        but `[#1]' was given.%
-      }%
-      \let\tud@res@b\@empty%
-    \fi%
-    \edef\tud@res@c{%
-      \endgroup%
-      \unexpanded{\def\ProcessedArgument}{%
-        \expandonce\tud@res@a\expandonce\tud@res@b%
-      }%
-    }%
-  \tud@res@c%
-}
-% DOC {Deklaration}{Voreinstellungen}{Querverweis}{Änderungsliste}
-\newcommand*\tud@declare@process@list{}
-% DOC {internal markup}{label}
-\newcommand*\tud@declare@result@list{}
-\NewDocumentCommand\tud@declare@start{%
-  s o m d== r[] >{\AP@PresetParser}r() r<>%
-}{%
-  \begingroup%
-    \tud@toks@{}%
-    \def\tud@res@c{\endgroup}%
-    \Entity@Level@@Validate{3}{3}{#3}{%
-      \IfValueT{#2}{%
-        \tud@ref@get\tud@res@a{\IfBooleanTF{#1}{discontinued}{new}}%
-          {\IfValueTF{#7}{#7}{}}{|\@nil|'\@nil'}%
-        \edef\tud@res@a{[{#1}]:\expandonce\tud@res@a:{\unexpanded{#2}}}%
-        \addto@hook@expandafter\tud@toks@{\expandafter[\tud@res@a]}%
-      }%
-      \IfValueT{#6}{\addto@hook\tud@toks@{(#6)}}%
-      \IfValueT{#7}{%
-        \tud@ref@get\tud@res@a{\IfBooleanTF{#1}{discontinued}{see}}%
-          {#7}{||'page'}%
-        \addto@hook@expandafter\tud@toks@{\expandafter<\tud@res@a>}%
-      }%
-      \addto@hook\tud@toks@{{\tud@declare@open{#3}=#4=[{#5}]}}%
-      \eappto\tud@res@c{%
-        \unexpanded{\listadd\tud@declare@process@list}{{\the\tud@toks@}}%
-      }%
-    }%
-  \tud@res@c%
-  \let\printdeclarationlist\tud@print@declarationlist%
-}
-\NewDocumentCommand\tud@declare@end{m r[]}{%
-  \ifvmode\else\@killglue\fi%
-  \tud@declare@check%
-  \tud@declare@close{#1}[{#2}]%
-  \par%
-}
-\newcommand*\tud@declaration@inner@list{}
-\newcommand*\tud@declaration@label@list{}
-\newcommand*\printdeclarationlist{}
-\AtBeginDocument{\undef\printdeclarationlist}
-\newcommand*\tud@declare@check{%
-  \ifundef\printdeclarationlist{}{%
-    \ClassError{tudscrmanual}{\string\printdeclarationlist\space missing}{%
-      The command \string\printdeclarationlist\space must\MessageBreak%
-      be used right after the last declaration environment.%
-    }%
-    \gundef\printdeclarationlist%
-    \global\let\tud@declaration@inner@list\@empty%
-  }%
-}
-\newcommand\Process@@Output{}%
-\NewDocumentCommand\tud@print@declarationlist{!o !+d()}{%
-  \tud@setglue\tud@res@glue{\medskipamount*3/2}%
-  \ifhmode%
-    \vskip\tud@res@glue%
-  \else%
-    \addpenalty{\@beginparpenalty}%
-    \addvspace{\tud@res@glue}%
-  \fi%
-  \noindent\null%
-  \begingroup%
-    % DOC interne Teil der Tabelle
-    \let\tud@res@a\@empty%
-    % DOC alles, was nach \printdeclarationlist definiert werden muss
-    \let\tud@res@b\@empty%
-    \def\do##1{\tud@declare@process@eval\tud@res@a\tud@res@b##1}%
-    \dolistloop{\tud@declare@process@list}%
-    \sbox\z@{%
-      \begin{tabular}[t]{|l|@{}l@{}l@{}}%
-        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
-        \tud@res@a%
-        \cline{1-1}\noalign{\vskip\arrayrulewidth}%
-      \end{tabular}%
-      \IfValueT{#1}{\zap@space#1 \@empty}%
-    }%
-    \raisebox{\dimexpr\ht\strutbox\relax}{%
-      \usebox\z@%
-      \IfValueT{#2}{%
-        \hskip.75em%
-        \begin{minipage}%
-            [t][\dimexpr\ht\z@+\dp\z@-2\arrayrulewidth\relax][c]%
-            {\the\dimexpr\textwidth-\wd\z@-.75em\relax}%
-          #2%
-        \end{minipage}%
-      }%
-    }%
-    \edef\tud@res@c{%
-      \endgroup%
-      \expandonce\tud@res@b%
-      \noexpand\tud@print@changedatlist[-\arrayrulewidth]%
-      \begingroup\expandonce\tud@index@note@entries\endgroup%
-    }%
-  \tud@res@c%
-  \gundef\printdeclarationlist%
-  \par\nobreak%
-  \vskip\glueexpr\medskipamount\relax%
-  \@afterindentfalse\@afterheading%
-}
-% DOC Verarbeitung Argumente \tud@declare@process@list, siehe \tud@declare@start
-% #3 Änderungseintrag [...]:...:{...}
-% #4 preset, #5 reference #6 \tud@declare@open{...}=...=[...]
-\NewDocumentCommand\tud@declare@process@eval{m m o d() d<> m}{%
-  \begingroup%
-    \let\tud@res@a\@empty%
-    % DOC gdef aufgrund der Tabelle
-    \def\Process@Output##1{\gdef\Process@@Output{##1}}%
-    #6%
-    \ifx\Process@@Output\@empty\else%
-      \edef\tud@res@a{\expandonce\Process@@Output&}%
-      \global\let\Process@@Output\@empty%
-      \IfValueT{#4}{%
-        \appto\tud@res@a{\hskip.75em\relax\small\ignorespaces#4}%
-      }%
-      \appto\tud@res@a{&}%
-      \IfValueT{#5}{%
-        \appto\tud@res@a{\hskip.75em\relax\small\ignorespaces#5}%
-      }%
-      \appto\tud@res@a{\tabularnewline}%
-    \fi%
-    \let\tud@res@b\@empty%
-    % DOC \tud@declare@result@list: {inner markup}{label}
-    \def\do##1{\tud@declare@result@eval\tud@res@b[{#3}]##1}%
-    \dolistloop{\tud@declare@result@list}%
-    \edef\tud@res@c{%
-      \endgroup%
-      \unexpanded{\appto#1}{\expandonce\tud@res@a}%
-      \unexpanded{\appto#2}{\expandonce\tud@res@b}%
-    }%
-  \tud@res@c%
-}
-% DOC Verarbeitung der Argumente, siehe \tud@declare@result@list
-% #2 Änderungseintrag [...]:...:{...}
-\NewDocumentCommand\tud@declare@result@eval{m o m m}{%
-  \IfValueT{#2}{\tud@chg@appto#1#2{#3}{#4}}%
-  \if@tud@declare@track%
-    \tud@truncate@value\tud@lbl@tmp{#4}%
-    \eappto#1{%
-      \unexpanded{\listadd\tud@declaration@label@list}{\tud@lbl@tmp}%
-    }%
-    \appto#1{\listadd\tud@declaration@inner@list{#3}}%
-  \fi%
-}
-% DOC split von #3 \tud@declare@process@eval und \tud@declare@result@list
-\NewDocumentCommand\tud@chg@appto{m o d:: m m m}{%
-  \IfArgIsEmpty{#5}{}{%
-    \appto#1{\Changed@At@Process[{#2}]<{#5}{#6}>:#3:{#4}}%
-  }%
-}
-\NewDocumentCommand\InlineDeclaration{s m}{%
-  \IfBooleanT{#1}{%
-    \ClassWarning{tudscrmanual}{%
-      There is no starred variant for \string\InlineDeclaration%
-    }%
-  }%
-  \Inline@Declaration{#2}%
-}
-\NewDocumentCommand\Inline@Declaration{s t' o d== m}{%
-  \begingroup%
-    \tud@declare@special@start[{#3}]{#5}=#4=%
-      [inline\IfBooleanT{#1}{,output=false}\IfBooleanT{#2}{,label=noalias}]%
-    \tud@declare@special@end{#5}[inline]%
-  \endgroup%
-  \null%
-}
-\NewDocumentEnvironment{DeclareEntity}{m !o}{%
-  \tud@declare@special@start*[{#2}]{#1}[output=false]%
-  \begin{Entity}{#1}%
-}{%
-  \end{Entity}%
-  \tud@declare@special@end{#1}[]%
-}
-\NewDocumentEnvironment{DeclareEntity*}{m !o}{%
-  \tud@declare@special@start*[{#2}]{#1}[output=false]%
-}{%
-  \tud@declare@special@end{#1}[]%
-}
-\NewDocumentCommand\tud@declare@special@start{s o m d== r[]}{%
-  \tud@declare@open{#3}=#4=[{#5}]%
-  \IfValueT{#2}{%
-    \IfBooleanTF{#1}{%
-      \Changed@At@Process(#3):neuer Bestandteil von \TUDScript:{#2}%
-    }{%
-      \begingroup%
-        \let\tud@res@a\@empty%
-        \def\tud@res@b##1##2{%
-          \appto\tud@res@a{\Changed@At@Process<##2>:##1:{#2}}%
-        }%
-        \tud@ref@get\tud@res@c{new}{}{|\@nil|'\@nil'}%
-        \edef\tud@res@c{%
-          \noexpand\forlistloop{\noexpand\tud@res@b{\expandonce\tud@res@c}}%
-        }%
-        \tud@res@c{\tud@declare@result@list}%
-        \edef\tud@res@a{%
-          \endgroup%
-          \expandonce\tud@res@a%
-        }%
-      \tud@res@a%
-    }%
-    \tud@print@changedatlist%
-  }%
-  \tud@lbl@get\tud@lbl@tmp{#3}%
-  \listeadd\tud@declaration@label@list{\tud@lbl@tmp}%
-  \ignorespaces%
-}
-\NewDocumentCommand\tud@declare@special@end{m r[]}{%
-  \tud@declare@close{#1}[{#2}]%
-  \ignorespaces%
 }
 \newcommand*\tud@val@main{}
 \newcommand*\tud@val@addon{}
@@ -4204,7 +4131,9 @@
             }%
           \fi%
         \else%
-          \eappto\tud@res@c{\ifx\tud@res@c\@empty\else,\fi\expandonce\tud@res@a}%
+          \eappto\tud@res@c{%
+            \ifx\tud@res@c\@empty\else,\fi\expandonce\tud@res@a%
+          }%
           \eappto\tud@res@d{,\expandonce\tud@res@a}%
         \fi%
       \fi%
@@ -4250,76 +4179,52 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@index@note@entries{}
-\let\tud@index@note@entries\relax
-\tud@newdim\tud@index@note@vskip
-\newcommand*\tud@index@note@format[1]{%
-  \hfill\llap{%
-    \colorbox{HKS41!60}{%
-      \normalfont\normalsize%
-      \tiny\textcdsi{\textcolor{HKS07}{#1}}%
-    }%
-  }%
-}
-% TODO überprüfen, was genau läuft hier?
-\newcommand*\tud@index@note@write[2]{%
+\NewDocumentCommand\TermTable{!o}{%
+  \ifhmode\par\fi%
+  \vskip\smallskipamount%
+  \@afterindentfalse\@afterheading%
   \begingroup%
-    \tud@if@strequal{\jobname}{#1}{%
-      \ifundef\printdeclarationlist{%
-        \@tud@res@swafalse%
-        \ifnum\@floatpenalty<\z@\relax\@tud@res@swatrue\fi%
-        \ifinner\@tud@res@swatrue\fi%
-        \if@tud@res@swa%
-          \tud@addtodim\tud@index@note@vskip{1\baselineskip}%
-          \marginnote{\tud@index@note@format{#2}}[\the\tud@index@note@vskip]%
-        \else%
-          \marginpar{\tud@index@note@format{#2}}%
-          \tud@setdim\tud@index@note@vskip{\z@}%
-        \fi%
+    \let\tud@res@a\@empty%
+    \def\do##1{\Term@Table\tud@res@a\@nil##1\@nil}%
+    \dolistloop{\tud@declaration@inner@list}%
+    \ifx\tud@res@a\@empty%
+      \ClassWarning{tudscrmanual}{No declaration for Terms found}%
+    \else%
+      \IfValueTF{#1}{%
+        \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}[b]{lXX}%
+          \expandafter\Term@@Table\expandafter{\tud@res@a}%
+        \end{tabularx}%
       }{%
-        \ifx\tud@index@note@entries\relax%
-          \tud@setdim\tud@index@note@vskip{\z@}%
-          \gdef\tud@index@note@entries{%
-            \global\let\tud@index@note@entries\relax%
-            \global\tud@index@note@vskip=\z@%
-          }%
-        \fi%
-        \appto\tud@index@note@entries{%
-          \marginnote{\tud@index@note@format{#2}}%
-        }%
-        \tud@addtodim\tud@index@note@vskip{1\baselineskip}%
-        \xappto\tud@index@note@entries{[\the\tud@index@note@vskip]}%
+        \begin{tabular}[b]{lll}%
+          \expandafter\Term@@Table\expandafter{\tud@res@a}%
+        \end{tabular}%
       }%
-      \global\tud@index@note@vskip=\tud@index@note@vskip%
-    }{}%
+    \fi%
   \endgroup%
 }
-\newcommand*\tud@idx@join[3]{%
-  \edef#1{\detokenize{#2}\detokenize{@}\detokenize{#3}}%
+\newcommand*\Term@Table{}
+\def\Term@Table#1\@nil#2#3#4\@nil{\tud@if@strequal{Term}{#2}{\appto#1{#3,}}{}}%
+\newcommand*\Term@@Table[1]{%
+  \toprule%
+  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
+  \midrule%
+  \forcsvlist{\Term@@@Table}{#1}%
+  \bottomrule%
 }
-\newcommand*\tud@idx@split[2]{%
-  \begingroup%
-    \edef\tud@idx@split{#2}%
-    \expandafter\tud@idx@@split\tud@idx@split\@nil%
-    \edef\tud@idx@split{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@idx@split}%
-    }%
-  \tud@idx@split%
+\newcommand*\Term@@@Table[1]{%
+  \Term*{#1} & %
+  \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
+  \strut\selectlanguage{english}%
+  \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
-\newcommand*\tud@idx@@split{}
-\expandafter\def\expandafter\tud@idx@@split%
-    \expandafter#\expandafter1\detokenize{@}#2\@nil{%
-  \def\tud@idx@split{{#1}{#2}}%
-}
+\let\makeindex\@empty
+\@onlypreamble\makeindex
 \undef\@wrindex
 \newcommand*\@wrindex[2][\jobname]{%
   \protected@write\@indexfile{\@sanitize}{%
     \string\indexentry[#1]{#2}{\thepage}%
   }%
 }
-\NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
-\tud@addtocontents@special*{\let\index\@gobbleopt@one}
 \def\index{%
   \@bsphack\begingroup%
   \@sanitize%
@@ -4338,9 +4243,10 @@
   }{%
     \@wrindex[{#1}]{#2}%
   }%
-  \tud@index@note@write{#1}{#2}%
   \endgroup\@esphack%
 }
+\NewExpandableDocumentCommand\@gobbleopt@one{o m}{}
+\tud@addtocontents@special*{\let\index\@gobbleopt@one}
 \newcommand*\tud@idx@parse[2]{%
   \in@{|}{#2}%
   \ifin@%
@@ -4389,180 +4295,44 @@
     \unexpanded{#2}%
   }%
 }
-\newcommand*\tud@index@prologue{}%
-\newcommand*\tud@index@item[2][\relax]{%
-  \par\penalty\numexpr#2*50-50\relax#1%
-  \hspace*{\dimexpr\numexpr#2\relax em\relax}%
-  \hangindent=\dimexpr\numexpr2*#2+3\relax em/2\relax%
+\newcommand*\tud@idx@join[3]{%
+  \edef#1{\detokenize{#2}\detokenize{@}\detokenize{#3}}%
 }
-\newcommand*\tud@index@vskip[1][\smallskipamount]{%
-  \vskip\glueexpr1#1\@plus1#1\@minus.5#1\relax%
-}
-\newcommand*\tud@index@hook{}
-\RenewDocumentEnvironment{theindex}{+b}{%
-  \def\lettergroup##1{\minisec{##1}}%
-  \def\item{\tud@index@item{0}}%
-  \def\subitem{\tud@index@item{1}}%
-  \def\subsubitem{\tud@index@item{2}}%
-  \def\subsubsubitem{\tud@index@item{3}}%
-  \def\indexspace{\tud@index@vskip[\bigskipamount]}%
-  \tud@index@hook%
-  \def\tud@res@a{%
-    \addsec[%
-      reference=\tud@index@ref,%
-      tocentry=\tud@index@toc%
-    ]{\tud@index@title\label{idx:\tud@index@name}}%
-    \markdouble{\tud@index@ref}%
-    \tud@index@prologue%
-  }%
-  \ifnum\tud@index@cols>\@ne\relax%
-    \long\def\tud@res@b##1{%
-      \setlength\columnsep{\f@size\p@}%
-      \setlength\columnseprule{\z@}%
-      \begin{multicols}{\tud@index@cols}[\tud@res@a]%
-      ##1%
-      \end{multicols}%
-    }%
-  \else%
-    \long\def\tud@res@b##1{\tud@res@a##1}%
-  \fi%
-  \tud@res@b{%
-    \setparsizes{\z@}{\z@\@plus.1\baselineskip}{\z@\@plus1fil}%
-    \par@updaterelative%
-    \tud@raggedright%
-    #1%
-  }%
-}{}
-\NewDocumentCommand\tud@index@print{!O{\jobname} !+d()}{%
-  \pagebreak[3]%
-  \IfFileExists{\jobname-#1.ind}{%
-    \IfValueTF{#2}{%
-      \def\tud@index@prologue{\nopagebreak#2\par}%
-    }{%
-      \let\tud@index@prologue\nopagebreak%
-    }%
-    \csuse{tud@index@set@@#1}%
-    \@input@{\jobname-#1.ind}%
-  }{%
-    \ClassWarning{tudscrmanual}%
-    {%
-      No processed index file found,\MessageBreak%
-      `\jobname-#1.ind' does not exist%
-    }%
-    \global\let\tud@index@mdfive\@empty%
-  }%
-}
-\newrobustcmd*\seesep{\txb}%
-\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
-\newrobustcmd*\cleverseealso{%
-  \ClassWarning{tudscrmanual}%
-    {You should use `|see' instead of `|seealso'}%
-  \tud@cleversee{\alsoname}%
-}
-\newcommand*\tud@cleversee{}
-\def\tud@cleversee#1#2\relax{%
+\newcommand*\tud@idx@split[2]{%
   \begingroup%
-    \let\cleversee\@empty%
-    \let\cleverseealso\@empty%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b{#2}%
-    \def\tud@res@c##1\\##2\@nil{%
-      \appto\tud@res@a{##1}%
-      \def\tud@res@b{##2}%
-      \trim@spaces@in\tud@res@b%
-      \in@{\\}{##2}%
-    }%
-    \in@true%
-    \@whilesw\ifin@\fi{%
-      \expandafter\tud@res@c\tud@res@b\@nil%
-    }%
-    \ifx\tud@res@b\@empty%
-      \mbox{\emph{#1}}%
-    \else%
-      \def\tud@res@c##1 ##2\@nil{%
-        ##2##1\space\mbox{\emph{\alsoname}}%
-      }%
-      \expandafter\tud@res@c\tud@res@b\@nil%
-    \fi%
-    \def\tud@res@b{\nobreakspace}%
-    \def\do##1{%
-      \def\tud@res@c{##1}%
-      \trim@spaces@in\tud@res@c%
-      \tud@res@b%
-      \begingroup%
-        \tud@if@markup*{##1}{%
-          \Markup@Split@Get*\tud@res@d{##1}%
-          \Markup@Suffix@@Select[\protected@edef\tud@res@d]{}{%
-            \expandafter\@firstoftwo\tud@res@d%
-          }%
-        }{%
-          \let\tud@res@d\@empty%
-        }%
-        \Markup@Expandable%
-        \let\DistributionGeneral\@DistributionGeneral%
-        \def\seesep{!}%
-        \protected@edef\tud@res@d{%
-          \endgroup%
-          \noexpand\hyperlink{indexentry:\tud@res@c\tud@res@d}%
-        }%
-      \tud@res@d{\tud@res@c}%
-      \def\tud@res@b{;\space}%
-    }%
-    \expandafter\dossvlist\expandafter{\tud@res@a}%
-  \endgroup%
-}
-\newrobustcmd*\tud@idx@declare[2]{%
-  \ifcsundef{tud@idx@lbl@@#1}{}{%
-    \ClassWarningNoLine{tudscrmanual}{%
-      Index entry for\MessageBreak`#1'\MessageBreak was already defined%
-    }%
-  }%
-  \csxdef{tud@idx@lbl@@#1}{\detokenize{#2}}%
-}
-\@onlypreamble\tud@idx@declare
-\AtEndDocument{\let\tud@idx@declare\@gobbletwo}
-\newcommand*\tud@if@idx@exists[1]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
+    \edef\tud@idx@split{#2}%
+    \expandafter\tud@idx@@split\tud@idx@split\@nil%
+    \edef\tud@idx@split{%
       \endgroup%
-      \noexpand\ifcsundef{tud@idx@lbl@@#1}%
+      \unexpanded{\def#1}{\tud@idx@split}%
     }%
-  \tud@res@a{%
-    \expandafter\@secondoftwo%
-  }{%
-    \expandafter\@firstoftwo%
-  }%
+  \tud@idx@split%
 }
-\newcommand*\tud@idx@read[2]{%
-  \begingroup%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\letcs#1}{tud@idx@lbl@@#2}%
-    }%
-  \tud@res@a%
+\newcommand*\tud@idx@@split{}
+\expandafter\def\expandafter\tud@idx@@split%
+    \expandafter#\expandafter1\detokenize{@}#2\@nil{%
+  \def\tud@idx@split{{#1}{#2}}%
 }
 \NewDocumentCommand\Process@Index{o m m r// r== r[] r|| r() r<>}{%
   \begingroup%
+    \@tud@res@swafalse%
     \ifnum\tud@index@mode@num>\m@ne\relax
-      \IfBooleanTF{#1}{\@tud@res@swafalse}{%
-        \ifcsdef{Markup@Format@@Index@@#2}{%
-          \@tud@res@swatrue%
-        }{%
-          \@tud@res@swafalse%
+      \IfBooleanF{#1}{%
+        \ifcsdef{Markup@Format@@Index@@#2}{\@tud@res@swatrue}{%
           \IfValueT{#7}{%
-            \ClassWarning{tudscrmanual}{%
+            \ClassWarning{tudscrmanual}%
+            {%
               Markup command `\tud@markup@detokenize{#2}{...}' was\MessageBreak%
               defined without index, |#7| is useless%
             }%
           }%
         }%
       }%
-    \else%
-      \@tud@res@swafalse%
     \fi%
+    \let\tud@res@a\relax%
     \if@tud@res@swa%
       \ifcase\tud@absnum\tud@declare@mode@num\relax\relax% inline
-        \tud@idx@markup@get\tud@res@a{#7}%
+        \tud@idx@attribute@get\tud@res@a{#7}%
       \or% declaration
         \ifnum\tud@declare@mode@num>\z@\relax%
           \def\tud@res@a{!(}%
@@ -4572,27 +4342,35 @@
       \or% inline declaration
         \ifnum\tud@declare@mode@num>\z@\relax%
           \def\tud@res@a{!}%
-        \else%
-          \let\tud@res@a\relax%
-        \fi%
-      \fi%
-      \ifx\tud@res@a\relax%
-        \@tud@res@swafalse%
-      \else%
-        \ifx\tud@res@a\@empty\else%
-          \edef\tud@res@a{|\tud@res@a|}%
         \fi%
       \fi%
     \fi%
     \protected@edef\tud@res@a{%
       \endgroup%
-      \if@tud@res@swa%
-        \noexpand\Process@@Index{#2}{#3}/#4/=#5=[{#6}]\tud@res@a(#8)<#9>%
+      \ifx\tud@res@a\relax\else%
+        \noexpand\Process@@Index%
+          {#2}{#3}/#4/=#5=[{#6}]%
+          \ifx\tud@res@a\@empty\else|\tud@res@a|\fi(#8)<#9>%
       \fi%
     }%
   \tud@res@a%
 }
-\newcommand*\tud@idx@markup@get[2]{%
+\NewDocumentCommand\Process@@Index{m m r// r== r[] d|| r() r<>}{%
+  \begingroup%
+    \tud@idx@get\tud@res@a<#8>{{#1}{#2}/#3/=#4=[{#5}](#7)}%
+    \tud@idx@write{#1}|#6|{\tud@res@a}%
+    \ifnum\tud@declare@mode@num>\z@\relax%
+      \tud@idx@aux@write{#8}{\tud@res@a}%
+      \tud@if@param@special{#4}{%
+        \tud@truncate@value\tud@lbl@tmp{#8}%
+        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{}{%
+          \expandafter\tud@idx@aux@write\expandafter{\tud@lbl@tmp}{\tud@res@a}%
+        }%
+      }{}%
+    \fi%
+  \endgroup%
+}
+\newcommand*\tud@idx@attribute@get[2]{%
   \begingroup%
     \ifnum\tud@index@mode@num>\z@\relax%
       \let\tud@res@b\@empty%
@@ -4633,24 +4411,63 @@
     }%
   \tud@res@a%
 }
-\NewDocumentCommand\Process@@Index{m m r// r== r[] d|| r() r<>}{%
+\NewDocumentCommand\tud@idx@write{m d|| m}{%
   \begingroup%
-    \tud@idx@get\tud@res@a<#8>{{#1}{#2}/#3/=#4=[{#5}](#7)}%
-    \tud@idx@write{#1}|#6|{\tud@res@a}%
-    \ifnum\tud@declare@mode@num>\z@\relax%
-      \def\tud@res@b##1{%
-        \protected@write\@auxout{}{\string\tud@idx@declare{##1}{\tud@res@a}}%
-        \global\cslet{tud@idx@lbl@@##1}\tud@res@a%
+    \protected@edef\tud@res@a{#3}%
+    \edef\tud@res@c{%
+      \expandafter\expandafter\expandafter\noexpand%
+      \csname Markup@Format@@Index@@#1\endcsname%
+    }%
+    \def\tud@res@d##1:##2:##3\@nil{%
+      \def\tud@res@b{##1}%
+      \IfArgIsEmpty{##2}{}{\preto\tud@res@a{##2!}}%
+    }%
+    \expandafter\tud@res@d\tud@res@c::\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\index[{\tud@res@b}]{%
+        \expandonce\tud@res@a\IfValueT{#2}{\unexpanded{|#2}}%
       }%
-      \tud@res@b{#8}%
-      \tud@if@param@special{#4}{%
-        \tud@truncate@value\tud@lbl@tmp{#8}%
-        \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{}{%
-          \expandafter\tud@res@b\expandafter{\tud@lbl@tmp}%
-        }%
-      }{}%
-    \fi%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@idx@aux@write[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \protected@write\@auxout{}{\string\tud@idx@aux@declare{#1}{\tud@res@a}}%
+    \csxdef{tud@idx@lbl@@#1}{\tud@res@a}%
   \endgroup%
+}
+\newrobustcmd*\tud@idx@aux@declare[2]{%
+  \tud@if@idx@aux@exists{#1}{%
+    \ClassWarningNoLine{tudscrmanual}{%
+      Index entry for\MessageBreak`#1'\MessageBreak was already defined%
+    }%
+  }{}%
+  \csxdef{tud@idx@lbl@@#1}{\detokenize{#2}}%
+}
+\@onlypreamble\tud@idx@aux@declare
+\AtEndDocument{\let\tud@idx@aux@declare\@gobbletwo}
+\newcommand*\tud@if@idx@aux@exists[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifcsundef{tud@idx@lbl@@#1}%
+    }%
+  \tud@res@a{%
+    \expandafter\@secondoftwo%
+  }{%
+    \expandafter\@firstoftwo%
+  }%
+}
+\newcommand*\tud@idx@aux@read[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\letcs#1}{tud@idx@lbl@@#2}%
+    }%
+  \tud@res@a%
 }
 \newcommand*\tud@idx@tmp{}
 \NewDocumentCommand\tud@idx@get{m r<> m}{%
@@ -4659,10 +4476,10 @@
     \ifnum\tud@declare@mode@num>\z@\relax%
       \let\tud@res@c\@secondoftwo%
     \else%
-      \def\tud@res@c{\tud@if@idx@exists{#2}}%
+      \def\tud@res@c{\tud@if@idx@aux@exists{#2}}%
     \fi%
     \tud@res@c{%
-      \tud@idx@read\tud@idx@tmp{#2}%
+      \tud@idx@aux@read\tud@idx@tmp{#2}%
     }{%
       \let\tud@idx@tmp\@empty%
       \tud@idx@@get#3%
@@ -4675,17 +4492,19 @@
 }
 \NewDocumentCommand\tud@idx@@get{o m m d// d== o d|| d'' r()}{%
   \def\tud@res@c##1##2##3{%
-    \tud@if@idx@exists{##1}{##2}{%
+    \tud@if@idx@aux@exists{##1}{##2}{%
       \ClassWarning{tudscrmanual}{%
-        Index entry for\MessageBreak`##1'\MessageBreak is not defined%
+        Index entry for\MessageBreak%
+        `##1'\MessageBreak%
+        is not defined%
       }%
       ##3%
     }%
   }%
   \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/(#9)}%
   \xifinlist{\tud@lbl@tmp}{\tud@declaration@label@list}{%
-    \tud@if@idx@exists{\tud@lbl@tmp}{%
-      \tud@idx@read\tud@idx@tmp{\tud@lbl@tmp}%
+    \tud@if@idx@aux@exists{\tud@lbl@tmp}{%
+      \tud@idx@aux@read\tud@idx@tmp{\tud@lbl@tmp}%
       \appto\tud@idx@tmp{!}%
     }{}%
   }{}%
@@ -4693,7 +4512,7 @@
     \IfValueT{#4}{%
       \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}(#9)}%
       \tud@res@c{\tud@lbl@tmp}{%
-        \tud@idx@read\tud@idx@tmp{\tud@lbl@tmp}%
+        \tud@idx@aux@read\tud@idx@tmp{\tud@lbl@tmp}%
       }{%
         \tud@idx@@@get\tud@idx@tmp{#2}{#3}(#9)%
       }%
@@ -4703,7 +4522,7 @@
       \tud@if@param@special{#5}{}{%
         \tud@lbl@@get\tud@lbl@tmp{{#2}{#3}/#4/(#9)}%
         \tud@res@c{\tud@lbl@tmp}{%
-          \tud@idx@read\tud@idx@tmp{\tud@lbl@tmp}%
+          \tud@idx@aux@read\tud@idx@tmp{\tud@lbl@tmp}%
           \let\tud@res@b\@empty%
         }{%
           \tud@idx@@@get\tud@res@b{#2}{#3}/#4/(#9)%
@@ -4721,7 +4540,6 @@
   \ifx\tud@idx@tmp\@empty\else%
     \IfValueT{#5}{%
       \tud@if@param@special{#5}{}{%
-        % URGENT suffix parameter generell nicht in index?
         \begingroup%
           \tud@idx@split\tud@res@c{\tud@res@b}%
           \edef\tud@res@d{%
@@ -4781,17 +4599,12 @@
     }%
     \Markup@Outer@Get\tud@idx@fmt{\tud@res@b}%
     \if@tud@res@swa%
-      \ifx\tud@res@a\@empty%
-        \@tud@res@swafalse%
-      \else%
-        \ifx\tud@res@a\tud@ety@dflt%
-          \@tud@res@swafalse%
-        \else%
+      \@tud@res@swafalse%
+      \ifx\tud@res@a\@empty\else%
+        \ifx\tud@res@a\tud@ety@dflt\else%
           \Entity@Level@Get\tud@res@c{#3}%
           \ifnum\tud@res@c>\tw@\relax%
             \@tud@res@swatrue%
-          \else%
-            \@tud@res@swafalse
           \fi%
         \fi%
       \fi%
@@ -4811,77 +4624,130 @@
     }%
   \tud@res@c%
 }
-\NewDocumentCommand\tud@idx@write{m d|| m}{%
-  \begingroup%
-    \protected@edef\tud@res@a{#3}%
-    \edef\tud@res@c{%
-      \expandafter\expandafter\expandafter\noexpand%
-      \csname Markup@Format@@Index@@#1\endcsname%
+\newcommand*\tud@index@prologue{}
+\NewDocumentCommand\tud@index@print{!O{\jobname} !+d()}{%
+  \IfFileExists{\jobname-#1.ind}{%
+    \pagebreak[3]%
+    \IfValueTF{#2}{%
+      \def\tud@index@prologue{\nopagebreak#2\par}%
+    }{%
+      \let\tud@index@prologue\nopagebreak%
     }%
-    \def\tud@res@d##1:##2:##3\@nil{%
-      \def\tud@res@b{##1}%
-      \IfArgIsEmpty{##2}{}{\preto\tud@res@a{##2!}}%
+    \csuse{tud@index@set@@#1}%
+    \@input@{\jobname-#1.ind}%
+  }{%
+    \ClassWarning{tudscrmanual}%
+    {%
+      No processed index file found,\MessageBreak%
+      `\jobname-#1.ind' does not exist%
     }%
-    \expandafter\tud@res@d\tud@res@c::\@nil%
-  % TODO split an "!" und jeden Eintrag auch verwenden?
-  %      falls ja, nur wenn \tud@declare@mode@num>\z@?
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\index[{\tud@res@b}]{%
-        \expandonce\tud@res@a\IfValueT{#2}{\unexpanded{|#2}}%
-      }%
-    }%
-  \tud@res@a%
+    \global\let\tud@xdy@mdfive\@empty%
+  }%
 }
-\NewDocumentCommand\CrossIndex{m o m}{%
+\newcommand*\tud@index@item[2][\relax]{%
+  \par\penalty\numexpr#2*50-50\relax#1%
+  \hspace*{\dimexpr\numexpr#2\relax em\relax}%
+  \hangindent=\dimexpr\numexpr2*#2+3\relax em/2\relax%
+}
+\newcommand*\tud@index@vskip[1][\smallskipamount]{%
+  \vskip\glueexpr1#1\@plus1#1\@minus.5#1\relax%
+}
+\newcommand*\tud@index@hook{}
+\RenewDocumentEnvironment{theindex}{+b}{%
+  \def\lettergroup##1{\minisec{##1}}%
+  \def\item{\tud@index@item{0}}%
+  \def\subitem{\tud@index@item{1}}%
+  \def\subsubitem{\tud@index@item{2}}%
+  \def\subsubsubitem{\tud@index@item{3}}%
+  \def\indexspace{\tud@index@vskip[\bigskipamount]}%
+  \tud@index@hook%
+  \def\tud@res@a{%
+    \addsec[%
+      reference=\tud@index@ref,%
+      tocentry=\tud@index@toc%
+    ]{\tud@index@title\label{idx:\tud@index@name}}%
+    \markdouble{\tud@index@ref}%
+    \tud@index@prologue%
+  }%
+  \ifnum\tud@index@cols>\@ne\relax%
+    \long\def\tud@res@b##1{%
+      \setlength\columnsep{\f@size\p@}%
+      \setlength\columnseprule{\z@}%
+      \begin{multicols}{\tud@index@cols}[\tud@res@a]%
+      ##1%
+      \end{multicols}%
+    }%
+  \else%
+    \long\def\tud@res@b##1{\tud@res@a##1}%
+  \fi%
+  \tud@res@b{%
+    \setparsizes{\z@}{\z@\@plus.1\baselineskip}{\z@\@plus1fil}%
+    \par@updaterelative%
+    \tud@raggedright%
+    #1%
+  }%
+}{}
+\newcommand*\seeidx[1]{\pageref{idx:#1}}
+\newrobustcmd*\seesep{\txb}%
+\newrobustcmd*\cleversee{\tud@cleversee{\seename}}
+\newrobustcmd*\cleverseealso{%
+  \ClassWarning{tudscrmanual}%
+    {You should use `|see' instead of `|seealso'}%
+  \tud@cleversee{\alsoname}%
+}
+\newcommand*\tud@cleversee{}
+\def\tud@cleversee#1#2\relax{%
   \begingroup%
-    \def\do##1{%
-      \IfValueTF{#2}{%
-        \def\tud@res@b{#2}%
-        \tud@replace@in\tud@res@b{*}{##1}%
-        \edef\tud@res@b{\noexpand\hyperref[{idx:#1}]{\tud@res@b}}%
-      }{%
-        \def\tud@res@b{\nameref{idx:#1}}%
-      }%
-      \protected@edef\tud@res@c{##1}%
-      \trim@spaces@in\tud@res@c%
+    \let\cleversee\@empty%
+    \let\cleverseealso\@empty%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b{#2}%
+    \def\tud@res@c##1\\##2\@nil{%
+      \appto\tud@res@a{##1}%
+      \def\tud@res@b{##2}%
       \trim@spaces@in\tud@res@b%
-      % DOC direkts schreiben um indextarget zu umgehen
-      \@wrindex{%
-        \tud@res@c!""idx:#1@\textrightarrow\kern.1em\tud@res@b|seeidx{#1}%
-      }%
+      \in@{\\}{##2}%
     }%
-    \docsvlist{#3}%
-  \endgroup%
-}
-\newcommand*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\SeeIndex{s m m}{
-  \begingroup%
-    \let\tud@index@note@write\@gobbletwo%
+    \in@true%
+    \@whilesw\ifin@\fi{%
+      \expandafter\tud@res@c\tud@res@b\@nil%
+    }%
+    \ifx\tud@res@b\@empty%
+      \mbox{\emph{#1}}%
+    \else%
+      \tud@res@b\space\linebreak[1]\mbox{\emph{\alsoname}}%
+    \fi%
+    \def\tud@res@b{\nobreakspace}%
     \def\do##1{%
+      \def\tud@res@c{##1}%
+      \trim@spaces@in\tud@res@c%
+      \tud@res@b%
       \begingroup%
-        \def\do####1{%
-          \protected@edef\tud@res@a{####1}%
-          \trim@spaces@in\tud@res@a%
-          \protected@edef\tud@res@b{##1}%
-          \trim@spaces@in\tud@res@b%
-          \edef\tud@res@c{%
-            \noexpand\index{%
-              \expandonce\tud@res@a%
-              |see\IfBooleanT{#1}{unverified}{\expandonce\tud@res@b}%
-            }%
+        \tud@if@markup*{##1}{%
+          \Markup@Split@Get*\tud@res@d{##1}%
+          \Markup@Suffix@@Select[\protected@edef\tud@res@d]{}{%
+            \expandafter\@firstoftwo\tud@res@d%
           }%
-          \tud@res@c%
+        }{%
+          \let\tud@res@d\@empty%
         }%
-        \docsvlist{#2}%
-      \endgroup%
+        \Markup@Expandable%
+        \let\DistributionGeneral\@DistributionGeneral%
+        \def\seesep{!}%
+        \protected@edef\tud@res@d{%
+          \endgroup%
+          \noexpand\hyperlink{indexentry:\tud@res@c\tud@res@d}%
+        }%
+      \tud@res@d{\tud@res@c}%
+      \def\tud@res@b{;\space}%
     }%
-    \docsvlist{#3}%
+    \expandafter\dossvlist\expandafter{\tud@res@a}%
   \endgroup%
 }
 \newcommand*\PrintIndex{%
   \begingroup%
     \cleardoublepage%
+    \@ifpackageloaded{bookmark}{\bookmarksetup{startatroot}}{}%
     \tud@index@mode@num=-2\relax%
     \setchapterpreamble{%
       \begin{abstract}%
@@ -4939,6 +4805,49 @@
     \tud@index@print[files]%
   \endgroup%
 }
+\NewDocumentCommand\CrossIndex{m o m}{%
+  \begingroup%
+    \def\do##1{%
+      \IfValueTF{#2}{%
+        \def\tud@res@b{#2}%
+        \tud@replace@in\tud@res@b{*}{##1}%
+        \edef\tud@res@b{\noexpand\hyperref[{idx:#1}]{\tud@res@b}}%
+      }{%
+        \def\tud@res@b{\nameref{idx:#1}}%
+      }%
+      \protected@edef\tud@res@c{##1}%
+      \trim@spaces@in\tud@res@c%
+      \trim@spaces@in\tud@res@b%
+      \@wrindex{%
+        \tud@res@c!""idx:#1@\textrightarrow\kern.1em\tud@res@b|seeidx{#1}%
+      }%
+    }%
+    \docsvlist{#3}%
+  \endgroup%
+}
+\NewDocumentCommand\SeeIndex{s m m}{%
+  \begingroup%
+    \def\do##1{%
+      \begingroup%
+        \def\do####1{%
+          \protected@edef\tud@res@a{####1}%
+          \trim@spaces@in\tud@res@a%
+          \protected@edef\tud@res@b{##1}%
+          \trim@spaces@in\tud@res@b%
+          \edef\tud@res@c{%
+            \noexpand\index{%
+              \expandonce\tud@res@a%
+              |see\IfBooleanT{#1}{unverified}{\expandonce\tud@res@b}%
+            }%
+          }%
+          \tud@res@c%
+        }%
+        \docsvlist{#2}%
+      \endgroup%
+    }%
+    \docsvlist{#3}%
+  \endgroup%
+}
 \NewDocumentCommand\ChangedAt{s d<> m}{%
   \begingroup%
     \let\tud@res@c\@empty%
@@ -4974,37 +4883,6 @@
 \tud@addtocontents@special*{\let\ChangedAt\@ChangedAt}
 \newcommand*\tud@chg@entry@list{}
 \newcommand*\tud@chg@version@list{}
-\newcommand*\tud@print@changedatlist[1][\z@]{%
-  \begingroup%
-    \ifx\tud@chg@version@list\@empty\else%
-      \tud@list@sort\tud@chg@version@list%
-      \let\tud@res@b\@empty%
-      \forlistloop{\tud@print@@changedatlist\tud@res@b}{\tud@chg@version@list}%
-      \strut%
-      \marginnote{%
-        \begin{tabular}[b]{|l|}%
-          \hline%
-          \tud@res@b%
-          \hline%
-        \end{tabular}%
-      }[{\dimexpr\glueexpr#1\relax\relax}]%
-    \fi%
-    \ifx\tud@chg@entry@list\@empty\else%
-      \forlistloop\@firstofone{\tud@chg@entry@list}%
-    \fi%
-  \endgroup%
-  \global\let\tud@chg@entry@list\@empty%
-  \global\let\tud@chg@version@list\@empty%
-  \ignorespaces%
-}
-\newcommand*\tud@print@@changedatlist[2]{%
-  \appto#1{%
-    \ignorespaces%
-    \normalfont\normalsize%
-    \hyperref[{idx:changes-#2}]{#2}%
-    \tabularnewline%
-  }%
-}
 \NewDocumentCommand\Changed@At@Process{O{\BooleanFalse} d() d<> d:: m}{%
   \begingroup%
     \let\tud@res@a\@empty%
@@ -5018,7 +4896,6 @@
     }%
   \tud@res@a%
 }
-% DOC [note?] (bdl) <{internal}{lbl}> :default text: entry
 \NewDocumentCommand\Changed@At@@Process{r[] r() r<> r:: m}{%
   \begingroup%
     \tud@chg@entry@validate\tud@res@a\tud@res@b{#5}{%
@@ -5065,9 +4942,63 @@
     \fi%
   \endgroup%
 }
+\newcommand*\tud@chg@entry@validate[3]{%
+  \begingroup%
+    \in@{:}{#3}%
+    \ifin@%
+      \def\tud@res@c##1:##2\@nil{%
+        \def\tud@res@a{##1}%
+        \def\tud@res@b{##2}%
+        \trim@spaces@in\tud@res@b%
+      }%
+      \tud@res@c#3\@nil%
+    \else%
+      \def\tud@res@a{#3}%
+      \let\tud@res@b\@empty%
+    \fi%
+    \tud@v@validate{\tud@res@a}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{\ifx\tud@res@a\relax\else\expandonce\tud@res@a\fi}%
+      \unexpanded{\def#2}{\expandonce\tud@res@b}%
+      \ifx\tud@res@a\relax%
+        \noexpand\@gobble%
+      \else%
+        \noexpand\@firstofone%
+      \fi%
+    }%
+  \tud@res@c%
+}
+\newcommand*\tud@chg@base@get[2]{%
+  \begingroup%
+    \protected@edef\tud@res@d{#2}%
+    \Markup@Split@Get\tud@res@a{#2}%
+    \Misc@Expandable%
+    \def\tud@res@b##1##2{%
+      \Entity@Level@Get\tud@res@b{##1}%
+      \Markup@Suffix@@Select[\protected@edef\tud@res@c]{}{##1}%
+      \protected@edef\tud@res@c{\tud@res@b\space##2\tud@res@c}%
+    }%
+    \expandafter\tud@res@b\tud@res@a%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@c @\expandonce\tud@res@d}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@chg@general@get[2]{%
+  \begingroup%
+    \protected@edef\tud@res@b{#2}%
+    \Markup@Expandable%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\tud@idx@join#1}%
+        {\tud@res@b}{\noexpand\nosuffix{\expandonce\tud@res@b}}%
+    }%
+  \tud@res@a%
+}
 \newcommand*\AP@ChangedAtSplit[3]{%
   \begingroup%
-    % DOC {markup}{label}
     \expandafter\def\expandafter\tud@res@a\expandafter{\@firstoftwo#3}%
     \expandafter\def\expandafter\tud@res@b\expandafter{\@secondoftwo#3}%
     \edef\tud@res@c{%
@@ -5167,61 +5098,6 @@
     }%
   \tud@res@c%
 }
-\newcommand*\tud@chg@entry@validate[3]{%
-  \begingroup%
-    \in@{:}{#3}%
-    \ifin@%
-      \def\tud@res@c##1:##2\@nil{%
-        \def\tud@res@a{##1}%
-        \def\tud@res@b{##2}%
-        \trim@spaces@in\tud@res@b%
-      }%
-      \tud@res@c#3\@nil%
-    \else%
-      \def\tud@res@a{#3}%
-      \let\tud@res@b\@empty%
-    \fi%
-    \tud@v@validate{\tud@res@a}%
-    \edef\tud@res@c{%
-      \endgroup%
-      \unexpanded{\def#1}{\ifx\tud@res@a\relax\else\expandonce\tud@res@a\fi}%
-      \unexpanded{\def#2}{\expandonce\tud@res@b}%
-      \ifx\tud@res@a\relax%
-        \noexpand\@gobble%
-      \else%
-        \noexpand\@firstofone%
-      \fi%
-    }%
-  \tud@res@c%
-}
-\newcommand*\tud@chg@base@get[2]{%
-  \begingroup%
-    \protected@edef\tud@res@d{#2}%
-    \Markup@Split@Get\tud@res@a{#2}%
-    \Misc@Expandable%
-    \def\tud@res@b##1##2{%
-      \Entity@Level@Get\tud@res@b{##1}%
-      \Markup@Suffix@@Select[\protected@edef\tud@res@c]{}{##1}%
-      \protected@edef\tud@res@c{\tud@res@b\space##2\tud@res@c}%
-    }%
-    \expandafter\tud@res@b\tud@res@a%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@c @\expandonce\tud@res@d}%
-    }%
-  \tud@res@a%
-}
-\newcommand*\tud@chg@general@get[2]{%
-  \begingroup%
-    \protected@edef\tud@res@b{#2}%
-    \Markup@Expandable%
-    \protected@edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\tud@idx@join#1}%
-        {\tud@res@b}{\noexpand\nosuffix{\expandonce\tud@res@b}}%
-    }%
-  \tud@res@a%
-}
 \NewDocumentCommand\Changed@At@Special{o m m m}{%
   \begingroup%
     \def\do##1{%
@@ -5239,20 +5115,53 @@
   \tud@res@a%
 }
 \newcommand*\Hint[2]{\Changed@At@Special{Tipps \& Tricks}{sec:tips}{#1:#2}}
+\newcommand*\tud@print@changedatlist[1][\z@]{%
+  \begingroup%
+    \ifx\tud@chg@version@list\@empty\else%
+      \tud@list@sort\tud@chg@version@list%
+      \let\tud@res@b\@empty%
+      \forlistloop{\tud@print@@changedatlist\tud@res@b}{\tud@chg@version@list}%
+      \strut%
+      \marginnote{%
+        \begin{tabular}[b]{|l|}%
+          \hline%
+          \tud@res@b%
+          \hline%
+        \end{tabular}%
+      }[{\dimexpr\glueexpr#1\relax\relax}]%
+    \fi%
+    \ifx\tud@chg@entry@list\@empty\else%
+      \forlistloop\@firstofone{\tud@chg@entry@list}%
+    \fi%
+  \endgroup%
+  \global\let\tud@chg@entry@list\@empty%
+  \global\let\tud@chg@version@list\@empty%
+  \ignorespaces%
+}
+\newcommand*\tud@print@@changedatlist[2]{%
+  \appto#1{%
+    \ignorespaces%
+    \normalfont\normalsize%
+    \hyperref[{idx:changes-#2}]{#2}%
+    \tabularnewline%
+  }%
+}
 \newcommand*\PrintChanges{%
   \begingroup%
     \cleardoublepage%
+    \@ifpackageloaded{bookmark}{\bookmarksetup{startatroot}}{}%
     \tud@index@mode@num=-3\relax%
     \def\indexname{\"Anderungsliste}%
     \addchap{\indexname\label{idx:changes}}%
     \appto\tud@index@hook{%
+      \def\tud@index@cols{\@ne}%
+      \let\lettergroup\@gobble%
+      \let\lettergroupDefault\@gobble%
+      \def\indexspace{\tud@index@vskip}%
       \def\item{%
         \def\item{\tud@index@item[\tud@index@vskip]{0}}%
         \tud@index@item{0}%
       }%
-      \def\tud@index@cols{\@ne}%
-      \let\lettergroup\@gobble%
-      \def\indexspace{\tud@index@vskip}%
     }%
     \def\do##1{%
       \begingroup%
@@ -5336,6 +5245,14 @@
     \noexpand\Inline@Declaration\IfBooleanT{#1}{*}\unexpanded{{#3}}%
   }%
 }
+\NewDocumentCommand\scrguide{!O{\KOMAScript-Handbuch}}{%
+  \begingroup%
+    \Entity@Link@Seek\tud@res@a{Bundle}{koma-script}%
+    \tud@specialurl@wrapper\tud@res@a{\tud@res@a}%
+    \tud@res@a{#1}%
+  \endgroup%
+  \xspace%
+}
 \NewDocumentEnvironment{tabularm}{O{c} m !o +b}{%
   \sbox\z@{\tabular[{#1}]{*{#2}l}#4\endtabular}%
   \begin{tabular}{c}%
@@ -5343,44 +5260,6 @@
     \IfValueT{#3}{\tabularnewline\parbox[b]{\the\wd\z@}{\vskip1.5ex#3}}%
   \end{tabular}%
 }{}
-\NewDocumentCommand\TermTable{!o}{%
-  \ifhmode\par\fi%
-  \vskip\smallskipamount%
-  \@afterindentfalse\@afterheading%
-  \begingroup%
-    \let\tud@res@a\@empty%
-    \def\do##1{\Term@Table\tud@res@a\@nil##1\@nil}%
-    \dolistloop{\tud@declaration@inner@list}%
-    \ifx\tud@res@a\@empty%
-      \ClassWarning{tudscrmanual}{No declaration for Terms found}%
-    \else%
-      \IfValueTF{#1}{%
-        \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}[b]{lXX}%
-          \expandafter\Term@@Table\expandafter{\tud@res@a}%
-        \end{tabularx}%
-      }{%
-        \begin{tabular}[b]{lll}%
-          \expandafter\Term@@Table\expandafter{\tud@res@a}%
-        \end{tabular}%
-      }%
-    \fi%
-  \endgroup%
-}
-\newcommand*\Term@Table{}
-\def\Term@Table#1\@nil#2#3#4\@nil{\tud@if@strequal{Term}{#2}{\appto#1{#3,}}{}}%
-\newcommand*\Term@@Table[1]{%
-  \toprule%
-  \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
-  \midrule%
-  \forcsvlist{\Term@@@Table}{#1}%
-  \bottomrule%
-}
-\newcommand*\Term@@@Table[1]{%
-  \Term*{#1} & %
-  \Ifstr{\csuse{#1}}{}{\PName{leer}}{\csuse{#1}} & %
-  \strut\selectlanguage{english}%
-  \Ifstr{\csuse{#1}}{}{\PName{empty}}{\csuse{#1}}\tabularnewline%
-}
 \tud@newif\if@tud@code@used
 \newenvironment{Example}{%
   \labeling{{\usekomafont{disposition}{Beispiel:\nobreakspace}}}%
@@ -5419,7 +5298,7 @@
       }%
     \fi%
     \def\tud@res@a{examples/#2.pdf}%
-    \ifdef{\tudprintflag}{%
+    \ifdef\tudprintflag{%
       \IfFileExists{examples/#2_print.pdf}{%
         \def\tud@res@a{examples/#2_print.pdf}%
       }{}%
@@ -5460,8 +5339,8 @@
   \ifnum\pdf@shellescape=\@ne\relax%
     \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
       \let\tud@res@a\@empty%
-      \ifdef{\tudfinalflag}{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
-      \ifdef{\tudprintflag}{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
+      \ifdef\tudfinalflag{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
+      \ifdef\tudprintflag{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
       \appto\tud@res@a{\noexpand\input{#1.tex}}%
       \immediate\openout\tud@bash@write=tutorials.sh\relax%
       \def\tud@res@b##1{\immediate\write\tud@bash@write{##1}}%
@@ -5676,25 +5555,26 @@
     }%
   \endgroup%
 }
-%%%% From File: tudscr-fields.dtx 2019/11/29 01:36:52 c9a9b7b
+\AtEndOfClass%
+  {\InputIfFileExists{tudscrmanual.cfg}{}{}}
+%%%% From File: tudscr-fields.dtx (no git version info was found)
 \newcommand*\@chairman{}
-\newcommand*\chairman[1]{\gdef\@chairman{#1}}
+\newcommand*\chairman[1]{\tud@trim@field\@chairman{#1}}
 \newcommand*\@grade{}
-\newcommand*\grade[1]{\gdef\@grade{#1}}
-\newcommand*\@headline{}
+\newcommand*\grade[1]{\tud@trim@field\@grade{#1}}
 \newcommand*\@issuedate{}
 \newcommand*\issuedate[1]{\tud@printdate{\@issuedate}{#1}}
 \newcommand*\@duedate{}
 \newcommand*\duedate[1]{\tud@printdate{\@duedate}{#1}}
 \newcommand*\@contactperson{}
-\newcommand*\contactperson[1]{\gdef\@contactperson{#1}}
+\newcommand*\contactperson[1]{\tud@trim@field\@contactperson{#1}}
 \newcommand*\@office{}
-\newrobustcmd*\office[1]{\gdef\@office{#1}}
+\newrobustcmd*\office[1]{\tud@trim@field\@office{#1}}
 \newcommand*\@telephone{}
-\newrobustcmd*\telephone[1]{\gdef\@telephone{#1}}
+\newrobustcmd*\telephone[1]{\tud@trim@field\@telephone{#1}}
 \newcommand*\@telefax{}
-\newrobustcmd*\telefax[1]{\gdef\@telefax{#1}}
-%%%% From File: tudscr-localization.dtx 2019/11/27 16:07:19 6567eba
+\newrobustcmd*\telefax[1]{\tud@trim@field\@telefax{#1}}
+%%%% From File: tudscr-localization.dtx (no git version info was found)
 \tud@localization@define{\authorname}
 \tud@localization@define{\contactname}
 \tud@localization@define{\contactpersonname}
@@ -5750,109 +5630,131 @@
   The thesis is evaluated with a grade of \textbf{\@grade}.%
 }
 \tud@localization@english{\noticename}{Notice}
-%%%% From File: tudscr-texindy.dtx 2021/06/12 02:44:58 6b1aad4
+%%%% From File: tudscr-texindy.dtx (no git version info was found)
+\edef\tud@res@a{\catcode`\noexpand\#=\the\catcode`\#\relax}%
+\@makeother\#
+\newcommand*\@hashchar{#}
+\tud@res@a
 \tud@newwrite\tud@xdy@write
 \NewDocumentCommand\tud@xdy@create{s}{%
   \begingroup%
-    \edef\tud@res@a{\@currname-\IfBooleanTF{#1}{gls}{ind}.xdy}%
+    \edef\tud@res@a{\@currname.\@currext-\IfBooleanTF{#1}{gls}{ind}.xdy}%
     \def\tud@res@b{\endgroup}%
     \expandafter\IfFileExists\expandafter{\tud@res@a}{}{%
-      \eappto\tud@res@b{\noexpand\tud@xdy@@create{#1}{\tud@res@a}}%
+      \eappto\tud@res@b{%
+        \noexpand\tud@xdy@@create%
+          {the\IfBooleanTF{#1}{glossary}{index}}%
+          {\tud@res@a}%
+      }%
     }%
   \tud@res@b%
 }
-\NewDocumentCommand\tud@xdy@@create{m m}{%
-  \openout\tud@xdy@write=#2\relax%
-  \write\tud@xdy@write{(require "texindy.xdy")}%
-  \write\tud@xdy@write{%
-    (define-location-class^^J%
-    \space\space"arabic-page-numbers" ("arabic-numbers")%
-    \space:min-range-length 1^^J%
+\newcommand*\tud@xdy@@create[2]{%
+  \immediate\openout\tud@xdy@write=#2\relax%
+  \immediate\write\tud@xdy@write{(require "texindy.xdy")}%
+  \immediate\write\tud@xdy@write{%
+    (markup-index^^J%
+    \@spaces:hierdepth 3^^J%
+    \@spaces:open^^J%
+    "^^J%
+    \string\begin{#1}^^J%
+    "^^J% /open
+    \@spaces:close^^J%
+    "^^J%
+    \string~n\string\end{#1}^^J%
+    "^^J% /close
     )^^J%
-    (markup-range :sep "--")%
-  }%
-  \write\tud@xdy@write{%
-    (merge-rule "\@backslashchar[(.*)\@backslashchar]" "" :eregexp)%
-  }%
-  \write\tud@xdy@write{%
-    (markup-indexentry :open "~n\string\subsubsubitem\space" :depth 3)%
-  }%
-  \write\tud@xdy@write{%
-    (markup-locclass-list%
-    \space:open "\string\dotfill{}"%
-    \space:sep ", "%
-    \space:close "\string\relax"%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    (define-location-class "arabic-page-numbers"^^J%
+    \@spaces("arabic-numbers")^^J%
+    \@spaces:min-range-length 1^^J%
+    )^^J%
+    (markup-range :sep "--")^^J%
+    (merge-rule :eregexp^^J%
+    \@spaces"\string\[(.*)\string\]"^^J%
+    \@spaces""^^J%
+    )^^J%
+    (markup-indexentry :depth 3^^J%
+    \@spaces:open\space\space%
+      "\string~n\string\subsubsubitem\space"^^J%
+    )^^J%
+    (markup-locclass-list^^J%
+    \@spaces:open\space\space%
+      "\string\,\string\dotfill\string\,"^^J%
+    \@spaces:close\space%
+      "\string\relax"^^J%
+    )^^J%
     (define-attributes (("!" "default") ("?" "default") ("default")))^^J%
-    (markup-attribute-group-list :sep ", ")^^J%
-    (markup-locref%
-    \space:attr "!"\@spaces\@spaces%
-    \space:open "\string\textbf{\string\hyperpage{"%
-    \space:close "}}"%
+    (markup-attribute-group-list :sep ",\space")^^J%
+    (markup-locref :attr "!"^^J%
+    \@spaces:open\space\space%
+      "\string\textbf\@charlb\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb\@charrb"^^J%
     )^^J%
-    (markup-locref%
-    \space:attr "?"\@spaces\@spaces%
-    \space:open "\string\textit{\string\hyperpage{"%
-    \space:close "}}"%
+    (markup-locref :attr "?"^^J%
+    \@spaces:open\space\space%
+      "\string\textit\@charlb\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb\@charrb"^^J%
     )^^J%
-    (markup-locref%
-    \space:attr "default"\space\space%
-    \space:open "\string\hyperpage{"\@spaces\@spaces%
-    \space:close "}"%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    (markup-locref :attr "default"^^J%
+    \@spaces:open\space\space%
+      "\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
+    )^^J%
     (markup-crossref-list :class "see"^^J%
-    \space\space%
-    :open "\string\cleversee\space"\@spaces\space%
-    :sep "; "\space%
-    :close "\@backslashchar\@backslashchar"^^J%
+    \@spaces:open\space\space%
+      "\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
     )^^J%
     (markup-crossref-list :class "seealso"^^J%
-    \space\space%
-    :open "\string\cleverseealso\space"\space%
-    :sep "; "\space%
-    :close "\@backslashchar\@backslashchar"^^J%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    \@spaces:open\space\space%
+      "\string\cleverseealso\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
+    )^^J%
     (define-crossref-class "seeunverified" :unverified)^^J%
     (markup-crossref-list :class "seeunverified"^^J%
-    \space\space%
-    :open "\string\cleversee\space"\@spaces\space%
-    :sep "; "\space%
-    :close "\@backslashchar\@backslashchar"^^J%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    \@spaces:open\space\space%
+      "\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
+    )^^J%
     (define-crossref-class "seeidx" :unverified)^^J%
     (markup-crossref-list :class "seeidx"^^J%
-    \space\space%
-    :open "\string\seeidx{"\@spaces\@spaces%
-    :sep "; "\space%
-    :close "}{}"^^J%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    \@spaces:open\space\space%
+      "\string\seeidx\@charlb"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
+    )^^J%
     (markup-crossref-layer-list :class "see"%
-    \@spaces\space:sep "\string\seesep\space"%
+    \@spaces\space:sep\space%
+      "\string\seesep\space"%
     )^^J%
     (markup-crossref-layer-list :class "seealso"%
-    \space:sep "\string\seesep\space"%
-    )%
-  }%
-  \write\tud@xdy@write{%
+    \space:sep\space%
+      "\string\seesep\space"%
+    )^^J%
     (define-location-class-order^^J%
     \space\space(^^J%
-    \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
+    \@spaces"see" "seealso"^^J%
+    \@spaces"seeidx" "seeunverified"^^J%
     \@spaces"roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
     \@spaces"Roman-page-numbers" "Alpha-page-numbers"^^J%
     \space\space)^^J%
-    )%
+    )^^J%
   }%
-  \closeout\tud@xdy@write%
+  \immediate\closeout\tud@xdy@write%
 }
 \tud@xdy@create
 \endinput
