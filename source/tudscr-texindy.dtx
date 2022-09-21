@@ -92,17 +92,20 @@
 %<!doc>\tud@newwrite\tud@xdy@write
 \NewDocumentCommand\tud@xdy@create{s}{%
   \begingroup%
-    \edef\tud@res@a{\@currname-\IfBooleanTF{#1}{gls}{ind}.xdy}%
+    \edef\tud@res@a{\@currname.\@currext-\IfBooleanTF{#1}{gls}{ind}.xdy}%
+    \def\tud@res@b{\endgroup}%
     \expandafter\IfFileExists\expandafter{\tud@res@a}{}{%
-      \IfBooleanTF{#1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
-      \edef\tud@res@b{the\if@tud@res@swa glossary\else index\fi}%
-      \edef\tud@res@a{\noexpand\tud@xdy@@create{\tud@res@b}{\tud@res@a}}%
-      \tud@res@a%
+      \eappto\tud@res@b{%
+        \noexpand\tud@xdy@@create%
+          {#1}%
+          {the\IfBooleanTF{#1}{glossary}{index}}%
+          {\tud@res@a}%
+      }%
     }%
-  \endgroup%
+  \tud@res@b%
 }
-\newcommand*\tud@xdy@@create[2]{%
-  \immediate\openout\tud@xdy@write=#2\relax%
+\newcommand*\tud@xdy@@create[3]{%
+  \immediate\openout\tud@xdy@write="#3"\relax%
 %    \end{macrocode}
 % Als erstes wird das \Lettering{LaTeX}-Standardmodul geladen.
 %    \begin{macrocode}
@@ -114,20 +117,12 @@
 %    \begin{macrocode}
   \immediate\write\tud@xdy@write{%
     (markup-index^^J%
+    \@spaces:hierdepth 3^^J%
     \@spaces:open^^J%
-    "\string\begin{#1}^^J%
+    "^^J%
+    \string\begin{#2}^^J%
 %<*doc>
     \space\space\string\makeatletter\@percentchar^^J%
-    \space\space\string\providecommand*\string\lettergroupDefault[1]%
-        {\string\lettergroup{\string\tud@symbols@name}}\@percentchar^^J%
-    \space\space\string\providecommand*\string\lettergroup[1]{\@percentchar^^J%
-    \@spaces\string\belowpdfbookmark%
-        {\@hashchar1}{#1/\@hashchar1}\@percentchar^^J%
-    \@spaces\string\par\string\centerline%
-        {\string\normalsize\string\textbf{\string\textsf{\@hashchar1}}}%
-        \@percentchar^^J%
-    \@spaces\string\par\string\smallskip\string\nopagebreak\@percentchar^^J%
-    \space\space}\@percentchar^^J%
     \space\space\string\scan@allowedfalse\@percentchar^^J%
 %    \end{macrocode}
 % Für die Änderungsliste erfolgt die Gruppierung anhand der Versionsnummer. Da 
@@ -136,20 +131,21 @@
 % Außerdem werden mit \cs{tud@lst@def} die benötigten Befehle zur selektiven 
 % Anzeige der Änderungseinträge erstellt.
 %    \begin{macrocode}
-\if@tud@res@swa
+\IfBooleanT{#1}{%
     \space\space\string\newcommand*\string\@lettergroup{}\@percentchar^^J%
     \space\space\string\def\string\@lettergroup\@hashchar1\string\relax%
         {\string\lettergroup{\@hashchar1}}\@percentchar^^J%
     \space\space\string\tud@lst@def\@percentchar^^J%
-\fi
+}%
 %</doc>
-    \space\space\string\providecommand*\string\seesep{/}\@percentchar^^J%
 %    \end{macrocode}
 % Der Abschluss der Umgebungsdefinition.
 %    \begin{macrocode}
-    "^^J% Ende des Umgebungsbeginns
-    \@spaces:close "\string~n\string~n\string\end{#1}\string~n"^^J%
-    \@spaces:hierdepth 3^^J%
+    "^^J% /open
+    \@spaces:close^^J%
+    "^^J%
+    \string~n\string\end{#2}^^J%
+    "^^J% /close
     )^^J%
 %    \end{macrocode}
 % Für die Sortierung des Indexes sollen einzelne Zeichen beachtet werden.
@@ -186,7 +182,6 @@
     \@spaces\@spaces"AlphaExtended" \space:sep "-" "arabic-numbers" :sep ":"^^J%
     \@spaces\@spaces"arabic-numbers"^^J%
     \@spaces)^^J%
-    \@spaces:min-range-length 2^^J%
     )^^J%
 %</doc>
 %    \end{macrocode}
@@ -197,12 +192,12 @@
 %    \begin{macrocode}
 %^^A  (require "ff-ranges.xdy")^^J%
 %    \end{macrocode}
-% Bereiche mit mehr als zwei Seitenzahlen werden zusammengefasst, wobei als
-% Trennzeichen ein Halbgeviertstrich verwendet wird.
+% Seitenzahlbereiche werden zusammengefasst, wobei als Trennzeichen ein 
+% Halbgeviertstrich verwendet wird.
 %    \begin{macrocode}
     (define-location-class "arabic-page-numbers"^^J%
     \@spaces("arabic-numbers")^^J%
-    \@spaces:min-range-length 2^^J%
+    \@spaces:min-range-length 1^^J%
     )^^J%
 %<*doc>
     (define-location-class-order ("hypdoc" "arabic-page-numbers"))^^J%
@@ -243,7 +238,8 @@
 %    \begin{macrocode}
 %<*!doc>
     (markup-indexentry :depth 3^^J%
-    \@spaces:open\space\space"\string~n\string\subsubsubitem\space"^^J%
+    \@spaces:open\space\space%
+      "\string~n\string\subsubsubitem\space"^^J%
     )^^J%
 %</!doc>
 %    \end{macrocode}
@@ -252,10 +248,12 @@
 % |letter-group| unterdrückt und die erste Ebene dafür verwendet wird. 
 %    \begin{macrocode}
 %<*doc>
-\if@tud@res@swa
+\IfBooleanTF{#1}{%
     (markup-letter-group^^J%
-    \@spaces:open-head\space\space"\string~n\space\space\string\@gobble{"^^J%
-    \@spaces:close-head "}"^^J%
+    \@spaces:open-head\space\space%
+      "\string~n\space\space\string\@gobble\@charlb"^^J%
+    \@spaces:close-head\space%
+      "\@charrb"^^J%
     )^^J%
 %    \end{macrocode}
 % Leider gibt es für die Eintragsebenen keine Schlüssel |open-head| und
@@ -280,10 +278,12 @@
 % wird mit \cs{item} ausgezeichnet.
 %    \begin{macrocode}
     (markup-indexentry-list :depth 1^^J%
-    \@spaces:open\space\space"\string\relax"^^J%
+    \@spaces:open\space\space%
+      "\string\relax"^^J%
     )^^J%
     (markup-indexentry \@spaces\space:depth 1^^J%
-    \@spaces:open\space\space"\string~n\space\space\string\item\space"^^J%
+    \@spaces:open\space\space%
+      "\string~n\space\space\string\item\space"^^J%
     )^^J%
 %    \end{macrocode}
 % Eine einzelne, nachfolgende Änderungsnotiz für den aktuellen Eintrag soll 
@@ -298,29 +298,44 @@
 % \cs{tud@lst@@add} sowie \cs{tud@lst@@process} verwendet.
 %    \begin{macrocode}
     (markup-indexentry-list :depth 2^^J%
-    \@spaces:open\space\space"\string\tud@lst@init"^^J%
-    \@spaces:close "\string~n \@spaces\space\string\tud@lst@process"^^J%
+    \@spaces:open\space\space%
+      "\string\tud@lst@init"^^J%
+    \@spaces:close\space%
+      "\string~n \@spaces\space\string\tud@lst@process"^^J%
     )^^J%
     (markup-indexentry \@spaces\space:depth 2^^J%
-    \@spaces:open%
-        \space\space"\string~n\@spaces\space\space\string\tud@lst@add{"^^J%
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string~n\@spaces\space\space\string\tud@lst@add\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
+%    \end{macrocode}
+% Beim Öffnen der Liste in dieser Ebene wird die Klammer von \cs{tud@lst@add} 
+% vor dem Aufruf von \cs{tud@lst@@init} geschlossen. Beim Schließen der Liste
+% wird dementsprechend nach \cs{tud@lst@@process} wieder eine öffnende Klammer 
+% verwendet, um das Schließen des Eintrags in der Ebene zuvor zu gewährleisten.
+%    \begin{macrocode}
     (markup-indexentry-list :depth 3^^J%
-    \@spaces:close "\string~n\@spaces\@spaces\string\tud@lst@@process{"^^J%
-    \@spaces:open\space\space"}\string\tud@lst@@init"^^J%
+    \@spaces:open\space\space%
+      "\@charrb\string\tud@lst@@init"^^J%
+    \@spaces:close\space%
+      "\string~n\@spaces\@spaces\string\tud@lst@@process\@charlb"^^J%
     )^^J%
     (markup-indexentry \@spaces\space:depth 3^^J%
-    \@spaces:open%
-        \space\space"\string~n\@spaces\@spaces\string\tud@lst@@add{"^^J%
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string~n\@spaces\@spaces\string\tud@lst@@add\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
 %    \end{macrocode}
 % Für den Index aller Eintragstypen ist nur auf zu leere \cs{hbox} zu achten.
 %    \begin{macrocode}
-\else
-    (markup-indexentry-list :open "\string\efil" :depth 1)^^J%
-\fi
+}{%
+    (markup-indexentry-list :depth 1^^J%
+    \@spaces:open\space\space%
+      "\string\hfil\string\nopagebreak"^^J%
+    )^^J%
+}%
 %</doc>
 %    \end{macrocode}
 % Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
@@ -331,10 +346,15 @@
 % direkt erzeugt.
 %    \begin{macrocode}
     (markup-locclass-list^^J%
-%<!doc>    \@spaces:open\space\space"\string\,\string\dotfill\string\,"^^J%
-%<doc>    \@spaces:open\space\space"\string\pfill\space"^^J%
-    \@spaces:close "\string\relax"^^J%
-    \@spaces:sep\space\space\space",\space"^^J%
+    \@spaces:open\space\space%
+%<*!doc>
+      "\string\,\string\dotfill\string\,"^^J%
+%</!doc>
+%<*doc>
+      "\string\pfill\space"^^J%
+%</doc>
+    \@spaces:close\space%
+      "\string\relax"^^J%
     )^^J%
 %    \end{macrocode}
 % Es werden für Handbuch und Tutorials die Attribute \emph{!} für deklarierende 
@@ -346,23 +366,29 @@
 %    \begin{macrocode}
 %<*!doc>
     (define-attributes (("!" "default") ("?" "default") ("default")))^^J%
-    (markup-attribute-group-list :sep ", ")^^J%
+    (markup-attribute-group-list :sep ",\space")^^J%
 %    \end{macrocode}
 % Hier erfolgt die Definition der Auszeichnugen der Attribute. Deklarationen 
 % werden fett gedruckt, wichtige Einträge erscheinen kursiv. Außerdem wird ein
 % entsprechnder Link auf die Seite eingefügt.
 %    \begin{macrocode}
     (markup-locref :attr "!"^^J%
-    \@spaces:open\space\space"\string\textbf{\string\hyperpage{"^^J%
-    \@spaces:close "}}"^^J%
+    \@spaces:open\space\space%
+      "\string\textbf\@charlb\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb\@charrb"^^J%
     )^^J%
     (markup-locref :attr "?"^^J%
-    \@spaces:open\space\space"\string\textit{\string\hyperpage{"^^J%
-    \@spaces:close "}}"^^J%
+    \@spaces:open\space\space%
+      "\string\textit\@charlb\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb\@charrb"^^J%
     )^^J%
     (markup-locref :attr "default"^^J%
-    \@spaces:open\space\space"\string\hyperpage{"^^J%
-    \@spaces:close "}" ^^J%
+    \@spaces:open\space\space%
+      "\string\hyperpage\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
 %</!doc>
 %    \end{macrocode}
@@ -375,23 +401,31 @@
 % die Ausgabe erfolgt mit \cs{tud@xdy@mapping}\marg{Attribut}\marg{Referenz}.
 %    \begin{macrocode}
 %<*doc>
-    (markup-attribute-group-list :sep ", ")^^J%
+    (markup-attribute-group-list :sep ",\space")^^J%
     (define-attributes (("usage") ("main") ("code") ("change") ("default")))^^J%
     (markup-locref :attr "change"^^J%
-    \@spaces:open"\string\tud@xdy@mapping{change}{"^^J
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string\tud@xdy@mapping{change}\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
     (markup-locref :attr "code"^^J%
-    \@spaces:open "\string\tud@xdy@mapping{code}{"^^J%
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string\tud@xdy@mapping{code}\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
     (markup-locref :attr "usage"^^J%
-    \@spaces:open "\string\tud@xdy@mapping{usage}{"^^J%
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string\tud@xdy@mapping{usage}\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
     (markup-locref :attr "main"^^J%
-    \@spaces:open "\string\tud@xdy@mapping{main}{"^^J%
-    \@spaces:close "}"^^J%
+    \@spaces:open\space\space%
+      "\string\tud@xdy@mapping{main}\@charlb"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
 %</doc>
 %    \end{macrocode}
@@ -400,25 +434,33 @@
 %    \begin{macrocode}
 %<*!doc>
     (markup-crossref-list :class "see"^^J%
-    \@spaces:open\space\space"\string\cleversee\space"^^J%
-    \@spaces:sep\space\space\space"; "^^J%
-    \@spaces:close "\@backslashchar\@backslashchar"^^J%
+    \@spaces:open\space\space%
+      "\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
     )^^J%
     (markup-crossref-list :class "seealso"^^J%
-    \@spaces:open\space\space"\string\cleverseealso\space"^^J%
-    \@spaces:sep\space\space\space"; "^^J%
-    \@spaces:close "\@backslashchar\@backslashchar"^^J%
+    \@spaces:open\space\space%
+      "\string\cleverseealso\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
     )^^J%
 %    \end{macrocode}
 % Um Querverweise ohne Prüfung des Zieleintrags erzeugen zu können, wird der 
 % passende Typ |seeunverified| definiert.
 %    \begin{macrocode}
-%<*class>
     (define-crossref-class "seeunverified" :unverified)^^J%
     (markup-crossref-list :class "seeunverified"^^J%
-    \@spaces:open\space\space"\string\cleversee\space"^^J%
-    \@spaces:sep\space\space\space"; "^^J%
-    \@spaces:close "\@backslashchar\@backslashchar"^^J%
+    \@spaces:open\space\space%
+      "\string\cleversee\space"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@backslashchar\@backslashchar"^^J%
     )^^J%
 %    \end{macrocode}
 % Dieser Querverweistyp wird speziell im allgemeinen Index verwendet, um auf 
@@ -428,21 +470,25 @@
 %    \begin{macrocode}
     (define-crossref-class "seeidx" :unverified)^^J%
     (markup-crossref-list :class "seeidx"^^J%
-    \@spaces:open\space\space"\string\seeidx{"^^J%
-    \@spaces:sep\space\space\space"; "^^J%
-    \@spaces:close "}{}"^^J%
+    \@spaces:open\space\space%
+      "\string\seeidx\@charlb"^^J%
+    \@spaces:sep\space\space\space%
+      ";\space"^^J%
+    \@spaces:close\space%
+      "\@charrb"^^J%
     )^^J%
-%</class>
 %    \end{macrocode}
 % Werden mit \verb+|see+\marg{Eintrag!Untereintrag} gezielte Querverweise auf
 % Untereinträge im Index erstellt, so werden diese nicht standardmäßig mit 
 % einem Komma sondern mit dem anpassbaren Makro \cs{seesep} getrennt.
 %    \begin{macrocode}
     (markup-crossref-layer-list :class "see"%
-    \@spaces\space:sep "\string\seesep{}"%
+    \@spaces\space:sep\space%
+      "\string\seesep\space"%
     )^^J%
     (markup-crossref-layer-list :class "seealso"%
-    \space:sep "\string\seesep{}"%
+    \space:sep\space%
+      "\string\seesep\space"%
     )^^J%
 %    \end{macrocode}
 % Damit die Makros \cs{cleversee} und \cs{cleverseealso} sowie \cs{seeidx} auf
@@ -450,12 +496,12 @@
 % aufgerufen werden.
 %    \begin{macrocode}
     (define-location-class-order^^J%
-    \@spaces(^^J%
-%<class>    \@spaces"see" "seealso" "seeidx" "seeunverified"^^J%
-%<!class>    \@spaces"see" "seealso"^^J%
+    \space\space(^^J%
+    \@spaces"see" "seealso"^^J%
+    \@spaces"seeidx" "seeunverified"^^J%
     \@spaces"roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
     \@spaces"Roman-page-numbers" "Alpha-page-numbers"^^J%
-    \@spaces)^^J%
+    \space\space)^^J%
     )^^J%
 %</!doc>
 %    \end{macrocode}

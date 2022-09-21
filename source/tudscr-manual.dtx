@@ -72,6 +72,7 @@
 % Klasse und dem Paket es eine große Menge an Überschneidungen gibt, basieren
 % diese auf der gleichen Quelldatei.
 % \ToDo{guards überarbeiten, korrelierenden Quelltext zusammenhalten}[v2.06]
+% \ToDo{alle externen Aufrufe mit \cs{if@filesw} behandeln}[v2.06]
 % \ToDo{Document(Com/Env) auf \val{!} und optionale Arg. am Ende prüfen}[v2.06]
 % \ToDo{Argumente \val{''} und \val{<>} ableichen; konsistente Inhalte}[v2.06]
 %    \begin{macrocode}
@@ -871,198 +872,357 @@
 % \subsection{Index und Änderungsliste}
 %
 % Hier erscheint alles, was für Erstellen und Ausgabe der einzelnen Indexe 
-% notwendig ist. Hierfür wird das Paket \pkg{imakeidx} in Verbindung mit 
-% \app{texindy} verwendet. Diese können sowohl mit dem Paket als auch mit der 
-% Klasse erzeugt werden.
+% notwendig ist. Diese werden via \app {splitindex} aus |\jobname.idx| 
+% extrahiert und anschließend mit \app{texindy} prozessiert.
+%
+% \begin{macro}{\tud@index@make}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\tud@index@list}
+% \changes{v2.06p}{2022/09/29}{neu}^^A
+% \begin{macro}{\tud@index@name}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% \begin{macro}{\tud@index@title}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% \begin{macro}{\tud@index@opt}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% Mit \cs{tud@index@make} werden die Einstellungen für das Erstellen der 
+% einzelnen Indexe gespeichert, wobei mit dem ersten optionalen Argument der 
+% spezifische Index definiert wird, welche durch \app{splitindex} genutzt wird. 
+% Im obligatorischen Argument wird die Bezeichnung des Indexes angegeben, die 
+% normalerweise für Überschrift, Kolumnentitel und Inhaltsverzeichnis genutzt 
+% wird. Dies kann mit dem zweiten optionalen Argument angepasst werden, welches 
+% an das optionale Argument der verwendeten \KOMAScript"=Gliederungsüberschrift 
+% durchgereicht wird und \prm{reference}, \prm{head} und \prm{tocentry} als 
+% Parameter enthalten kann. Alle so vorgenommenen Einstellungen werden in 
+% |\tud@index@set@@|\meta{name} gesichert und bei der Ausgabe zu Beginn von 
+% \env{theindex} durch \cs{tud@index@print}\oarg{name} gesetzt.
 %    \begin{macrocode}
-\PassOptionsToPackage{xindy,splitindex}{imakeidx}
-\RequirePackage{imakeidx}
-%    \end{macrocode}
-% Zuerst ein paar kleinere Einstellungen für das Layout\dots
-%    \begin{macrocode}
-\indexsetup{%
+\newcommand*\tud@index@list{}
+\newcommand*\tud@index@name{}
+\newcommand*\tud@index@title{}
+\newcommand*\tud@index@opt{}
+\NewDocumentCommand\tud@index@make{O{main} d() m}{%
+  \begingroup%
+    \edef\tud@index@name{#1}%
+    \def\tud@index@opt{head={#3},tocentry={#3},reference={Index der #3}}%
+    \IfValueT{#2}{\appto\tud@index@opt{,#2}}%
+    \def\tud@index@title{#3}%
+    \tud@toks@{}%
+    \def\tud@res@a##1{%
+      \addto@hook@expandafter\tud@toks@{%
+        \expandafter\def\expandafter##1\expandafter{##1}%
+      }%
+    }%
+    \tud@res@a\tud@index@name%
+    \tud@res@a\tud@index@title%
+    \tud@res@a\tud@index@opt%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\tud@unique@add\noexpand\tud@index@list{\tud@index@name}%
+      \noexpand\csdef{tud@index@set@@#1}{\the\tud@toks@}%
+    }%
+  \tud@res@a%
+}
 %<*class>
-  level=\addsec,%
+\AtEndOfClass%
 %</class>
 %<*package>
-  level=\subsection*,%
+\AtEndOfPackage%
 %</package>
-  noclearpage,firstpagestyle=headings,headers={\indexname}{\indexname},%
-  othercode={\renewcommand*\subitem{\@idxitem\hspace*{15\p@}}}%
+  {\undef\tud@index@make}
+%    \end{macrocode}
+% Nun können mit \cs{tud@index@make} die einzelnen Indexe erstellt werden.
+% \ToDo{\val{misc} in \val{register} umbenennen?! Ausgabereihenfolge!}[v2.06]
+%    \begin{macrocode}
+\tud@index@make
+  (reference=Allgemeiner Index)
+  {Allgemeiner Index}
+\tud@index@make[options]
+  {Klassen- und Paketoptionen}
+\tud@index@make[macros]
+  (reference=Index der Befehle und Umgebungen)
+  {Befehle und Umgebungen mit zugeh\"origen Parametern}
+\tud@index@make[misc]
+  {L\"angen und Z\"ahler}
+\tud@index@make[terms]
+  (reference=Index der Bezeichner)
+  {Sprachabh\"angige Bezeichner}
+\tud@index@make[elements]
+  {Seitenstile, Schriftelemente und Farben}
+\tud@index@make[files]
+  {Klassen, Pakete und Dateien}
+%    \end{macrocode}
+% \end{macro}^^A \tud@index@opt
+% \end{macro}^^A \tud@index@title
+% \end{macro}^^A \tud@index@name
+% \end{macro}^^A \tud@index@list
+% \end{macro}^^A \tud@index@make
+% \begin{macro}{\tud@changes@make}
+% \changes{v2.06p}{2022/09/29}{neu}^^A
+% \begin{macro}{\tud@changes@list}
+% \changes{v2.06p}{2022/09/29}{neu}^^A
+% \begin{macro}{\changesname}
+% \changes{v2.06p}{2022/09/29}{neu}^^A
+% Die einzelnen Indexe für Änderungseinträge werden automatisch anhand der 
+% ohnehin vorhandenen Versionsliste erzeugt.
+%    \begin{macrocode}
+%<*class>
+\newcommand*\changesname{\"Anderungsliste}%
+\newcommand*\tud@changes@list{}
+\newcommand*\tud@changes@make[1]{%
+  \tud@unique@add\tud@changes@list{changes-v#1}%
+  \tud@index@make[changes-v#1](%
+    head=\changesname:~\TUDScript~v#1,%
+    tocentry=v#1,%
+    reference=\changesname\space f\"ur \TUDScript~v#1,%
+  ){\TUDScript~v#1}%
+}
+\forlistloop\tud@changes@make{\tud@v@list}
+%</class>
+%    \end{macrocode}
+% \end{macro}^^A \changesname
+% \end{macro}^^A \tud@changes@list
+% \end{macro}^^A \tud@changes@make
+%
+% \begin{environment}{theindex}
+% \begin{macro}{\tud@index@cols}
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% \begin{macro}{\tud@index@prologue}
+% \changes{v2.06p}{2022/09/06}{neu}^^A
+% \begin{macro}{\tud@index@hook}
+% \changes{v2.06p}{2022/09/06}{neu}^^A
+% Die Umgebung \env{theindex} mit den Ebenenbefehlen \cs{item} etc. sowie die 
+% eingefügten vertikalen Abstände inklusive des notwendigen Kleisters werden 
+% definiert. Zusätzliche Einstellungen lassen sich via \cs{tud@index@hook} 
+% hinzugefügen. Weiterhin wird ein referenzierbares Label erstellt und der 
+% gegebenenfalls mit \cs{tud@index@prologue} angegebene Prolog gesetzt.
+%    \begin{macrocode}
+\newcommand*\tud@index@cols{2}
+\newcommand*\tud@index@prologue{}
+\newcommand*\tud@index@hook{}
+\RenewDocumentEnvironment{theindex}{+b}{%
+  \def\lettergroup##1{\minisec{##1}}%
+  \def\item{\tud@index@item{0}}%
+  \def\subitem{\tud@index@item{1}}%
+  \def\subsubitem{\tud@index@item{2}}%
+  \def\subsubsubitem{\tud@index@item{3}}%
+  \def\indexspace{\tud@index@vskip[\bigskipamount]}%
+  \tud@index@hook%
+%    \end{macrocode}
+% Hier werden die mit \cs{tud@index@make} festgelegten Einstellungen umgesetzt.
+%    \begin{macrocode}
+%<*class>
+  \def\tud@res@a{\addsec}%
+  \eappto\tud@res@a{[{\expandonce\tud@index@opt}]}%
+%</class>
+%<*package>
+  \def\tud@res@a{\subsection*}%
+%</package>
+  \appto\tud@res@a{%
+    {\tud@index@title\label{idx:\tud@index@name}}%
+%<*class>
+    \markdouble{\@currentheadentry}%
+%</class>
+%<*package>
+    \markdouble{\tud@index@title}%
+%</package>
+%    \end{macrocode}
+% Ein Index kann gegebenenfalls in mehreren Spalten gesetzt werden, wofür die 
+% Umgebung \env{multicols} aus dem gleichnamigen Paket genutzt wird. Damit 
+% Umbrüche sinnvoll gesetzt werden, wird reichlich Kleister verwendet. Zu 
+% beachten ist dabei, dass dieser ohne Prolog direkt nach der Überschrift 
+% verwendet werden soll, weshalb diesbezüglich \cs{multicolsep} angepasst wird.
+%    \begin{macrocode}
+    \ifx\tud@index@prologue\@empty
+      \setlength\multicolsep{\z@}%
+    \else
+      \nopagebreak\tud@index@prologue\par
+      \setlength\multicolsep{\tud@index@glue{\bigskipamount}}%
+    \fi
+  }%
+  \ifnum\tud@index@cols>\@ne\relax%
+    \long\def\tud@res@b##1{%
+      \setlength\columnsep{\f@size\p@}%
+      \setlength\columnseprule{\z@}%
+      \begin{multicols}{\tud@index@cols}[\tud@res@a]%
+      ##1%
+      \end{multicols}%
+    }%
+  \else%
+    \long\def\tud@res@b##1{\tud@res@a##1}%
+  \fi%
+  \tud@res@b{%
+    \setparsizes{\z@}{\z@\@plus.1\baselineskip}{\z@\@plus1fil}%
+    \par@updaterelative%
+    \tud@raggedright%
+    #1%
+  }%
+}{}
+%    \end{macrocode}
+% \end{macro}^^A \tud@index@hook
+% \end{macro}^^A \tud@index@prologue
+% \end{macro}^^A \tud@index@cols
+% \end{environment}^^A theindex
+% \begin{macro}{\tud@index@item}
+% \changes{v2.06p}{2022/09/06}{neu}^^A
+% \begin{macro}{\tud@index@vskip}
+% \changes{v2.02}{2014/09/02}{neu}^^A
+% \begin{macro}{\tud@index@glue}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% Mit \cs{tud@index@item} erfolgt eine generalisierte Definition für Einträge 
+% im Index in den einzelnen Ebenen. Diese wird anstelle von \cs{@idxitem} 
+% genutzt, um mit |penalty| Umbrüche in tieferen Ebenen zu reduzieren.
+%    \begin{macrocode}
+\newcommand*\tud@index@item[2][\relax]{%
+  \par\addpenalty{\numexpr#2*\@lowpenalty-\@lowpenalty\relax}#1%
+  \hspace*{\dimexpr\numexpr#2\relax em\relax}%
+  \hangindent=\dimexpr\numexpr2*#2+3\relax em/2\relax%
 }
 %    \end{macrocode}
-% \begin{environment}{theindex}
-% \dots gefolgt von einem Patch für die Umgebung \env{theindex}, um unschöne 
-% Seitenumbrüche direkt nach Überschriften zu vermeiden. Diese treten auf, das 
-% das Paket \pkg{imakeidx} meiner Meinung nach die Überschriften zusammen mit 
-% der \env{multicols}-Umgebung falsch setzt. Der Patch sorgt dafür, dass die
-% Überschriften (\cs{imki@indexlevel}|{|\cs{indexname}|}|) nicht 
-% vor der Umgebung sondern~-- wie für \pkg{multicol} auch dokumentiert~-- im
-% optionalen Argument von \env{multicols} aufgerufen werden.
+% Hiermit wird der zwischen den einzelnen Gruppierungen im Index eingefügte 
+% Abstand definiert. Dieser wird via \cs{indexspace} gesetzt.
 %    \begin{macrocode}
-\ifimki@original\else%
-  \CheckCommand\theindex{%
-    \imki@maybeaddtotoc
-    \imki@indexlevel{\indexname}\imki@indexheaders
-    \thispagestyle{\imki@firstpagestyle}%
-    \ifnum\imki@columns>\@ne
-      \columnsep \imki@columnsep
-      \ifx\imki@idxprologue\relax
-        \begin{multicols}{\imki@columns}
-      \else
-        \begin{multicols}{\imki@columns}[\imki@idxprologue]
-      \fi
-    \else
-      \imki@idxprologue
-    \fi
-    \global\let\imki@idxprologue\relax
-    \parindent\z@
-    \parskip\z@ \@plus .3\p@\relax
-    \columnseprule \ifKV@imki@columnseprule.4\p@\else\z@\fi
-    \raggedright
-    \let\item\@idxitem
-    \imki@othercode%
-  }%
-  \patchcmd\theindex{%
-    \imki@indexlevel{\indexname}\imki@indexheaders%
-  }{%
-    \imki@indexheaders%
-  }{}{\tud@patch@wrn{theindex}}%
-  \patchcmd\theindex{%
-    \ifnum\imki@columns>\@ne
-      \columnsep \imki@columnsep
-      \ifx\imki@idxprologue\relax
-        \begin{multicols}{\imki@columns}
-      \else
-        \begin{multicols}{\imki@columns}[\imki@idxprologue]
-      \fi
-    \else
-      \imki@idxprologue
-    \fi
-  }{%
-    \ifnum\imki@columns>\@ne\relax%
-      \columnsep \imki@columnsep%
-      \ifx\imki@idxprologue\relax%
-        \begin{multicols}{\imki@columns}[\imki@indexlevel{\indexname}]%
-      \else%
-        \begin{multicols}{\imki@columns}[%
-          \imki@indexlevel{\indexname}%
-          \imki@idxprologue%
-        ]%
-      \fi%
-    \else%
-      \imki@indexlevel{\indexname}\imki@idxprologue%
-    \fi%
-  }{}{\tud@patch@wrn{theindex}}%
-\fi%
-\tud@addtocontents@initialize*{\let\index\@gobbleopt@one}
+\newcommand*\tud@index@vskip[1][\smallskipamount]{%
+  \vskip\tud@index@glue{#1}%
+}
+\newcommand*\tud@index@glue[1]{%
+  \glueexpr%
+    1\glueexpr#1\relax%
+    \@plus1\glueexpr#1\relax%
+    \@minus.5\glueexpr#1\relax%
+  \relax%
+}
 %    \end{macrocode}
-% \end{environment}^^A theindex
+% \end{macro}^^A \tud@index@glue
+% \end{macro}^^A \tud@index@vskip
+% \end{macro}^^A \tud@index@item
 %
-% \subsubsection{Erstellen der notwendigen Indexe}
+% \subsubsection{Prozessieren der Indexeinträge mit \app{texindy}}
 %
-% \begin{macro}{\makexdyindex}
-% \changes{v2.05}{2015/11/01}{neu}^^A
+% \begin{macro}{\makeindex}
+% \begin{macro}{\@indexfile}
 % \begin{macro}{\tud@xdy@settings}
 % \changes{v2.05}{2019/10/30}{neu}^^A
 % \begin{macro}{\tud@xdy@mdfive}
-% Um die einzelnen Indexe erstellen zu können, wird das Makro \cs{makexdyindex} 
-% definiert. Die Sternversion dieses Befehle erstellt dabei neben dem normalen
-% Spezialindex einen weiteren, welcher explizit für Deklarationen genutzt wird.
-% Dieser wird anschließen als erstes an \app{texindy} weitergereicht, um die
-% richtige Formatierung der einzelnen Einträge gewährleisten zu können. Erst 
-% danach wird die Datei mit den normalen Einträgen verarbeitet. Siehe hierzu 
-% auch \cs{Process@@Index}.
+% \changes{v2.06p}{2022/09/05}{neu}^^A
+% \begin{macro}{\tud@xdy@log}
+% \changes{v2.06p}{2022/09/29}{neu}^^A
+% Die notwendigen Einstellungen für den Aufruf von \app{texindy} werden in 
+% \cs{tud@xdy@settings} definiert. Dabei werden sowohl die Eingabekodierung als 
+% auch die Dokumentsprache beachtet. Diese werden nach dem Satz des Dokumentes 
+% ausgelesen, da diese an diesem Punkt in jedem Fall definiert sind und der 
+% Aufruf von \app{texindy} ohnehin erst nach dem Ende des Dokumentes erfolgt.
 %    \begin{macrocode}
 \newcommand*\tud@xdy@settings{}
-\edef\tud@xdy@settings{-M \@currname-ind.xdy -L german-din}
-\NewDocumentCommand\makexdyindex{s o m !o}{%
-  \let\@tempb\@empty%
-%<*class>
-  \IfBooleanT{#1}{%
-    \def\@tempc{\jobname-#4-declare.idx}%
-    \makeindex[name=#4-declare]%
-    \IfFileExists{\@tempc}{%
-      \edef\@tempb{-o \jobname-#4.ind \@tempc}%
-    }{%
-      \ClassWarning{tudscrmanual}{File \@tempc\space not found}%
-    }%
+\edef\tud@xdy@settings{texindy -M \@currname.\@currext-ind.xdy}
+\AtEndDocument{%
+  \tud@if@language@main{german}{%
+    \eappto\tud@xdy@settings{\space-L german-din}%
+  }{}%
+  \eappto\tud@xdy@settings{%
+    \space-C \ifundef\inputencodingname{utf8}{\inputencodingname}%
   }%
-%</class>
-  \ifundef\inputencodingname{}{%
-    \eappto\tud@xdy@settings{\space-C\space\inputencodingname}%
-  }%
-  \protected@edef\tud@res@a{%
-    title={#3},%
-    columnsep=\noexpand\f@size\noexpand\p@,%
-    \IfValueTF{#4}{%
-      name={#4},%
-      options={\tud@xdy@settings\space-t \jobname-#4.xlg \@tempb},%
-    }{%
-      options={\tud@xdy@settings\space-t \jobname.xlg},%
-    }%
-    \IfValueT{#2}{#2}%
-  }%
-  \expandafter\makeindex\expandafter[\tud@res@a]%
 }
 %    \end{macrocode}
-% Nun können mit \cs{makexdyindex} die einzelnen Indexe erstellt werden.
+% Das Erstellen der Indexdatei \file{\string\jobname.idx} wird hier definiert.
+% Damit nicht bei jedem Aufruf mit \file{-{}-shell-escape} die Indexe neu 
+% erstellt werden, wird mit \cs{pdf@filemdfivesum} geprüft, ob sich die Datei 
+% \file{\string\jobname.idx} überhaupt seit dem letzten Aufruf geändert hat. 
+% Hierfür wird die Prüfsumme der Datei \file{\string\jobname.idx} in die 
+% aux"~Datei geschrieben. Lediglich bei einer detektierten Änderung der
+% Indexdatei \file{\string\jobname.idx} werden \app{splitindex} gefolgt von 
+% \app{texindy} aufgerufen.
 %    \begin{macrocode}
-\makexdyindex{Allgemeiner Index}
-\makexdyindex*{Klassen- und Paketoptionen}[options]
-\makexdyindex*{Befehle und Umgebungen mit zugeh\"origen Parametern}[macros]
-%<*class>
-\makexdyindex*{Sprachabh\"angige Bezeichner}[terms]
-\makexdyindex*{Seitenstile, Schriftelemente und Farben}[elements]
-%</class>
-\makexdyindex{L\"angen und Z\"ahler}[misc]
-\makexdyindex*{Klassen, Pakete und Dateien}[files]
-%<*class>
-\makexdyindex[columns=1]{\"Anderungsliste}[changelog]
-%</class>
-\undef\makexdyindex
+\newcommand*\tud@xdy@mdfive{}
+\newcommand*\tud@xdy@log{}
+\edef\tud@xdy@log{\jobname.xlg}
+\ifx\makeindex\relax\else
+\def\makeindex{%
+  \tud@newwrite\@indexfile%
+  \immediate\openout\@indexfile="\jobname.idx"\relax%
+  \typeout{Writing index file \jobname.idx}%
+  \BeforeClosingMainAux{%
+    \immediate\closeout\@indexfile%
 %    \end{macrocode}
-% Damit \pkg{imakeidx} nicht bei jedem Aufruf mit \file{-{}-shell-escape} die 
-% Indexe neu erstellt, wird mit \cs{pdf@filemdfivesum} geprüft, ob sich die
-% Basisdatei überhaupt seit dem letzten Aufruf geändert hat. Dafür wird die 
-% Prüfsumme in aux"~Datei geschrieben, wobei diese dort nur geändert wird, wenn
-% das Flag \file{-{}-shell-escape} aktiv ist, da nur dann auch wirklich der 
-% nachgelagerte Prozess mit \pkg{imakeidx} auseführt wird.
-% \begin{macro}{\tud@idx@mdfive}
-% \changes{v2.07}{2019/11/22}{neu}^^A
-% Das Makro für die Prüfsumme, welches in die aux"~Datei geschrieben wird.
+% Die Prüfsumme der Indexdatei wird temporär in \cs{tud@res@a} gesichert. 
+% Zusätzlich wird die Prüfsumme der Logdatei |\jobname.xlg| nach dem Aufruf 
+% verglichen, um zu detektieren, ob der Aufruf von \app{splitindex} gefolgt von 
+% \app{texindy} auch erfolgreich war. Hierfür wird \cs{tud@res@b} genutzt.
 %    \begin{macrocode}
-\newcommand*\tud@idx@mdfive{}%
-%    \end{macrocode}
-% \end{macro}^^A \tud@idx@mdfive
-% Hier erfolgt das vergleichen der letzten mit der aktuellen Prüfsumme. Ist 
-% diese identisch, kann der nachgelagerte Prozess von \pkg{imakeidx} 
-% deaktiviert werden.
-%    \begin{macrocode}
-\AtBeginDocument{%
-  \ifundef\pdf@filemdfivesum{}{%
-    \PassOptionsToPackage{quiet}{imakeidx}%
+    \@tud@res@swafalse%
     \edef\tud@res@a{\pdf@filemdfivesum{\jobname.idx}}%
+    \edef\tud@res@b{\pdf@filemdfivesum{\tud@xdy@log}}%
+    \edef\tud@res@c{%
+      splitindex%
+        \space-m\space''%'\tud@xdy@settings\space2>\string&1'%
+        \space\jobname.idx%
+    }%
+    \ifnum\pdf@strcmp{\tud@res@a}{\tud@xdy@mdfive}=\z@\else
+      \ifnum\pdf@shellescape=\@ne\relax
+%<*class>
+        \ClassInfo{tudscrmanual}%
+%</class>
+%<*package>
+        \PackageInfo{tudscrmanual}%
+%</package>
+          {invoking: \tud@res@c}%
+        \begingroup%
+          \everyeof{\noexpand}%
+          \endlinechar=\m@ne%
+          \edef\tud@res@c{%
+            \noexpand\@@input\string|%
+              \string"\tud@res@c\string"\space%
+          }%
+          \tud@res@c%
+        \endgroup%
 %    \end{macrocode}
-% Das Paket \pkg{imakeidx} prüft nach dem durch \cs{printindex} initiierten 
-% Aufruf von \app{splitindex} nicht, ob \file{\cs{jobname}-\meta{name}.idx} 
-% auch tatsächlich exisitiert, was am Ende zu einem fehlerhaften Aufruf von
-% \app{texindy} führt. Um dies zu umgehen, wird durch \cs{tud@print@index}
-% geprüft, ob die gewünschte Datei auch vorhanden ist, bevor \cs{printindex} 
-% ausgeführt wird. Dafür muss \app{splitindex} aber zuvor aufgerufen worden 
-% sein, was hier erfolgt.
+% Leeren des alten Logs. In der folgenden Schleife werden alle Ausgaben von 
+% |stdout| und |stderr| an dieses via |>>\tud@xdy@log| angehangen.
 %    \begin{macrocode}
-    \ifnum\pdf@shellescape=\@ne\relax%
-      \ifx\tud@idx@mdfive\@empty%
-        \ifx\tud@res@a\@empty\else%
-          \ShellEscape{splitindex -m \string"\string" \jobname.idx}%
+        \immediate\openout\@indexfile="\tud@xdy@log"\relax%
+        \immediate\closeout\@indexfile%
+        \def\do##1{%
+          \begingroup
+            \eappto\tud@xdy@settings{\space-o \jobname-##1.ind}%
+            \def\tud@res@c{\jobname-##1-declare.idx}%
+            \IfFileExists{\tud@res@c}{%
+              \eappto\tud@xdy@settings{\space\tud@res@c}%
+            }{}%
+            \eappto\tud@xdy@settings{\space\jobname-##1.idx}%
+            \begingroup%
+              \everyeof{\noexpand}%
+              \endlinechar=\m@ne%
+              \edef\tud@res@c{%
+                \noexpand\@@input\string|%
+                  \string"\tud@xdy@settings%
+                    \space>>\tud@xdy@log%
+                    \space2>\string&1%
+                    \string"\space%
+              }%
+              \tud@res@c%
+            \endgroup%
+          \endgroup
+        }%
+        \dolistloop{\tud@index@list}%
+%    \end{macrocode}
+% Bei einem erfolgreichen Aufruf~-- eine (neue) Logdatei wurde erstellt~-- wird 
+% die Prüfsumme auf den neuen Wert gesetzt.
+%    \begin{macrocode}
+        \ifnum\pdf@strcmp{\pdf@filemdfivesum{\tud@xdy@log}}{\tud@res@b}=\z@%
+%<*class>
+          \ClassWarningNoLine{tudscrmanual}%
+%</class>
+%<*package>
+          \PackageWarningNoLine{tudscrmanual}%
+%</package>
+          {%
+            \tud@res@c\MessageBreak%
+            was called but there is no result%
+          }%
+        \else%
+          \let\tud@xdy@mdfive\tud@res@a%
         \fi%
-      \fi%
-    \fi%
-    \ifnum\pdf@strcmp{\tud@res@a}{\tud@idx@mdfive}=\z@\relax%
-      \PassOptionsToPackage{noautomatic}{imakeidx}%
-    \else%
-      \ifnum\pdf@shellescape=\@ne\relax\else%
+      \else%
 %<*class>
         \ClassWarningNoLine{tudscrmanual}%
 %</class>
@@ -1071,18 +1231,61 @@
 %</package>
         {%
           The index file `\jobname.idx' has changed. Run again\MessageBreak%
-          with --shell-escape flag enabled%
+          with --shell-escape flag enabled or just call\MessageBreak%
+          \tud@res@c%
         }%
-        \let\tud@res@a\tud@idx@mdfive%
-      \fi%
-    \fi%
-    \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{\tud@res@a}}%
-  }%
-}
+      \fi
+    \fi
 %    \end{macrocode}
+% Die Prüfsumme der Indexdatei wird \emph{immer} in die aux"~Datei geschrieben.
+%    \begin{macrocode}
+    \immediate\write\@mainaux{%
+      \string\gdef\string\tud@xdy@mdfive{\tud@xdy@mdfive}%
+    }%
+  }%
+  \def\@index[##1]##2{%
+    \@wrindex[{##1}]{##2}%
+    \endgroup\@esphack%
+  }%
+  \let\makeindex\@empty
+}
+\fi
+\@onlypreamble\makeindex
+%    \end{macrocode}
+% \end{macro}^^A \tud@xdy@log
 % \end{macro}^^A \tud@xdy@mdfive
 % \end{macro}^^A \tud@xdy@settings
-% \end{macro}^^A \makexdyindex
+% \end{macro}^^A \@indexfile
+% \end{macro}^^A \makeindex
+%
+% \subsubsection{Definition von Indexeinträgen}
+%
+% \begin{macro}{\@wrindex}
+% \begin{macro}{\index}
+% \begin{macro}{\@index}
+% Für das Erzeugen von Indexeinträgen werden die entsprechenden Befehle neu
+% definiert, um via \cs{index}\oarg{Index}\marg{Eintrag} mit einem optionalen
+% Argument einen spezifischen Index angegeben zu können.
+%    \begin{macrocode}
+\undef\@wrindex
+\newcommand*\@wrindex[2][main]{%
+  \protected@write\@indexfile{\@sanitize}{%
+    \string\indexentry[#1]{#2}{\thepage}%
+  }%
+}
+\def\index{%
+  \@bsphack\begingroup%
+  \@sanitize%
+  \@ifnextchar[%]
+    {\@index}%
+    {\@index[main]}%
+}
+\def\@index[#1]#2{\endgroup\@esphack}
+\tud@addtocontents@initialize*{\let\index\@gobbleopt@one}
+%    \end{macrocode}
+% \end{macro}^^A \@index
+% \end{macro}^^A \index
+% \end{macro}^^A \@wrindex
 %
 % \iffalse
 %<*class>
@@ -1136,68 +1339,80 @@
 %
 % \subsubsection{Indexverweise}
 %
-% \begin{macro}{\CrossIndex}
+% \begin{macro}{\SeeIndex}
 % \begin{macro}{\seeidx}
-% Der Befehl \cs{CrossIndex} dient zum Eintragen eines Schlagwortes, welches im 
-% ersten obligatorischen Argument angegeben wird, in den allgemeinen Index und
-% verweist auf den im zweiten obligatorischen Argument, zum Schlagwort gehörigen
-% Spezialindex. Das ordinäre optionale Argument kann verwendet werden, um ggf.
-% den Eintrag in den allgemeinen Index, der normalerweise mit dem jeweiligen
-% Schlagwort erfolgt, zu überschrieben.
-%
-% Wird die Sternversion von \cs{CrossIndex} genutzt, so wird der Querverweis 
-% als Eintrag in der obersten Ebene gesetzt, andernfalls wird ein Untereintrag
-% gesetzt. Mit der normalen Variante können so zu einem Schlagwort weitere
-% Verweise im allgemeinen Index erscheinen. Das zweite obligatorische Argument
-% kann eine kommagetrennte Liste enthalten.
-%
-% Das Makro \cs{seeidx} verweist auf die Seite eines Indexes.
+% Der Befehl \cs{SeeIndex} dient zum Eintragen eines oder mehrerer Schlagworte 
+% in den allgemeinen Index und verweist für dieses auf den im ersten Argument 
+% gegebenen Spezialindex. Das optionale Argument kann verwendet werden, um den 
+% hierfür genutzten Text anzupassen, wobei ein im Argument angegebener \val{*} 
+% durch das jeweilige Schlagwort substituiert wird. Die Schlagworte selbst 
+% werden als kommaseparierte Liste im zweiten Argument angegeben.
 %    \begin{macrocode}
-\newrobustcmd*\seeidx[2]{\pageref{idx:#1}}
-\NewDocumentCommand\CrossIndex{s m o m}{%
-  \def\@tempa##1##2##3{%
-    \index{%
-      \IfBooleanTF{#1}{##3@##3}{##3!"|@}%
-      \,\textrightarrow\,%
-      \tudhyperref{idx:##2}{\IfValueTF{##1}{##1}{Index der ##3}}|seeidx{##2}%
+\newcommand*\seeidx[1]{\pageref{idx:#1}}
+\NewDocumentCommand\SeeIndex{m o m}{%
+  \begingroup
+    \def\do##1{%
+      \IfValueTF{#2}{%
+        \def\tud@res@b{#2}%
+        \tud@replace@in\tud@res@b{*}{##1}%
+        \trim@spaces@in\tud@res@b%
+        \protected@edef\tud@res@b{\noexpand\hyperref[{idx:#1}]{\tud@res@b}}%
+      }{%
+        \def\tud@res@b{\nameref{idx:#1}}%
+      }%
+      \protected@edef\tud@res@c{##1}%
+      \trim@spaces@in\tud@res@c%
+%    \end{macrocode}
+% Mit der Verwendung von \val{""} zu Beginn des Sortierschlüssels wird der 
+% Verweis als erster Untereintrag für das jeweilige Schlagwort gesetzt.
+%    \begin{macrocode}
+      \index{%
+        \tud@res@c!""idx:#1@\textrightarrow\kern.1em\tud@res@b|seeidx{#1}%
+      }%
     }%
-  }%
-  \forcsvlist{\@tempa{#3}{#4}}{#2}%
+    \docsvlist{#3}%
+  \endgroup
 }
 %    \end{macrocode}
 % \end{macro}^^A \seeidx
-% \end{macro}^^A \CrossIndex
-% \begin{macro}{\SeeRef}
+% \end{macro}^^A \SeeIndex
+% \begin{macro}{\SeeEntry}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% Mit \cs{SeeRef} wird unter dem im ersten Argument gegebenen Schlagwort ein
-% Indexuntereintrag erzeugt, der wiederum auf einen Indexeintrag des zweiten 
-% Argumentes verweist. Dabei kann im zweiten Argument ein normaler Begriff oder 
-% ein Markup-Befehl verwendet werden. Normalerweise wird für den Querverweis 
-% die Referenzklasse \verb+|see+ verwendet, die Sternversion des Befehls
-% hingegen nutzt \verb+|seeunverified+, um auf eine Prüfung des verwiesenen
-% Eintrags zu verzichten.
+% Mit \cs{SeeEntry} wird unter dem im ersten Argument gegebenen Schlagwort auf 
+% einen Indexeintrag des zweiten Argumentes verwiesen. In beiden Argumenten
+% kann eine kommaseperierte Liste genutzt werden. Für ein spezielles Markup
+% eines Begriffes ist es außerdem möglich, die für eine angepasste Auszeichnung 
+% gebräuchliche Notation \meta{Eintrag}|@|\meta{Markup} zu nutzen.
+%
+% Normalerweise wird für den Verweis die Referenzklasse \verb+|see+ verwendet.
+% Die Sternversion des Befehls hingegen nutzt \verb+|seeunverified+, um auf 
+% eine Existenzprüfung des Refernzeintrags durch \app{texindy} zu verzichten.
 %    \begin{macrocode}
-\NewDocumentCommand\SeeRef{s m m}{%
-  \sbox\z@{%
-    \let\tud@idx@fmt\relax%
-    #3%
-%    \end{macrocode}
-% Wurde im zweiten Argument ein Markup-Befehl angegeben, so wurde durch das 
-% Erstellen der Box das dazugehörige Indexformat in \cs{tud@idx@fmt} für den
-% Eintrag erstellt. Andernfalls wurde die Definition von \cs{tud@idx@fmt} nicht
-% geändert und das Argument wird nach der Box direkt in den Index eingetragen.
-%    \begin{macrocode}
-    \ifx\tud@idx@fmt\relax%
-      \gdef\tud@reserved{#3}%
-    \else%
-      \global\let\tud@reserved\tud@idx@fmt%
-    \fi%
-  }%
-  \IfBooleanTF{#1}{\def\tud@idx@fmt{seeunverified}}{\def\tud@idx@fmt{see}}%
-  \index{#2!#3|\tud@idx@fmt{\tud@reserved}}%
+\NewDocumentCommand\SeeEntry{s m m}{%
+  \begingroup
+    \def\do##1{%
+      \begingroup
+        \def\do####1{%
+          \protected@edef\tud@res@a{####1}%
+          \trim@spaces@in\tud@res@a%
+          \protected@edef\tud@res@b{##1}%
+          \trim@spaces@in\tud@res@b%
+          \edef\tud@res@c{%
+            \noexpand\index{%
+              \expandonce\tud@res@a%
+              |see\IfBooleanT{#1}{unverified}{\expandonce\tud@res@b}%
+            }%
+          }%
+          \tud@res@c%
+        }%
+        \docsvlist{#2}%
+      \endgroup
+    }%
+    \docsvlist{#3}%
+  \endgroup
 }
 %    \end{macrocode}
-% \end{macro}^^A \SeeRef
+% \end{macro}^^A \SeeEntry
 %
 % \begin{macro}{\cleversee}
 % \changes{v2.05}{2015/11/02}{neu}^^A
@@ -1232,10 +1447,8 @@
 % die angegebenen Seitenzahlen eines Indexeintrages erst \emph{nach} den
 % Hinweisen ausgegeben und mit \cs{relax} abgeschlossen werden. Dies wird mit
 % der später definierten Stildatei für \app{texindy} sichergestellt. So wird es 
-% möglich, dass das Makro \cs{tud@cleversee} auf alles ihm bis \cs{relax} 
-% nachfolgende parsen kann und abhängig davon die Ausgabe gestaltet. Das zweite 
-% obligatorische Argument beinhaltet dabei den Querverweis, das dritte Argument
-% ist alles nachfolgende bis \cs{relax}.
+% möglich, dass das Makro \cs{tud@cleversee} das zweite obligatorische Argument 
+% bis zu \cs{relax} parsen kann und abhängig davon die Ausgabe gestaltet.
 %    \begin{macrocode}
 \newcommand*\tud@cleversee{}
 \def\tud@cleversee#1#2\relax{%
@@ -1244,23 +1457,34 @@
     \let\cleverseealso\@empty%
     \let\tud@res@a\@empty%
     \def\tud@res@b{#2}%
+%    \end{macrocode}
+% Im Index erzeugte Verweise mit \verb+|+|see| werden vor Seitenzahlen angegben 
+% und von diesen durch |\\| getrennt. Bei der Ausgabe soll diese Reihenfolge 
+% jedoch getauscht werden.
+%    \begin{macrocode}
     \def\tud@res@c##1\\##2\@nil{%
       \appto\tud@res@a{##1}%
       \def\tud@res@b{##2}%
       \trim@spaces@in\tud@res@b%
       \in@{\\}{##2}%
     }%
+%    \end{macrocode}
+% Für einen Eintrag können mit \verb+|+|see| sowie \verb+|+|seealso| oder 
+% \verb+|+|seeunverified| unterschiedliche Verweise existieren, die jeweils mit 
+% |\\| voneinander getrennt sind. Diese werden mit der Schleife zusammengefasst.
+%    \begin{macrocode}
     \in@true%
     \@whilesw\ifin@\fi{%
       \expandafter\tud@res@c\tud@res@b\@nil%
     }%
+%    \end{macrocode}
+% Falls mindestens ein Eintrag mit einer Seitenzahl existiert, wird der 
+% Verweis darauf mit einem Zeilenumbruch angehangen.
+%    \begin{macrocode}
     \ifx\tud@res@b\@empty%
       \mbox{\emph{#1}}%
     \else%
-      \def\tud@res@c##1 ##2\@nil{%
-        ##2##1\space\mbox{\emph{\alsoname}}%
-      }%
-      \expandafter\tud@res@c\tud@res@b\@nil%
+      \tud@res@b\space\linebreak[1]\mbox{\emph{\alsoname}}%
     \fi%
     \space\tud@res@a%
   \endgroup%
@@ -1277,213 +1501,234 @@
 % \app{splitindex} unterteilten und \app{texindy} prozessierten Indexe 
 % notwendig ist.
 %
-% \begin{macro}{\tud@print@index}
+% \begin{macro}{\tud@index@print}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@idx@skip}
-% \changes{v2.02}{2014/09/02}{neu}^^A
-% Mit \cs{tud@print@index} erfolgt die Ausgabe der einzelnen Indexe. Dabei wird
-% in der Klasse \cls{tudscrmanual} zuvor für jeden Index ein referenzierbares
-% Label erstellt und ggf. der Prolog gesetzt.
-%
-% Aufgrund der Verwendung der \env{multicols}-Umgebung durch das Paket
-% \pkg{imakeidx} werden normalerweise ohne einen Prolog zu große vertikale
-% Abstände nach der Überschrift und am Ende des Index gesetzt. Dies wird mit
-% \cs{tud@idx@skip} behoben.
+% \begin{macro}{\tud@index@nolettergroup@list}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% \begin{macro}{\tud@index@nolettergroup@add}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% Mit \cs{tud@index@print} erfolgt die Ausgabe der einzelnen Indexe, wobei im 
+% ersten optionalen Argument der gewünschte, mittels \app{splitindex} erzeugte 
+% Index und im zweiten optionalen Argument eine Präambel angegben werden kann.
+% Ein möglicher Seitenumbruch wird vor dem Index und nicht nach der Präambel 
+% bevorzugt. Vor dem Einbinden werden die mittels \cs{tud@index@make} in 
+% |\tud@index@set@@|\meta{name} gesicherten Einstellungen gesetzt.
 %    \begin{macrocode}
-\newcommand*\tud@idx@skip{%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-}
-\newcommand*\tud@print@index[1][]{%
-%    \end{macrocode}
-% Falls ein Seitenumbruch notwendig ist, sollte dieser vor dem Index und nicht 
-% unmittelbar nach dem Beginn erfolgen.
-%    \begin{macrocode}
+\NewDocumentCommand\tud@index@print{s O{main} D<>{2} >{\TrimSpaces}+D(){}}{%
   \pagebreak[3]%
-  \@tud@indextrue%
-%<*class>
-%    \end{macrocode}
-% Das zu erstellende Label wird in \cs{tud@reserved} gespeichert. Dabei wird 
-% die Sternversion von \cs{tudhyperdef} genutzt, um das Label auf die Höhe der 
-% Überschrift zu setzen.
-%    \begin{macrocode}
-  \tud@if@strblank{#1}{%
-    \def\tud@reserved{\tudhyperdef*{idx:main}}%
-  }{%
-    \def\tud@reserved{\tudhyperdef*{idx:#1}}%
-  }%
-%    \end{macrocode}
-% Ohne Prolog wird der fehlerhafte vertikale Abstand behoben. 
-%    \begin{macrocode}
-  \ifx\tud@indexprologue\@empty%
-    \indexprologue[\tud@idx@skip]{\tud@reserved}%
-%    \end{macrocode}
-% Mit Prolog wird der fehlerhafte vertikale Abstand nach diesem korrigiert.
-%    \begin{macrocode}
-  \else%
-    \indexprologue{%
-      \tud@reserved%
-      \tud@indexprologue%
-      \tud@idx@skip%
+  \begingroup
+    \@tud@res@swafalse%
+    \IfBooleanTF{#1}{\@tud@res@swatrue}{%
+      \ifinlist{#2}{\tud@index@nolettergroup@list}{\@tud@res@swatrue}{}%
     }%
-  \fi%
+    \if@tud@res@swa
+      \preto\tud@index@hook{%
+        \let\lettergroup\@gobble
+        \let\lettergroupDefault\@gobble
+        \let\indexspace\relax
+      }%
+    \fi
+    \csuse{tud@index@set@@#2}%
+    \def\tud@index@cols{#3}\relax%
+    \ifnum\tud@index@cols<\tw@\relax%
+      \def\tud@index@cols{\@ne}\relax%
+    \fi%
+    \def\tud@index@prologue{#4}%
+    \IfFileExists{\jobname-#2.ind}{%
+      \@input@{\jobname-#2.ind}%
+    }{%
+      \IfFileExists{\jobname-#2.idx}{%
+        \begin{theindex}\end{theindex}%
+%<*class>
+        \ClassWarning{tudscrmanual}%
 %</class>
+%<*package>
+        \PackageWarning{tudscrmanual}%
+%</package>
+        {%
+          Processing with `texindy' went wrong as\MessageBreak%
+          `\jobname-#2.ind' is missing%
+        }%
+        \global\let\tud@xdy@mdfive\@empty%
+      }{}%
+    }%
+  \endgroup
+}
 %    \end{macrocode}
-% Fur das Paket \pkg{tudscrmanual} erfolgt eine einfache Ausgabe der Indexe.
+% Um für spezifische Indexe \cs{lettergroup} und \cs{indexspace} unwirksam 
+% machen zu können, wird diese Liste verwendet, welche über \cs{PrintIndex}
+% gesetzt werden kann.
 %    \begin{macrocode}
-%<package>  \indexprologue[\tud@idx@skip]{}%
-%    \end{macrocode}
-% Die Ausgabe des gewünschten Index und des leeren des Prologs.
-%    \begin{macrocode}
-  \tud@if@strblank{#1}{\printindex}{\printindex[{#1}]}%
-  \ifnum\imki@columns>\@ne\relax\vspace{-\multicolsep}\fi%
-%<class>  \let\tud@indexprologue\@empty%
-  \IfFileExists{\jobname-#1.ind}{}{%
-    \immediate\write\@mainaux{\string\gdef\string\tud@idx@mdfive{}}%
+\newcommand*\tud@index@nolettergroup@list{}
+\NewDocumentCommand\tud@index@nolettergroup@add{>{\TrimSpaces}m}{%
+  \xifinlist{#1}{\tud@index@list}{%
+    \tud@unique@eadd\tud@index@nolettergroup@list{#1}%
+  }{%
+%<*class>
+    \ClassWarning{tudscrmanual}%
+%</class>
+%<*package>
+    \PackageWarning{tudscrmanual}%
+%</package>
+    {%
+      Index `#1' unknown, possible values are:\MessageBreak%
+      \tud@index@list%
+    }%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@idx@skip
-% \end{macro}^^A \tud@print@index
+% \end{macro}^^A \tud@index@nolettergroup@list
+% \end{macro}^^A \tud@index@nolettergroup@add
+% \end{macro}^^A \tud@index@print
+%
+% \begin{macro}{\tud@index@check}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% Falls \cs{makeindex} nicht genutzt wurde, aber die Ausgabe von Index oder 
+% Änderungsliste via \cs{PrintIndex} oder \cs{PrintChanges} gewünscht ist, wird 
+% eine Warnung erzeugt.
+%    \begin{macrocode}
+\newcommand*\tud@index@check{%
+  \IfFileExists{\jobname.idx}{}{%
+%<*class>
+    \ClassWarning{tudscrmanual}%
+%</class>
+%<*package>
+    \PackageWarning{tudscrmanual}%
+%</package>
+    {%
+      Did you use `\string\makeindex'? Index file\MessageBreak%
+      `\jobname.idx' is missing%
+    }%
+  }%
+}
+\AtBeginDocument{\ifx\makeindex\relax\let\tud@index@check\relax\fi}
+%    \end{macrocode}
+% \end{macro}^^A \tud@index@check
 %
 % \begin{macro}{\PrintIndex}
 % \changes{v2.02}{2014/08/20}{neu}^^A
-% \begin{macro}{\tud@indexprologue}
-% \changes{v2.02}{2014/08/20}{neu}^^A
-% Mit \cs{PrintIndex} erfolgt die Ausgabe aller erstellten Indexe. Dabei wird 
-% für bestimmte Spezialindexe das Makro \cs{tud@indexprologue} neu gesetzt, um 
-% für diese vor der eigentlichen Ausgabe einige Anmerkungen machen zu können.
-% Mit \cs{tud@indexprologue} kann der einleitende Teil für einen Index gesetzt
-% werden.
+% Mit \cs{PrintIndex} erfolgt die Ausgabe aller mit \app{splitindex} erzeugten 
+% und \app{texindy} prozessierten Indexe.
 %    \begin{macrocode}
+\NewDocumentCommand\PrintIndex{>{\SplitList{,}}d() >{\TrimSpaces}o}{%
 %<*class>
-\newcommand*\tud@indexprologue{}
+  \cleardoublepage%
 %</class>
-\newcommand*\PrintIndex{%
-  \begingroup%
-    \providecommand*\lettergroup[1]{%
-      \par\textbf{\textsf{##1}}\par%
-      \nopagebreak%
-    }%
+  \tud@index@check%
+  \let\tud@index@nolettergroup@list\@empty%
+  \IfValueT{#1}{\ProcessList{#1}{\tud@index@nolettergroup@add}}%
+  \bookmarksetup{startatroot}%
+  \def\tud@index@hook{\@tud@indextrue}%
 %<*class>
-    \renewcommand\tud@indexprologue{%
-      Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
-      \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
-      sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
-      typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
-      zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
-      Ergebnis erzielt werden kann, sollte das \GitHubRepo'discussions' erster %
-      Anlaufpunkt sein, um weitere Hilfe zu erhalten.%
+  \setchapterpreamble{%
+    \begin{abstract}%
+    \noindent%
+    \IfValueTF{#2}{#2}{%
+      Die Formatierung der Eintr\"age in allen aufgef\"uhrten Indexen ist %
+      folgenderma\ss{}en aufzufassen: \textbf{Zahlen in fetter Schrift} %
+      verweisen auf die \textbf{Erkl\"arung} zu einem Stichwort, wobei in %
+      der digitalen Fassung dieses Handbuchs dieser Eintrag selbst ein %
+      Hyperlink zu seiner Erl\"auterung ist. Seitenzahlen in normaler %
+      Schriftst\"arke hingegen deuten auf zus\"atzliche Informationen, %
+      wobei diese f\"ur \textit{kursiv hervorgehobene Zahlen} als besonders %
+      \textit{wichtig} erachtet werden.\par %
+      In den themenspezifischen Indexen wird f\"ur alle Eintr\"age, welche %
+      nicht durch \TUDScript sondern von anderen Klassen oder Paketen zur %
+      Verf\"ugung gestellt werden, dies im Suffix des entsprechenden %
+      Eintrages angegeben. Existiert f\"ur einen solchen Eintrag %
+      \emph{keine} direkte \textbf{Erl\"auterung} ist dementsprechend auch %
+      kein Hyperlink verf\"ugbar.%
     }%
-%</class>
-%<*package>
-    \begingroup%
-    \let\lettergroup\@gobble%
-    \let\indexspace\relax%
-%</package>
-    \tud@print@index%
-%<*package>
-    \endgroup%
-%</package>
-%<*class>
-    \clearpage%
-    \renewcommand\tud@indexprologue{%
-      Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten %
-      Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangaben %
-      f\"ur spezielle Wertzuweisungen existieren.%
-    }%
-%</class>
-    \tud@print@index[options]%
-%<*class>
-    \renewcommand\tud@indexprologue{%
-      Dies ist eine Auflistung aller zuvor erl\"auterten sowie erw\"ahnten %
-      Befehle und Umgebungen. Bei einigen sind zus\"atzliche Untereintr\"age %
-      f\"ur Schl\"ussel-Wert-Parameter zu finden, die im optionalen Argument %
-      der jeweiligen Anweisung verwendet werden k\"onnen. Gegebenenfalls sind %
-      f\"ur explizite Wertzuweisungen an diese Parameter Seitenverweise zu %
-      finden.%
-    }%
-%</class>
-    \tud@print@index[macros]%
-%<*class>
-    \renewcommand\tud@indexprologue{%
-      Dies sind die von \TUDScript definierten beziehungsweise erw\"ahnten, %
-      sprachabh\"angigen Bezeichner. Informationen zur Verwendung sowie den %
-      Anpassungsm\"oglichkeiten sind in \autoref{sec:localization} zu finden.%
-    }%
-    \tud@print@index[terms]%
-    \tud@print@index[elements]%
+    \end{abstract}%
+  }%
+  \addchap{\indexname\label{idx:index}}%
 %</class>
 %<*package>
-    \begingroup%
-    \let\lettergroup\@gobble%
-    \let\indexspace\relax%
+  \addsec{\indexname\label{idx:index}}%
+  \IfValueT{#2}{#2}%
 %</package>
-    \tud@print@index[misc]%
-%<*package>
-    \endgroup%
-%</package>
-    \tud@print@index[files]%
-  \endgroup%
+  \tud@index@print%
+%<*class>
+  (%
+    Die im Folgenden aufgelisteten Schlagworte sollen f\"ur den Umgang mit %
+    \hologo{LaTeXe} im Allgemeinen sowie dem \TUDScript-Bundle im Speziellen %
+    sowohl Antworten bei generellen Fragen liefern als auch L\"osungen f\"ur %
+    typische Probleme bereitstellen. Falls ein gesuchter Begriff hier nicht %
+    zu finden ist oder trotz vorhandener Hinweise kein zufriedenstellendes %
+    Ergebnis erzielt werden kann, sollte das \Forum* erster Anlaufpunkt %
+    sein, um weitere Hilfe zu erhalten.%
+  )%
+  \clearpage%
+%</class>
+  \tud@index@print[options]%
+%<*class>
+  (%
+    Dies ist der Index aller im Handbuch erl\"auterten sowie erw\"ahnten %
+    Optionen, wobei bei den meisten auch Untereintr\"age mit Seitenangaben %
+    f\"ur spezielle Wertzuweisungen existieren.%
+  )%
+%</class>
+  \tud@index@print[macros]%
+%<*class>
+  (%
+    Dies ist eine Auflistung aller zuvor erl\"auterten sowie erw\"ahnten %
+    Befehle und Umgebungen. Bei einigen sind zus\"atzliche Untereintr\"age %
+    f\"ur Schl\"ussel-Wert-Parameter zu finden, die im optionalen Argument %
+    der jeweiligen Anweisung verwendet werden k\"onnen. Gegebenenfalls sind %
+    auch explizite Wertzuweisungen an diese Parameter angegeben.%
+  )%
+%</class>
+  \tud@index@print[terms]%
+%<*class>
+  (%
+    Dies sind die von \TUDScript definierten respektive erw\"ahnten, %
+    sprachabh\"angigen Bezeichner. Informationen zu Nutzung und %
+    Anpassungsm\"oglichkeiten sind in \autoref{sec:localization} zu finden.%
+  )%
+%</class>
+  \tud@index@print[elements]%
+  \tud@index@print[misc]%
+  \tud@index@print[files]%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@indexprologue
 % \end{macro}^^A \PrintIndex
 %
-% \begin{macro}{\PrintChangelog}
-% \begin{environment}{theindex}
-% Mit \cs{PrintChangelog} erfolgt die Ausgabe der Änderungsliste. Dabei ist zu 
-% beachten, dass die Einträge im Index bis zur vierten Ebene erfolgen.
-%    \begin{macrocode}
+% \iffalse
 %<*class>
-\newcommand*\PrintChangelog{%
+% \fi
+%
+% \begin{macro}{\PrintChanges}
+% Hiermit erfolgt die Ausgabe der Änderungsliste. Für jede Version wurde eine 
+% Indexdatei |\jobname-changes-|\meta{Version}|.ind| erstellt. Diese werden 
+% nachfolgend eingelesen.
+%    \begin{macrocode}
+\newcommand*\PrintChanges{%
   \begingroup%
+    \cleardoublepage%
+    \tud@index@check%
+    \bookmarksetup{startatroot}%
 %    \end{macrocode}
-% Die oberste Ebene enthält die Versionsnummer mit dem Präfix |v|. Diese Ebene
-% soll nicht als Indexeintrag selber sondern vielmehr als Überschrift der Ebene
-% \cs{subsection} genutzt werden. Dafür wird zum einen das durch das Paket
-% \pkg{imakeidx} definierte Makro \cs{lettergroup} \emph{unschädlich} gemacht,
-% zum anderen wird der Befehl \cs{item} so umdefiniert, dass dieser alles bis
-% zum nächsten Zeilenumbruch als Argument einliest. Alle darunter liegenden
-% \cs{item}-Befehle werden eine Ebene nach oben gehoben.
+% Jedes Element der obersten Ebene soll einen vertikalen Abstand erzeugen.
 %    \begin{macrocode}
-    \let\lettergroup\@gobble%
-    \apptocmd\theindex{%
-      \let\subsubsubitem\subsubitem%
-      \let\subsubitem\subitem%
-      \let\subitem\item%
-      \renewcommand*\item{%
-        \begingroup%
-          \escapechar=`\\%
-          \catcode\endlinechar=\active%
-          \csname\string\item\endcsname%
+    \def\tud@index@hook{%
+      \@tud@indextrue%
+      \def\indexspace{\tud@index@vskip}%
+      \def\item{%
+        \def\item{\tud@index@item[\tud@index@vskip]{0}}%
+        \tud@index@item{0}%
       }%
-      \begingroup%
-      \escapechar=`\\%
-      \lccode`\~=\endlinechar%
-      \lowercase{%
-        \expandafter\endgroup%
-        \expandafter\def\csname\string\item\endcsname##1~%
-      }{%
-        \endgroup%
-        \addsec[{##1}]{\TUDScript ##1}%
-        \tudhyperdef*{idx:changelog:##1}%
-        \def\@tempa{\indexname: \TUDScript ##1}%
-        \@mkboth{\@tempa}{\@tempa}%
-      }%
-    }{}{\tud@patch@wrn{theindex}}%
-%    \end{macrocode}
-% Mit der so angepassten \env{theindex}-Umgebung erfolgt die Ausgabe der 
-% Änderungshistorie.
-%    \begin{macrocode}
-    \clearpage%
-    \def\imki@indexlevel{\addchap}%
-    \tud@print@index[changelog]%
+    }%
+    \addchap{\changesname\label{idx:changes}}%
+    \def\do##1{\tud@index@print*[##1]<1>}%
+    \dolistloop{\tud@changes@list}%
   \endgroup%
 }
-%</class>
 %    \end{macrocode}
-% \end{environment}^^A theindex
-% \end{macro}^^A \PrintChangelog
+% \end{macro}^^A \PrintChanges
+%
+% \iffalse
+%</class>
+% \fi
 %
 % \subsection{Markup von \LaTeX-Elementen in der Dokumentation}
 % \subsubsection{Markup von Variablen, Parametern etc.}
@@ -1685,7 +1930,7 @@
 % unterbinden. Weiterhin verhindert der aktivierte Schalter bei der Ausführung 
 % von \cs{Process@Markup} das Erstellen von erweiterten Querverweisen sowie das 
 % Setzen von CTAN-Links bei Paketen (\cs{Package}), was weder in Verzeichnissen 
-% noch im Index erwünscht ist, weshalb vom Makro \cs{tud@print@index} ebenfalls
+% noch im Index erwünscht ist, weshalb vom Makro \cs{tud@index@print} ebenfalls
 % \cs{@tud@indextrue} gesetzt wird.
 %    \begin{macrocode}
 \tud@newif\if@tud@index
@@ -2673,8 +2918,8 @@
         \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
       }%
     }%
-    \@tempa\Distribution{\jobname}{dst}%
-    \@tempa\Format{\jobname}{fmt}%
+    \@tempa\Distribution{main}{dst}%
+    \@tempa\Format{main}{fmt}%
     \@tempa\Bundle{files}{bdl}%
     \@tempa\Class{files}{cls}%
     \@tempa\Package{files}{pkg}%
@@ -2694,7 +2939,7 @@
     \@tempa\PageStyle{elements}{pgs}%
     \@tempa\Font{elements}{font}%
     \@tempa\Color{elements}{clr}%
-    \@tempa\Application{\jobname}{app}%
+    \@tempa\Application{main}{app}%
     \@tempa\File{files}{fle}%
 %    \end{macrocode}
 % Nachdem alle Markup-Befehle lokal redefiniert wurden, wird der nun angegebene 
@@ -3298,11 +3543,11 @@
 % eine Formatierung des Schlüssels nicht notwendig.
 %    \begin{macrocode}
       \index[\tud@lbl@tmp-declare]{%
-        \tud@idx@val\tud@idx@key @\tud@idx@fmt|(declare%
+        \tud@idx@val\tud@idx@key @\tud@idx@fmt|(!%
       }%
     \else%
       \index[\tud@lbl@tmp-declare]{%
-        \tud@idx@val\tud@idx@key @\tud@idx@fmt|declare)%
+        \tud@idx@val\tud@idx@key @\tud@idx@fmt|!)%
       }%
     \fi%
 %    \end{macrocode}
@@ -3318,7 +3563,7 @@
 %<*class>
       \tud@if@strequal{#5}{declare}{%
         \appto\tud@lbl@tmp{-declare}%
-        \appto\tud@idx@fmt{|declare}%
+        \appto\tud@idx@fmt{|!}%
       }{%
         \appto\tud@idx@fmt{|#5}%
       }%
@@ -3967,6 +4212,7 @@
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\Changed@At@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
+% \begin{macro}{\tud@templist}
 % Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungen aus der 
 % Liste \cs{tud@changedat@list} in den Index~\val{changelog}. Der Befehl
 % \cs{Changed@At@CreateEntry} wird durch \cs{@printchangedatlist} aufgerufen
@@ -3976,6 +4222,8 @@
 % Argumente mit dem~-- durch das Paket \pkg{xparse} definierten~-- leeren Wert
 % \val{-NoValue-} an den Befehl \cs{Changed@At@@CreateEntry} übergeben.
 %    \begin{macrocode}
+\newcommand*\tud@templist{}
+\let\tud@templist\relax
 \NewDocumentCommand\Changed@At@CreateEntry{>{\SplitArgument{4}{!}}m}{%
   \Changed@At@@CreateEntry#1%
 }
@@ -4067,7 +4315,7 @@
 %    \end{macrocode}
 % Nachdem alles abgearbeitet wurde, wird der Indexeintrag erstellt.
 %    \begin{macrocode}
-      \index[changelog]{#1!#2!\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
+      \index[changes-#1]{#2!\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
 %    \end{macrocode}
 % Existiert das vierte Argument nicht, handelt es sich um einen allgemeinen 
 % Eintrag in der Änderungshistorie. Dieser wird direkt ausgeführt.
@@ -4077,16 +4325,17 @@
       \def\tud@idx@fmt{#3}%
       \tud@replace@@in\tud@idx@fmt{"=}{""=}%
       \tud@replace@@in\tud@idx@fmt{"~}{""~}%
-      \index[changelog]{#1!#2!\tud@idx@fmt}%
+      \index[changes-#1]{#2!\tud@idx@fmt}%
     }%
   }%
 %    \end{macrocode}
 % Außerdem wird der Liste \cs{tud@templist} die aktuelle Version einmalig 
 % hinzugefügt, um alle Versionsangaben in einer Randnotiz ausgeben zu können.
 %    \begin{macrocode}
-  \ifinlist{#1}{\tud@templist}{}{\listadd\tud@templist{#1}}%
+  tud@unique@add\tud@templist{#1}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@templist
 % \end{macro}^^A \Changed@At@@CreateEntry
 % \end{macro}^^A \Changed@At@CreateEntry
 %
@@ -4171,7 +4420,7 @@
       \marginnote{%
         \def\@tempa####1{%
           \ignorespaces%
-          \tudhyperref{idx:changelog:####1}{####1}%
+          \hyperref[idx:changes-####1]{####1}%
           \tabularnewline%
         }%
         \begin{tabular}{|l|}%
@@ -4317,8 +4566,8 @@
         \noexpand\subsection[nonumber=true]{%
           \expandonce\tud@res@a%
           \noexpand\label{\tud@lbl@tmp}%
-          \noexpand\index[changelog]{\tud@cessations@version!%
-            Allgemein!"!@\noexpand\hyperref[\tud@lbl@tmp]{%
+          \noexpand\index[changes-\tud@cessations@version]{%
+            Allgemein!""@\noexpand\hyperref[\tud@lbl@tmp]{%
               \unexpanded{Anpassungen gegen\"uber der vorhergehenden Version}%
             }%
           }%
