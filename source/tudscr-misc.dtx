@@ -914,117 +914,141 @@
 % \end{macro}^^A \seename
 %
 % \iffalse
-%<*class&manual>
+%<*manual>
 % \fi
 %
-% \subsection{Sortieren von Listen}
+% \subsection{Verarbeitung von Listen}
+%
+% \begin{macro}{\tud@unique@add}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@unique@eadd}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@unique@xadd}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@unique@csxadd}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\listeremove}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Ein wenig syntaktischer Zucker für Listen ohne Duplikate.
+% \ToDo{in manual prüfen, ob überall genutzt, wo sinnvoll}[v2.06]
+%    \begin{macrocode}
+\newcommand*\tud@unique@add[2]{%
+  \ifinlist{#2}{#1}{}{\listadd#1{#2}}%
+}
+\newcommand*\tud@unique@eadd[2]{%
+  \xifinlist{#2}{#1}{}{\listeadd#1{#2}}%
+}
+\newcommand*\tud@unique@xadd[2]{%
+  \xifinlist{#2}{#1}{}{\listxadd#1{#2}}%
+}
+\newcommand*\tud@unique@csxadd[2]{%
+  \xifinlistcs{#2}{#1}{}{\listcsxadd{#1}{#2}}%
+}
+\providerobustcmd*\listeremove[2]{%
+  \begingroup%
+    \edef\etb@tempa{\endgroup\unexpanded{\listremove#1}{#2}}%
+  \etb@tempa%
+}
+%    \end{macrocode}
+% \end{macro}^^A \listeremove
+% \end{macro}^^A \tud@unique@csxadd
+% \end{macro}^^A \tud@unique@xadd
+% \end{macro}^^A \tud@unique@eadd
+% \end{macro}^^A \tud@unique@add
+%
+% \subsubsection{Sortieren von Listen}
 %
 % \begin{macro}{\tud@list@sort}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\tud@list@@sort}
 % \changes{v2.02}{2014/07/25}{neu}^^A
-% \begin{macro}{\tud@templist}
+% \begin{macro}{\tud@list@@@sort}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@list@sorted}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % \begin{macro}{\if@tud@list@sorted}
 % \changes{v2.02}{2014/07/25}{neu}^^A
 % Der Befehl \cs{tud@list@sort} erwartet eine \pkg{etoolbox}-Liste und sortiert 
-% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge in eine 
-% kommagetrennte Auflistung. Diese wird anschließend wieder in eine
-% \pkg{etoolbox}-Liste umgewandelt.
+% diese mit dem Makro \cs{sort@list} in alphabetischer Reihenfolge.
 %    \begin{macrocode}
-\newcommand*\tud@templist{}
-\let\tud@templist\relax
+\tud@newif\if@tud@list@sorted
+\newcommand*\tud@list@sorted{}
 \newcommand*\tud@list@sort[1]{%
-  \let\tud@reserved#1%
-  \let\tud@templist\relax%
-  \forlistloop\tud@list@@sort{\tud@reserved}%
-  \let\tud@reserved\relax%
-  \@for\@tempa:=\tud@templist\do{\listeadd\tud@reserved{\@tempa}}%
-  \let#1\tud@reserved%
+  \begingroup%
+    \let\tud@list@sorted\@empty%
+    \forlistloop\tud@list@@sort{#1}%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@list@sorted}%
+    }%
+  \tud@res@c%
 }
 %    \end{macrocode}
 % Hier erfolgt die eigentliche Sortierung der Liste.
 %    \begin{macrocode}
-\tud@newif\if@tud@list@sorted
 \newcommand*\tud@list@@sort[1]{%
 %    \end{macrocode}
-% Der erste Eintrag wird direkt der Liste hinzugefügt.
-%    \begin{macrocode}
-  \ifx\tud@templist\relax%
-    \def\tud@templist{#1}%
-%    \end{macrocode}
-% Weitere Einräge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt.
-% Dabei wird die kommagetrennte Liste \cs{tud@templist} durchlaufen und
-% \cs{@tempb} als Hilfsmakro verwendet, in welches die aktuelle Liste innerhalb 
-% der \cs{@for}-Schleife stückweise expandiert wird. Wenn das aktuelle Element
-% an der dafür passenden Stelle eingesetzt wurde, wird \cs{if@tud@list@sorted} 
+% Die Einträge werden mit \cs{pdfstrcmp} an der richtigen Stelle eingefügt. 
+% Dabei wird die temporäre Liste \cs{tud@list@sorted} durchlaufen und 
+% \cs{tud@res@a} als Hilfsmakro verwendet, in welches die aktuelle Liste 
+% innerhalb der \cs{forlistloop}-Schleife stückweise expandiert wird. Wenn das 
+% aktuelle Element an der passenden Stelle eingesetzt wurde, wird der Rest von 
+% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt und  \cs{if@tud@list@sorted} 
 % gesetzt.
 %    \begin{macrocode}
-  \else%
-    \@tud@list@sortedfalse%
-    \let\@tempb\@empty%
-    \@for\@tempa:=\tud@templist\do{%
-%    \end{macrocode}
-% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
-% angehangen.
-% \ToDo{\cs{expandafter}\cs{edef}\cs{expandafter} ist quatsch, oder?}[v2.07]
-%    \begin{macrocode}
-      \if@tud@list@sorted%
-        \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-      \else%
-%    \end{macrocode}
-% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
-% durchlaufenenen Liste, so wird dieser davor eingefügt. Dabei muss der Fall, 
-% dass das Element der erste Eintrag in der temporären Liste \cs{@tempb} ist, 
-% eine Sonderbehandlung erfolgen. Anschließend wird \cs{@tud@list@sortedtrue} 
-% gesetzt.
-%    \begin{macrocode}
-        \expandafter\ifnum\pdf@strcmp{#1}{\@tempa}<\z@\relax%
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              #1,\@tempa%
-            }%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{%
-              \@tempb,#1,\@tempa%
-            }%
-          \fi%
-          \@tud@list@sortedtrue%
-        \else%
-%    \end{macrocode}
-% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
-% Liste, so wird dieser (noch) nicht eingefügt. Der Sonderfall des ersten
-% Elementes wird abgedeckt.
-%    \begin{macrocode}
-          \ifx\@tempb\@empty%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempa}%
-          \else%
-            \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,\@tempa}%
-          \fi%
-        \fi%
-      \fi%
-    }%
+  \@tud@list@sortedfalse%
+  \let\tud@res@a\@empty%
+  \forlistloop{\tud@list@@@sort\tud@res@a{#1}}{\tud@list@sorted}%
 %    \end{macrocode}
 % Wurde der Eintrag nach dem Durchlaufen der Liste nicht eingefügt, so erfolgt 
 % dies hier am Ende der Liste.
 %    \begin{macrocode}
-    \if@tud@list@sorted\else%
-      \expandafter\edef\expandafter\@tempb\expandafter{\@tempb,#1}%
-    \fi%
+  \if@tud@list@sorted\else%
+    \listadd\tud@res@a{#1}%
+  \fi%
 %    \end{macrocode}
-% Die temporäre Liste \cs{@tempb} wird auf \cs{tud@templist} überschrieben.
+% Die temporäre Liste \cs{tud@res@a} wird in \cs{tud@list@sorted} geschrieben.
 %    \begin{macrocode}
-    \let\tud@templist\@tempb%
+  \let\tud@list@sorted\tud@res@a%
+}
+%    \end{macrocode}
+% Das Makro für die eigentliche Sortierung.
+%    \begin{macrocode}
+\newcommand*\tud@list@@@sort[3]{%
+%    \end{macrocode}
+% Ist der Eintrag bereits erfolgt, wird der verbliebene Teil der Liste 
+% angehangen.
+%    \begin{macrocode}
+  \if@tud@list@sorted%
+    \listadd#1{#3}%
+  \else%
+%    \end{macrocode}
+% Liegt der Eintrag in alphabetischer Reihenfolge vor dem aktuellen der 
+% durchlaufenenen Liste, so wird dieser davor eingefügt. Anschließend wird 
+% \cs{@tud@list@sortedtrue} gesetzt.
+%    \begin{macrocode}
+    \ifnum\pdf@strcmp{#2}{#3}<\z@\relax%
+      \listadd#1{#2}%
+      \listadd#1{#3}%
+      \@tud@list@sortedtrue%
+    \else%
+%    \end{macrocode}
+% Ist Eintrag in alphabetischer Reihenfolge nach dem aktuellen der geprüften 
+% Liste, so wird dieser (noch) nicht eingefügt.
+%    \begin{macrocode}
+      \listadd#1{#3}%
+    \fi%
   \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \if@tud@list@sorted
-% \end{macro}^^A \tud@templist
+% \end{macro}^^A \tud@list@sorted
+% \end{macro}^^A \tud@list@@@sort
 % \end{macro}^^A \tud@list@@sort
 % \end{macro}^^A \tud@list@sort
 %
 % \iffalse
-%</class&manual>
+%</manual>
 % \fi
 %
 % \subsection{Stringmanipulation}
