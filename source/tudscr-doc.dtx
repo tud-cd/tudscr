@@ -981,6 +981,29 @@
 % Nachdem die Form der Referenzierung für \app{texindy} definiert wurde, müssen
 % die Einträge im Index auch entsprechend erstellt werden.
 %
+% \begin{macro}{\lettergroup}
+% \changes{v2.06p}{2022/09/04}{neu}^^A
+% \begin{macro}{\lettergroupDefault}
+% \changes{v2.06p}{2022/09/04}{neu}^^A
+% Durch \app{texindy} werden die sortierten Einträge anhand ihres ersten 
+% Buchstabens mit \cs{lettergroup} gruppiert. Einträge ohne Buchstaben an 
+% erster Position werden unter \cs{lettergroupDefault}|default| zu Beginn des 
+% Indexes aufgeführt.
+%    \begin{macrocode}
+\ifdefined\tudxdyflag
+\newcommand*\lettergroup[1]{%
+  \par%
+  \ifundef\belowpdfbookmark{}{%
+    \smash{\raisebox{2\baselineskip}{\belowpdfbookmark{#1}{theindex/#1}}}%
+  }%
+  \centerline{\normalsize\textbf{\textsf{#1}}}%
+  \par\smallskip\nopagebreak%
+}
+\newcommand*\lettergroupDefault[1]{\lettergroup{\tud@symbols@name}}
+\fi
+%    \end{macrocode}
+% \end{macro}^^A \lettergroupDefault
+% \end{macro}^^A \lettergroup
 % \begin{macro}{\tud@xdy@wrindex}
 % \changes{v2.06o}{2022/07/24}{neu}^^A
 % \begin{macro}{\tud@xdy@page@wrindex}
@@ -1209,8 +1232,6 @@
 % \changes{v2.05g}{2016/11/02}{neu}^^A
 % \begin{macro}{\tud@lst@@@sub}
 % \changes{v2.05g}{2016/11/02}{neu}^^A
-% \begin{macro}{\efil}
-% \changes{v2.05g}{2016/11/02}{neu}^^A
 % Falls für die Sortierung der Änderungsliste in \cls{tudscrdoc} \app{texindy}
 % zum Einsatz kommt, wird bei der Beschreibung von Einträgen oder Parametern
 % nur dann eine Unterebene verwendet, wenn zu einem Eintrag mehrere Angaben
@@ -1219,7 +1240,6 @@
 %    \begin{macrocode}
 \newcommand*\tud@lst@@sub{}
 \newcommand*\tud@lst@@@sub{}
-\newcommand*\efil{\hfil\nopagebreak}%
 \newcommand*\tud@lst@def{%
   \newcommand*\tud@lst@values{}%
   \tud@newif\if@tud@lst@multi%
@@ -1272,7 +1292,6 @@
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \efil
 % \end{macro}^^A \tud@lst@@@sub
 % \end{macro}^^A \tud@lst@@sub
 % \end{macro}^^A \tud@lst@@process
@@ -1470,7 +1489,7 @@
           \if@tempswa%
             \ShellEscape{%
               texindy\space%
-              -M \@currname-#2.xdy\space%
+              -M \@currname.\@currext-#2.xdy\space%
               \ifdefvoid\inputencodingname{%
                 -C\space utf8%
               }{%
