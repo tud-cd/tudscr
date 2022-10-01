@@ -1,0 +1,75 @@
+(require "texindy.xdy")
+(markup-index
+    :hierdepth 3
+    :open
+"
+\begin{theindex}
+"
+    :close
+"
+~n\end{theindex}
+"
+)
+(define-location-class "arabic-page-numbers"
+    ("arabic-numbers")
+    :min-range-length 1
+)
+(markup-range :sep "--")
+(merge-rule :eregexp
+    "\[(.*)\]"
+    ""
+)
+(markup-indexentry :depth 3
+    :open  "~n\subsubsubitem "
+)
+(markup-locclass-list
+    :open  "\,\dotfill\,"
+    :close "\relax"
+)
+(define-attributes (("!" "default") ("?" "default") ("default")))
+(markup-attribute-group-list :sep ", ")
+(markup-locref :attr "!"
+    :open  "\textbf{\hyperpage{"
+    :close "}}"
+)
+(markup-locref :attr "?"
+    :open  "\textit{\hyperpage{"
+    :close "}}"
+)
+(markup-locref :attr "default"
+    :open  "\hyperpage{"
+    :close "}"
+)
+(markup-crossref-list :class "see"
+    :open  "\cleversee "
+    :sep   "; "
+    :close "\\"
+)
+(markup-crossref-list :class "seealso"
+    :open  "\cleverseealso "
+    :sep   "; "
+    :close "\\"
+)
+(define-crossref-class "seeunverified" :unverified)
+(markup-crossref-list :class "seeunverified"
+    :open  "\cleversee "
+    :sep   "; "
+    :close "\\"
+)
+(define-crossref-class "seeidx" :unverified)
+(markup-crossref-list :class "seeidx"
+    :open  "\seeidx{"
+    :sep   "; "
+    :close "}"
+)
+(markup-crossref-layer-list :class "see"     :sep "\seesep ")
+(markup-crossref-layer-list :class "seealso" :sep "\seesep ")
+(define-location-class-order
+  (
+    "see" "seealso"
+    "seeidx" "seeunverified"
+    "roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"
+    "Roman-page-numbers" "Alpha-page-numbers"
+  )
+)
+
