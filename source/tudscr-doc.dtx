@@ -11,7 +11,7 @@
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, either version 1.3c of this license or
 %  any later version. The latest version of this license is in
-%    http://www.latex-project.org/lppl.txt
+%    https://www.latex-project.org/lppl.txt
 %  and version 1.3c or later is part of all distributions of
 %  LaTeX version 2008-05-04 or later.
 %
@@ -181,8 +181,8 @@
     \title{\file{\filename}}%
     \date{%
       \filedate%
-      \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
-      \ifdefvoid\filerevision{}{\nobreakspace\texttt{\filerevision}}%
+      \ifdefvoid\fileversion{}{~\fileversion}%
+      \ifdefvoid\filerevision{}{~\texttt{\filerevision}}%
     }%
   }{}%
   \CodelineIndex%
@@ -201,11 +201,14 @@
     }%
     \undef\filedate%
     \undef\fileversion%
-    \undef\filerevision%
     \undef\fileinfo%
+    \undef\filerevision%
+    \undef\filedir%
     \expandafter\GetFileInfo\expandafter{\filename}%
   }{}%
   \ifdefvoid\filerevision{\let\filerevision\@empty}{}%
+  \ifdefvoid\filedir{\let\filedir\@empty}{}%
+  \newcommand*\filepath{\ifdefvoid\filerevision{main}{\filerevision}/\filedir}%
   \expandafter\selectlanguage\expandafter{\languagename}%
 }
 %    \end{macrocode}
@@ -225,29 +228,21 @@
   \let\@oddhead\@empty%
   \let\@evenhead\@empty%
   \def\@oddfoot{%
-    File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
-    \nobreakspace\texttt{%
+    File\ifnum\c@part>\z@~\thepart\fi:~%
+    \texttt{%
       \ifdefvoid\filename{?}{%
-        \ifx\tud@github@url@base\relax%
-          \filename%
-        \else%
-          \ifdefvoid\filerevision{%
-            \GitHubRepo[\filename]<blob/main/\filename>%
-          }{%
-            \GitHubRepo[\filename]<blob/\filerevision/\filename>%
-          }%
-        \fi%
+        \ifdefvoid\tud@github@url@base%
+          {\filename}%
+          {\GitHubRepo'blob/\filepath\filename'[\filename]}%
       }%
     }%
-    \enskip Version:\nobreakspace\ifdefvoid\filedate{?}{\filedate}%
-    \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
+    \enskip Version:~\ifdefvoid\filedate{?}{\filedate}%
+    \ifdefvoid\fileversion{}{~\fileversion}%
     \ifdefvoid\filerevision{}{%
       \enskip\texttt{%
-        \ifx\tud@github@url@base\relax%
-          \filerevision%
-        \else%
-          \texttt{\GitHubRepo[\filerevision]<commit/\filerevision>}%
-        \fi%
+        \ifdefvoid\tud@github@url@base%
+          {\filerevision}%
+          {\texttt{\GitHubRepo'commit/\filerevision'[\filerevision]}}%
       }%
     }%
     \hfill\thepage%
@@ -330,7 +325,7 @@
 % Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
 % Index, Änderungsliste und Randnotizen.
 %    \begin{macrocode}
-\NewDocumentCommand{\tud@idx@typemarkup}{r()}{%
+\NewDocumentCommand\tud@idx@typemarkup{r()}{%
   \begingroup%
   \normalfont\scriptsize\space(#1)%
   \endgroup%
@@ -1012,11 +1007,11 @@
 %    \begin{macrocode}
 \ifdefined\tudxdyflag
 \newcommand*\lettergroup[1]{%
-  \ifundef\belowpdfbookmark%
-    {\expandafter\@gobbletwo}%
-    {\expandafter\belowpdfbookmark}%
-        {#1}{theindex/#1}%
-  \par\centerline{\normalsize\textbf{\textsf{#1}}}%
+  \par%
+  \ifundef\belowpdfbookmark{}{%
+    \smash{\raisebox{2\baselineskip}{\belowpdfbookmark{#1}{theindex/#1}}}%
+  }%
+  \centerline{\normalsize\textbf{\textsf{#1}}}%
   \par\smallskip\nopagebreak%
 }
 \newcommand*\lettergroupDefault[1]{\lettergroup{\tud@symbols@name}}
@@ -1114,6 +1109,13 @@
 % \app{makeindex} und \app{texindy} unterschieden. Für die Reihenfolge des 
 % Erscheinens der einzelnen Einträge wird das in |#2| angegebene Datum zur 
 % Sortierung genutzt.
+% \ToDo{
+%   Änderungsnotizen nach gültiger Version und Datum überprüfen, im Idealfall 
+%   mit der jeweiligen Release-Version (und vorhergehenden) abgleichen;
+%   Liste mit \cs{Release}\marg{\marg{\meta{Version}}\marg{\meta{Datum}}} und 
+%   daraus gültige Datumsbereiche bauen
+%   develop Version überall auf 2100/01/01
+% }[v2.06]
 %    \begin{macrocode}
 \renewcommand*\changes@[3]{%
   \ifnum\@parse@version@1993/01/01\@nil<\expandafter\@parse@version@#2//00\@nil%

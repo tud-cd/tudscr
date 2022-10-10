@@ -29,13 +29,13 @@ set sourceinput="\def\tudfinalflag{}\input{tudscrsource.tex}"
 set docinput="\def\tudfinalflag{}\input{tudscr.tex}"
 set docprintinput="\def\tudfinalflag{}\def\tudprintflag{}\input{tudscr.tex}"
 cd source
-pdflatex --shell-escape %sourceinput%
+pdflatex --recorder --shell-escape %sourceinput%
 cd ..
 xcopy source temp\ /s
 cd temp
 call clearsource.bat
 del clearsource.bat
-xcopy ..\source\tudscr-gitinfo-ver.aux .
+xcopy ..\source\tudscr-gitinfo.cfg .
 cd doc
 call cleardoc.bat
 del  cleardoc.bat
@@ -61,6 +61,7 @@ mkdir source\latex\tudscr
 move     doc                  source\latex\tudscr\doc
 copy     *.dtx                source\latex\tudscr\
 copy     tudscr.ins           source\latex\tudscr\
+copy     tudscr-gitinfo.cfg   source\latex\tudscr\
 copy     tudscrsource.tex     source\latex\tudscr\
 mkdir doc\latex\tudscr\tutorials
 copy     ..\*.md              doc\latex\tudscr\
@@ -69,7 +70,7 @@ echo =========================================================================
 echo  Erzeugen der Quelltextdokumentation
 echo =========================================================================
 echo.
-pdflatex --shell-escape %sourceinput%
+pdflatex --recorder --shell-escape %sourceinput%
 pdflatex %sourceinput%
 pdflatex %sourceinput%
 pdflatex --shell-escape %sourceinput%
@@ -80,11 +81,10 @@ echo =========================================================================
 echo  Erzeugen des Benutzerhandbuchs
 echo =========================================================================
 echo.
-pdflatex %docinput%
 pdflatex --shell-escape %docinput%
 pdflatex %docinput%
 pdflatex --shell-escape %docinput%
-pdflatex %docinput%
+pdflatex --shell-escape %docinput%
 pdflatex %docprintinput%
 copy tudscr.pdf tudscr_print.pdf
 pdflatex %docinput%

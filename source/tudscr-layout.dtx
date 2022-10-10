@@ -11,7 +11,7 @@
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, either version 1.3c of this license or
 %  any later version. The latest version of this license is in
-%    http://www.latex-project.org/lppl.txt
+%    https://www.latex-project.org/lppl.txt
 %  and version 1.3c or later is part of all distributions of
 %  LaTeX version 2008-05-04 or later.
 %
@@ -760,7 +760,6 @@
 % \subsection{Umsetzung des Layouts}
 %
 % \begin{macro}{\tud@sec@fontface}
-% \changes{v2.05}{2016/04/04}{Optionales Argument für \pkg{tudscrcomp}}^^A
 % \changes{v2.06}{2018/08/20}{extra-fette Überschriften möglich}^^A
 % \changes{v2.06o}{2022/08/02}{Überschrifen im \CD ohne aktive
 %   Fließtextschriften möglich}^^A
@@ -776,9 +775,8 @@
 % \ToDo{Auf neues NFSS anpassen, \cs{fontseriesforce} überprüfen}[v2.07]
 %    \begin{macrocode}
 %<package&fixfonts>\AfterPackage{tudscrfonts}{%
-\newcommand*\tud@sec@fontface[1][]{\tud@sec@@fontface{#1}}%
-\newcommand*\tud@sec@@fontface[1]{%
-  \sectfont#1%
+\newcommand*\tud@sec@fontface{\tud@sec@@fontface}
+\newcommand*\tud@sec@@fontface{%
   \if@tud@cdfont@active%
     \if@tud@heavyheadings%
       \if@tud@x@mweights@enabled%
@@ -786,16 +784,16 @@
         \edef\bfseries@sf{\tud@cdfont@ebf}%
         \edef\bfseries@tt{\tud@ttfont@ebf}%
       \fi%
-      \let\bfdefault\tud@cdfont@ebf%
+      \edef\bfdefault{\tud@cdfont@ebf}%
       \fontseriesforce{\tud@cdfont@ebf}%
     \fi%
   \else%
     \tud@if@v@lower{2.06}{}{%
       \fontfamily{\tud@cdfont@fam}%
       \if@tud@heavyheadings%
-        \let\bfdefault\tud@cdfont@ebf%
+        \edef\bfdefault{\tud@cdfont@ebf}%
       \else%
-        \let\bfdefault\tud@cdfont@bf%
+        \edef\bfdefault{\tud@cdfont@bf}%
       \fi%
       \fontseriesforce{\bfdefault}%
     }%
@@ -808,9 +806,9 @@
 % dies per Option auch deaktiviert werden.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
-  \renewcommand*\tud@sec@fontface[1][]{%
+  \renewcommand*\tud@sec@fontface{%
     \if@tud@cdoldfont@nodin%
-      \tud@sec@@fontface{#1}%
+      \tud@sec@@fontface%
     \else%
       \tud@db\tud@raggedright%
     \fi%
@@ -866,7 +864,7 @@
 % Für die alten Schriften hat der Befehl eine erweiterte Funktionalität, wenn 
 % die Schriftfamilie \DIN aktiv ist, welche für Überschriften einzusetzen ist.
 % Das \CD verlangt dabei, dass zwingend Majuskeln zu verwenden sind. Hierfür 
-% wird der Befehl \cs{MakeUppercase} aus dem \LaTeX"~Kernel genutzt.
+% wird der Befehl \cs{MakeUppercase} aus dem \Lettering{LaTeXe}"~Kernel genutzt.
 %    \begin{macrocode}
 \if@tud@cdoldfont@active
   \def\tud@sec@@@@format#1{\tud@ifdin{\MakeUppercase{#1}}{#1}}%
@@ -1382,7 +1380,7 @@
   \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
-  \KOMAoptions{titlepage=false}%
+  \TUD@KOMAoptions{titlepage=false}%
   \null\vskip-1\baselineskip%
   \addtokomafont{disposition}{\tud@color{\tud@part@fontcolor}}%
   \addtokomafont{dictum}{\tud@color{\tud@part@fontcolor}}%
@@ -1401,7 +1399,7 @@
   \ifnum\tud@abstract@level@num>\@ne\relax% sec/chap
     \renewcommand*\tud@abstract@level@num{1}%
   \fi%
-  \KOMAoptions{titlepage=false}%
+  \TUD@KOMAoptions{titlepage=false}%
   \null\vskip-1\baselineskip%
 %    \end{macrocode}
 % Die Farb- und Schrifteinstellungen sind nur für reine Kapitelseiten notwendig.

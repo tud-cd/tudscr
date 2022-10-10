@@ -11,7 +11,7 @@
 %  This work may be distributed and/or modified under the conditions of the
 %  LaTeX Project Public License, either version 1.3c of this license or
 %  any later version. The latest version of this license is in
-%    http://www.latex-project.org/lppl.txt
+%    https://www.latex-project.org/lppl.txt
 %  and version 1.3c or later is part of all distributions of
 %  LaTeX version 2008-05-04 or later.
 %
@@ -97,16 +97,17 @@
     \expandafter\IfFileExists\expandafter{\tud@res@a}{}{%
       \eappto\tud@res@b{%
         \noexpand\tud@xdy@@create%
+          {#1}%
           {the\IfBooleanTF{#1}{glossary}{index}}%
           {\tud@res@a}%
       }%
     }%
   \tud@res@b%
 }
-\newcommand*\tud@xdy@@create[2]{%
-  \immediate\openout\tud@xdy@write=#2\relax%
+\newcommand*\tud@xdy@@create[3]{%
+  \immediate\openout\tud@xdy@write=#3\relax%
 %    \end{macrocode}
-% Als erstes wird das \LaTeX-Standardmodul geladen.
+% Als erstes wird das \Lettering{LaTeX}-Standardmodul geladen.
 %    \begin{macrocode}
   \immediate\write\tud@xdy@write{(require "texindy.xdy")}%
 %    \end{macrocode}
@@ -119,7 +120,7 @@
     \@spaces:hierdepth 3^^J%
     \@spaces:open^^J%
     "^^J%
-    \string\begin{#1}^^J%
+    \string\begin{#2}^^J%
 %<*doc>
     \space\space\string\makeatletter\@percentchar^^J%
     \space\space\string\scan@allowedfalse\@percentchar^^J%
@@ -130,12 +131,12 @@
 % Außerdem werden mit \cs{tud@lst@def} die benötigten Befehle zur selektiven 
 % Anzeige der Änderungseinträge erstellt.
 %    \begin{macrocode}
-\if@tud@res@swa
+\IfBooleanT{#1}{%
     \space\space\string\newcommand*\string\@lettergroup{}\@percentchar^^J%
     \space\space\string\def\string\@lettergroup\@hashchar1\string\relax%
         {\string\lettergroup{\@hashchar1}}\@percentchar^^J%
     \space\space\string\tud@lst@def\@percentchar^^J%
-\fi
+}%
 %</doc>
 %    \end{macrocode}
 % Der Abschluss der Umgebungsdefinition.
@@ -143,7 +144,7 @@
     "^^J% /open
     \@spaces:close^^J%
     "^^J%
-    \string~n\string\end{#1}^^J%
+    \string~n\string\end{#2}^^J%
     "^^J% /close
     )^^J%
 %    \end{macrocode}
@@ -191,8 +192,8 @@
 %    \begin{macrocode}
 %^^A  (require "ff-ranges.xdy")^^J%
 %    \end{macrocode}
-% Bereiche mit mehr als zwei Seitenzahlen werden zusammengefasst, wobei als
-% Trennzeichen ein Halbgeviertstrich verwendet wird.
+% Seitenzahlbereiche werden zusammengefasst, wobei als Trennzeichen ein 
+% Halbgeviertstrich verwendet wird.
 %    \begin{macrocode}
     (define-location-class "arabic-page-numbers"^^J%
     \@spaces("arabic-numbers")^^J%
@@ -226,7 +227,7 @@
 % genutzt werden.
 %    \begin{macrocode}
 %<*!doc>
-%^^A    (merge-rule "\\Logo\{(.*)\}" "/1" :eregexp)^^J%
+%^^A    (merge-rule "\\Lettering\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\texttt\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\textsbn\{(.*)\}" "/1" :eregexp)^^J%
 %^^A    (merge-rule "\\textsbi\{(.*)\}" "/1" :eregexp)^^J%
@@ -247,7 +248,7 @@
 % |letter-group| unterdrückt und die erste Ebene dafür verwendet wird. 
 %    \begin{macrocode}
 %<*doc>
-\if@tud@res@swa
+\IfBooleanTF{#1}{%
     (markup-letter-group^^J%
     \@spaces:open-head\space\space%
       "\string~n\space\space\string\@gobble\@charlb"^^J%
@@ -329,12 +330,12 @@
 %    \end{macrocode}
 % Für den Index aller Eintragstypen ist nur auf zu leere \cs{hbox} zu achten.
 %    \begin{macrocode}
-\else
+}{%
     (markup-indexentry-list :depth 1^^J%
     \@spaces:open\space\space%
       "\string\hfil\string\nopagebreak"^^J%
     )^^J%
-\fi
+}%
 %</doc>
 %    \end{macrocode}
 % Punkte zwischen Eintrag und Seitenzahl. Das schließende \cs{relax} wird für 
@@ -452,7 +453,6 @@
 % Um Querverweise ohne Prüfung des Zieleintrags erzeugen zu können, wird der 
 % passende Typ |seeunverified| definiert.
 %    \begin{macrocode}
-%<*class>
     (define-crossref-class "seeunverified" :unverified)^^J%
     (markup-crossref-list :class "seeunverified"^^J%
     \@spaces:open\space\space%
@@ -477,7 +477,6 @@
     \@spaces:close\space%
       "\@charrb"^^J%
     )^^J%
-%</class>
 %    \end{macrocode}
 % Werden mit \verb+|see+\marg{Eintrag!Untereintrag} gezielte Querverweise auf
 % Untereinträge im Index erstellt, so werden diese nicht standardmäßig mit 
@@ -499,9 +498,7 @@
     (define-location-class-order^^J%
     \space\space(^^J%
     \@spaces"see" "seealso"^^J%
-%<*class>
     \@spaces"seeidx" "seeunverified"^^J%
-%</class>
     \@spaces"roman-page-numbers" "arabic-page-numbers" "alpha-page-numbers"^^J%
     \@spaces"Roman-page-numbers" "Alpha-page-numbers"^^J%
     \space\space)^^J%
