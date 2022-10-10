@@ -263,31 +263,27 @@
   partopsep=0pt,noitemsep%
 }
 %    \end{macrocode}
-% \begin{macro}{\stditem}
-% \begin{macro}{\tud@before@item}
-% Mit den Möglichkeiten des Paketes \pkg{enumitem} werden folgend Listen für 
-% das Aufführen von möglichen Werten einer Option sowie der Beschreibung von 
-% nützlichen Paketen erstellt. Für beide Listen soll dabei die originale 
-% Definition von \cs{item} in \cs{stditem} gesichert und anschließend angepasst
-% werden. Die Sicherung und Redefinition von \cs{item} erfolgt dabei über das 
-% Makro \cs{tud@before@item} über einen bereitgestellten \emph{hook} zu Beginn
-% der jeweiligen Liste.
+% \begin{macro}{\tud@list@create}
+% \changes{v2.06p}{2021/10/04}{neu}^^A
+% Erstellen zusätzlicher Listenumgebungen mit vordefinierten Einstellungen. Für 
+% die Verwendung des Stils |style=nextline| wird durch |labelwidth=0pt| und 
+% |labelsep=0pt| sichergestellt, dass auch nach sehr kurzen Labeln direkt ein 
+% Umbruch erfolgt. Weiterhin sorgt |midpenalty=-\@medpenalty| für bevorzugte
+% Umbrüche vor einem \cs{item} anstatt diese innerhalb des Textes auszuführen.
 %    \begin{macrocode}
-\newcommand*\stditem{}
-\newcommand*\tud@before@item[1]{%
-  \ifdefvoid\stditem{%
-    \let\stditem\item%
-    \letcs\item{tud@item@#1}%
-%    \end{macrocode}
-% Damit die Änderungsnotizen in der passenden vertikalen Position erscheinen, 
-% wird die Länge \cs{tud@dim@changedatvskip} entsprechend angepasst.
-%    \begin{macrocode}
-    \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
-  }{}%
+\newcommand*\tud@list@create[4][]{%
+  \newlist{#2}{#3}{#4}%
+  \setlist[{#2}]{%
+    font=\normalfont,%
+    topsep=\smallskipamount,parsep=\parskip,listparindent=\parindent,%
+    style=nextline,%
+    leftmargin=2.5em,itemindent=-2em,labelwidth=0pt,labelsep=0pt,%
+    midpenalty=-\@medpenalty,%
+    #1%
+  }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@before@item
-% \end{macro}^^A \stditem
+% \end{macro}^^A \tud@list@create
 %
 % \subsubsection{Grafiken \& Co.}
 %
@@ -3080,11 +3076,15 @@
   \if@tud@declare%
     \if@tud@openindex%
       \IfValueT{#6}{%
-        \ClassWarning{tudscrmanual}{%
-          It is not possible to use any cross-reference\MessageBreak%
-          shorthand like '#6' within the arguments\MessageBreak%
-          of the environment `Declaration'%
-        }%
+        \@tud@res@swatrue
+        \IfValueT{#5}{\tud@if@strequal{#6}{url}{\@tud@res@swafalse}{}}%
+        \if@tud@res@swa
+          \ClassWarning{tudscrmanual}{%
+            It is not possible to use any cross-reference\MessageBreak%
+            shorthand like '#6' within the arguments\MessageBreak%
+            of the environment `Declaration'%
+          }%
+        \fi
       }%
 %    \end{macrocode}
 % Für ein eventuell notwendiges Debugging, wird \cs{Process@@MarkupDeclare} mit
@@ -5101,217 +5101,329 @@
 %
 % \subsubsection{Auflistung gültiger Werte von Optionen und Parametern}
 %
-% \begin{environment}{values}
-% \begin{environment}{@values}
-% \begin{macro}{\tud@values}
-% Die Liste \env{@values} dient zum Benennen der möglichen Werte für einen 
-% bestimmten Schlüssel. Im Handbuch kommt diese Liste vor allem bei Optionen 
-% aber ggf. auch bei bestimmten Befehls- und Optionsparametern zum Einsatz. 
-% Diese wird in der Umgebung \env{values} eingebettet, damit zum einen ein 
-% \emph{obligatorisches} Argument verwendet werden kann und zum anderen 
-% \emph{nach} diesem ein optionales für die Liste selbst verwendbar ist. Das 
-% obligatorische Argument wird in \cs{tud@values} gesichert und sollte die 
-% genauer zu beschreibende Option bzw. das Makro etc. enthalten.
-% \ToDo{grab body; optional öffnenden und schließenden Indexexintrag}[v2.06]
+% \begin{environment}{DeclareValues}
+% \begin{macro}{\tud@val@index}
+% \changes{v2.06p}{2022/10/09}{neu}^^A
+% \begin{macro}{\tud@val@declare}
+% \changes{v2.06p}{2022/10/09}{neu}^^A
+% Die Umgebung \env{DeclareValues} dient zum Benennen möglicher Werte für 
+% einen bestimmten Schlüssel. Im Handbuch kommt diese Liste vor allem bei 
+% Optionen aber ggf. auch bei bestimmten Befehls- und Optionsparametern zum 
+% Einsatz. Diese ummantelt die Liste \env{Declare@Values}, damit zum einen 
+% ein optionales Argument für Indexeinträge zum Einsatz kommen kann~-- das 
+% Vorgehen ist äquivalent zu \cs{tud@declare@index}~-- und zum anderen wird die
+% zu beschreibende Option bzw. das Makro im \emph{obligatorischen} Argument 
+% angegeben werden kann und in \cs{tud@val@declare} gesichert wird.
 %    \begin{macrocode}
-\newcommand*\tud@values{}
-\NewDocumentEnvironment{values}{m !o}{%
-  \def\tud@values{#1}%
-  \IfValueTF{#2}{\@values[{#2}]}{\@values}%
+\newcommand*\tud@val@index{}
+\AddToHook{shipout/after}{\tud@val@index}
+\newcommand*\tud@val@declare{}
+\NewDocumentEnvironment{DeclareValues}{o m}{%
+  \begin{Declare@Values}%
+  \let\tud@val@index\@empty
+  \IfValueT{#1}{%
+    \tud@index@csv\tud@val@index{#1}%
+    \tud@val@index%
+  }%
+  \def\tud@val@declare{#2}%
 }{%
-  \end@values%
+  \ifvmode\removelastskip\else\@killglue\fi
+  \tud@val@index%
+  \end{Declare@Values}%
 }
-\newlist{@values}{description}{1}
-\setlist[@values]{%
-  topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
-  font=\normalfont,parsep=\parskip,listparindent=\parindent,%
-  before=\tud@before@item{values}%
+\NoIndentAfterEnv{DeclareValues}
+%    \end{macrocode}
+% \end{macro}^^A \tud@val@declare
+% \end{macro}^^A \tud@val@index
+% \end{environment}^^A DeclareValues
+% \begin{environment}{Declare@Values}
+% \begin{macro}{\itemval}
+% \begin{macro}{\tud@val@item}
+% \begin{macro}{\tud@val@before}
+% \begin{macro}{\tud@val@format}
+% \changes{v2.06p}{2022/10/09}{neu}^^A
+% \begin{macro}{\tud@val@main}
+% \changes{v2.06p}{2022/10/09}{neu}^^A
+% \begin{macro}{\tud@val@addon}
+% \changes{v2.06p}{2022/10/09}{neu}^^A
+% Innerhalb von \env{DeclareValues} kann mit \cs{itemval} das resultierende 
+% Verhalten für die Wertzuweisung an eine Option respektive einen Parameter 
+% beschrieben werden. Mit der Sternversion lässt sich dabei die Einstellung 
+% für den Säumniswert hervorheben.
+% \ToDo{Änderungsnotizen über Argument auf gleiche Höhe wie Label}[v2.06]
+%    \begin{macrocode}
+\newcommand*\itemval{}
+\AtBeginDocument{\undef\itemval}
+\newcommand*\tud@val@before{%
+  \let\itemval\tud@val@item%
+  \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
 }
+\tud@list@create[before=\tud@val@before]{Declare@Values}{description}{1}
 %    \end{macrocode}
-% \end{macro}^^A \tud@values
-% \end{environment}^^A @values
-% \end{environment}^^A values
-% \begin{macro}{\tud@item@values}
-% Das Makro \cs{tud@item@values} ersetzt in der Umgebung \env{values} die 
-% originale Definiton von \cs{item}. Die Sternversion kann dabei verwendet 
-% werden, um die Einstellung für den Säumniswert hervorzuheben. Im ersten 
-% optionalen Argument können die möglichen Werte einer Option oder eines 
-% Parameters angegeben werden. Sind mehrere Werte gleichbedeutende Werte
-% verwendbar, so sind diese durch |/| zu trennen. Dabei wird der als erstes
-% angegebene Wert für den Untereintrag in den Index verwendet. Das zweite
-% optionale Argument kann genutzt werden, falls beispielsweise für
-% unterschiedliche Klassen sich der Säumniswert unterscheidet. Das letzte 
-% optionale Argument in runden Klammern fügt zum Schluss einen ergänzenden 
-% Eintrag hinzu.
+% Im obligatorischen Argument können die möglichen Werte 
+% einer Option oder eines Parameters angegeben werden. Sind mehrere Werte
+% gleichbedeutend verwendbar, so sind diese mit Komma zu trennen, wobei der 
+% erste angegebene Wert für den Untereintrag in den Index verwendet wird. Das 
+% erste optionale Argument kann genutzt werden, falls sich der Säumniswert
+% beispielsweise für eine Klasse unterscheidet.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@item@values{s o o d()}{%
-  \begingroup%
+\NewDocumentCommand\tud@val@item{s m d() d<>}{%
+  \begingroup
 %    \end{macrocode}
-% Die ggf. durch Schrägstrich getrennte Liste im optionalen Argument wird 
-% abgearbeitet. Der erste Eintrag wird für den Indexeintrag benötigt und in
-% \cs{tud@res@b} gesichert, alle weiteren Einträge werden in \cs{tud@res@c}
-% gespeichert und lediglich im Fließtext aufgelistet.
+% Zunächst werden die Werte aus dem obligatorischen Argument formatiert. Der 
+% erste Eintrag wird für den Indexeintrag benötigt und in \cs{tud@val@main} 
+% gesichert, alle weiteren Einträge werden formatiert in 
+% \cs{tud@val@addon} gespeichert und lediglich im Fließtext aufgelistet.
 %    \begin{macrocode}
-    \in@{/}{#3}%
-    \ifin@%
-      \def\tud@res@a##1/##2\@nil{%
-        \def\tud@res@b{##1}%
-        \def\tud@res@c{\PValue{/##2}}%
-      }%
-      \tud@res@a#3\@nil%
-    \else%
-      \def\tud@res@b{#3}%
-      \let\tud@res@c\@empty%
-    \fi%
+    \tud@val@format\tud@val@main\tud@val@addon{#1}{#2}%
 %    \end{macrocode}
-% Jetzt beginnt die Formatierung der Ausgabe. Wurde die Sternversion genutzt, 
-% so werden die extrahierten Werte als Säumniswert mit \cs{emph} hervorgehoben.
-% Danach wird die zu beschreibende Option in \cs{tud@res@a} expandiert. Danach 
-% wird der erste Wert angehangen. Zuletzt wird mit \cs{InlineDeclaration*} 
-% dafür Sorge getragen, dass auf den erzeugten Eintrag selbst kein Hyperlink
-% erzeugt wird und dieser im passenden Index als fettmarkierter Eintrag
-% erscheint.
+% Erstellen des Säumniswertes aus optionalen Argumenten.
 %    \begin{macrocode}
-    \protected@edef\tud@res@b{#2{\tud@res@b}}%
-    \ifx\tud@res@c\@empty\else%
-      \protected@edef\tud@res@c{#2{\tud@res@c}}%
-    \fi%
-    \protected@edef\tud@res@a{\tud@values}%
-    \eappto\tud@res@a{=\expandonce\tud@res@b=}%
-%    \end{macrocode}
-% Zuletzt erfolgt die Auszeichnung, ob es sich bei den gelisteten Werten um 
-% Säumniswerte handelt, gefolgt vom optionalen Suffix.
-%    \begin{macrocode}
-    \let\tud@res@b\@empty%
-    \IfBooleanTF{#1}{%
-      \appto\tud@res@b{\suffix{S\"aumniswert}}%
+    \let\tud@res@d\@empty%
+    \IfValueTF{#3}{%
+      \appto\tud@res@d{\suffix{S\"aumniswert f\"ur #3}}%
     }{%
-      \IfValueT{#4}{\appto\tud@res@b{\suffix{S\"aumniswert f\"ur #4}}}%
+      \IfBooleanT{#1}{\appto\tud@res@d{\suffix{S\"aumniswert}}}%
     }%
-    \IfValueT{#5}{\appto\tud@res@b{\suffix{#5}}}%
+    \IfValueT{#4}{\appto\tud@res@d{\suffix{#4}}}%
 %    \end{macrocode}
-% Die in \cs{tud@res@a} gespeicherte, zu beschreibende Option und der erste im 
-% optionalen Argument angegebene Wert werden verwendet, um ein diese zu 
-% deklarieren. Die restlichen Werte sowie mögliche Suffixe werden für die 
-% Ausgabe angehängt.
+% Die in \cs{tud@val@declare} gespeicherte, zu beschreibende Option bzw. Makro 
+% etc. und der erste im optionalen Argument angegebene Wert werden verwendet, 
+% um ein Label zu erstellen.
+%    \begin{macrocode}
+    \tud@lbl@get@curr*\tud@lbl@tmp%
+      {\tud@bdl@curr:\tud@val@declare}=\tud@val@main=%
+%    \end{macrocode}
+% Jetzt beginnt die Formatierung der Ausgabe. Zuerst wird die zu beschreibende 
+% Option in \cs{@tempa} expandiert. Danach wird der erste Wert angehangen, 
+% wobei dieser für die Sternversion als Säumniswert mit \cs{emph} hervorgehoben 
+% wird. Zuletzt wird dafür Sorge getragen, dass auf den anschließend erzeugten 
+% Eintrag selbst kein Hyperlink erzeugt wird und dieser im passenden Index als 
+% fettmarkierter Eintrag erscheint.
+%    \begin{macrocode}
+    \edef\tud@res@a{\expandonce\tud@val@declare}%
+    \protected@eappto\tud@res@a{%
+      =\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\tud@val@main}=%
+    }%
+    \appto\tud@res@a{'none'|!|}%
+%    \end{macrocode}
+% Abschließend erfolgt die Ausgabe des generierten Eintrags mit \cs{item}. 
 %    \begin{macrocode}
     \edef\tud@res@a{%
-      \noexpand\InlineDeclaration*{\expandonce\tud@res@a}%
-      \expandonce\tud@res@c\expandonce\tud@res@b%
-    }%
-%    \end{macrocode}
-% Abschließend erfolgt die Ausgabe des generierten Eintrags mit dem originalen
-% Makro \cs{stditem}.
-%    \begin{macrocode}
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\stditem[{\expandonce\tud@res@a}]%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@item@values
-% \begin{macro}{\itemtrue}
-% \begin{macro}{\itemfalse}
-% \begin{macro}{\tud@item@bool}
-% Die folgenden beiden Befehle sind äquivalent zu \cs{tud@item@values} genutzt 
-% werden. Diese enthalten allerdings im optionalen Argument zumindest die
-% Standardwerte für positive bzw. negative boolesche Schalter. Diese werden 
-% durch den Befehl \cs{item@bool} gesetzt.
-%    \begin{macrocode}
-\NewDocumentCommand\itemtrue{!s !o !o !d()}{%
-  \item@bool{#1}{true/on/yes}[{#2}][{#3}](#4)%
-}
-\NewDocumentCommand\itemfalse{!s !o !o !d()}{%
-  \item@bool{#1}{false/off/no}[{#2}][{#3}](#4)%
-}
-%    \end{macrocode}
-% Der Befehl \cs{item@bool} setzt je nach angegebenen Argumenten über ein
-% token-Register den auszuführenden \cs{item}-Befehl zusammen.
-%    \begin{macrocode}
-\NewDocumentCommand\item@bool{m m r[] r[] r()}{%
-  \toks@{\item}%
-  \IfBooleanT{#1}{\addto@hook\toks@{*}}%
-%    \end{macrocode}
-% Die optionalen Werte werden im Zweifel den booleschen Standardwerten 
-% angehängt und als einziges optionales Argument an \cs{item} übergeben.
-%    \begin{macrocode}
-  \protected@edef\@tempa{#2\IfValueT{#3}{/#3}}%
-  \addto@hook@expandafter\toks@{\expandafter[\@tempa]}%
-  \IfValueT{#4}{\addto@hook\toks@{[{#4}]}}%
-  \IfValueT{#5}{\addto@hook\toks@{(#5)}}%
-  \the\toks@%
-}
-%    \end{macrocode}
-% \end{macro}^^A \itemfalse
-% \end{macro}^^A \itemtrue
-% \end{macro}^^A \tud@item@bool
-%
-% \subsubsection{Kurzbeschreibung von Paketen}
-%
-% \begin{environment}{packages}
-% \begin{macro}{\tud@item@packages}
-% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
-% Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
-% Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
-% speziell gekennzeichnet.
-%    \begin{macrocode}
-\newlist{packages}{description}{2}
-\setlist[packages]{%
-  topsep=\smallskipamount,labelwidth=\linewidth,labelsep=0pt,%
-  font=\normalfont,parsep=\parskip,listparindent=\parindent,%
-  before=\tud@before@item{packages}%
-}
-%    \end{macrocode}
-% Hiermit können ein oder mehrere Pakete erläutert werden. Des Weiteren werden 
-% Textanker definiert, auf die im Zweifelsfall in der Dokumentation verlinkt 
-% wird.
-% \ToDo{grab body; optional öffnenden und schließenden Indexexintrag}[v2.06]
-%    \begin{macrocode}
-\NewDocumentCommand\tud@item@packages{r[] !d() !d<>}{%
-%    \end{macrocode}
-% Die kommagetrennte Liste im optionalen Argument wird verwendet, um jedes
-% einzelne Paket zu deklarieren und einen dazugehörigen Textanker zu erzeugen. 
-% Die runden Klammern können genutzt werden, um das Bundle (Label, Index etc.)
-% für das Paket zu definieren. Das optionale Argument in Guillemets kann
-% genutzt werden, um \emph{alle} gelisteten Pakete auf den gleichen CTAN-Link
-% zielen zu lassen. Dies ist beispielsweise für mehrere Pakete aus dem gleichen
-% Bundle sinnvoll.
-%    \begin{macrocode}
-  \begingroup%
-    \let\tud@res@a\@empty%
-    \def\tud@res@b##1{%
-      \eappto\tud@res@a{%
-        ,\noexpand\InlineDeclaration{%
-          \noexpand\Package{##1}%
-          \IfValueT{#2}{\unexpanded{(#2)}}%
-          \IfValueT{#3}{<#3>}%
-        }%
-      }%
-    }%
-    \forcsvlist\tud@res@b{#1}%
-%    \end{macrocode}
-% Die Deklarationen werden durchgeführt und ausgegeben. Dabei muss das führende 
-% Komma zuvor ignoriert werden.
-%    \begin{macrocode}
-    \edef\tud@res@a{%
-      \endgroup%
-      \noexpand\stditem[{%
-        \expandafter\expandafter\expandafter\@gobble\expandonce\tud@res@a%
+      \endgroup
+      \noexpand\item[{%
+        \noexpand\tudhyperdef{\tud@lbl@tmp}%
+        \expandonce\tud@res@a\expandonce\tud@val@addon\expandonce\tud@res@d%
       }]%
     }%
   \tud@res@a%
+  \strut\ignorespaces%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@item@packages
-% \end{environment}^^A packages
+% Mit diesem Makro wird die kommaseparierte Liste möglicher Werte im letzten 
+% Argument formatiert.
+%    \begin{macrocode}
+\newcommand*\tud@val@format[4]{%
+  \begingroup
+    \let\tud@res@d\@empty%
+    \protected@edef\tud@res@a{#4}%
+%    \end{macrocode}
+% Die kommaseparierte Liste wird nach boolschen Werten durchsucht. Diese werden 
+% bei der Ausgabe immer als erstes gesetzt.
+%    \begin{macrocode}
+    \@for\tud@res@a:=\tud@res@a\do{%
+      \trim@spaces@in\tud@res@a%
+      \ifx\tud@res@a\@empty\else%
+        \TUD@set@ifkey{}{@tempswa}{\tud@res@a}%
+        \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+          \if@tempswa%
+            \preto\tud@res@d{true,on,yes,}%
+          \else%
+            \preto\tud@res@d{false,off,no,}%
+          \fi%
+        \else%
+          \eappto\tud@res@d{,\expandonce\tud@res@a}%
+        \fi%
+      \fi%
+    }%
+    \let\tud@res@a\@empty%
+    \let\tud@res@b\@empty%
+    \def\do##1{%
+      \def\tud@res@d{##1}%
+      \ifx\tud@res@d\@empty\else%
+        \ifx\tud@res@a\@empty%
+          \let\tud@res@a\tud@res@d%
+        \else%
+%    \end{macrocode}
+% Alle weiteren Werte werden gegebenenfalls mit \cs{emph} hervorgehoben.
+%    \begin{macrocode}
+          \eappto\tud@res@b{%
+            \noexpand\PValue{\slc}%
+            \IfBooleanTF{#3}{\noexpand\emph}{\@firstofone}{%
+              \noexpand\PValue{\expandonce\tud@res@d}%
+            }%
+          }%
+        \fi%
+      \fi%
+    }%
+    \expandafter\docsvlist\expandafter{\tud@res@d}%
+    \edef\tud@res@a{%
+      \endgroup
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+      \unexpanded{\def#2}{\expandonce\tud@res@b}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@val@addon
+% \end{macro}^^A \tud@val@main
+% \end{macro}^^A \tud@val@format
+% \end{macro}^^A \tud@val@before
+% \end{macro}^^A \tud@val@item
+% \end{macro}^^A \itemval
+% \end{environment}^^A Declare@Values
+%
+% \subsubsection{Kurzbeschreibung von Paketen}
+%
+% \begin{environment}{DeclarePackages}
+% \begin{macro}{\tud@pkg@index}
+% \changes{v2.06p}{2022/10/05}{neu}^^A
+% Ähnlich wie für die Auflistung von Werten eines Schlüssels wird auch mit der 
+% Charakterisierung von Paketen verfahren. Diese werden in der Auflistung 
+% \env{Declare@Packages} speziell gekennzeichnet. Um über ein optionales 
+% Argument einen oder mehrere Indexeinträge angeben zu können, wird diese 
+% Umgebung von \env{DeclarePackages} ummantelt, wobei das Vorgehen äquivalent 
+% zu \cs{tud@declare@index} ist.
+%    \begin{macrocode}
+\newcommand*\tud@pkg@index{}
+\AddToHook{shipout/after}{\tud@pkg@index}
+\NewDocumentEnvironment{DeclarePackages}{o}{%
+  \begin{Declare@Packages}%
+  \let\tud@pkg@index\@empty
+  \IfValueT{#1}{%
+    \tud@index@csv\tud@pkg@index{#1}%
+    \tud@pkg@index%
+  }%
+}{%
+  \ifvmode\removelastskip\else\@killglue\fi
+  \tud@pkg@index%
+  \end{Declare@Packages}%
+}
+\NoIndentAfterEnv{DeclarePackages}
+%    \end{macrocode}
+% \end{macro}^^A \tud@pkg@index
+% \end{environment}^^A DeclarePackages
+% \begin{environment}{Declare@Packages}
+% \begin{macro}{\itempkg}
+% \changes{v2.02}{2014/10/09}{optionales Argument für CTAN-Link}^^A
+% \changes{v2.04}{2015/03/12}{optionales Argument für weitere Pakete}^^A
+% \begin{macro}{\tud@pkg@item}
+% \begin{macro}{\tud@pkg@before}
+% \begin{macro}{\tud@pkg@declare}
+% \changes{v2.06p}{2022/10/05}{neu}^^A
+% \begin{macro}{\tud@pkg@@declare}
+% \changes{v2.06p}{2022/10/05}{neu}^^A
+% Innerhalb von \env{Declare@Packages} kann mit \cs{itempkg} ein oder mehrere
+% Pakete erläutert werden. Des Weiteren werden Textanker definiert, auf die 
+% in der Dokumentation gegebenenfalls automatisch verlinkt wird.
+%    \begin{macrocode}
+\newcommand*\itempkg{}
+\AtBeginDocument{\undef\itempkg}
+\newcommand*\tud@pkg@before{%
+  \let\itempkg\tud@pkg@item%
+}
+\tud@list@create[before=\tud@pkg@before]{Declare@Packages}{description}{2}
+%    \end{macrocode}
+% Im obligatorischen Argument werden die namentlich genannten Pakete deklariert 
+% und ausgegeben. Mit |(|\meta{Markup}|)| lassen sich auch andere Entitäten 
+% angeben und in gleicher Weise deklarieren, |<|\meta{Markup}|>| unterdrückt 
+% die Ausgabe erzeugt allerding Textanker und Indexeinträge. Das letzte 
+% optionale Argument akzeptiert eine Änderungsnotiz.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@pkg@item{m d() d<> o d''}{%
+  \begingroup
+    \let\tud@res@a\@empty
+    \forcsvlist{\tud@pkg@declare\tud@res@a<#5>}{#1}%
+    \IfValueT{#2}{%
+      \forcsvlist{\tud@pkg@@declare\tud@res@a<#5>}{#2}%
+    }%
+    \IfValueT{#3}{%
+      \forcsvlist{\tud@pkg@@declare*\tud@res@a<#5>}{#3}%
+    }%
+%    \end{macrocode}
+% Paketbeschreibungen erhalten einen separaten Abschnitt in der Änderungsliste.
+% Zunächst wird die Ausgabe der gegebenen Pakete in \cs{tud@res@c} definiert.
+%    \begin{macrocode}
+    \let\tud@res@b\@empty
+    \IfValueT{#4}{%
+      \let\tud@res@c\@empty
+      \def\do##1{%
+        \eappto\tud@res@c{%
+          \ifx\tud@res@c\@empty\else\slc\fi
+          \noexpand\Package{\trim@spaces{##1}}%
+        }%
+      }%
+      \docsvlist{#1}%
+%    \end{macrocode}
+% Danach werden die Änderungsnotizen ausgewertet. Wurde lediglich eine Version 
+% ohne die Spezifizierung eines Textes angegeben, wird einfach die zuvor 
+% definierte Liste der Pakete ausgegeben.
+%    \begin{macrocode}
+      \def\do##1{%
+        \ifx\tud@res@b\@empty\else\appto\tud@res@b{;}\fi
+        \appto\tud@res@b{##1}%
+        \in@{:}{##1}%
+        \ifin@\else
+          \eappto\tud@res@b{:\expandonce\tud@res@c}%
+        \fi
+      }%
+      \dossvlist{#4}%
+      \edef\tud@res@b{%
+        \noexpand\Changed@At@Special[-1\baselineskip]%
+          {Paketbeschreibungen}<sec:packages:recommended>%
+          {\expandonce\tud@res@b}%
+      }%
+    }%
+%    \end{macrocode}
+% Die Deklarationen werden durchgeführt und ausgegeben, die Änderungsnotizen 
+% werden erzeugt und die Liste der aktuell deklarierten Label für diesen 
+% Eintrag geändert.
+%    \begin{macrocode}
+    \edef\tud@res@a{%
+      \endgroup
+      \noexpand\item[{\expandonce\tud@res@a}]%
+      \noexpand\strut\expandonce\tud@res@b%
+    }%
+  \tud@res@a%
+  \ignorespaces%
+}
+%    \end{macrocode}
+% Hiermit erfolgt die eigentliche Deklaration (Textanker, Indexeinträg) und 
+% gegebenenfalls die Ausgabe.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@pkg@declare{m r<> m}{%
+  \tud@pkg@@declare{#1}<#2>'url'{\Package{#3}}%
+}
+\NewDocumentCommand\tud@pkg@@declare{s m r<> d'' >{\TrimSpaces}m}{%
+  \eappto#2{%
+    \IfBooleanF{#1}{\ifx#2\@empty\else\slc\fi}%
+    \Inline@Declaration\IfBooleanT{#1}{*}%
+      {#5\IfValueT{#3}{<#3>}\IfValueT{#4}{'#4'}}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@pkg@@declare
+% \end{macro}^^A \tud@pkg@declare
+% \end{macro}^^A \tud@pkg@before
+% \end{macro}^^A \tud@pkg@item
+% \end{macro}^^A \itempkg
+% \end{environment}^^A Declare@Packages
 %
 % \iffalse
 %</class>
 % \fi
 %
 % \subsection{Erläuterungen und weiterführende Ergänzungen}
-%
 %
 % \begin{macro}{\Tutorial}
 % \changes{v2.02}{2014/08/22}{neu}^^A
