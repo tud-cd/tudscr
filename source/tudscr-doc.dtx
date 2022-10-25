@@ -179,11 +179,7 @@
   \@ifpackageloaded{tudscr-gitinfo}{%
     \GetFileInfo{\jobname}%
     \title{\file{\filename}}%
-    \date{%
-      \filedate%
-      \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
-      \ifdefvoid\filerevision{}{\nobreakspace\texttt{\filerevision}}%
-    }%
+    \date{\filedate}%
   }{}%
   \CodelineIndex%
   \RecordChanges%
@@ -201,11 +197,14 @@
     }%
     \undef\filedate%
     \undef\fileversion%
-    \undef\filerevision%
     \undef\fileinfo%
+    \undef\filerevision%
+    \undef\filedir%
     \expandafter\GetFileInfo\expandafter{\filename}%
   }{}%
   \ifdefvoid\filerevision{\let\filerevision\@empty}{}%
+  \ifdefvoid\filedir{\let\filedir\@empty}{}%
+  \newcommand*\filepath{\ifdefvoid\filerevision{main}{\filerevision}/\filedir}%
   \expandafter\selectlanguage\expandafter{\languagename}%
 }
 %    \end{macrocode}
@@ -225,11 +224,23 @@
   \let\@oddhead\@empty%
   \let\@evenhead\@empty%
   \def\@oddfoot{%
-    File\ifnum\c@part>\z@\nobreakspace\thepart\fi:%
-    \nobreakspace\texttt{\ifdefvoid\filename{?}{\filename}}%
-    \enskip Version:\nobreakspace\ifdefvoid\filedate{?}{\filedate}%
-    \ifdefvoid\fileversion{}{\nobreakspace\fileversion}%
-    \ifdefvoid\filerevision{}{\enskip\texttt{\filerevision}}%
+    File\ifnum\c@part>\z@~\thepart\fi:~%
+    \texttt{%
+      \ifdefvoid\filename{?}{%
+        \ifdefvoid\tud@github@url@base%
+          {\filename}%
+          {\GitHubRepo'blob/\filepath\filename'[\filename]}%
+      }%
+    }%
+    \enskip Version:~\ifdefvoid\filedate{?}{\filedate}%
+    \ifdefvoid\fileversion{}{~\fileversion}%
+    \ifdefvoid\filerevision{}{%
+      \enskip\texttt{%
+        \ifdefvoid\tud@github@url@base%
+          {\filerevision}%
+          {\texttt{\GitHubRepo'commit/\filerevision'[\filerevision]}}%
+      }%
+    }%
     \hfill\thepage%
   }%
   \def\@evenfoot{\@oddfoot}%
@@ -310,7 +321,7 @@
 % Dieses Makro dient zur Formatierung des Typen der Deklarationselemente in 
 % Index, Änderungsliste und Randnotizen.
 %    \begin{macrocode}
-\NewDocumentCommand{\tud@idx@typemarkup}{r()}{%
+\NewDocumentCommand\tud@idx@typemarkup{r()}{%
   \begingroup%
   \normalfont\scriptsize\space(#1)%
   \endgroup%

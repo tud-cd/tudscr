@@ -57,24 +57,22 @@
 % \begin{macro}{\InputGitContainer}
 % \changes{v2.06o}{2022/08/09}{neu}^^A
 % In \cs{GitContainerFile} wird der Name der Datei gespeichert, welche die 
-% Versionsinformationen für alle Quelldateien enthält. Diese definiert für alle 
-% relevanten Dateien Makros in der Form
-% |\|\meta{Dateiname}|-ver{|\meta{Datum}| |\meta{Zeit}| |\meta{Hash}|}|. Diese 
-% Datei wird eingebunden, falls vorhanden sowie der Befehl \cs{GitFileInfo} für 
-% das Hinzufügen der Versionsinformationen für das Erzeugen der Zieldateien mit 
-% \app{docstrip} definiert.
-% \ToDo{rename to tudscr-gitinfo.cfg}[v2.06]
-% \ToDo{add to source files}[v2.06]
+% mit |git log| generierten Versionsinformationen für alle Quelldateien 
+% enthält. In dieser werden für alle relevanten Dateien Makros in der Form
+% |\|\meta{Name}|-ver{|\meta{Date}| |\meta{Time}| |\meta{Hash}| |\meta{Path}|}| 
+% definiert. Diese Datei wird~-- falls vorhanden~-- eingebunden. Weiterhin wird 
+% der Befehl \cs{GitFileInfo} für das Hinzufügen der Versionsinformationen für
+% das Erzeugen der Zieldateien mit \app{docstrip} definiert.
 % \ToDo{generate via \app{make}}[v2.06]
 %    \begin{macrocode}
-\def\GitContainerFile{tudscr-gitinfo-ver.aux}
+\def\GitContainerFile{tudscr-gitinfo.cfg}
 %<*!package>
 \begingroup
   \catcode`\@11\relax%
   \ifx\documentclass\undefined%
     \ifx\@@input\undefined\global\let\@@input\input\fi%
     \newread\@inputcheck%
-    \immediate\openin\@inputcheck=\GitContainerFile\relax%
+    \immediate\openin\@inputcheck="\GitContainerFile" %
     \ifeof\@inputcheck%
       \global\let\InputGitContainer\relax%
     \else%
@@ -205,12 +203,14 @@
     \PackageWarningNoLine{tudscr-gitinfo}{No git info found for \filename}%
     \expandafter\tud@@GetFileInfo\expandafter{\filename}%
   \fi%
+  \tud@git@find@root%
 }
 \newcommand*\tud@@GetFileInfo[1]{%
   \@ifundefined{filedate}{\def\filedate{?}}{}%
-  \@ifundefined{fileversion}{\def\fileversion{?}}{}%
-  \@ifundefined{filerevision}{\let\filerevision\@empty}{}%
+  \@ifundefined{fileversion}{\let\fileversion\@empty}{}%
   \@ifundefined{fileinfo}{\let\fileinfo\@empty}{}%
+  \@ifundefined{filerevision}{\let\filerevision\@empty}{}%
+  \@ifundefined{filedir}{\let\filedir\@empty}{}%
 %    \end{macrocode}
 % Verbesserte Variante, um nicht \cs{relax?} in die Felder zu schreiben.
 %    \begin{macrocode}
@@ -231,7 +231,7 @@
       \fi%
     }%
     \edef\@tempb{\csname ver@#1\endcsname}%
-    \expandafter\@tempa\@tempb\relax? ? \relax\relax%
+    \expandafter\@tempa\@tempb\relax? \relax? \relax\relax%
   \fi%
 }
 %    \end{macrocode}
@@ -246,6 +246,67 @@
 % \end{macro}^^A \tud@@GetFileInfo
 % \end{macro}^^A \tud@GetFileInfo
 % \end{macro}^^A \GetFileInfo
+% \begin{macro}{\tud@git@find@root}
+% \changes{v2.06p}{2022/10/26}{neu}^^A
+% Um vom genutzten GitHub-Repository das Wurzelverzeichnis zu finden, muss die 
+% Ausgabe mit dem Parameter \file{-{}-recorder} erzeugt werden, wodurch die
+% Datei \file{\jobname.fls} generiert wird, welche als ersten Eintrag den 
+% absoluten Pfad des kompilierten Dokumentes enthält. Davon ausgehend wird
+% aufsteigend nach dem Wurzelverzeichnis gesucht. Wird dieses gefunden, werden
+% alle darunter liegenden Verzeichnisse bis zu Ursprungsdatei in \cs{filedir}
+% abgelegt. Dieser Pfad wird für das Erzeugen von GitHub-Links benötigt.
+%    \begin{macrocode}
+\newcommand*\tud@git@find@root{%
+  \begingroup
+    \IfFileExists{\jobname.fls}{%
+      \openin\@inputcheck="\jobname.fls" %
+      \endlinechar\m@ne
+      \def\@tempb{PWD}%
+      \@onelevel@sanitize\@tempb%
+      \def\@tempc####1 ####2\relax{%
+        \def\@tempa{####1}%
+        \ifx\@tempa\@tempb
+          \def\@tempa{####2}%
+          \let\iterate\relax
+        \fi
+      }%
+      \loop\unless\ifeof\@inputcheck%
+        \readline\@inputcheck to \@tempa
+        \@onelevel@sanitize\@tempa%
+        \expandafter\@tempc\@tempa\relax%
+      \repeat
+      \closein\@inputcheck%
+      \ifx\@tempa\@empty\def\@tempa{./}\fi
+      \let\filedir\@empty
+      \def\@tempc####1//####2\relax{\def\@tempa{####1}}%
+      \@tempswatrue
+      \@whilesw\if@tempswa\fi{%
+        \expandafter\@tempc\@tempa//\relax%
+        \IfFileExists{\@tempa/.git/HEAD}{\@tempswafalse}{%
+          \expandafter\filename@parse\expandafter{\@tempa}%
+          \let\@tempa\filename@area
+          \edef\filedir{\filename@base/\filedir}%
+        }%
+        \ifx\@tempa\@empty
+          \let\filedir\@empty
+          \@tempswafalse
+        \fi
+      }%
+    }{%
+      \PackageWarningNoLine{tudscr-gitinfo}{%
+        You have to compile with flag `-recorder'\MessageBreak%
+        to get the git base path%
+      }%
+      \let\filedir\@empty
+    }%
+    \edef\@tempc{%
+      \endgroup
+      \def\noexpand\filedir{\filedir}%
+    }%
+  \@tempc%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@git@find@root
 % \begin{macro}{\tud@git@log}
 % \changes{v2.06o}{2022/08/09}{neu}^^A
 % \begin{macro}{\tud@git@@log}
@@ -309,7 +370,7 @@
       }%
       \chardef\reserved@c15 %
       \ch@ck7\reserved@c\write%
-      \immediate\openout\reserved@c\GitContainerFile\relax%
+      \immediate\openout\reserved@c="\GitContainerFile"\relax%
       \immediate\write\reserved@c{\@tempa}%
       \@for\@tempa:=\tud@git@file@list\do{%
         \edef\@tempb{%
@@ -334,11 +395,9 @@
 \AtEndOfPackage{%
   \GetFileInfo{\jobname}%
   \edef\@tempa{%
-    \filedate\space\fileversion\space%
-    \ifx\filerevision\@empty\else%
-      \filerevision\ifx\fileinfo\@empty\else\space\fi%
-    \fi%
-    \fileinfo%
+    \filedate\space\fileversion%
+    \ifx\filerevision\@empty\else\space\filerevision\fi
+    \ifx\fileinfo\@empty\else\space\fileinfo\fi
   }%
   \ifcsname ver@\filename\endcsname%
     \edef\@tempb{\csname ver@\filename\endcsname}%
