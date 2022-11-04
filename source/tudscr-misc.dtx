@@ -315,7 +315,7 @@
 %^^A  }{}%
 %^^A}
 %^^A%    \end{macrocode}
-%^^A% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird  
+%^^A% Bei aktivierter Option \opt{footnotes}|=|\val{symbolheadings} wird 
 %^^A% dieser Zähler für die Symboleauswahl von Fußnoten in Überschirften 
 %^^A% inkrementiert.
 %^^A%    \begin{macrocode}
@@ -767,7 +767,6 @@
 %    \begin{macrocode}
 \RequirePackage{xspace}
 \xspaceaddexceptions{"=}
-\AtBeginDocument{\robustify{~}}
 %    \end{macrocode}
 % Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
 % für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
@@ -814,13 +813,17 @@
 \AfterAtEndOfPackage*{hyperref}{%
   \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
   \hypersetup{%
+%<*!manual>
     linkcolor=blue,%
+%</!manual>
+%<*manual>
+    linkcolor=HKS44,%
+    urlcolor=HKS33,%
+    citecolor=HKS57,%
+    filecolor=HKS65,%
+%</manual>
     pdfpagelayout=OneColumn%
   }%
-  \robustify\url%
-  \robustify\nolinkurl%
-  \robustify\href%
-  \robustify\hyperref%
 }
 %    \end{macrocode}
 % \begin{macro}{\url}
@@ -1082,78 +1085,24 @@
 %
 % \iffalse
 %</manual>
-% \fi
-%
-% \subsection{Stringmanipulation}
-%
-% \begin{macro}{\tud@replace@in}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% \begin{macro}{\tud@replace@@in}
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
-% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
-% Unterstriche zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
-% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
-% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
-% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
-% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
-% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
-% Ersatzzeichen vervollständigt.
-%    \begin{macrocode}
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
-% behandelt werden.
-%    \begin{macrocode}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace@@in
-% \end{macro}^^A \tud@replace@in
-%
-% \iffalse
 %</option>
 %<*body>
 % \fi
 %
 % \subsection{Zusätzliche Markup-Befehle}
 %
+% \ToDo{als Makro und innerhalb vom Markup setzen}[v2.06]
+%    \begin{macrocode}
+\AfterEndPreamble{%
+  \robustify\url%
+  \robustify\nolinkurl%
+  \robustify\href%
+  \robustify\hyperref%
+  \robustify\emph%
+  \robustify\dots%
+  \robustify{~}%
+}
+%    \end{macrocode}
 % \begin{macro}{\@pnumwidth}
 % \begin{macro}{\@tocrmarg}
 % Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
@@ -1214,16 +1163,21 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \mailto
-% \begin{macro}{\seeref}
+% \begin{macro}{\seeplain}
 % \changes{v2.05}{2015/11/02}{neu}^^A
-% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
+% \begin{macro}{\@seeplain}
+% Der Befehl \cs{seeplain} kann anstelle von \cs{see} bzw. in der Sternversion
 % statt \cs{seealso} genutzt werden.
 %    \begin{macrocode}
-\NewDocumentCommand\seeref{s m}{%
-  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+\NewDocumentCommand\seeplain{s m}{%
+  \emph{\mbox{\IfBooleanTF{#1}{\alsoname}{\seename}}}~#2%
+}
+\NewExpandableDocumentCommand\@seeplain{s m}{%
+  \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
 }
 %    \end{macrocode}
-% \end{macro}^^A \seeref
+% \end{macro}^^A \@seeplain
+% \end{macro}^^A \seeplain
 % \begin{macro}{\Attention}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % Falls irgendetwas besonders hervorgehoben werden soll.
@@ -1350,7 +1304,9 @@
 \newrobustcmd*\TnUD{Technischen Universit\"at Dresden\xspace}
 \newcommand*\TUDCD{\CD der \TnUD}
 \newcommand*\TUDCDs{\CDs der \TnUD}
-\newrobustcmd*\TUDForum{\mbox{T\kern.05em U\kern.05em D-\LaTeX-Forum}\xspace}
+\newrobustcmd*\TUDForum{%
+  \mbox{T\kern.05em U\kern.05em D-\Lettering{LaTeX}-Forum}\xspace%
+}
 \newrobustcmd*\DDC{%
   \mbox{%
     D\kern.05em R\kern.05em E\kern.05em S\kern.05em %
@@ -1407,66 +1363,208 @@
 %
 % \subsubsection{Markup für Links}
 %
-% \begin{macro}{\GitHubBase}
-% Angabe der URL des verwendeten GitHub-Repository. Aktuell nicht implementiert.
+% \begin{macro}{\tud@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% URL-Pfade sauber schreiben und Trennzeichen ggf. ergänzen. Die Sternversion 
+% liefert \cs{relax} zurück, wenn das letzte obligatorische Argument leer ist.
 %    \begin{macrocode}
-\newcommand*\GitHubBase[1]{}
+\NewDocumentCommand\tud@url@normalize{s m O{https://} m m}{%
+  \begingroup%
+    \edef\tud@res@a{\trim@spaces{#5}}%
+    \def\tud@res@b##1#4/##2#4/##3\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@c{##1}%
+      }{%
+        \def\tud@res@c{##2}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a #4/#4/\@nil%
+    \tud@remove@enfold@char\tud@res@c{/}%
+    \edef\tud@res@b{%
+      \endgroup%
+      \unexpanded{\def#2}{#3#4/\tud@res@c}%
+      \IfBooleanT{#1}{\ifdefvoid\tud@res@a{\unexpanded{\let#2\relax}}{}}%
+    }%
+  \tud@res@b%
+}
 %    \end{macrocode}
+% \end{macro}^^A \tud@url@normalize
+% \begin{macro}{\GitHubBase}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@base}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@error}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Angabe der URL des verwendeten GitHub-Repository.
+%    \begin{macrocode}
+\newcommand*\tud@github@url@normalize[2]{%
+  \tud@url@normalize*#1{github.com}{#2}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\NewDocumentCommand\GitHubBase{m}{%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
+}
+\newcommand*\tud@github@url@error{%
+%<*class>
+  \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageError{tudscrmanual}%
+%</package>
+    {GitHub repository missing}%
+    {%
+      No default GitHub repository was set with\MessageBreak%
+      `\detokenize{\GitHubBase{<url>}}'. You should either\MessageBreak%
+      set a default one or pass it as argument.%
+    }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@github@url@error
+% \end{macro}^^A \tud@github@url@normalize
+% \end{macro}^^A \tud@github@url@base
 % \end{macro}^^A \GitHubBase
 % \begin{macro}{\GitHubRepo}
 % \changes{v2.02}{2014/08/16}{neu}^^A
-% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. 
+% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Standardmäßig 
+% wird die mit \cs{GitHubBase} respektive mit dem optionalen Argument in runden 
+% Klammern gegebene Repository-URL für die Ausgabe genutzt, wobei hierfür der
+% letzte Teil des Pfades verwendet wird. Mit dem ersten optionalen Argument 
+% kann dies überschrieben werden. Mit dem optionalen Argument in Guillemets
+% kann entweder mit einem numerischen Wert auf ein Issue oder aber auf ein 
+% Unterpfad der gegebenen URL verlinkt werden.
 %    \begin{macrocode}
-\NewDocumentCommand\GitHubRepo{!s !t' !O{releases} !D(){tud-cd/tudscr} !d<>}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \def\@tempa{https://github.com/#4/}%
-  \edef\@tempa{{\@tempa\IfValueTF{#5}{issues/#5}{#3}}}%
-  \addto@hook@expandafter\toks@{\@tempa}%
-  \IfBooleanF{#2}{%
-    \addto@hook\toks@{{\tud@english{GitHub-Repository~\textsbn{#4}}}}%
-  }%
-  \the\toks@\xspace%
+\NewDocumentCommand\GitHubRepo{d<> d'' o}{%
+  \begingroup%
+    \def\tud@res@a{\href}%
+    \IfValueT{#1}{\tud@github@url@normalize\tud@github@url@base{#1}}%
+    \ifdefvoid\tud@github@url@base{%
+      \def\tud@res@a{\tud@github@url@error\@secondoftwo}%
+      \def\tud@github@url@base{??}%
+    }{}%
+    \IfValueTF{#3}{%
+%    \end{macrocode}
+% Um \pkg{babel}-Shorthands im letzten optionalen Argument nutzen zu können, 
+% ist \cs{@safe@activesfalse} notwendig (\GitHubRepo<latex3/hyperref>'149').
+%    \begin{macrocode}
+      \def\tud@res@c{\csuse{@safe@activesfalse}#3{}}%
+    }{%
+      \expandafter\filename@parse\expandafter{\tud@github@url@base}%
+      \edef\tud@res@c{%
+        \noexpand\tud@english{%
+          \unexpanded{GitHub\mbox{-}Repository~\textsbn}{\filename@base}%
+        }%
+      }%
+    }%
+    \IfValueT{#2}{%
+      \edef\tud@res@b{\trim@spaces{#2}}%
+      \Ifnumber{\tud@res@b}{%
+        \IfValueF{#3}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
+        \eappto\tud@github@url@base{/issues/\tud@res@b}%
+      }{%
+        \tud@remove@enfold@char\tud@res@b{/}%
+        \eappto\tud@github@url@base{/\tud@res@b}%
+      }%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@github@url@base}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a\xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \GitHubRepo
-% \begin{macro}{\Download}
+% \begin{macro}{\GitHubDownload}
 % \changes{v2.05g}{2016/11/08}{neu}^^A
 % Der Befehl für die Angabe von direkten Downloadlinks.
 %    \begin{macrocode}
-%<*manual>
-\newcommand*\Download[1]{%
-  https://github.com/tud-cd/tudscr/releases/download/#1%
+\NewDocumentCommand\GitHubDownload{d<> d'' o m}{%
+  \begingroup%
+    \def\tud@res@a{\href}%
+    \IfValueT{#1}{\tud@github@url@normalize\tud@github@url@base{#1}}%
+    \ifdefvoid\tud@github@url@base{%
+      \def\tud@res@a{\tud@github@url@error\@secondoftwo}%
+      \def\tud@github@url@base{??}%
+    }{}%
+    \IfValueTF{#2}{%
+      \edef\tud@res@b{\trim@spaces{#2}}%
+      \tud@remove@enfold@char\tud@res@b{/}%
+      \eappto\tud@github@url@base{/releases/download/\tud@res@b}%
+    }{%
+      \appto\tud@github@url@base{/releases/latest/download}%
+    }%
+    \appto\tud@github@url@base{/#4}%
+    \IfValueTF{#3}{%
+      \def\tud@res@c{\csuse{@safe@activesfalse}#3{}}%
+    }{%
+      \def\tud@res@c{\textttit{#4}}%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@github@url@base}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
 }
-%</manual>
 %    \end{macrocode}
-% \end{macro}^^A \Download
+% \end{macro}^^A \GitHubDownload
 % \begin{macro}{\CTAN}
 % \changes{v2.05}{2015/11/22}{neu}^^A
+% \begin{macro}{\tud@ctan@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Das Markup für einen Link auf \CTAN.
 %    \begin{macrocode}
-\NewDocumentCommand\CTAN{!s !o !g}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{{http://www.ctan.org/\IfValueT{#2}{#2}}}%
-  \addto@hook\toks@{%
-    {\tud@english{Comprehensive TeX Archive Network (CTAN\IfValueT{#3}{~#3})}}%
-  }%
-  \the\toks@\xspace%
+\newcommand*\tud@ctan@url@normalize[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
+\NewDocumentCommand\CTAN{d<> o}{%
+  \begingroup%
+    \def\tud@res@a{\href}%
+    \tud@ctan@url@normalize\tud@res@d{\IfValueT{#1}{#1}}%
+    \IfValueTF{#2}{%
+      \def\tud@res@c{\csuse{@safe@activesfalse}#2{}}%
+    }{%
+      \def\tud@res@c{%
+        \tud@english{Comprehensive \Lettering{TeX} Archive Network~(CTAN)}%
+      }%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@res@d}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a\xspace%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@ctan@url@normalize
 % \end{macro}^^A \CTAN
 % \begin{macro}{\Forum}
 % Der Befehl für die Ausgabe eines Links zum \TUDForum. Das optionale Argument 
 % in Guillemets kann genutzt werden, um auf einen spezifisches Beitrag zu 
 % verlinken.
 %    \begin{macrocode}
-\NewDocumentCommand\Forum{!s !t' !O{\TUDForum} !d<>}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \IfBooleanT{#2}{\toks@{\url}}%
-  \def\@tempa{http://latex.wcms-file3.tu-dresden.de/phpBB3/}%
-  \edef\@tempa{{\@tempa\IfValueT{#4}{viewtopic.php?t=#4}}}%
-  \addto@hook@expandafter\toks@{\@tempa}%
-  \IfBooleanF{#2}{\addto@hook\toks@{{#3}}}%
-  \the\toks@\xspace%
+\NewDocumentCommand\Forum{d'' o}{%
+  \begingroup%
+    \def\tud@res@a{\href}%
+    \IfValueTF{#2}%
+      {\def\tud@res@c{\csuse{@safe@activesfalse}#2{}}}%
+      {\def\tud@res@c{\TUDForum}}%
+    \def\tud@res@d{\TUDScriptForum}%
+    \IfValueT{#1}{%
+      \edef\tud@res@b{\trim@spaces{#1}}%
+      \Ifnumber{\tud@res@b}{%
+        \IfValueF{#2}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
+        \eappto\tud@res@d{viewtopic.php?t=\tud@res@b}%
+      }{%
+        \tud@remove@enfold@char\tud@res@b{/}%
+        \eappto\tud@res@d{\tud@res@b}%
+      }%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@res@d}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a\xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Forum
@@ -1474,18 +1572,324 @@
 % \changes{v2.02}{2014/09/04}{neu}^^A
 % \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
 %    \begin{macrocode}
-%<*manual>
-\NewDocumentCommand\scrguide{!s !O{\KOMAScript-Handbuch}}{%
-  \IfBooleanTF{#1}{\toks@{\href}}{\toks@{\hrfn}}%
-  \addto@hook\toks@{%
-    {http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf}%
-  }%
-  \addto@hook\toks@{{#2}}%
-  \the\toks@\xspace%
+\NewDocumentCommand\scrguide{O{\KOMAScript-Handbuch}}{%
+  \CTAN<pkg/koma-script>[#1]%
 }
-%</manual>
 %    \end{macrocode}
 % \end{macro}^^A \scrguide
+%
+% \subsubsection{Setzen von Schriftzügen}
+%
+% Zum Setzen verschiedenster Logos und Schriftzüge gibt es eigentlich das Paket 
+% \pkg{hologo}. Allerdings ist es auf die \Lettering{LaTeX}"=Standardschriften 
+% ausgelegt. Insbesondere das Kerning harmoniert nicht mit den Schriften der 
+% \OpenSans, weshalb hier die benötigten Schriftzüge mit \cs{tud@lttr@define} 
+% definiert werden. Mit \cs{Lettering}\marg{name} können diese gesetzt werden.
+% \ToDo{in tudscr-fonts übernehmen}[v2.07]
+%
+% \begin{macro}{\tud@if@cdfont@activated}
+% \changes{v2.06p}{2022/10/28}{neu}^^A
+% Mit \cs{tud@if@cdfont@activated} kann geprüft werden, ob die \OpenSans 
+% überhaupt verfügbar und gegebenenfalls aktiviert ist.
+%    \begin{macrocode}
+\newcommand*\tud@if@cdfont@activated{}
+\let\tud@if@cdfont@activated\@secondoftwo
+\AtBeginDocument{%
+  \ifdefined\if@tud@cdfont@active
+    \expandafter\@firstofone%
+  \else%
+    \expandafter\@gobble%
+  \fi{%
+    \renewcommand*\tud@if@cdfont@activated{%
+      \if@tud@cdfont@active%
+        \expandafter\@firstoftwo%
+      \else%
+        \expandafter\@secondoftwo%
+      \fi%
+    }%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@if@cdfont@activated
+%
+% \begin{macro}{\tud@lttr@kern}
+% \begin{macro}{\tud@lttr@shift}
+% \begin{macro}{\tud@lttr@topscript}
+% \begin{macro}{\tud@lttr@reflect}
+% Diese Befehle dienen dazu, nachfolgend spezielle Schriftzüge zu definieren, 
+% welche Kerning, vertikales Verschieben oder Skalieren einzelner Lettern 
+% ermöglichen. Die Implemetierung ist stark am Paket \pkg{hologo} orientiert.
+%
+% Mit \cs{tud@lttr@kern} wird Kerning eingefügt, wobei im obligatorischen 
+% Argument ein prozentualer Faktor für den Basiswert \val{1em} angegeben wird. 
+% Mit dem optionalen Argument kann ggf. zusätzliches Kerning für den kursiven 
+% Schriftschnitt definiert werden.
+%    \begin{macrocode}
+\newcommand*\tud@lttr@kern[2][0]{%
+  \kern\dimexpr1em*%
+    \numexpr\ifdim\the\fontdimen\@ne\font>\z@#1+\fi#2\relax%
+  /100\relax%
+}
+%    \end{macrocode}
+% Dieser Befehl verschiebt den im zweiten Argument angegebenen Inhalt vertikal 
+% um Basiswert \val{1ex} mutlipliziert mit dem prozentualer Faktor im ersten 
+% Argument.
+%    \begin{macrocode}
+\newcommand*\tud@lttr@shift[2]{%
+  \lower\dimexpr1ex*#1/100\relax\hbox{#2}%
+}
+%    \end{macrocode}
+% Der im zweiten Argument gegebene Inhalt wird mit \cs{scriptsize} auf der Höhe
+% des im ersten Argumentes angegebenen Inhaltes ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@lttr@topscript[2]{%
+  \begingroup%
+    \setbox\z@\hbox{#1}%
+    \vbox to\ht\z@{%
+      \hbox{%
+        \check@mathfonts%
+        \fontsize\sf@size\z@%
+        \math@fontsfalse\selectfont%
+        #2%
+      }%
+      \vss%
+    }%
+  \endgroup%
+}
+%    \end{macrocode}
+% Um den Schriftzug für \Lettering{XeLaTeX} bauen zu können, wird das Paket 
+% \pkg{l3draw} bemüht, womit beliebige Eingaben transformiert werden können. 
+% Hier wird es genutzt, um das Argument vertikal zu spiegeln und gegebenenfalls 
+% die Neigung an die aktuelle Schrift anzupassen.
+%    \begin{macrocode}
+\RequirePackage{l3draw}
+\ExplSyntaxOn
+\newcommand*\tud@lttr@reflect[1]{%
+  \begingroup%
+  \rlap{%
+    \draw_begin:
+    \hcoffin_set:Nn \l_tmpa_coffin{ #1 }
+    \draw_transform_xslant:n{ \the\dimexpr\fontdimen\@ne\font*2\relax }
+    \draw_transform_xscale:n{ -1 }
+    \draw_coffin_use:Nnn \l_tmpa_coffin { hc } { vc }
+    \draw_end:
+  }%
+  \hphantom{#1}%
+  \endgroup%
+}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}^^A \tud@lttr@reflect
+% \end{macro}^^A \tud@lttr@topscript
+% \end{macro}^^A \tud@lttr@shift
+% \end{macro}^^A \tud@lttr@kern
+%
+% \begin{macro}{\tud@lttr@define}
+% \begin{macro}{\tud@lttr@alias}
+% \begin{macro}{\tud@lttr@list}
+% Die Schriftzüge werden mit \cs{tud@lttr@define} definiert und in der Liste 
+% \cs{tud@lttr@list} registriert. In das obligatorische Argument wird die 
+% Bezeichnungen übergeben, welche als Argument von \cs{Lettering} zu verwenden 
+% ist. Das optionale Argument kann genutzt werden, um alternative Bezeichnungen 
+% zu definieren.
+%    \begin{macrocode}
+\newcommand*\tud@lttr@list{}
+\newcommand*\tud@lttr@define[3][]{%
+  \expandafter\newcommand\expandafter*%
+    \csname\detokenize{tud@lettering@#2}\endcsname{#3}%
+  \listadd\tud@lttr@list{#2}%
+  \forcsvlist{\tud@lttr@alias{#2}}{#1}%
+}
+\newcommand*\tud@lttr@alias[2]{%
+  \csdef{\detokenize{tud@lettering@#2}}{\csuse{\detokenize{tud@lettering@#1}}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lttr@list
+% \end{macro}^^A \tud@lttr@alias
+% \end{macro}^^A \tud@lttr@define
+%
+% \begin{macro}{\Lettering}
+% \changes{v2.06p}{2022/10/28}{neu}^^A
+% Der Anwenderbefehl zum Setzen der Schriftzüge.
+%    \begin{macrocode}
+\newrobustcmd*\Lettering[1]{%
+  \ifcsundef{\detokenize{tud@lettering@#1}}{%
+%<*class>
+    \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package>
+    \PackageError{tudscrmanual}%
+%</package>
+      {Lettering `\detokenize{#1}' missing}%
+      {%
+        `\@backslashchar\detokenize{tud@lettering@#1}'\MessageBreak%
+        was never defined, possible values as argument are:\MessageBreak%
+        \tud@lttr@list%
+      }%
+  }{%
+    \mbox{\csuse{\detokenize{tud@lettering@#1}}}%
+  }%
+}
+\AfterPackage*{hyperref}{%
+  \pdfstringdefDisableCommands{%
+    \let\Lettering\@firstofone%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Lettering
+%
+% \begin{macro}{\tud@lettering@TeX}
+% \begin{macro}{\tud@lettering@LaTeX}
+% \begin{macro}{\tud@lettering@LaTeXe}
+% \begin{macro}{\tud@lettering@LaTeX3}
+% \begin{macro}{\tud@lettering@pdfLaTeX}
+% \begin{macro}{\tud@lettering@LuaLaTeX}
+% \begin{macro}{\tud@lettering@XeLaTeX}
+% \begin{macro}{\tud@lettering@BibTeX}
+% \begin{macro}{\tud@lettering@TeXLive}
+% \begin{macro}{\tud@lettering@MacTeX}
+% \begin{macro}{\tud@lettering@MiKTeX}
+% \begin{macro}{\tud@lettering@LyX}
+% \begin{macro}{\tud@lettering@TikZ}
+% Hier werden die Schriftzüge definiert, die sich mit \cs{Lettering}\marg{name} 
+% ausgeben lassen.
+%    \begin{macrocode}
+\tud@lttr@define{TeX}{%
+  T%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[-4]{-17}%
+    \tud@lttr@shift{40}{E}%
+    \tud@lttr@kern[7]{-6}%
+  }{%
+    \tud@lttr@kern[-5]{-17}%
+    \tud@lttr@shift{48}{E}%
+    \tud@lttr@kern[2]{-13}%
+  }%
+  X\@%
+}
+\tud@lttr@define{LaTeX}{%
+  L%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[9]{-32}\tud@lttr@topscript{T}{A}%
+    \tud@lttr@kern[1]{-13}%
+  }{%
+    \tud@lttr@kern[3]{-33}\tud@lttr@topscript{T}{A}%
+    \tud@lttr@kern[-7]{-17}%
+  }%
+  \Lettering{TeX}%
+}
+\tud@lttr@define{LaTeXe}{%
+  \Lettering{LaTeX}%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[-2]{8}%
+  }{%
+    \tud@lttr@kern[-2]{7}%
+  }%
+  \hbox{%
+    \m@th%
+    \if b\expandafter\@car\f@series x\@nil\csname boldmath\endcsname\fi%
+    2$_{\textstyle\varepsilon}$%
+  }\@%
+}
+\tud@lttr@define{LaTeX3}{%
+  \Lettering{LaTeX}%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[-2]{8}%
+  }{%
+    \tud@lttr@kern[-2]{7}%
+  }%
+  3\@%
+}
+\tud@lttr@define{pdfLaTeX}{%
+  pdf%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern{3}%
+  }{%
+    \tud@lttr@kern[-6]{4}%
+  }%
+  \Lettering{LaTeX}%
+}
+\tud@lttr@define{LuaLaTeX}{%
+  Lua%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern{-2}%
+  }{%
+    \tud@lttr@kern[-3]{3}%
+  }%
+  \Lettering{LaTeX}%
+}
+\tud@lttr@define{XeLaTeX}{%
+  X%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[-15]{-5}%
+    \tud@lttr@shift{40}{\tud@lttr@reflect{E}}%
+    \tud@lttr@kern[15]{-12}%
+  }{%
+    \tud@lttr@kern[-9]{-10}%
+    \tud@lttr@shift{48}{\tud@lttr@reflect{E}}%
+    \tud@lttr@kern[2]{-10}%
+  }%
+  \Lettering{LaTeX}%
+}
+\tud@lttr@define{BibTeX}{%
+  B%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern{-5}%
+    \tud@lttr@shift{7}{\tud@lttr@topscript{x}{I\tud@lttr@kern{-5}B}}%
+    \tud@lttr@kern{-10}%
+  }{%
+    \tud@lttr@kern{-5}%
+    \tud@lttr@shift{-10}{\tud@lttr@topscript{x}{I\tud@lttr@kern[-6]{-3}B}}%
+    \tud@lttr@kern[-5]{-7}%
+  }%
+  \Lettering{TeX}%
+}
+\tud@lttr@define[TeX Live,TeX~Live]{TeXLive}{%
+  \Lettering{TeX}%
+  \tud@lttr@kern[-5]{\tud@if@cdfont@activated{20}{15}}Live\@%
+}
+\tud@lttr@define{MacTeX}{%
+  Mac\tud@lttr@kern{-3}\Lettering{TeX}%
+}
+\tud@lttr@define{MiKTeX}{%
+  MiK\tud@lttr@kern{\tud@if@cdfont@activated{6}{-2}}\Lettering{TeX}%
+}
+\tud@lttr@define{LyX}{%
+  L%
+  \tud@if@cdfont@activated{%
+    \tud@lttr@kern[-3]{-11}%
+    \tud@lttr@shift{40}{Y}%
+    \tud@lttr@kern[7]{-11}%
+  }{%
+    \tud@lttr@kern[-9]{-9}%
+    \tud@lttr@shift{40}{Y}%
+    \tud@lttr@kern[1]{-11}%
+  }%
+  X\@%
+}
+\tud@lttr@define{TikZ}{%
+  \textnormal{Ti}\textit{k}%
+   \tud@if@cdfont@activated{%
+    \tud@lttr@kern[5]{-2}%
+  }{%
+    \tud@lttr@kern[10]{-3}%
+  }%
+  \textnormal{Z}\@%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@lettering@TikZ
+% \end{macro}^^A \tud@lettering@LyX
+% \end{macro}^^A \tud@lettering@MiKTeX
+% \end{macro}^^A \tud@lettering@MacTeX
+% \end{macro}^^A \tud@lettering@TeXLive
+% \end{macro}^^A \tud@lettering@BibTeX
+% \end{macro}^^A \tud@lettering@XeLaTeX
+% \end{macro}^^A \tud@lettering@LuaLaTeX
+% \end{macro}^^A \tud@lettering@pdfLaTeX
+% \end{macro}^^A \tud@lettering@LaTeX3
+% \end{macro}^^A \tud@lettering@LaTeXe
+% \end{macro}^^A \tud@lettering@LaTeX
+% \end{macro}^^A \tud@lettering@TeX
 %
 % \iffalse
 %</body>
