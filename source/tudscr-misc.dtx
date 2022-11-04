@@ -816,13 +816,17 @@
 \AfterAtEndOfPackage*{hyperref}{%
   \@ifpackageloaded{bookmark}{}{\RequirePackage{bookmark}}%
   \hypersetup{%
+%<*!manual>
     linkcolor=blue,%
+%</!manual>
+%<*manual>
+    linkcolor=HKS44,%
+    urlcolor=HKS33,%
+    citecolor=HKS57,%
+    filecolor=HKS65,%
+%</manual>
     pdfpagelayout=OneColumn%
   }%
-  \robustify\url%
-  \robustify\nolinkurl%
-  \robustify\href%
-  \robustify\hyperref%
 }
 %    \end{macrocode}
 % \begin{macro}{\url}
@@ -1084,78 +1088,24 @@
 %
 % \iffalse
 %</manual>
-% \fi
-%
-% \subsection{Stringmanipulation}
-%
-% \begin{macro}{\tud@replace@in}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% \begin{macro}{\tud@replace@@in}
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
-% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
-% Unterstriche zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
-% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
-% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
-% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
-% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
-% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
-% Ersatzzeichen vervollständigt.
-%    \begin{macrocode}
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
-% behandelt werden.
-%    \begin{macrocode}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace@@in
-% \end{macro}^^A \tud@replace@in
-%
-% \iffalse
 %</option>
 %<*body>
 % \fi
 %
 % \subsection{Zusätzliche Markup-Befehle}
 %
+% \ToDo{als Makro und innerhalb vom Markup setzen}[v2.06]
+%    \begin{macrocode}
+\AfterEndPreamble{%
+  \robustify\url%
+  \robustify\nolinkurl%
+  \robustify\href%
+  \robustify\hyperref%
+  \robustify\emph%
+  \robustify\dots%
+  \robustify{~}%
+}
+%    \end{macrocode}
 % \begin{macro}{\@pnumwidth}
 % \begin{macro}{\@tocrmarg}
 % Etwas mehr Platz im Inhaltsverzeichnis für die Seitenzahlen.
@@ -1216,16 +1166,21 @@
 %    \end{macrocode}
 % \end{macro}^^A \TUDScriptContactTitle
 % \end{macro}^^A \mailto
-% \begin{macro}{\seeref}
+% \begin{macro}{\seeplain}
 % \changes{v2.05}{2015/11/02}{neu}^^A
-% Der Befehl \cs{seeref} kann anstelle von \cs{see} bzw. in der Sternversion
+% \begin{macro}{\@seeplain}
+% Der Befehl \cs{seeplain} kann anstelle von \cs{see} bzw. in der Sternversion
 % statt \cs{seealso} genutzt werden.
 %    \begin{macrocode}
-\NewDocumentCommand\seeref{s m}{%
-  \emph{\IfBooleanTF{#1}{\alsoname}{\seename}}\space#2%
+\NewDocumentCommand\seeplain{s m}{%
+  \emph{\mbox{\IfBooleanTF{#1}{\alsoname}{\seename}}}~#2%
+}
+\NewExpandableDocumentCommand\@seeplain{s m}{%
+  \IfBooleanTF{#1}{\alsoname}{\seename}\space#2%
 }
 %    \end{macrocode}
-% \end{macro}^^A \seeref
+% \end{macro}^^A \@seeplain
+% \end{macro}^^A \seeplain
 % \begin{macro}{\Attention}
 % \changes{v2.02}{2014/08/16}{neu}^^A
 % Falls irgendetwas besonders hervorgehoben werden soll.
@@ -1404,117 +1359,116 @@
 %
 % \subsubsection{Markup für Links}
 %
-% \begin{macro}{\GitHubBase}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@github@url@base}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@github@url@normalize}
-% \changes{v2.07}{2019/11/11}{neu}^^A
-% \begin{macro}{\tud@remove@trailing@slashes}
-% \changes{v2.07}{2019/11/11}{neu}^^A
+% \begin{macro}{\tud@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% URL-Pfade sauber schreiben und Trennzeichen ggf. ergänzen. Die Sternversion 
+% liefert \cs{relax} zurück, wenn das letzte obligatorische Argument leer ist.
 %    \begin{macrocode}
-\newcommand*\GitHubBase[1]{%
-  \tud@github@url@normalize\tud@github@url@base{#1}%
-}
-\newcommand*\tud@github@url@base{}
-\let\tud@github@url@base\relax
-\newcommand*\tud@github@url@normalize[2]{%
+\NewDocumentCommand\tud@url@normalize{s m O{https://} m m}{%
   \begingroup%
-    \def\tud@res@a{#2}%
-    \def\tud@res@b{\tud@github@url@base}%
-    \ifx\tud@res@a\tud@res@b%
-      \ifx\tud@github@url@base\relax%
-%<class&!doc>        \ClassWarning{tudscrmanual}%
-%<class&doc>        \ClassWarning{tudscrdoc}%
-%<package>        \PackageWarning{tudscrmanual}%
-        {%
-          No GitHub repository was set with `\string\GitHubBase'\MessageBreak%
-          so \TUDScriptRepository\space is used%
-        }%
-        \edef\tud@res@a{\TUDScriptRepository}%
-      \fi%
-    \else%
-      \edef\tud@res@a{\trim@spaces{#2}}%
-    \fi%
-    \def\tud@res@b##1github.com/##2github.com/##3\@nil{%
+    \edef\tud@res@a{\trim@spaces{#5}}%
+    \def\tud@res@b##1#4/##2#4/##3\@nil{%
       \IfArgIsEmpty{##2}{%
-        \def\tud@res@a{##1}%
+        \def\tud@res@c{##1}%
       }{%
-        \def\tud@res@a{##2}%
+        \def\tud@res@c{##2}%
       }%
     }%
-    \expandafter\tud@res@b\tud@res@a github.com/github.com/\@nil%
-    \tud@remove@trailing@slashes{\tud@res@a}%
+    \expandafter\tud@res@b\tud@res@a #4/#4/\@nil%
+    \tud@remove@enfold@char\tud@res@c{/}%
     \edef\tud@res@b{%
       \endgroup%
-      \def\noexpand#1{\tud@res@a}%
-    }%
-  \tud@res@b%
-}
-\newcommand*\tud@remove@trailing@slashes[1]{%
-  \begingroup%
-    \edef\tud@res@a{\trim@spaces{#1}}%
-    \Ifstrstart{\tud@res@a}{/}{%
-      \edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
-    }{}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1/##2/\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \tud@if@strequal{##2}{/}{%
-          \appto\tud@res@c{##1}%
-        }{%
-          \appto\tud@res@c{##1/}%
-          \tud@res@b##2/\@nil%
-        }%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a//\@nil%
-    \edef\tud@res@b{%
-      \endgroup%
-      \def\noexpand#1{\tud@res@c}%
+      \unexpanded{\def#2}{#3#4/\tud@res@c}%
+      \IfBooleanT{#1}{\ifdefvoid\tud@res@a{\unexpanded{\let#2\relax}}{}}%
     }%
   \tud@res@b%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@remove@trailing@slashes
+% \end{macro}^^A \tud@url@normalize
+% \begin{macro}{\GitHubBase}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@base}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% \begin{macro}{\tud@github@url@error}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Angabe der URL des verwendeten GitHub-Repository.
+%    \begin{macrocode}
+\newcommand*\tud@github@url@normalize[2]{%
+  \tud@url@normalize*#1{github.com}{#2}%
+}
+\newcommand*\tud@github@url@base{}
+\let\tud@github@url@base\relax
+\NewDocumentCommand\GitHubBase{m}{%
+  \tud@github@url@normalize\tud@github@url@base{#1}%
+}
+\newcommand*\tud@github@url@error{%
+%<*class>
+  \ClassError{\TUD@Class@Name}%
+%</class>
+%<*package>
+  \PackageError{tudscrmanual}%
+%</package>
+    {GitHub repository missing}%
+    {%
+      No default GitHub repository was set with\MessageBreak%
+      `\detokenize{\GitHubBase{<url>}}'. You should either\MessageBreak%
+      set a default one or pass it as argument.%
+    }%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@github@url@error
 % \end{macro}^^A \tud@github@url@normalize
 % \end{macro}^^A \tud@github@url@base
 % \end{macro}^^A \GitHubBase
 % \begin{macro}{\GitHubRepo}
 % \changes{v2.02}{2014/08/16}{neu}^^A
-% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Die Ausgabe für 
-% den Befehl kann mit dem optionalen Argument bestimmt werden. Wird dieses 
-% Argument nicht gegeben, wird der letzte Teil der in runden Klammern gegebenen 
-% Repository-URL als Grundlage für die Ausgabe genutzt. Das letzte optionale 
-% Argument in Guillemets kann entweder als Link auf ein Issue (numerisch) oder 
-% aber zum anhängen eines URL-Pfades genutzt werden.
+% Auszeichnungsbefehle für Verweise auf ein GitHub-Repository. Standardmäßig 
+% wird die mit \cs{GitHubBase} respektive mit dem optionalen Argument in runden 
+% Klammern gegebene Repository-URL für die Ausgabe genutzt, wobei hierfür der
+% letzte Teil des Pfades verwendet wird. Mit dem ersten optionalen Argument 
+% kann dies überschrieben werden. Mit dem optionalen Argument in Guillemets
+% kann entweder mit einem numerischen Wert auf ein Issue oder aber auf ein 
+% Unterpfad der gegebenen URL verlinkt werden.
 %    \begin{macrocode}
-\NewDocumentCommand\GitHubRepo{!t' !o !D<>{\tud@github@url@base} !d''}{%
+\NewDocumentCommand\GitHubRepo{d<> d'' o}{%
   \begingroup%
-    \tud@github@url@normalize\tud@res@b{#3}%
-    \IfValueTF{#2}{%
-      \def\tud@res@c{#2}%
+    \def\tud@res@a{\href}%
+    \IfValueT{#1}{\tud@github@url@normalize\tud@github@url@base{#1}}%
+    \ifdefvoid\tud@github@url@base{%
+      \def\tud@res@a{\tud@github@url@error\@secondoftwo}%
+      \def\tud@github@url@base{??}%
+    }{}%
+    \IfValueTF{#3}{%
+%    \end{macrocode}
+% Um \pkg{babel}-Shorthands im letzten optionalen Argument nutzen zu können, 
+% ist \cs{@safe@activesfalse} notwendig (\GitHubRepo<latex3/hyperref>'149').
+%    \begin{macrocode}
+      \def\tud@res@c{\csuse{@safe@activesfalse}#3{}}%
     }{%
-      \expandafter\filename@parse\expandafter{\tud@res@b}%
-      \protected@edef\tud@res@c{%
-        \mbox{\tud@english{GitHub-Repository~\textsbn{\filename@base}}}%
+      \expandafter\filename@parse\expandafter{\tud@github@url@base}%
+      \edef\tud@res@c{%
+        \noexpand\tud@english{%
+          \unexpanded{GitHub\mbox{-}Repository~\textsbn}{\filename@base}%
+        }%
       }%
     }%
-    \IfValueT{#4}{%
-      \edef\tud@res@a{\trim@spaces{#4}}%
-      \tud@remove@trailing@slashes{\tud@res@a}%
-      \Ifnumber{\tud@res@a}{%
-        \eappto{\tud@res@b}{/issues/\tud@res@a}%
+    \IfValueT{#2}{%
+      \edef\tud@res@b{\trim@spaces{#2}}%
+      \Ifnumber{\tud@res@b}{%
+        \IfValueF{#3}{\eappto\tud@res@c{\unskip\#\tud@res@b}}%
+        \eappto\tud@github@url@base{/issues/\tud@res@b}%
       }{%
-        \eappto{\tud@res@b}{/\tud@res@a}%
+        \tud@remove@enfold@char\tud@res@b{/}%
+        \eappto\tud@github@url@base{/\tud@res@b}%
       }%
     }%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c}%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@github@url@base}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a\xspace%
 }
 %    \end{macrocode}
 % \end{macro}^^A \GitHubRepo
@@ -1522,53 +1476,71 @@
 % \changes{v2.05g}{2016/11/08}{neu}^^A
 % Der Befehl für die Angabe von direkten Downloadlinks.
 %    \begin{macrocode}
-%<*manual>
-\NewDocumentCommand\GitHubDownload{s t' D(){\tud@github@url@base} d<> m}{%
+\NewDocumentCommand\GitHubDownload{d<> d'' o m}{%
   \begingroup%
-    \tud@github@url@normalize\tud@res@b{#3}%
-    \IfValueTF{#4}{%
-      \appto\tud@res@b{/releases/download/#4/#5}%
+    \def\tud@res@a{\href}%
+    \IfValueT{#1}{\tud@github@url@normalize\tud@github@url@base{#1}}%
+    \ifdefvoid\tud@github@url@base{%
+      \def\tud@res@a{\tud@github@url@error\@secondoftwo}%
+      \def\tud@github@url@base{??}%
+    }{}%
+    \IfValueTF{#2}{%
+      \edef\tud@res@b{\trim@spaces{#2}}%
+      \tud@remove@enfold@char\tud@res@b{/}%
+      \eappto\tud@github@url@base{/releases/download/\tud@res@b}%
     }{%
-      \appto\tud@res@b{/releases/latest/download/#5}%
+      \appto\tud@github@url@base{/releases/latest/download}%
     }%
-    \IfBooleanTF{#2}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \IfBooleanTF{#1}{\def\tud@res@c{\File*}}{\def\tud@res@c{\File}}%
-    \tud@res@a{https://github.com/\tud@res@b}{\tud@res@c{#5}}%
-  \endgroup%
-  \xspace%
+    \appto\tud@github@url@base{/#4}%
+    \IfValueTF{#3}{%
+      \def\tud@res@c{\csuse{@safe@activesfalse}#3{}}%
+    }{%
+      \def\tud@res@c{\textttit{#4}}%
+    }%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@github@url@base}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
 }
-%</manual>
 %    \end{macrocode}
 % \end{macro}^^A \GitHubDownload
 % \begin{macro}{\CTAN}
 % \changes{v2.05}{2015/11/22}{neu}^^A
+% \begin{macro}{\tud@ctan@url@normalize}
+% \changes{v2.06p}{2022/09/20}{neu}^^A
+% Das Markup für einen Link auf \CTAN.
 %    \begin{macrocode}
-\NewDocumentCommand\CTAN{!t' !o}{%
+\newcommand*\tud@ctan@url@normalize[2]{%
+  \tud@url@normalize#1{ctan.org}{#2}%
+}
+\NewDocumentCommand\CTAN{d<> o}{%
   \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{http://www.ctan.org\IfValueT{#2}{/#2}}{%
-      \tud@english{Comprehensive TeX Archive Network (CTAN)}%
+    \def\tud@res@a{\href}%
+    \tud@ctan@url@normalize\tud@res@d{\IfValueT{#1}{#1}}%
+    \IfValueTF{#2}{%
+      \def\tud@res@c{\csuse{@safe@activesfalse}#2{}}%
+    }{%
+      \def\tud@res@c{%
+        \tud@english{Comprehensive \Lettering{TeX} Archive Network~(CTAN)}%
+      }%
     }%
-  \endgroup%
-  \xspace%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \expandonce\tud@res@a{\tud@res@d}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a\xspace%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@ctan@url@normalize
 % \end{macro}^^A \CTAN
 % \begin{macro}{\scrguide}
 % \changes{v2.02}{2014/09/04}{neu}^^A
 % \changes{v2.05}{2015/07/23}{Hyperlinktext über optionales Argument}^^A
 %    \begin{macrocode}
-%<*manual>
-\NewDocumentCommand\scrguide{!t' !O{\KOMAScript-Handbuch}}{%
-  \begingroup%
-    \IfBooleanTF{#1}{\let\tud@res@a\href}{\let\tud@res@a\hrfn}%
-    \tud@res@a{%
-      http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf%
-    }{#2}%
-  \endgroup%
-  \xspace%
+\NewDocumentCommand\scrguide{O{\KOMAScript-Handbuch}}{%
+  \CTAN<pkg/koma-script>[#1]%
 }
-%</manual>
 %    \end{macrocode}
 % \end{macro}^^A \scrguide
 %

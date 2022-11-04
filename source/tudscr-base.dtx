@@ -539,6 +539,97 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@remove@spaces@within
 %
+% \minisec{Entfernen umhüllender Zeichen}
+%
+% \begin{macro}{\tud@remove@enfold@char}
+% \changes{v2.06p}{2022/10/24}{neu}^^A
+% Entfernt aus der im ersten Argument als Makro gegebenen Zeichenkette am 
+% Anfang und Ende sämtliche Leerzeichen sowie das im zweiten Argument 
+% angegebene Zeichen.
+%    \begin{macrocode}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \expandafter\def\expandafter\tud@res@a\expandafter{#1}%
+    \trim@spaces@in\tud@res@a%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@a}%
+    \ifin@%
+      \let\tud@res@b\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@b\@empty%
+            \def\tud@res@b{##1}%
+          \else%
+            \appto\tud@res@b{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@a#2\@nil%
+      \trim@spaces@in\tud@res@b%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@enfold@char
+%
+% \minisec{Ersetzen von Zeichen}
+%
+% \begin{macro}{\tud@replace@in}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% Ersetzt innerhalb der im ersten Argument als Makro gegebenen Zeichenkette 
+% alle im zweiten Argument gegebene \meta{Suchzeichen} durch die im dritten 
+% Argument angegebene \meta{Ersatzzeichen} rekursiv.
+%    \begin{macrocode}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden. Die zurückgelieferte Zeichenkette enthält demzufolge nur 
+% noch Zeichen mit \val{catcode 12}.
+%    \begin{macrocode}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@replace@@in
+% \end{macro}^^A \tud@replace@in
+%
 % \subsubsection{Test auf verfügbare Sprachen}
 %
 % Aktuell gibt es leider keine gemeinsame Schnittstelle für die Sprachpakete 
