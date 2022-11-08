@@ -75,6 +75,7 @@
 % \ToDo{alle externen Aufrufe mit \cs{if@filesw} behandeln}[v2.06]
 % \ToDo{Document(Com/Env) auf \val{!} und optionale Arg. am Ende prüfen}[v2.06]
 % \ToDo{Argumente \val{''} und \val{<>} ableichen; konsistente Inhalte}[v2.06]
+%^^A TODO (d|D|r|R)['\+\-/:;<=>?_\(\|\)]{2}(?=( |\{|\}))
 %    \begin{macrocode}
 %<*package&identify>
 \ProvidesPackage{tudscrmanual}[%
@@ -452,56 +453,34 @@
 % \end{macro}^^A \partautorefname
 % \end{macro}^^A \autoref
 %
-% \begin{macro}{\tudhyperdef}
-% \changes{v2.02}{2014/10/27}{neu}^^A
-% \begin{macro}{\tudhyperref}
-% \changes{v2.02}{2014/10/27}{neu}^^A
-% \begin{macro}{\tud@manualname}
-% \changes{v2.05}{2015/11/19}{neu}^^A
-% Diese Befehle dienen sowohl zum Definieren von Textankern im Handbuch als 
-% auch zum Referenzieren auf diese. Bei der Erstellung des Ankers mit 
-% \cs{tudhyperdef} wird zusätzlich auch noch ein Label (\cs{label}) erzeugt.
-% Der Anker wird mit \cs{Hy@raisedlink}~-- wie es auch bei pkg{hyperref}-Labels 
-% geschieht~-- über die Grundlinie gehoben. Die Sternversion sollte nach
-% Überschriften verwendet werden und verschiebt die vertikale Position des
-% Ankers noch weiter nach oben.
+% \begin{macro}{\tud@hyperdef}
+% \changes{v2.06p}{2022/11/08}{neu}^^A
+% \begin{macro}{\tud@hyperref}
+% \changes{v2.06p}{2022/11/08}{neu}^^A
+% Zum einfachen Setzen respektive Referenzieren von Textankern. Damit ersteres 
+% oberhalb der Grundlinie erfolgt, wird~-- wie auch an vielen Stellen von 
+% \pkg{hyperref} selbst~-- hierfür \cs{Hy@raisedlink} verwendet. Das optionale 
+% Argument der Befehle kann für die Angabe einer Kategorie verwendet werden.
 %    \begin{macrocode}
-\newcommand*\tud@manualname{tudscr}
-%<*class>
-\TUD@UnwindPackage{hyperref}{%
-  \RenewDocumentCommand\tudhyperdef{s t' m}{\label{#3}}%
+\newrobustcmd*\tud@hyperdef[2][]{%
+  \begingroup
+    \edef\tud@res@a{%
+      \endgroup
+      \noexpand\Hy@raisedlink{\noexpand\hyperdef{#1}{#2}{}}%
+    }%
+  \tud@res@a%
 }
-\NewDocumentCommand\tudhyperdef{s t' m}{%
-  \@tempswafalse%
-  \IfBooleanT{#1}{\@tempswatrue\tud@setdim\@tempdima{3\baselineskip}}%
-  \IfBooleanT{#2}{\@tempswatrue\tud@setdim\@tempdima{15\baselineskip}}%
-  \if@tempswa%
-    \raisebox{\@tempdima}[0pt][0pt]{\hyperdef{\tud@manualname}{#3}{}}%
-    \par\nobreak\vskip-\parskip\vskip-\baselineskip%
-    \@afterindentfalse\@afterheading%
-  \else%
-    \Hy@raisedlink{\hyperdef{\tud@manualname}{#3}{}}\ignorespaces%
-  \fi%
-  \label{#3}%
-  \tud@trace@lbl@created@add{#3}%
+\newrobustcmd*\tud@hyperref[3][]{%
+  \begingroup
+    \edef\tud@res@a{%
+      \endgroup
+      \noexpand\hyperref{}{#1}{#2}%
+    }%
+  \tud@res@a{#3}%
 }
-\newrobustcmd*\tudhyperref[2]{\hyperref{}{\tud@manualname}{#1}{#2}}
-%</class>
 %    \end{macrocode}
-% Aus einem Tutorial erfolgen alle Querverweise mit \cs{tudhyperref} auf das 
-% Anwenderhandbuch \enquote*{tudscr} im übergeordneten Ordner.
-% \ToDo{umbenennen in \cs{tudscrmanualref}}[v2.06]
-% \ToDo{\pkg{xr-hyper} oder \cs{href}[pdfnewwindow]{run:./../xxx}}[v2.06]
-%    \begin{macrocode}
-%<*package>
-\newrobustcmd*\tudhyperref[2]{%
-  \hyperref{../\tud@manualname.pdf}{\tud@manualname}{#1}{#2}%
-}
-%</package>
-%    \end{macrocode}
-% \end{macro}^^A \tud@manualname
-% \end{macro}^^A \tudhyperref
-% \end{macro}^^A \tudhyperdef
+% \end{macro}^^A \tud@hyperref
+% \end{macro}^^A \tud@hyperdef
 % \begin{macro}{\tud@currentHref}
 % Einige Befehle und Umgebungen von Drittpaketen ändern bei deren Aufruf die 
 % Definition von \cs{currentHref}, was bei Querverweisen gegebenenfalls zu 
@@ -1706,13 +1685,42 @@
 % \fi
 %
 % \subsection{Markup von \Lettering{LaTeX}-Elementen in der Dokumentation}
+%
+% Es folgen die Definitionen, um verschiedenste \Lettering{LaTeX}-Elemente wie 
+% beispielsweise Bundle, Klassen oder Pakete sowie deren Befehle und Umgebungen 
+% inklusive der nutzbaren Argumente dokumentieren und erläutern zu können. All
+% diese Elemente werden im Folgenden allgemein und unspezifisch als Entitäten
+% bezeichnet. Ziel der definierten Entitätsbefehle und -umgebungen ist es, dass
+% diese uniform genutzt werden und kontektabhängig automatisch Indexeinträge, 
+% Label, Referenzierungen und unterschiedliche Ausgaben generieren können.
+%
+% Zu Beginn werden einige Hilfmakros definiert.
+%
+% \begin{macro}{\tud@truncate@value}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% Der expandierte Inhalt des zweiten Argumentes \meta{key}|=|\meta{value}
+% wird an |=| getrennt und \meta{key} in das Makro des ersten Argumentes 
+% zurück geschrieben.
+%    \begin{macrocode}
+\newcommand*\tud@truncate@value[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \def\tud@res@b##1=##2\@nil{%
+      \endgroup%
+      \def#1{##1}%
+    }%
+  \expandafter\tud@res@b\tud@res@a=\@nil%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@truncate@value
+%
 % \subsubsection{Markup von Variablen, Parametern etc.}
 %
 % \begin{macro}{\tud@doifPValue}
 % \changes{v2.05}{2015/11/14}{neu}^^A
-% Der Befehl wird von den Makros \cs{tud@lbl@get@curr} und \cs{tud@idx@get} 
+% Der Befehl wird von den Makros \cs{tud@lbl@@@get} und \cs{tud@idx@get} 
 % genutzt, um bedingten Quelltext auszuführen, falls im ersten obligatorischen 
-% Argument Parameter direkt oder aber mit einem der Parameter-Markup-Befehle 
+% Argument entweder Parameter direkt oder aber mit einem der Parameterbefehle 
 % \cs{PValue} oder \cs{PSet} angegeben wurde. Andere Auszeichnungsbefehle 
 % für Parameter werden ignoriert.
 %    \begin{macrocode}
@@ -1841,7 +1849,7 @@
 %
 % \subsubsection{Markup von Klassen, Paketen, Optionen und weiteren Elementen}
 %
-% \changes{v2.05}{2015/11/02}{Markup-Befehle komplett überarbeitet}^^A
+% \changes{v2.05}{2015/11/02}{Entitätsbefehle komplett überarbeitet}^^A
 %
 % Im Folgenden werden allerhand Befehle mit Hilfe des Paketes \pkg{xparse} 
 % definiert, um bestimmte Begriffe, Klassen, Pakete, Optionen, Umgebungen, 
@@ -1869,7 +1877,7 @@
 % \cls{tudscrmanual} und nicht für das Paket \pkg{tudscrmanual} gilt.
 %
 % Für Labels, Index- und Änderungs- sowie PDF-Outline-Einträge etc. müssen die
-% nachfolgend definierten Markup-Befehle durch eine expandierbare Version
+% nachfolgend definierten Entitätsbefehle durch eine expandierbare Version
 % ersetzt werden, welche hier mit \cs{NewExpandableDocumentCommand} ebenfalls 
 % definiert werden.
 %
@@ -1877,7 +1885,7 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Dieser Schalter wird zwei unterschiedliche Aufgaben verwendet. Zum einen wird 
 % er bei der Ausgabe von Verzeichnissen auf \val{true} gesetzt, um das Setzen 
-% von Indexeinträgen durch Markup-Befehle in den Verzeichnissen selbst zu 
+% von Indexeinträgen durch Entitätsbefehle in den Verzeichnissen selbst zu 
 % unterbinden. Weiterhin verhindert der aktivierte Schalter bei der Ausführung 
 % von \cs{Process@Markup} das Erstellen von erweiterten Querverweisen sowie das 
 % Setzen von CTAN-Links bei Paketen (\cs{Package}), was weder in Verzeichnissen 
@@ -1921,7 +1929,7 @@
 %    \end{macrocode}
 % Nach der formatierten Ausgabe wird \cs{Markup@ClearFormat} aufgerufen, um die 
 % aktuell definierte Formatierung zurückzusetzen und bei einem neuen Aufruf 
-% eines der Markup-Befehle mit \cs{Markup@CheckFormat} auf die Verwendung von 
+% einer der Entitätsbefehle mit \cs{Markup@CheckFormat} auf die Verwendung von 
 % \cs{Markup@SetFormat} prüfen zu können.
 %    \begin{macrocode}
 \newcommand*\Markup@ClearFormat{%
@@ -2055,7 +2063,7 @@
 % \end{macro}^^A \AP@Underscore
 % \begin{macro}{\Markup@Expandable}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Dieser Befehl definiert alle Markup-Befehle in der Form um, dass diese nur 
+% Dieses Makro definiert alle Entitätsbefehle in der Form um, dass diese nur 
 % noch das eigentliche Hauptargument unformatiert durchreichen. Dies wird für 
 % die Erstellung von Label und Indexeinträgen benötigt. Die Sternversion führt 
 % dies auch noch für die Auszeichnung von Parametern etc. durch.
@@ -2083,9 +2091,7 @@
 %    \begin{macrocode}
   \IfBooleanF{#1}{%
     \Parameter@Expandable%
-    \let\Lettering\@firstofone%
-    \def\_{-}%
-    \protected\def~{~}%
+    \Misc@Expandable%
   }%
 }
 %    \end{macrocode}
@@ -2098,6 +2104,22 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \Markup@Expandable
+% \begin{macro}{\Misc@Expandable}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% Allerlei Makros, die für das Erstellen von Labeln oder Indexeinträgen bei der 
+% Expansion eine passende Definition benötigen.
+%    \begin{macrocode}
+\newcommand*\Misc@Expandable{%
+  \let\Lettering\@firstofone%
+  \let\emph\@firstofone%
+  \let\texttt\@firstofone%
+  \def\dots{...}%
+  \def\_{_}%
+  \protected\def~{~}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \Misc@Expandable
+%
 % \begin{macro}{\Distribution}
 % \changes{v2.02}{2014/10/08}{überarbeitet}^^A
 % \begin{macro}{\@Distribution}
@@ -2107,7 +2129,7 @@
 \NewDocumentCommand\Distribution{s d|| d'' d() m}{%
   \Markup@SetFormat{\sbnfont}%
   \Process@Markup{\Distribution{#5}}(#4)'#3'|#2|%
-  \Process@Index{#1}{\Distribution{#5}}[Distribution](#4)|#2|%
+  \Process@Index{#1}[main]{\Distribution{#5}}[Distribution](#4)|#2|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Distribution
@@ -2203,7 +2225,7 @@
 \NewDocumentCommand\Format{s d|| d'' d() m}{%
   \Markup@SetFormat{\sbnfont}%
   \Process@Markup{\Format{\Lettering{#5}}}(#4)'#3'|#2|%
-  \Process@Index{#1}{\Format{#5}}[Textsatzsystem](#4)|#2|%
+  \Process@Index{#1}[main]{\Format{#5}}[Textsatzsystem](#4)|#2|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Format
@@ -2224,7 +2246,7 @@
 %</class>
     \Markup@SetFormat{\sbnfont}%
     \Process@Markup{\Bundle{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Bundle{#5}}[Bundle](#4)|#2|%
+    \Process@Index{#1}[files]{\Bundle{#5}}[Bundle](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2249,7 +2271,7 @@
 %</class>
     \Markup@SetFormat{\sbnfont}%
     \Process@Markup{\Class{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Class{#5}}[Klasse](#4)|#2|%
+    \Process@Index{#1}[files]{\Class{#5}}[Klasse](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2281,7 +2303,7 @@
     }{%
       \Process@Markup{\Package{#5}}(#4)<#5>'#3'|#2|%
     }%
-    \Process@Index{#1}{\Package{#5}}[Paket](#4)|#2|%
+    \Process@Index{#1}[files]{\Package{#5}}[Paket](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2329,7 +2351,7 @@
 %</class>
     \Markup@SetFormat{\ttfamily}%
     \Process@Markup{\Option{#5}}=#6=[{#7}](#4)'#3'|#2|%
-    \Process@Index{#1}{\Option{#5}}=#6=(#4)|#2|%
+    \Process@Index{#1}[options]{\Option{#5}}=#6=(#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2377,7 +2399,7 @@
       )%
     }%
     \Process@Markup{\Environment{#5}}/#6/=#7=[{#8}](#4)'#3'|#2|%
-    \Process@Index{#1}{\Environment{#5}}/#6/=#7=[Umgebung](#4)|#2|%
+    \Process@Index{#1}[macros]{\Environment{#5}}/#6/=#7=[Umgebung](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2411,7 +2433,7 @@
       \Markup@SetFormat[\bsc]{\ttfamily}%
     }%
     \Process@Markup{\Macro{#5}}/#6/=#7=[{#8}](#4)'#3'|#2|%
-    \Process@Index{#1}{\Macro{#5}}/#6/=#7=(#4)|#2|%
+    \Process@Index{#1}[macros]{\Macro{#5}}/#6/=#7=(#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2433,7 +2455,7 @@
 %</class>
     \Markup@SetFormat[\bsc]{\ttfamily}[L\"ange]%
     \Process@Markup{\Length{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Length{#5}}[L\"ange](#4)|#2|%
+    \Process@Index{#1}[misc]{\Length{#5}}[L\"ange](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2455,7 +2477,7 @@
 %</class>
     \Markup@SetFormat{\ttfamily}[Z\"ahler]%
     \Process@Markup{\Counter{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Counter{#5}}[Z\"ahler](#4)|#2|%
+    \Process@Index{#1}[misc]{\Counter{#5}}[Z\"ahler](#4)|#2|%
 %<*class>
   \fi%
 %</class>
@@ -2475,7 +2497,7 @@
   \else%
     \Markup@SetFormat[\bsc]{\ttfamily}[Bezeichner]%
     \Process@Markup{\Term{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Term{#5}}(#4)|#2|%
+    \Process@Index{#1}[terms]{\Term{#5}}(#4)|#2|%
   \fi%
 }
 %    \end{macrocode}
@@ -2493,7 +2515,7 @@
   \else%
     \Markup@SetFormat{\ttfamily}[Seitenstil]%
     \Process@Markup{\PageStyle{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\PageStyle{#5}}[Seitenstil](#4)|#2|%
+    \Process@Index{#1}[elements]{\PageStyle{#5}}[Seitenstil](#4)|#2|%
   \fi%
 }
 %    \end{macrocode}
@@ -2511,7 +2533,7 @@
   \else%
     \Markup@SetFormat{\ttfamily}[Schriftelement]%
     \Process@Markup{\Font{#5}}(#4)'#3'|#2|%
-    \Process@Index{#1}{\Font{#5}}[Schriftelement](#4)|#2|%
+    \Process@Index{#1}[elements]{\Font{#5}}[Schriftelement](#4)|#2|%
   \fi%
 }
 %    \end{macrocode}
@@ -2539,7 +2561,7 @@
       \begingroup\ttfamily{#5\IfValueT{#6}{~(#6)}}\endgroup%
     )%
     \Process@Markup{\Color{#5}}[{#6}](#4)'#3'|#2|%
-    \Process@Index{#1}{\Color{#5}}[Farbe](#4)|#2|%
+    \Process@Index{#1}[elements]{\Color{#5}}[Farbe](#4)|#2|%
   \fi%
 }
 %    \end{macrocode}
@@ -2555,7 +2577,7 @@
 %%  \IfValueT{#6}{\ClassWarning{xxx}{move me \detokenize{#6}}}%
   \Markup@SetFormat{\sbifont}%
   \Process@Markup{\Application{#5}}(#4)<#6>'#3'|#2|%
-  \Process@Index{#1}{\Application{#5}}[Anwendungssoftware](#4)|#2|%
+  \Process@Index{#1}[main]{\Application{#5}}[Anwendungssoftware](#4)|#2|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@Application
@@ -2569,443 +2591,250 @@
 \NewDocumentCommand\File{s d|| d'' d() >{\AP@Underscore}m}{%
   \Markup@SetFormat{\ttfamily}%
   \Process@Markup{\File{#5}}(#4)'#3'|#2|%
-  \Process@Index{#1}{\File{#5}}[Datei](#4)|#2|%
+  \Process@Index{#1}[files]{\File{#5}}[Datei](#4)|#2|%
 }
 %    \end{macrocode}
 % \end{macro}^^A \@File
 % \end{macro}^^A \File
 %
-% \subsubsection{Namensraum für unterschiedliche Entitäten}
+% \subsection{Namensraum für unterschiedliche Entitäten}
 %
 % Um eventuell identisch benannte Befehle und die dazu passenden Indexeinträge 
-% für unterschiedliche Bundle, Pakete oder Klassen~-- im Folgenden unspezifisch
-% als Entitäten bezeichnet werden~-- zu ermöglichen, wird ein Namensraum für 
-% diese eingeführt.
+% für unterschiedliche Entitäten zu ermöglichen, wird ein Namensraum für diese 
+% eingeführt.
 %
 % \begin{environment}{Entity}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@bdl@curr}
+% \begin{macro}{\tud@ety@crnt}
 % \changes{v2.05}{2015/08/04}{neu}^^A
-% \begin{macro}{\tud@bdl@dflt}
+% \begin{macro}{\tud@ety@dflt}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% \begin{macro}{\tud@if@bdl}
-% \changes{v2.05}{2015/08/04}{neu}^^A
-% Diese Makros werden für das Definieren einer Entität und ggf. das 
-% Prüfen der selbigen benötigt.
+% \begin{macro}{\tud@ety@gnrl}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% Diese Makros werden für das Definieren eines Entitätelements und ggf. das 
+% Prüfen des selbigen benötigt.
 % \ToDo{Suffixe wie Klasse, Paket etc. lokalisieren (locale)}[v2.??]
 %    \begin{macrocode}
-\newcommand*\tud@bdl@dflt{tudscr}
-\newcommand*\tud@bdl@curr{}
-\let\tud@bdl@curr\tud@bdl@dflt
-\newcommand*\tud@if@bdl[2]{%
-  \tud@if@strequal{\tud@bdl@curr}{\tud@bdl@dflt}{#2}{#1}%
-}
+\newcommand*\tud@ety@crnt{}
+\newcommand*\tud@ety@dflt{\Bundle{tudscr}}
+\newcommand*\tud@ety@gnrl{+general+}
 %    \end{macrocode}
 % Die Umgebung \env{Entity} kann nicht verschachtelt werden und prüft zuerst 
 % dementsprechend die Verwendung. Anschließend wird lediglich das Makro 
-% \cs{tud@bdl@curr} auf das übergebene Argument gesetzt, um innerhalb der 
+% \cs{tud@ety@crnt} auf das übergebene Argument gesetzt, um innerhalb der 
 % Umgebung erstellte Label und Indexeinträge zu beeinflussen.
 %    \begin{macrocode}
 \NewDocumentEnvironment{Entity}{m}{%
-  \tud@if@bdl{%
-%<*class>
-    \ClassError{tudscrmanual}%
-%</class>
-%<*package>
-    \PackageError{tudscrmanual}%
-%</package>
-      {Nested environment `Entity'}{%
-        It is not possible to nest this environment, when\MessageBreak%
-        a cross-label was given before.%
-      }%
-  }{%
-    \gdef\tud@bdl@curr{#1}%
-  }%
+  \def\tud@ety@crnt{#1}%
   \ignorespaces%
 }{%
-  \global\let\tud@bdl@curr\tud@bdl@dflt%
   \aftergroup\ignorespaces%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@if@bdl
-% \end{macro}^^A \tud@bdl@dflt
-% \end{macro}^^A \tud@bdl@curr
+% \end{macro}^^A \tud@ety@gnrl
+% \end{macro}^^A \tud@ety@dflt
+% \end{macro}^^A \tud@ety@crnt
 % \end{environment}^^A Entity
 %
-% \subsubsection{Erstellung und Validierung von Labeln}
+% \subsection{Erstellung und Validierung von Labeln}
 %
-% \begin{macro}{\tud@lbl@get@curr}
+% Für Entitätsbefehle sollen korrespondierende Label generiert werden, um diese 
+% einerseits zu setzen und im Fließtext automatisch auf diese zu referenzieren.
+%
+% \begin{macro}{\tud@lbl@get}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@get@@curr}
-% \changes{v2.05}{2015/11/03}{neu}^^A
+% \changes{v2.06p}{2022/11/04}{reimplementiert}^^A
+% \begin{macro}{\tud@lbl@@get}
+% \begin{macro}{\tud@lbl@@@get}
 % \begin{macro}{\tud@lbl@tmp}
 % \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@fmt}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% In \cs{tud@lbl@tmp} werden nachfolgend die durch \cs{tud@lbl@get@curr} oder 
-% \cs{tud@attr@get} erzeugten (Sub-)Label gespeichert.
+% Mit \cs{tud@lbl@get} wird anhand des im zweiten obligatorischen Argument 
+% gegebenen Entitätsbefehls ein Label generiert.
 %    \begin{macrocode}
 \newcommand*\tud@lbl@tmp{}
+\NewDocumentCommand\tud@lbl@get{m m}{%
+  \begingroup%
+    \Markup@Inner@Get\tud@res@a{#2}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\tud@lbl@@get#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
 %    \end{macrocode}
-% Für den Befehl \cs{tud@lbl@get@curr} wird das zweite obligatorische 
-% Argument (|#3|) für gewöhnlich in der Form
-% |\Bundle/\Class/\Package|\marg{\dots}|:\Markup|\marg{Element}|}| angegeben. 
-% Dieses wird beim Einlesen direkt an die beiden Argumentprozessoren 
-% \cs{SplitArgument}|{2}{:}| gefolgt von \cs{tud@lbl@create} übergeben. Danach
-% enthält das zweite obligatorische Argument ein Label der Form
-% \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element}. Auch die Angabe
-% eines Makros als zweites obligatorische Argument, welches das Label in der
-% richtigen Formatierung enthält, ist möglich.
+% Bei \cs{tud@lbl@@get} handelt es sich quasi um die interne Variante, der im 
+% zweiten obligatorischen Argument alle zur Labelgenerierung gewünschten 
+% Argumente in der internen Nomenklatur übergeben werden müssen.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@curr{%
-  s m >{\tud@lbl@create}>{\SplitArgument{2}{:}}m d// d==%
-}{%
-%    \end{macrocode}
-% Mit \cs{tud@lbl@get@@curr} wird das im zweiten obligatorischen Argument 
-% (|#3|) generierte Label in das im ersten obligatorischen Argument |#2|
-% angegebenen Makro gespeichert und ggf. diesem das letzte optionale Argument
-% für einen speziellen Wert zu einem Schlüssel angehangen.
-%    \begin{macrocode}
-  \tud@lbl@get@@curr#2{#3}/#4/=#5=%
-%    \end{macrocode}
-% Die Sternversion von \cs{tud@lbl@get@curr} wird für das Definieren von Labeln 
-% bei Deklarationen etc. genutzt. Sollte diese verwendet worden sein, ist die 
-% Generierung beendet.
-%    \begin{macrocode}
-%<*class>
-  \IfBooleanF{#1}{%
-%    \end{macrocode}
-% Andernfalls wird geprüft, ob das erstellte Label überhaupt existiert. Sollte 
-% das nicht der Fall sein, wird ein passendes Label für den gegebenen Schlüssel 
-% ohne speziellen Wert gesucht.
-%    \begin{macrocode}
-    \@tempswafalse%
-    \tud@if@lbl@exists{#2}{%
-      \@tempswatrue%
-    }{%
-      \IfValueT{#5}{%
-        \tud@lbl@get@@curr\tud@reserved{#3}%
-        \tud@if@lbl@exists{\tud@reserved}{%
-          \let#2\tud@reserved%
-          \@tempswatrue%
-        }{}%
+\NewDocumentCommand\tud@lbl@@get{m m}{%
+  \begingroup%
+    \tud@lbl@@@get#2%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\detokenize\expandafter{\tud@lbl@tmp}}%
+    }%
+  \tud@res@a%
+}
+\NewDocumentCommand\tud@lbl@@@get{m d// d== o d() d<> d'' d||}{%
+  \begingroup%
+    \IfValueTF{#5}{\protected@edef\tud@res@a{#5}}{\let\tud@res@a\tud@ety@crnt}%
+    \ifx\tud@res@a\tud@ety@gnrl\else%
+      \let\tud@res@b\@empty%
+      \def\tud@res@c##1##2\@nil{%
+        \ifx\tud@res@b\@empty\else%
+          \appto\tud@res@b{+}%
+        \fi%
+        \eappto\tud@res@b{\expandafter\@gobble\string##1(##2)}%
+      }%
+      \@for\tud@res@d:=\tud@res@a\do{%
+        \trim@spaces@in\tud@res@d%
+        \ifx\tud@res@d\@empty\else%
+          \expandafter\tud@res@c\tud@res@d\@nil%
+        \fi%
+      }%
+      \ifx\tud@res@b\@empty%
+        \let\tud@res@a\tud@ety@gnrl
+      \else%
+        \let\tud@res@a\tud@res@b
+      \fi%
+    \fi%
+    \Parameter@Expandable%
+    \Misc@Expandable%
+    \protected@edef\tud@res@d{#1}%
+    \def\tud@res@b##1##2\@nil{%
+      \edef\tud@res@b{\expandafter\@gobble\string##1}%
+      \appto\tud@res@b{:##2}%
+    }%
+    \expandafter\tud@res@b\tud@res@d\@nil%
+    \let\tud@res@c\@empty
+    \tud@doifPValue{#3}{\unexpanded{\def\tud@res@c}{\trim@spaces{#3}}}%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def\tud@lbl@tmp}{%
+        \tud@res@a:\tud@res@b%
+        \IfValueT{#2}{/#2}%
+        \ifx\tud@res@c\@empty\else=\tud@res@c\fi%
       }%
     }%
-%    \end{macrocode}
-% Wurde auch danach noch kein passendes Label gefunden, gibt es u.\,U. eine 
-% letzte Möglichkeit, ein passendes Label zu finden. Wird in der Dokumentation 
-% gerade eine Entität erläutert (\env{Entity}, \env{DeclareEntity}), so wird 
-% eventuell auf ein Element aus ebendiesen Hauptklassen referenziert. In 
-% diesem Fall wird \cs{tud@lbl@get@dflt} aufgerufen, um den Entitätpräfix für 
-% das Label entsprechend zu setzen.
-%    \begin{macrocode}
-    \if@tempswa\else%
-      \tud@if@bdl{\tud@lbl@get@dflt#2{#3}/#4/=#5=}{}%
-    \fi%
-  }%
-%</class>
+  \tud@res@a%
 }
 %    \end{macrocode}
-% Mit \cs{tud@lbl@get@@curr} wird das generierte Label in Makro gespeichert, 
-% welches beim Aufruf von \cs{tud@lbl@get@curr} angegebenen wurde.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@curr{m m d// d==}{%
-  \def#1{#2}%
-  \IfValueT{#3}{\appto#1{/#3}}%
-%    \end{macrocode}
-% Sollte optional mit \cs{PValue} bzw. \cs{PSet} ein spezieller Wert für
-% einen Schlüssel übergeben worden sein, wird dieser ggf. angehängt.
-%    \begin{macrocode}
-  \tud@doifPValue[\tud@lbl@fmt]{#4}{\noexpand\appto\noexpand#1{=#4}}%
-}
-%    \end{macrocode}
-% Mit dem Hilfsmakro \cs{tud@lbl@fmt} wird innerhalb der beiden Befehle 
-% \cs{tud@lbl@@create} und \cs{tud@lbl@get@@curr} dafür gesorgt, dass 
-% geschützte Leerzeichen sowie eingabekodierungsabhängige Zeichen korrekt für 
-% ein Label umgesetzt werden. Auch durch \cs{NoCaseChange} in Überschriften 
-% geschützte Inhalte werden direkt übernommen.
-%    \begin{macrocode}
-\newcommand*\tud@lbl@fmt{%
-  \def~{-}%
-  \let\IeC\@firstofone%
-  \def\"##1{##1e}%
-  \def\ss{ss}%
-  \def\dots{...}%
-  \let\NoCaseChange\@firstofone%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@fmt
 % \end{macro}^^A \tud@lbl@tmp
-% \end{macro}^^A \tud@lbl@get@@curr
-% \end{macro}^^A \tud@lbl@get@curr
-% \begin{macro}{\tud@lbl@get@dflt}
-% \changes{v2.05}{2015/11/04}{neu}^^A
-% \begin{macro}{\tud@lbl@get@@dflt}
-% \changes{v2.05}{2015/11/04}{neu}^^A
-% Diese beiden Makros werden genutzt, um mit \cs{tud@lbl@get@curr} innerhalb 
-% der Umgebungen \env{Entity} und \env{DeclareEntity} für den Fall, dass ein 
-% gesuchtes Label für die aktuelle Entität nicht existiert, nach diesem
-% Element in den existierenden Labels der Hauptklassen zu suchen.
+% \end{macro}^^A \tud@lbl@@@get
+% \end{macro}^^A \tud@lbl@@get
+% \end{macro}^^A \tud@lbl@get
 %
-% Dabei wird das bereits generierte Label durch \cs{tud@lbl@get@dflt} in 
-% seine drei Hauptbestandteile zur Weiterverarbeitung zerlegt.
+% \iffalse
+%<*class>
+% \fi
+%
+% \begin{macro}{\tud@lbl@declare}
+% \changes{v2.06p}{2022/11/08}{neu}^^A
+% \begin{macro}{\tud@lbl@@declare}
+% \changes{v2.06p}{2022/11/08}{neu}^^A
+% Diese Befehle dienen zum gemeinsamen Definieren von Textankern sowie Labeln 
+% für die Entitätsbefehle (\cs{tud@lbl@@get}). Die Sternversion wird von 
+% \cs{entitylabel} genutzt und setzt für \opt{destlabel=true} keinen Textanker 
+% sondern nur ein Label.
+% \ToDo{use categories, especially \val{declaration}}[v2.06]
+% \ToDo{set \cs{@currentlabelname} manually?}[v2.06]
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@dflt{m >{\SplitArgument{2}{:}}m r// r==}{%
-  \tud@lbl@get@@dflt{#1}#2/#3/=#4=%
+\NewDocumentCommand\tud@lbl@declare{s m}{%
+  \begingroup
+    \edef\tud@res@a{%
+      \endgroup
+      \noexpand\tud@lbl@@declare{#1}{#2}%
+    }%
+  \tud@res@a%
 }
 %    \end{macrocode}
-% Durch \cs{tud@lbl@get@@dflt} wird als erstes geprüft, ob der Entitätpräfix 
-% bereits dem Standardpräfix für die Hauptklassen entspricht. Nur wenn dies 
-% nicht der Fall ist, wird die Labelgenerierung abermals ausgeführt.
+% Nachdem die Argumente vollständig expandiert wurden, werden Textanker und 
+% Label für die Entität gesetzt. Durch \pkg{hyperref} werden einige generische 
+% Textanker (\emph{target})~-- beispielsweise für Überschriften~-- gesetzt. Mit 
+% der Option \opt{destlabel} werden diese mit dem nächsten gesetzten Label 
+% korreliert, um diese beispielsweise über externe Links mit einer bekannten 
+% und nicht der generischen Bezeichnung aufrufen zu können. Sollte der letzten 
+% generischen Anker jedoch die Deklaration einer Entität folgen, ist dies nicht 
+% gewünscht, weshalb \cs{\HyperDestRename} hier deaktiviert wird.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@get@@dflt{m m m m r// r==}{%
-  \tud@if@strequal{#2}{\tud@bdl@dflt}{}{%
-%    \end{macrocode}
-% Dabei erfolgt der Aufruf logischerweise mit dem richtigen Entitätpräfix. 
-%    \begin{macrocode}
-    \tud@lbl@get@curr#1{\tud@bdl@dflt:#3:#4}/#5/=#6=%
-  }%
+\newcommand*\tud@lbl@@declare[2]{%
+  \begingroup
+    \tud@hyperdef{#2}%
+    \let\HyperDestRename\@gobbletwo%
+    \label{#2}%
+    \tud@trace@lbl@add{created}{#2}%
+  \endgroup
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@lbl@get@@dflt
-% \end{macro}^^A \tud@lbl@get@dflt
-% \begin{macro}{\tud@if@lbl@exists}
-% \changes{v2.05}{2015/11/05}{neu}^^A
-% Mit dem Befehl \cs{tud@if@lbl@exists} wird eine Fallunterscheidung bezüglich
-% der Existenz eines Labels in der Form
-% \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element} durchgeführt. Das
-% zu prüfende Label ist in gleicher Weise wie beim Makro \cs{tud@lbl@get@curr}
-% anzugeben. Je nachdem, ob ein existierendes Label gefunden wird oder nicht,
-% wird das zweite oder das dritte obligatorische Argument ausgeführt.
+% \end{macro}^^A \tud@lbl@@declare
+% \end{macro}^^A \tud@lbl@declare
+%
+% \iffalse
+%</class>
+% \fi
+%
+% \begin{macro}{\tudhyperref}
+% \changes{v2.02}{2014/10/27}{neu}^^A
+% \begin{macro}{\tud@lbl@ref}
+% \changes{v2.06p}{2022/11/08}{neu}^^A
+% Hiermit wird auf die zuvor definierten Textanker der Entitäten referenziert.
 %    \begin{macrocode}
 %<*class>
-\NewDocumentCommand\tud@if@lbl@exists{%
-  >{\tud@lbl@create}>{\SplitArgument{2}{:}}m%
-}{%
-  \ifcsundef{r@#1}{%
-    \expandafter\@secondoftwo%
-  }{%
-    \expandafter\@firstoftwo%
-  }%
+\newrobustcmd*\tud@lbl@ref[2]{\tud@hyperref{#1}{#2}}
+%</class>
+%    \end{macrocode}
+% Mit \cs{tudhyperref} kann in Tutorials auf Labels im Handbuch verwiesen 
+% werden. Um auf Deklarationen von Entitäten im Handbuch zu referenzieren, 
+% wird intern \cs{tud@lbl@ref} genutzt.
+% \ToDo{\cs{tudhyperref} umbenennen in \cs{manualref}}[v2.06]
+% \ToDo{\pkg{xr-hyper} (zum prüfen der Labels) nutzen?}[v2.07]
+% \ToDo{Anwenderbefehl für Dateipfad, an \cs{externaldocument} übergeben}[v2.07]
+% \ToDo{\pkg{xr-hyper} zusammen mit \cs{nameref} verwenden}[v2.07]
+%    \begin{macrocode}
+%<*package>
+\newrobustcmd*\tudhyperref[2]{\tud@lbl@ref{#1}{#2}}
+\newrobustcmd*\tud@lbl@ref[2]{\hyperref{../tudscr.pdf}{}{#1}{#2}}
+%</package>
+%    \end{macrocode}
+% \end{macro}^^A \tud@lbl@ref
+% \end{macro}^^A \tudhyperref
+%
+% \begin{macro}{\tud@if@lbl@exists}
+% \changes{v2.05}{2015/11/05}{neu}^^A
+% Mit \cs{tud@if@lbl@exists} wird abhängig davon, ob ein~-- möglicherweise via 
+% \cs{tud@lbl@get} generiertes~-- Label definiert ist, verzweigt.
+% \ToDo{für \pkg{xr-hyper} anpassen}[v2.07]
+%    \begin{macrocode}
+%<*class>
+\newcommand*\tud@if@lbl@exists[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifcsundef{r@#1}%
+    }%
+  \tud@res@a{#3}{#2}%
 }
 %</class>
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@lbl@exists
-% \begin{macro}{\tud@lbl@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% \begin{macro}{\tud@lbl@@create}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% Das Makro \cs{tud@lbl@@create} ist ein Argumentprozessor, welcher als Eingabe 
-% genau drei Argumente für das Erstellen eines gültigen Labels erwartet. Er
-% wird sowohl von \cs{tud@lbl@get@curr} als auch von \cs{tud@if@lbl@exists}
-% verwendet. Vor der Nutzung von \cs{tud@lbl@create} muss das Argument zuvor
-% bereits mit \cs{SplitArgument}|{2}{:}| aufgerufen worden sein. Diese
-% Eigenheit macht die Definition von \cs{tud@lbl@create} notwendig, um das
-% Ergebnis der zuvor vorgenommenen Argumentaufspaltung verarbeiten zu können,
-% in dem dieses an \cs{tud@lbl@@create} durchgereicht wird. Eine Integration 
-% der Spaltung des Argumentes in \cs{tud@lbl@create} ist aufgrund des 
-% mehrmaligen rekursiven Aufrufs von \cs{tud@lbl@create} nicht möglich.
 %
-% Mit dem Argumentprozessor \cs{tud@lbl@create} wird es ermöglicht, an die 
-% beiden Befehle \cs{tud@lbl@get@curr} und \cs{tud@if@lbl@exists} sowohl ein
-% einzelnes Makro, welches das Label bereits beinhaltet als auch einen
-% Markup-Befehl ggf. mit einem Entitätpräfix zu übergeben. In beiden Fällen
-% wird aus dem übergebenen Argument ein eindeutiges Label in der Form 
-% \meta{Entitätpräfix}|:|\meta{Labelpräfix}|:|\meta{Element} generiert und als
-% resultierendes Argument an das aufrufenden Makro übergeben.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@create{m}{\tud@lbl@@create#1}
-%    \end{macrocode}
-% Es gibt insgesamt vier verschiedene Varianten der Argumentenübergabe an den
-% Argumentprozessor \cs{tud@lbl@@create}.
-% \begin{description}\let\itshape\slshape
-%    \item[\cs{tud@lbl@@create}]^^A
-%    |{\LabelMakro}{-NoValue-}{-NoValue-}|\strut\newline%
-%      Das Label ist bereits in \cs{LabelMakro} enthalten und soll expandiert 
-%      werden. Dabei spielt es keine Rolle, ob die durch |:| getrennten
-%      Bestandteile innerhalb des Labels schon als einfacher String oder in der 
-%      Markupform gegeben sind.
-%    \item[\cs{tud@lbl@@create}]^^A
-%    |{-NoValue-}{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden, wobei in jedem
-%      Fall der Inhalt aus \cs{tud@bdl@curr} als Entitätpräfix genutzt wird.
-%    \item[\cs{tud@lbl@@create}]^^A
-%    |{\Class/\Package|\marg{\dots}|}|^^A
-%    |{\Markup|\marg{Element}|}{-NoValue-}|\strut\newline%
-%      Das Label soll für ein Markupelement generiert werden. 
-%      Dabei wurde explizit ein Paket oder eine Klasse aus dem Entität 
-%      angegeben oder implizit das Makro \cs{tud@bdl@curr} als Argument
-%      verwendet, welches innerhalb der Umgebungen \env{Entity} und
-%      \env{DeclareEntity} auf das/die aktuell beschriebene Paket/Klasse
-%      gesetzt wurde.
-%    \item[\cs{tud@lbl@@create}]^^A
-%    \marg{Entitätpräfix}\marg{Labelpräfix}\marg{Element}\strut\newline 
-%      Das Label ist bereits vollständig bestimmt und die Argumente werden 
-%      entweder als String oder als Markup übergeben. Auch Mischformen sind 
-%      möglich. In diesem Fall wird es einfach wieder zusammengesetzt. Diese
-%      Variante tritt durch rekursiven Aufruf des Argumentprozessors auf.
-% \end{description}
-%    \begin{macrocode}
-\NewDocumentCommand\tud@lbl@@create{m m m}{%
-  \begingroup%
-%    \end{macrocode}
-% Zu Beginn werden die Markup-Befehle auf ihre expandierbaren Varianten gesetzt 
-% und die zusätzlichen Redefinitionen für die Labelgenerierung aktiviert.
-%    \begin{macrocode}
-    \Markup@Expandable%
-    \tud@lbl@fmt%
-%    \end{macrocode}
-% Sind alle drei Bestandteile bereits vorhanden, wird das Label einfach wieder
-% zusammengesetzt.
-%    \begin{macrocode}
-    \IfValueTF{#3}{%
-      \edef\@tempa{#1:#2:#3}%
-    }{%
-%    \end{macrocode}
-% Hier geschieht die eigentliche Erzeugung der Labels. Dabei wird mit 
-% \cs{tud@attr@get} der für den jeweiligen Markup-Befehl aus dem zweiten
-% obligatorischen Argument spezifische Labelpräfix generiert. Abhängig davon,
-% ob im ersten obligatorischen Argument ein spezieller Entitätpräfix angegeben
-% wurde, wird dieser entweder verwendet oder aber implizit auf den Inhalt aus
-% \cs{tud@bdl@dflt} zurückgegriffen.
-%    \begin{macrocode}
-      \IfValueTF{#2}{%
-        \tud@attr@get\@tempb{#2}%
-        \IfValueTF{#1}{%
-          \tud@if@strblank{#1}{%
-            \edef\@tempa{\tud@bdl@dflt:\@tempb:#2}%
-          }{%
-            \edef\@tempa{#1:\@tempb:#2}%
-          }%
-        }{%
-          \edef\@tempa{\tud@bdl@curr:\@tempb:#2}%
-        }%
-      }{%
-%    \end{macrocode}
-% Wurde lediglich ein Makro angegeben, wird dieses einfach expandiert.
-%    \begin{macrocode}
-        \edef\@tempa{#1}%
-      }%
-    }%
-%    \end{macrocode}
-% Das Ergebnis der Labelgenrierung wurde für alle der behandelten Fälle in 
-% \cs{@tempa} geschrieben. Abschließnd wird \cs{ProcessedArgument} nach der 
-% Gruppe mit dessen Inhalt definiert. Dabei werden bei der Expansion die 
-% catcodes aller Zeichen in Tokens der Klasse \val{other} gewandelt, um diese 
-% später sicher vergleichen zu können.
-%    \begin{macrocode}
-    \edef\@tempc{%
-      \noexpand\endgroup%
-      \def\noexpand\ProcessedArgument{%
-        \expandafter\detokenize\expandafter{\@tempa}%
-      }%
-    }%
-  \@tempc%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@lbl@@create
-% \end{macro}^^A \tud@lbl@create
+% \subsection{Verarbeitung der Entitätsbefehle}
 %
-% \subsubsection{Zuordnung der Markup-Befehle für Label und Index}
+% Die Festlegung des individuellen Markups der spezifischen Entitäten erfolgt 
+% bei der Definition mit \cs{Markup@SetFormat}. Bei der Verwendung der 
+% Entitätsbefehle im Fließtext wird zum einen das in \cs{Markup@Format}
+% individuell definierte Markup umgesetzt und zum anderen wird dabei gleich
+% automatisch ein Eintrag für das Element im Index erzeugt.
 %
-% \begin{macro}{\tud@attr@get}
-% \changes{v2.05}{2015/11/03}{neu}^^A
-% Der Befehl \cs{tud@attr@get} ordnet den einzelnen Markup-Befehlen ihren 
-% spezifischen Präfix für ein Label oder in der Sternversion den passenden 
-% Index zu. Im ersten obligatorischen Argument wird ein Makro angegeben, 
-% welches die Zuordnung enthalten soll, das zweite ist der Markup-Befehl selbst.
-%    \begin{macrocode}
-\NewDocumentCommand\tud@attr@get{s m m}{%
-  \begingroup%
-%    \end{macrocode}
-% Das temporäre Makro \cs{@tempa} definiert zunächst alle Markup-Befehle in 
-% einer Gruppe neu und expandiert beim Aufruf jedes dieser lokal umdefinierten 
-% Markup-Befehle~-- abhängig vom Aufruf von \cs{tud@attr@get} mit oder ohne
-% Stern~-- entweder zum Markup-Befehl passenden Index oder zum entsprechenden
-% Labelpräfix in \cs{@tempb}.
-%    \begin{macrocode}
-    \def\@tempa##1##2##3{%
-      \def##1####1{%
-        \edef\@tempb{\IfBooleanTF{#1}{##2}{##3}}%
-      }%
-    }%
-    \@tempa\Distribution{main}{dst}%
-    \@tempa\Format{main}{fmt}%
-    \@tempa\Bundle{files}{bdl}%
-    \@tempa\Class{files}{cls}%
-    \@tempa\Package{files}{pkg}%
-    \@tempa\Option{options}{opt}%
-    \@tempa\Environment{macros}{env}%
-    \@tempa\Macro{macros}{cmd}%
-    \@tempa\Length{misc}{len}%
-    \@tempa\Counter{misc}{cnt}%
-    \@tempa\Term{terms}{term}%
-    \@tempa\PageStyle{elements}{pgs}%
-    \@tempa\Font{elements}{font}%
-    \@tempa\Color{elements}{clr}%
-    \@tempa\Application{main}{app}%
-    \@tempa\File{files}{fle}%
-%    \end{macrocode}
-% Nachdem alle Markup-Befehle lokal redefiniert wurden, wird der nun angegebene 
-% Befehl ausgeführt, was zum eigentlichen Definieren von \cs{@tempb} führt.
-%    \begin{macrocode}
-    #3%
-%    \end{macrocode}
-% Damit alle Änderungen der temporären Makros lokal bleiben, wird das Ergebnis 
-% nach der Gruppe in das erste obligatorische Argument expandiert.
-%    \begin{macrocode}
-    \edef\tud@reserved{%
-      \noexpand\endgroup%
-      \def\noexpand#2{\@tempb}%
-    }%
-  \tud@reserved%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@attr@get
-%
-% \subsection{Verarbeitung der Markup-Befehle}
-%
-% Die Festlegung des individuellen Markups der Einzelnen Elemente erfolgt bei 
-% der Definition mit \cs{Markup@SetFormat}. Bei der Nutztung der Markup-Befehle
-% im Fließtext wird zum einen das in \cs{Markup@Format} individuell definierte
-% Markup umgesetzt und zum anderen wird dabei gleich automatisch ein Eintrag
-% für das Element im Index erzeugt.
-%
-% \begin{macro}{\ifdisposition}
-% \changes{v2.06}{2018/08/02}{neu}^^A
-% \begin{macro}{\if@tud@disposition}
-% \begin{macro}{\tud@sec@format}
-% Für Markup oder andere Inhalte, die lediglich im Fließtext jedoch nicht in 
-% Überschriften ausgegeben werden, wird der Schalter \cs{if@tud@disposition} 
-% und der dazugehörige auswertende Befehl \cs{ifdisposition} definiert. Das
-% Setzen des Schalters wird in \cs{tud@sec@format} gepatcht.
-% \ToDo{besser nur als internen Befehl definieren \cs{tud@if@...}?!}[v2.06]
-%    \begin{macrocode}
-\tud@newif\if@tud@disposition
-\newcommand*\ifdisposition{%
-  \if@tud@disposition%
-    \expandafter\@firstoftwo%
-  \else%
-    \expandafter\@secondoftwo%
-  \fi%
-}
-\pretocmd\tud@sec@format{%
-  \@tud@dispositiontrue%
-}{}{\tud@patch@wrn{tud@sec@format}}
-%    \end{macrocode}
-% \end{macro}^^A \tud@sec@format
-% \end{macro}^^A \if@tud@disposition
-% \end{macro}^^A \tud@if@disposition
-%
-% In der Klasse \cls{tudscrmanual} werden die Markup-Befehle zusätzlich auch 
+% In der Klasse \cls{tudscrmanual} werden die Entitätsbefehle zusätzlich auch 
 % als Argument der Umgebung \env{Declaration} genutzt. Für diese Verwendung
 % kommt die Definition von \cs{Markup@Declare} und ggf. \cs{Markup@Suffix} zum 
 % Einsatz. 
 %
 % \begin{macro}{\Process@Markup}
 % \changes{v2.02}{2014/10/08}{Markup für Index und Fließtext getrennt}^^A
-% \changes{v2.02}{2014/10/09}{Anpassung für Umgebung \env{DeclareEntity*}}^^A
 % \changes{v2.05}{2015/11/05}{Neuimplementierung}^^A
+% \changes{v2.06p}{2022/11/04}{Signatur und Labelgenerierung angepasst}^^A
 % \begin{macro}{\Markup@Suppress}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\Markup@@Suppress}
@@ -3033,7 +2862,7 @@
 %   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|^^A
 % \endgroup
 %
-% In eingen Fällen ist es beim Aufruf eines Markup-Befehls nicht erwünscht, 
+% In eingen Fällen ist es beim Aufruf eines Entitätsbefehls nicht erwünscht, 
 % dass dieser auch tatsächlich ausgegeben wird. Für diesen Fall wird gleich zu
 % Beginn der Befehl \cs{Markup@Suppress} definiert, der dies ermöglicht.
 %    \begin{macrocode}
@@ -3045,39 +2874,48 @@
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Markup{m d// d== o d() d<> d'' d||}{%
 %    \end{macrocode}
-% Zu Beginn wird mit dem Schalter \cs{if@tud@declare} geprüft, ob die der 
-% Markup-Befehl in einer der Deklarationsumgebungen oder anderweitig genutzt 
+% Zu Beginn wird mit dem Schalter \cs{if@tud@declare} geprüft, ob der 
+% Entitätsbefehl in einer der Deklarationsumgebungen oder anderweitig genutzt 
 % wird. Für den ersten Fall erfolgt die Weiterverarbeitung der Argumente mit
-% \cs{Process@@MarkupDeclare}, andernfalls kommt \cs{Process@@MarkupInline} zum
-% Einsatz. Da beide Makros die gleiche Reihenfolge der Argumente verlangen,
+% \cs{Process@@MarkupDeclare}, andernfalls kommt \cs{Process@@MarkupInline} 
+% zum Einsatz. Da beide Makros die gleiche Reihenfolge der Argumente verlangen,
 % wird der jeweilige Befehlsaufruf über ein Token-Register realisiert, womit
 % das Zusammensetzen der notwendigen Übergabewerte erleichtert wird. 
 %
 % Die Fallunterscheidung betrifft des Weiteren die Erzeugung des Labels. Für 
-% eine Deklaration wird die Sternversion von \cs{tud@lbl@get@curr} verwendet, 
-% welche ein Label aus den gegebenen Argumenten zusammensetzt. Ist keine 
-% Deklaration aktiv, versucht \cs{tud@lbl@get@curr} ein gültiges, schon 
-% vorhandenes Label zu verwenden. Das generierte Label wird anschließend als 
-% erstes Argument für das weiterverabeitende Makro genutzt.
+% eine Deklaration wird das mit \cs{tud@lbl@@get} aus den gegebenen Argumenten 
+% erzeugte Label direkt verwendet. Ist keine Deklaration aktiv, wird nach einem 
+% weniger spezifischen aber gültigen Label gesucht. Das generierte Label wird
+% anschließend als erstes Argument für das weiterverabeitende Makro genutzt.
 %    \begin{macrocode}
+  \tud@lbl@@get\tud@lbl@tmp{{#1}/#2/=#3=(#5)}%
 %<*class>
   \if@tud@declare%
     \tud@toks@{\Process@@MarkupDeclare}%
-    \IfValueTF{#5}{%
-      \tud@lbl@get@curr*\tud@lbl@tmp{#5:#1}/#2/=#3=%
-    }{%
-      \tud@lbl@get@curr*\tud@lbl@tmp{\tud@bdl@curr:#1}/#2/=#3=%
-    }%
   \else%
-%</class>
     \tud@toks@{\Process@@MarkupInline}%
-    \tud@lbl@get@curr\tud@lbl@tmp{#5:#1}/#2/=#3=%
-%<*class>
+    \tud@if@lbl@exists\tud@lbl@tmp{}{%
+      \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
+    }%
+    \tud@if@lbl@exists\tud@lbl@tmp{}{%
+      \IfValueF{#5}{%
+        \tud@lbl@@get\tud@lbl@tmp{{#1}/#2/=#3=(\tud@ety@dflt)}%
+        \tud@if@lbl@exists\tud@lbl@tmp{}{%
+          \tud@truncate@value\tud@lbl@tmp{\tud@lbl@tmp}%
+          \tud@if@lbl@exists\tud@lbl@tmp{}{%
+            \tud@lbl@@get\tud@lbl@tmp{{#1}/#2/(\tud@ety@gnrl)}%
+          }%
+        }%
+      }%
+    }%
   \fi%
 %</class>
+%<*package>
+  \tud@toks@{\Process@@MarkupInline}%
+%</package>
   \addto@hook@expandafter\tud@toks@{\expandafter{\tud@lbl@tmp}}%
 %    \end{macrocode}
-% Danach wird der Inhalt des im ersten Argument übergebenen Markup-Befehls in 
+% Danach wird der Inhalt des im ersten Argument übergebenen Entitätsbefehls in 
 % einer Gruppe ein temporäres Makro expandiert und als zweites Argument für die 
 % Weiterverarbeitung genutzt.
 %    \begin{macrocode}
@@ -3102,9 +2940,9 @@
 % schließenden Indexeintrag zu erzeugen, ist die Ausführung des Hauptargumentes 
 % der Deklarationsumgebung am Ende dieser notwendig. Dabei soll allerdings das
 % Markup nicht noch ein weiteres Mal ausgegeben werden. Deshalb wird der
-% Schalter hier genutzt, um lediglich zu Beginn einer Deklaration das Markup 
-% auszuführen. Dabei Angaben für eine |'|\meta{Referenzvariante}|'| nicht
-% erlaubt.
+% Schalter hier genutzt, um lediglich zu Beginn einer Deklaration der Entität 
+% das Markup auszuführen. Dabei Angaben für eine |'|\meta{Referenzvariante}|'|
+% nicht erlaubt.
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
@@ -3124,7 +2962,7 @@
 % Für ein eventuell notwendiges Debugging, wird \cs{Process@@MarkupDeclare} mit
 % seinen Argumenten ggf. in das Log-File geschrieben.
 %    \begin{macrocode}
-      \tud@trace@markup{declare}{\the\tud@toks@}%
+      \tud@trace@ety@add{declared}{\the\tud@toks@}%
     \else%
       \tud@toks@{\relax}%
     \fi%
@@ -3151,7 +2989,7 @@
 %    \end{macrocode}
 % Auch hier wird ggf. ein Debug-Eintrag ins Log-File geschrieben. 
 %    \begin{macrocode}
-    \tud@trace@markup{output}{\the\tud@toks@}%
+    \tud@trace@ety@add{output}{\the\tud@toks@}%
   \fi%
 %    \end{macrocode}
 % Ganz zum Schluss wird noch für beide Fälle geprüft, ob \parg{Entität} 
@@ -3160,14 +2998,13 @@
 % ob für das \meta{Element} überhaupt ein Link definiert wurde, der verwendet
 % werden soll. Ist dies nicht der Fall, wird eine Warnung ausgegeben. Dies ist 
 % möglich, da durch die automatische Labelgenerierung normalerweise alle nicht 
-% existierenden Labels mit \meta{Entitätpräfix} auf \cs{tud@bdl@dftl} verweisen
+% existierenden Labels mit \meta{Entitätpräfix} auf \cs{tud@ety@dflt} verweisen
 % müssten. Für die wenigen Fälle, in denen gezielt auf einen Querverweis 
 % verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
 %    \begin{macrocode}
   \if@tud@index\else%
     \IfValueT{#5}{%
       \tud@if@strblank{#5}{}{%
-        \tud@trace@bdl@add{#5}%
         \tud@if@strequal{#7}{none}{}{%
           \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
             \ClassWarning{tudscrmanual}{%
@@ -3228,16 +3065,14 @@
 \NewDocumentCommand\Process@@MarkupDeclare{m m d== o}{%
   \Markup@CheckFormat%
   \ifcase\tud@declare@num\relax%
-    \tudhyperdef{#1}%
+    \tud@lbl@declare{#1}%
     \Markup@Output{#2}=#3=[{#4}]%
   \or%
     \Markup@Output{#2}=#3=[{#4}]%
   \or%
-    \tudhyperdef{#1}%
+    \tud@lbl@declare{#1}%
   \or%
-    \tudhyperdef*{#1}%
-    \def\@tempa##1:##2:##3\@nil{\tudhyperdef*{##3:##2:##3}}%
-    \@tempa#1\@nil%
+    \tud@lbl@declare*{#1}%
   \fi%
   \Markup@ClearFormat%
 }
@@ -3272,7 +3107,7 @@
 %    \begin{macrocode}
 %<*class>
     \tud@if@lbl@exists{#1}{%
-      \def\@tempa{\hyperref{}{\tud@manualname}{#1}{\@tempc}}%
+      \def\@tempa{\tud@lbl@ref{#1}{\@tempc}}%
 %    \end{macrocode}
 % Anschließend wird \cs{@tempb} ggf. für den erweiterten Querverweis verwendet.
 % Wurde ein Format für den Querverweis gesetzt, muss dieses validiert werden. 
@@ -3303,6 +3138,7 @@
             {}%
         }%
       }%
+      \tud@trace@lbl@add{matched}{#1}%
     }{%
 %</class>
 %    \end{macrocode}
@@ -3320,7 +3156,7 @@
       \IfValueT{#6}{%
         \tud@if@strequal{#6}{none}{\let\@tempa\@tempc}{%
 %<*package>
-        \tud@if@strequal{#6}{manual}{\def\@tempa{\tudhyperref{#1}{\@tempc}}}{%
+        \tud@if@strequal{#6}{manual}{\def\@tempa{\tud@lbl@ref{#1}{\@tempc}}}{%
 %</package>
           \def\@tempb{%
 %<*class> 
@@ -3349,14 +3185,18 @@
 % es den passenden Debug-Befehl.
 %    \begin{macrocode}
 %<*class>
-      \tud@trace@lbl@missing@add{#1}%
+      \tud@trace@lbl@add{missing}{#1}%
     }%
 %</class>
 %    \end{macrocode}
 % Ganz zum Schluss erfolgt die Ausgabe als Hyperlink mit optional erweitertem 
 % Querverweis nicht, wenn gerade eine Überschrift gesetzt wird.
 %    \begin{macrocode}
-    \ifdisposition{\@tempc}{\@tempa\@tempb}%
+    \if@tud@sec%
+      \@tempc%
+    \else%
+      \@tempa\@tempb%
+    \fi%
 %    \end{macrocode}
 % Zum Schluss wird die Formatierung mit \cs{Markup@ClearFormat} zurückgesetzt.
 %    \begin{macrocode}
@@ -3404,7 +3244,7 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Die Ausgabe selbst ist alles andere als spektakulär. Die zur Formatierung 
 % verwendeten Makros \cs{Markup@Format} und \cs{Markup@Suffix} werden durch
-% \cs{Markup@SetFormat} für jedes Markup-Element individuell definiert.
+% \cs{Markup@SetFormat} für jede Entität individuell definiert.
 %    \begin{macrocode}
 \newcommand*\Markup@Inline[1]{\mbox{\Markup@Format{#1}}}
 %<*class>
@@ -3416,27 +3256,27 @@
 % \end{macro}^^A \Markup@Declare
 % \end{macro}^^A \Markup@Inline
 %
-% \subsubsection{Extraktion von Argumenten der Markup-Befehle}
+% \subsubsection{Extraktion von Argumenten der Entitätsbefehle}
 %
-% Die Markup-Befehle für Entitäten nutzen zum einen sämtliche optionalen 
-% Argumenten vor dem obligatorischen, um auch expandierbaren Varianten 
-% bereitstellen zu können. Zum anderen werden die Inhalte des obligatorischen 
-% Argumentes intern in mehrere Argumente zerlegt. Die folgenden Makros dienen
-% zur Wandlung von der externen in die interne Darstellung und vice versa.
+% Die Entitätsbefehle nutzen zum einen sämtliche optionalen Argumenten vor dem
+% obligatorischen, um auch expandierbaren Varianten bereitstellen zu können.
+% Zum anderen werden die Inhalte des obligatorischen Argumentes intern in
+% mehrere Argumente zerlegt. Die folgenden Makros dienen zur Wandlung von der
+% externen in die interne Darstellung und vice versa.
 %
 % \begin{macro}{\Markup@Inner@Get}
 % \changes{v2.06p}{2022/11/04}{neu}^^A
 % \begin{macro}{\Markup@Inner@@Get}
 % \changes{v2.06p}{2022/11/04}{neu}^^A
-% Alle Markup-Befehle nutzen \cs{Process@Markup}, was sich hier zunutze gemacht 
-% wird, indem \cs{Markup@Inner@@Get} mit der gleichen Signatur definiert wird, 
-% um die übergebenen Argumente einzusammeln. Hierfür muss \cs{Markup@Inner@Get} 
-% mit dem ursprünglichen Markup im zweiten obligatorischen Argument aufgerufen 
-% werden.
+% Alle Entitätsbefehle nutzen \cs{Process@Markup}, was sich hier zunutze 
+% gemacht wird, indem \cs{Markup@Inner@@Get} mit der gleichen Signatur
+% definiert wird, um die übergebenen Argumente einzusammeln. Hierfür muss
+% \cs{Markup@Inner@Get} mit dem ursprünglichen Markup des Entitätsbefehls im 
+% zweiten obligatorischen Argument aufgerufen werden.
 %    \begin{macrocode}
 \NewDocumentCommand\Markup@Inner@Get{m m}{%
   \begingroup
-    \RenewDocumentCommand\Process@Index{m m d// d== o d() d||}{}%
+    \RenewDocumentCommand\Process@Index{m r[] m d// d== o d() d||}{}%
     \let\Process@Markup\Markup@Inner@@Get%
     #2%
     \edef\tud@res@a{%
@@ -3549,8 +3389,8 @@
 % \changes{v2.05}{2015/11/15}{neu}^^A
 % \changes{v2.06p}{2022/11/04}{Signatur angepasst}^^A
 % Mit \cs{Process@Index} wird geprüft, ob mit dem im zweiten obligatorischen 
-% Argument enthaltenen Markup-Befehl ein Indexeintrag erzeugt werden soll. 
-% Ein Indexeintrag kann mit der Sternversion eines Markup-Befehls explizit 
+% Argument enthaltenen Entitätsbefehl ein Indexeintrag erzeugt werden soll. 
+% Ein Indexeintrag kann mit der Sternversion eines Entitätsbefehls explizit 
 % unterdrückt werden, wobei der boolesche Wert im ersten obligatorischen 
 % Argument an \cs{Process@Index} zu Prüfung übergeben wird. Außerdem wird für
 % obsolete Deklarationen ebenso wie bei aktiviertem Schalter \cs{if@tud@index} 
@@ -3566,13 +3406,13 @@
 %   \verb+|+\meta{Indexmarkup}\verb+|+^^A
 % \endgroup
 %    \begin{macrocode}
-\NewDocumentCommand\Process@Index{m m d// d== o d() d||}{%
+\NewDocumentCommand\Process@Index{m r[] m d// d== o d() d||}{%
   \ifboolexpr{%
 %<class>    bool {@tud@index} or bool {@tud@obsolete}%
 %<package>    bool {@tud@index}%
   }{}{%
     \IfBooleanTF{#1}{%
-      \IfValueT{#7}{%
+      \IfValueT{#8}{%
 %<*class> 
         \ClassWarning{tudscrmanual}%
 %</class>
@@ -3581,19 +3421,19 @@
 %</package>
         {%
           You've used the starred version. No index entry\MessageBreak%
-          for #2 is created. The\MessageBreak%
-          optional argument |#7| will be ignored%
+          for `\detokenize{#3}' is created. The\MessageBreak%
+          optional argument |#8| will be ignored%
         }%
       }%
     }{%
-      \Process@@Index{#2}/#3/=#4=[{#5}](#6)|#7|%
+      \Process@@Index[#2]{#3}/#4/=#5=[{#6}](#7)|#8|%
     }%
   }%
 }
 %    \end{macrocode}
 % Mit \cs{Process@@Index} erfolgt die eigentliche Erzeugung des Indexeintrages.
 %    \begin{macrocode}
-\NewDocumentCommand\Process@@Index{m r// r== r[] r() r||}{%
+\NewDocumentCommand\Process@@Index{r[] m r// r== r[] r() r||}{%
 %    \end{macrocode}
 % Dabei erledigt \cs{tud@idx@get} einen Großteil der Aufgabe. Mit besagtem 
 % Makro werden Schlüssel und Format für den gewünschten Indexeintrag erzeugt.
@@ -3602,30 +3442,26 @@
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
-    \tud@idx@get{#1}/#2/=#3=[{#4}](#5)|declare|%
+    \tud@idx@get{#2}/#3/=#4=[{#5}](#6)|declare|%
   \else%
 %</class>
-    \tud@idx@get{#1}/#2/=#3=[{#4}](#5)|#6|%
+    \tud@idx@get{#2}/#3/=#4=[{#5}](#6)|#7|%
 %<*class>
   \fi%
 %</class>
+  \edef\tud@lbl@tmp{#1}%
 %    \end{macrocode}
-% Mit der Sternversion \cs{tud@attr@get*} wird der Zielindex für das im 
-% ersten Argument übergebene \marg{Element} ermittelt.
-%    \begin{macrocode}
-  \tud@attr@get*\tud@lbl@tmp{#1}%
-%    \end{macrocode}
-% Markup-Befehle, welche in Deklarationen verwendet wurden, werden für eine 
+% Entitätsbefehle, welche in Deklarationen verwendet wurden, werden für eine 
 % höhere Priorisierung in einem speziellen Index angelegt, wobei hier die 
 % Formatierung dieses Eintrags fest vorgegeben ist.
 %    \begin{macrocode}
 %<*class>
   \if@tud@declare%
     \if@openindex%
-      \IfValueT{#6}{%
+      \IfValueT{#7}{%
         \ClassWarning{tudscrmanual}{%
           It is not possible to use any indexing format\MessageBreak%
-          like |#6| within the arguments of the\MessageBreak%
+          like |#7| within the arguments of the\MessageBreak%
           environments `Declaration' or `DeclareEntity*'%
         }%
       }%
@@ -3643,7 +3479,7 @@
       }%
     \fi%
 %    \end{macrocode}
-% Für Markup-Befehle außerhalb von Deklarationsumgebungen wird ein einfacher 
+% Für Entitätsbefehle außerhalb von Deklarationsumgebungen wird ein einfacher 
 % Eintrag in den Index erzeugt, wobei auch im Fließtext über das Indexmarkup 
 % \verb+|+\val{declare}\verb+|+ eine Quasi-Deklaration verwendet werden kann. 
 % Dies wird beispielsweise für \KOMAScript-Optionen genutzt, um diese in der 
@@ -3651,17 +3487,17 @@
 %    \begin{macrocode}
   \else%
 %</class>
-    \IfValueT{#6}{%
+    \IfValueT{#7}{%
 %<*class>
-      \tud@if@strequal{#6}{declare}{%
+      \tud@if@strequal{#7}{declare}{%
         \appto\tud@lbl@tmp{-declare}%
         \appto\tud@idx@fmt{|!}%
       }{%
-        \appto\tud@idx@fmt{|#6}%
+        \appto\tud@idx@fmt{|#7}%
       }%
 %</class>
 %<*package>
-      \appto\tud@idx@fmt{|#6}%
+      \appto\tud@idx@fmt{|#7}%
 %</package>
     }%
     \index[\tud@lbl@tmp]{\tud@idx@val\tud@idx@key @\tud@idx@fmt}%
@@ -3684,15 +3520,15 @@
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % \begin{macro}{\tud@idx@val}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% \begin{macro}{\tud@idx@bdl}
+% \begin{macro}{\tud@idx@ety}
 % \changes{v2.05}{2015/11/05}{neu}^^A
 % Mit dem Makro \cs{tud@idx@get} wird die Formatierung eines Indexeintrags für 
-% einen Markup-Befehl realisiert. Für das Sortieren der Indexeinträge kommt 
+% einen Entitätsbefehl realisiert. Für das Sortieren der Indexeinträge kommt 
 % \app{texindy} zum Einsatz. Um die Indexeinträge wie gewünscht zu Formatieren, 
 % gibt es zwei Möglichkeit. 
 %
 % Bei der ersten Variante würde der Indexeintrag einfach direkt mit den 
-% Markup-Befehlen erstellt und in der \app{texindy}-Stildatei wird für alle
+% Entitätsbefehlen erstellt und in der \app{texindy}-Stildatei wird für alle
 % Auszeichnungsbefehle die passende |merge-rule| erstellt, um die korrekte 
 % Sortierung zu gewährleisten. Tatsächlich war in einer früheren Version genau
 % das der Ansatz. Allerdings können die manuell erstellten RegExp-Regeln durch 
@@ -3714,7 +3550,7 @@
 % Dabei wird vor der Erstellung des Untereintrages der direkt zuvor generierte
 % Indexhaupteintrag ins dritte Argument~-- normalerweise \cs{tud@idx@val}~--
 % gesichert. Das vierte und letzte obligatorische Argument enthält schließlich 
-% den eigentlichen Markup-Befehl, für welchen der Indexeintrag erzeugt werden 
+% den eigentlichen Entitätsbefehl, für welchen der Indexeintrag erzeugt werden 
 % soll. 
 %
 % Daran schließen sich vier optionale Argumente an, mit denen die Formatierung 
@@ -3738,14 +3574,14 @@
 \newcommand*\tud@idx@key{}
 \newcommand*\tud@idx@fmt{}
 \newcommand*\tud@idx@val{}
-\newcommand*\tud@idx@bdl{}
+\newcommand*\tud@idx@ety{}
 \NewDocumentCommand\tud@idx@get{s m r// r== r[] r() d<> d'' d||}{%
 %    \end{macrocode}
 % Die Änderungen an allerhand temporären Makros sollen lokal bleibens.
 %    \begin{macrocode}
   \begingroup%
 %    \end{macrocode}
-% In einer weiteren Gruppe wird der Markup-Befehl des vierten obligatorischen
+% In einer weiteren Gruppe wird der Entitätsbefehl des vierten obligatorischen
 % Arguments ausgewertet. Es wird eine Fallunterschiedung durchgeführt, ob es 
 % sich dabei um einen Parameter handelt oder nicht. Ist dies der
 % Fall, wird für diesen Parameter der hier nachfolgend formatierte Indexeintrag
@@ -3754,7 +3590,7 @@
     \begingroup%
 %    \end{macrocode}
 % Nachdem ein möglicher Haupteintrag für Parameter erzeugt wurde, folgt nun 
-% der formatierte Indexeintrag für das aktuelle Markup-Element. Um diesen zu
+% der formatierte Indexeintrag für die aktuelle Entität. Um diesen zu 
 % erstellen, wird für \meta{Schlüsselwort} zunächst nur der Inhalt des
 % Hauptargumentes benötigt. Dieser wird hier in das zweite Argument
 % expandiert, der ggf. erzeugte Haupteintrag in das vierte.
@@ -3767,7 +3603,7 @@
     \tud@reserved%
 %    \end{macrocode}
 % Die Auszeichnung für den Indexeintrag besteht in erster Linie aus dem 
-% Markup-Befehl selbst. Damit ein |@|"~Zeichen beispielsweise in einem 
+% Entitätsbefehl selbst. Damit ein |@|"~Zeichen beispielsweise in einem 
 % Makronamen korrekt verarbeitet wird, wird dieses im Stil von \app{makeindex} 
 % mit |"| maskiert.
 %    \begin{macrocode}
@@ -3780,28 +3616,29 @@
 % der aktuelle Eintrag erzeugt werden soll. Eine explizite Angabe wird in jedem 
 % Fall genutzt,\dots
 %    \begin{macrocode}
-    \let\tud@idx@bdl\tud@bdl@dflt%
+    \let\tud@idx@ety\tud@ety@dflt%
     \IfValueTF{#6}{%
-      \def\tud@idx@bdl{#6}%
+      \def\tud@idx@ety{#6}%
     }{%
 %    \end{macrocode}
 % \dots eine implizite nur, wenn auch tatsächlich das passende Label existiert, 
 % da sonst mit Sicherheit falsche Einträge im Index erscheinen würden.
 %    \begin{macrocode}
 %<*class>
-      \tud@if@bdl{%
-        \tud@if@lbl@exists{\tud@bdl@curr:#2}{%
-          \edef\tud@idx@bdl{\expandonce\tud@bdl@curr}%
+      \ifx\tud@ety@crnt\tud@ety@dflt\else
+        \tud@lbl@@get\tud@lbl@tmp{{#2}/#3/(\tud@ety@crnt)}%
+        \tud@if@lbl@exists{\tud@lbl@tmp}{%
+          \let\tud@idx@ety\tud@ety@crnt%
 %    \end{macrocode}
 % Sollte der Eintrag selbst dem Suffix für Paket oder Klasse entsprechen, wird
 % dieser ignoriert.
 %    \begin{macrocode}
           \def\tud@reserved{#2}%
-          \ifx\tud@reserved\tud@idx@bdl%
-            \let\tud@idx@bdl\tud@bdl@dflt%
+          \ifx\tud@reserved\tud@idx@ety%
+            \let\tud@idx@ety\tud@ety@dflt%
           \fi%
         }{}%
-      }{}%
+      \fi
 %</class>
     }%
 %    \end{macrocode}
@@ -3822,11 +3659,11 @@
 % Hauptklassen gehören, erfolgen.
 %    \begin{macrocode}
     \@tempswatrue%
-    \ifx\tud@idx@bdl\tud@bdl@dflt%
+    \ifx\tud@idx@ety\tud@ety@dflt%
       \@tempswafalse%
     \else%
       \IfBooleanT{#1}{\@tempswafalse}%
-      \edef\@tempc{\expandonce\tud@idx@bdl}%
+      \let\@tempc\tud@idx@ety
     \fi%
 %    \end{macrocode}
 % Der Indexeintrag kann zur besseren Kenntnisnahme außerdem standardmäßig mit 
@@ -3838,7 +3675,7 @@
     }%
 %    \end{macrocode}
 % Wird die Anmerkung gesetzt, ist für den Schlüssel nur der Inhalt des in 
-% \cs{@idxbundle} gesicherten Markup-Befehls relevant. Dieser wird in der 
+% \cs{@idxbundle} gesicherten Entitätsbefehls relevant. Dieser wird in der 
 % folgenden Gruppe extrahiert und \cs{@tempa} angehangen. Für die Formatierung 
 % bleibt das Markup erhalten und wird \cs{tempb} hinzugefügt.
 %    \begin{macrocode}
@@ -3847,10 +3684,14 @@
         \Markup@Expandable%
         \edef\tud@reserved{%
           \noexpand\endgroup%
-          \noexpand\appto\noexpand\@tempa{ \tud@idx@bdl}%
+          \ifx\tud@idx@ety\@empty\else
+            \noexpand\appto\noexpand\@tempa{\space\tud@idx@ety}%
+          \fi
         }%
       \tud@reserved%
-      \eappto\@tempb{\suffix{\expandonce\tud@idx@bdl}}%
+      \ifx\tud@idx@ety\@empty\else
+        \eappto\@tempb{\suffix{\expandonce\tud@idx@ety}}%
+      \fi
     \fi%
 %    \end{macrocode}
 % Sollte mit |=|\meta{Wert}|=| ein spezieller Schlüsselwert angegeben worden
@@ -3991,7 +3832,7 @@
   \tud@res@c%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@idx@bdl
+% \end{macro}^^A \tud@idx@ety
 % \end{macro}^^A \tud@idx@val
 % \end{macro}^^A \tud@idx@fmt
 % \end{macro}^^A \tud@idx@key
@@ -4034,7 +3875,7 @@
 % \changes{v2.02}{2014/07/25}{erweitert}^^A
 % \changes{v2.02}{2014/10/08}{Sternversion ergänzt}^^A
 % Der Schalter \cs{if@tud@changedat} wird im weiteren Verlauf dazu verwendet, 
-% das Standardverhalten der einzelnen Markup-Befehle kurzeitig zu ändern und
+% das Standardverhalten der einzelnen Entitätsbefehle kurzeitig zu ändern und
 % anstelle der Makros \cs{Process@Markup} und \cs{Process@Index} den Befehl 
 % \cs{Process@ChangedAt} auszuführen, mit welchem die Formatierung der Einträge 
 % der Änderungsliste erfolgt.
@@ -4168,9 +4009,9 @@
 %    \end{macrocode}
 % Der Befehl \cs{Changed@At@@@@CreateList} übernimmt nun die Erstellung des 
 % Eintrags in die Liste \cs{tud@changedat@list}. Wie bereits erwähnt, enthalten 
-% die beiden ersten Argumente ggf. Markup-Befehl und \TUDScript-Bundle-Element. 
+% die beiden ersten Argumente ggf. Entitätsbefehl und \TUDScript-Bundle-Element.
 % Danach folgt die Versionsnummer der Änderungsnotiz, der mögliche Untereintrag 
-% für einen Markup-Befehl sowie die Änderungsnotiz selbst. 
+% für einen Entitätsbefehl sowie die Änderungsnotiz selbst. 
 %
 % Die oberste Gliederungsebene der Änderungshistorie ist die Versionsnummer. 
 % Unter dieser werden für jedes \TUDScript-Bundle-Element die Änderungsnotizen 
@@ -4185,7 +4026,7 @@
 %  werden allgemeine Änderungsnotizen erstellt, für Einträge bezüglich der
 % Implementierung wird die folgende Form genutzt:
 % \newline\begingroup\scriptsize
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Entitätsbefehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
 %    \begin{macrocode}
@@ -4194,7 +4035,7 @@
 % Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
 % runden Klammern oder aber implizit über den gegenwärtigen Inhalt des Makros
-% \cs{tud@bdl@curr}. Dafür wird das Makro \cs{@tempa} so definiert, dass es
+% \cs{tud@ety@crnt}. Dafür wird das Makro \cs{@tempa} so definiert, dass es
 % das angegebene Argument in einer Box ausführt und die gesuchte Entität 
 % in \cs{@tempb} gespeichert ist.
 %    \begin{macrocode}
@@ -4203,17 +4044,21 @@
       \let\tud@idx@fmt\relax%
       \@tud@changedattrue##1\@tud@changedatfalse%
       \ifx\tud@idx@fmt\relax%
-        \gdef\@tempb{##1}%
+        \def\@tempb{##1}%
       \else%
-        \global\let\@tempb\tud@idx@fmt%
+        \let\@tempb\tud@idx@fmt%
       \fi%
+      \trim@spaces@in\tud@res@b%
+      \global\let\@tempb\@tempb
     }%
   }%
   \let\@tempb\@empty%
   \IfValueTF{#2}{%
     \@tempa{#2}%
   }{%
-    \tud@if@bdl{\@tempa{\tud@bdl@curr}}{}%
+    \ifx\tud@ety@crnt\tud@ety@dflt\else
+      \expandafter\@tempa\expandafter{\tud@ety@crnt}%
+    \fi
   }%
 %    \end{macrocode}
 % Nachdem klar ist, für welche Entität ggf. der Änderungslisteneintrag 
@@ -4222,18 +4067,21 @@
 % Argumentes entschieden. Ist es vorhanden, handelt es sich um einen Eintrag 
 % für den Implementierungsteil, welcher in \cs{tud@changedat@list} in der Form 
 % \newline\begingroup^^A
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Entitätsbefehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline^^A
 % gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
 %    \begin{macrocode}
   \IfValueTF{#1}{%
-    \toks@{#3!Implementierung }%
+    \toks@{#3!Implementierung}%
 %    \end{macrocode}
 % Hier erfolgt ggf. der Eintrag des \TUDScript-Bundle-Elements, danach folgt 
-% der Markup-Befehl.
+% der Entitätsbefehl.
 %    \begin{macrocode}
-    \addto@hook@expandafter\toks@{\@tempb}%
+    \ifx\@tempb\@empty\else
+      \addto@hook\toks@{\space}%
+      \addto@hook@expandafter\toks@{\@tempb}%
+    \fi
     \addto@hook\toks@{!#1!}%
 %    \end{macrocode}
 % Wurde ein Untereintrag angegeben, wird dieser hier gefolgt von der 
@@ -4260,17 +4108,23 @@
 % Verwendung jedoch innerhalb einer \TUDScript-Bundle-Deklaration, so erscheint
 % der Eintrag im allgemeinen Teil für die explizite engegebene Entität.
 %    \begin{macrocode}
-    \toks@{#3!Allgemein }%
+    \toks@{#3!Allgemein}%
     \IfValueTF{#2}{%
       \addto@hook\toks@{!}%
-      \addto@hook@expandafter\toks@{\@tempb:\space}%
+      \ifx\@tempb\@empty\else
+        \addto@hook@expandafter\toks@{\@tempb}%
+      \fi
+      \addto@hook@expandafter\toks@{:\space}%
       \IfValueTF{#5}{%
         \addto@hook\toks@{#5}%
       }{%
         \addto@hook\toks@{neu}%
       }%
     }{%
-      \addto@hook@expandafter\toks@{\@tempb}%
+      \ifx\@tempb\@empty\else
+        \addto@hook\toks@{\space}%
+        \addto@hook@expandafter\toks@{\@tempb}%
+      \fi
       \addto@hook\toks@{!}%
       \addto@hook\toks@{#5}%
     }%
@@ -4352,7 +4206,7 @@
 % \endgroup\newline^^A
 % oder 
 % \newline\begingroup^^A
-%   \meta{Versionsnummer}|!Implementierung!|\meta{Markup-Befehl}^^A
+%   \meta{Versionsnummer}|!Implementierung!|\meta{Entitätsbefehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
 %    \begin{macrocode}
@@ -4366,9 +4220,9 @@
 %    \begin{macrocode}
     \IfValueTF{#4}{%
 %    \end{macrocode}
-% \dots befindet sich im dritten Argument der Markup-Befehl für den Eintrag im
+% \dots befindet sich im dritten Argument der Entitätsbefehl für den Eintrag im
 % Implementierungsteil. Mit dem zwischenzeitlichen Aktivieren des Schalters
-% \cs{if@tud@changedat} wird beim nachfolgenden Aufruf des Markup-Befehls das 
+% \cs{if@tud@changedat} wird beim nachfolgenden Aufruf des Entitätsbefehls das 
 % Makro \cs{Process@ChangedAt} ausgeführt und dadurch auch \cs{tud@idx@get*} 
 % aufgerufen, wodurch in den Makros \cs{tud@idx@key}, \cs{tud@idx@fmt} und
 % \cs{tud@idx@val} die passend formatierten Indexeinträge enthalten sind.
@@ -4376,12 +4230,12 @@
       \@tud@changedattrue#3\@tud@changedatfalse%
 %    \end{macrocode}
 % Das vierte Argument erstellt in der Änderungsliste einen Untereintrag für den
-% im dritten Argument gegebenen Markup-Befehl. Dies wird für Anmerkungen zu 
+% im dritten Argument gegebenen Entitätsbefehl. Dies wird für Anmerkungen zu 
 % expliziten Schlüssel-Wert-Paaren bei Optionen oder Parametern genutzt. 
 %    \begin{macrocode}
       \tud@if@strblank{#4}{}{%
 %    \end{macrocode}
-% Hierfür wird die zuvor erhaltene Formatierung des Markup-Befehls des dritten
+% Hierfür wird die zuvor erhaltene Formatierung des Entitätsbefehls des dritten
 % Argumentes an den Haupteintrag \cs{tud@idx@val} mit der zusätzlichen
 % Anmerkung \enquote{Werte angepasst} angehängt.
 %    \begin{macrocode}
@@ -4408,7 +4262,7 @@
 % Nachdem die Formatierung der Haupt- und Untereinträge soweit zusammengebaut 
 % wurden, wird die eigentliche Änderungsnotiz des fünften Arguments angehangen. 
 % Dabei wird für den Fall, dass \emph{keine} Erklärung angegeben wurde, in der 
-% Änderungsliste vermerkt, ob es sich bei dem Markup-Befehl respektive dessen 
+% Änderungsliste vermerkt, ob es sich bei dem Entitätsbefehl respektive dessen 
 % Untereintrag um eine \emph{neue} bzw. eine \emph{obsolete} Variante handelt.
 %    \begin{macrocode}
       \tud@if@strblank{#5}{%
@@ -4736,12 +4590,12 @@
 % \begin{macro}{\tud@declaration@list}
 % \begin{macro}{\tud@declare@num}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Dies sin ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von
+% Dies sind ein paar Hilfsmakros zur Steuerung des Markup sowie der Ausgabe von 
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
-% Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die
-% Befehle für das Markup in der Ausgabe als Deklaration oder anderweiteig
-% erfolgt. Der Schalter \cs{if@openindex} wird zu Beginn einer Deklaration auf
-% \val{true} gesetzt und vor dem Beenden auf \val{false}. Damit wird bestimmt,
+% Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die 
+% Befehle für das Markup in der Ausgabe als Deklaration oder anderweitig 
+% erfolgt. Der Schalter \cs{if@openindex} wird zu Beginn einer Deklaration auf 
+% \val{true} gesetzt und vor dem Beenden auf \val{false}. Damit wird bestimmt, 
 % ob ein öffnender oder ein schließender Indexeintrag erzeugt werden soll.
 %    \begin{macrocode}
 \tud@newif\if@tud@declare
@@ -5012,8 +4866,8 @@
     \@tud@declaretrue\@openindextrue%
     \noindent\null%
     \def\@tempa##1{\ignorespaces##1\tabularnewline}%
-    \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
     \sbox\z@{%
+      \edef\HyperRaiseLinkDefault{\the\dimexpr1\baselineskip\relax}%
       \begin{tabular}{|l|}%
         \hline%
         \forlistloop\@tempa{\tud@declaration@list}%
@@ -5087,7 +4941,7 @@
 % \changes{v2.06p}{2022/10/06}{neu}^^A
 % Mit dem Befehl \cs{InlineDeclaration} kann eine Deklaration auch im Fließtext 
 % erfolgen, ohne das hierfür die tabellarische Darstellung gewählt wird. 
-% Vielmehr erscheint der Markup-Befehl in seiner gewöhnlichen Fließtextform, 
+% Vielmehr erscheint der Entitätsbefehl in seiner gewöhnlichen Fließtextform, 
 % allerdings werden zusätzlich ein Anker und ein Deklarationsindexeintrag 
 % erstellt.
 %    \begin{macrocode}
@@ -5273,6 +5127,7 @@
 \AtBeginDocument{\undef\itemval}
 \newcommand*\tud@val@before{%
   \let\itemval\tud@val@item%
+  \let\NR@gettitle\@gobble%
   \tud@setdim\changedatskip{-1\baselineskip}%
 }
 \tud@list@create[before=\tud@val@before]{Declare@Values}{description}{1}
@@ -5308,8 +5163,7 @@
 % erste im optionalen Argument angegebene Wert werden verwendet, um ein Label 
 % zu erstellen.
 %    \begin{macrocode}
-    \tud@lbl@get@curr*\tud@lbl@tmp%
-      {\tud@bdl@curr:\tud@val@declare}=\tud@val@main=%
+    \tud@lbl@@get\tud@lbl@tmp{{\tud@val@declare}=\tud@val@main=(\tud@ety@crnt)}%
 %    \end{macrocode}
 % Jetzt beginnt die Formatierung der Ausgabe. Zuerst wird die zu beschreibende 
 % Entität in der internen Repräsentation in \cs{tud@res@a} abgelegt. Danach 
@@ -5328,7 +5182,7 @@
     \edef\tud@res@a{%
       \endgroup
       \noexpand\item[{%
-        \noexpand\tudhyperdef{\tud@lbl@tmp}%
+        \noexpand\tud@lbl@declare{\tud@lbl@tmp}%
         \expandonce\tud@res@a\expandonce\tud@val@addon\expandonce\tud@res@d%
       }]%
     }%
@@ -5447,6 +5301,7 @@
 \AtBeginDocument{\undef\itempkg}
 \newcommand*\tud@pkg@before{%
   \let\itempkg\tud@pkg@item%
+  \let\NR@gettitle\@gobble%
 }
 \tud@list@create[before=\tud@pkg@before]{Declare@Packages}{description}{2}
 %    \end{macrocode}
@@ -5504,6 +5359,7 @@
 % Die Deklarationen werden durchgeführt und ausgegeben, die Änderungsnotizen 
 % werden erzeugt und die Liste der aktuell deklarierten Label für diesen 
 % Eintrag geändert.
+% \ToDo{set \cs{@currentlabelname} manually?}[v2.06]
 %    \begin{macrocode}
     \edef\tud@res@a{%
       \endgroup
@@ -6512,131 +6368,201 @@
 % Dinge direkt im Log-File zu überprüfen. Hierfür werden folgend einige Befehle 
 % zur Ablaufkontrolle definiert.
 %
+% \begin{macro}{\tud@trace@check@types}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% Ein Hilfsmakro zum Überprüfen gegebener Tracingtypen. Das optionale Argument 
+% kann genutzt werden, um den gültigen Typ zu verarbeiten.
+%    \begin{macrocode}
+\newcommand*\tud@trace@check@types[3][\@gobble]{%
+  \begingroup
+    \tud@toks@{}%
+    \def\do##1{%
+      \ifinlist{##1}{#2}{\addto@hook\tud@toks@{#1{##1}}}{%
+        \ClassError{tudscrmanual}{Undefined tracing type `##1'}{%
+          Tracing type `##1' unknown, possible values are:\MessageBreak%
+          #2%
+        }%
+      }%
+    }%
+    \docsvlist{#3}%
+    \edef\tud@res@a{\endgroup\the\tud@toks@}%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@trace@check@types
 % \begin{macro}{\tracinglabels}
 % \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@created@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@lbl@missing@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
+% \changes{v2.06p}{2022/11/05}{überarbeitet und erweitert}^^A
+% \begin{macro}{\tud@trace@lbl@log@sorted}
+% \changes{v2.06p}{2022/11/05}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@on@line}
+% \changes{v2.06p}{2022/11/05}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@types}
+% \changes{v2.06p}{2022/11/05}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@created@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
 % \begin{macro}{\tud@trace@lbl@missing@list}
 % \changes{v2.05}{2015/10/29}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@matched@list}
+% \changes{v2.06p}{2022/11/05}{neu}^^A
+% \begin{macro}{\tud@trace@lbl@add}
+% \changes{v2.06p}{2022/11/05}{neu}^^A
 % Mit \cs{tracinglabels} wird die Nachverfolgung aller erstellten Labels in der 
-% Dokumentation aktiviert werden. Die Label werden zum einen direkt im Logfile
-% ausgegeben und am Ende des selbigen in einer sortierten Liste ausgegeben. Die 
-% Sternversion des Befehls erzeugt keine sortierte Liste. Über das optionale 
-% Argument kann mit verschiedenen Schlüsseln zudem eingestellt werden, ob alle
-% Label (\val{all}) oder nur die erstellten (\val{created}) beziehungsweise die
-% fehlenden (\val{missing}) nachverfolgt werden sollen.
+% Dokumentation aktiviert, wobei zwischen erzeugten (\val{created}), genutzten 
+% (\val{matched}) sowie fehlenden (\val{missing}) Labeln unterschieden wird. 
+% Die nachverfolgten Label werden direkt im Log-File~-- bei der Verwendung der 
+% Sternversion ohne Zeilennummer~-- ausgegeben. Mit dem gewöhnlichen optionalen 
+% Argument kann eine Angabe der gewünschten Tracingtypen für die Nachvervolgung 
+% erfolgen. Über das optionale Argument in Guillemets werden alle den gegebenen 
+% Tracingtypen zugehörigen Label am Ende des Log-Files sortiert aufgelistet. 
+% Für beide optionale Argumente gilt, das eine leere Angabe von |[]| respektive 
+% |<>| zur Verwendung aller Typen führt.
 %    \begin{macrocode}
-\newcommand*\tud@trace@lbl@created@add[1]{}
-\newcommand*\tud@trace@lbl@missing@add[1]{}
-\NewDocumentCommand\tracinglabels{!s !O{missing}}{%
-  \newcommand*\tud@trace@lbl@created@list{}%
-  \newcommand*\tud@trace@lbl@missing@list{}%
-  \@tempswafalse%
-  \tud@if@strequal{#2}{created}{\@tempswatrue}{}%
-  \tud@if@strequal{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@created@add[1]{%
-      \typeout{%
-        +++++ label created: ##1 on page \thepage%
-      }%
-      \xifinlist{##1}{\tud@trace@lbl@created@list}{}{%
-        \listxadd\tud@trace@lbl@created@list{##1}%
-      }%
+\newcommand*\tud@trace@lbl@log@sorted{\relax}
+\AfterEndDocument{\tud@trace@lbl@log@sorted}
+\newcommand*\tud@trace@lbl@types{}
+\listadd\tud@trace@lbl@types{created}
+\listadd\tud@trace@lbl@types{missing}
+\listadd\tud@trace@lbl@types{matched}
+\NewDocumentCommand\tracinglabels{s O{missing} d<>}{%
+  \newcommand*\tud@trace@lbl@on@line{}%
+  \IfBooleanT{#1}{\let\tud@trace@lbl@on@line\on@line}%
+  \begingroup
+    \def\do##1{%
+      \expandafter\newcommand\csname tud@trace@lbl@##1@list\endcsname{}%
+      \global\cslet{tud@trace@lbl@##1@list}\relax%
     }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels created (sorted) +++++}%
-        \tud@list@sort\tud@trace@lbl@created@list%
-        \forlistloop\typeout{\tud@trace@lbl@created@list}%
-      }%
+    \dolistloop{\tud@trace@lbl@types}%
+    \tud@if@strempty{#2}{%
+      \let\tud@res@a\tud@trace@lbl@types
+    }{%
+      \let\tud@res@a\@empty
+      \tud@trace@check@types[\listadd\tud@res@a]{\tud@trace@lbl@types}{#2}%
     }%
-  \fi%
-  \@tempswafalse%
-  \tud@if@strequal{#2}{missing}{\@tempswatrue}{}%
-  \tud@if@strequal{#2}{all}{\@tempswatrue}{}%
-  \if@tempswa%
-    \renewcommand*\tud@trace@lbl@missing@add[1]{%
-      \typeout{%
-        +++++ label missing: ##1 on page \thepage%
+    \def\do##1{\global\cslet{tud@trace@lbl@##1@list}\@empty}%
+    \dolistloop{\tud@res@a}%
+    \IfValueT{#3}{%
+      \tud@if@strempty{#3}{%
+        \let\tud@res@b\tud@res@a
+      }{%
+        \let\tud@res@b\@empty
+        \tud@trace@check@types[\listadd\tud@res@b]{\tud@res@a}{#3}%
       }%
-      \xifinlist{##1}{\tud@trace@lbl@missing@list}{}{%
-        \listxadd\tud@trace@lbl@missing@list{##1}%
+      \def\do##1{%
+        \gappto\tud@trace@lbl@log@sorted{%
+          \ifcsvoid{tud@trace@lbl@##1@list}{%
+            \wlog{+++++ no labels ##1 +++++}%
+          }{%
+            \wlog{+++++ labels ##1 (sorted) +++++}%
+            \expandafter\tud@list@sort\expandafter{%
+              \csname tud@trace@lbl@##1@list\endcsname%
+            }%
+%    \end{macrocode}
+% Damit der Befehl \cs{wlog} nicht mit jedem Schleifendurchlauf aufgerufen 
+% werden muss, wird ein Hilfsmakro mit dem notwendigen Inhalt bestückt.
+%    \begin{macrocode}
+            \begingroup
+              \let\tud@res@a\@empty%
+              \def\do####1{\appto\tud@res@a{####1^^J}}%
+              \dolistcsloop{tud@trace@lbl@##1@list}%
+              \wlog{\tud@res@a}%
+            \endgroup
+          }%
+        }%
       }%
+      \dolistloop{\tud@res@b}%
     }%
-    \IfBooleanF{#1}{%
-      \AfterEndDocument{%
-        \typeout{+++++ labels missing (sorted) +++++}%
-        \tud@list@sort\tud@trace@lbl@missing@list%
-        \forlistloop\typeout{\tud@trace@lbl@missing@list}%
-      }%
-    }%
-  \fi%
+  \endgroup
 }
 \@onlypreamble\tracinglabels
 %    \end{macrocode}
+% Hiermit werden Labels aus der Liste im zweiten obligatorischen Argument der 
+% Typliste im ersten obligatorischen Argument hinzugefügt.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@trace@lbl@add{m m}{%
+  \begingroup
+    \def\tud@res@a##1{%
+      \ifcsundef{tud@trace@lbl@##1@list}{}{%
+        \tud@unique@csxadd{tud@trace@lbl@##1@list}{#2}%
+        \wlog{%
+          +++++ label ##1\tud@trace@lbl@on@line\space+++++^^J%
+          \@spaces#2%
+        }%
+      }%
+    }%
+    \tud@trace@check@types[\tud@res@a]{\tud@trace@lbl@types}{#1}%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@trace@lbl@add
+% \end{macro}^^A \tud@trace@lbl@matched@list
 % \end{macro}^^A \tud@trace@lbl@missing@list
 % \end{macro}^^A \tud@trace@lbl@created@list
-% \end{macro}^^A \tud@trace@lbl@missing@add
-% \end{macro}^^A \tud@trace@lbl@created@add
+% \end{macro}^^A \tud@trace@lbl@types
+% \end{macro}^^A \tud@trace@lbl@on@line
+% \end{macro}^^A \tud@trace@lbl@log@sorted
 % \end{macro}^^A \tracinglabels
-% \begin{macro}{\tracingmarkup}
+% \begin{macro}{\tracingentities}
 % \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@markup}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Mit \cs{tracinglabels} wird die Nachverfolgung aller Aufrufe von
+% \changes{v2.06p}{2022/11/04}{überarbeitet und erweitert}^^A
+% \begin{macro}{\tud@trace@ety@on@line}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% \begin{macro}{\tud@trace@ety@types}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% \begin{macro}{\tud@trace@ety@active}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% \begin{macro}{\tud@trace@ety@add}
+% \changes{v2.06p}{2022/11/04}{neu}^^A
+% Mit \cs{tracingentities} wird die Nachverfolgung aller Aufrufe von
 % \cs{Process@@MarkupDeclare} und \cs{Process@@MarkupInline} durch
-% \cs{Process@Markup} inklusive all ihrer Argumente aktiviert. Dies ist für die 
-% Kontrolle des erzeugten Markups sinnvoll.
+% \cs{Process@Markup} inklusive all ihrer Argumente aktiviert. Dies wird 
+% gegebenenfalls zur Kontrolle des erzeugten Markups genutzt. Die 
+% nachverfolgten Entitätsbefehle werden direkt im Log-File~-- bei der Nutzung 
+% der Sternversion ohne Zeilennummer~-- ausgegeben. Über das optionale Argument 
+% kann gewählt werden, ob die Deklarationen~(\val{declared}) respektive die 
+% Ausgaben~(\val{output}) nachverfolgt werden sollen. Sollen alle Typen genutzt 
+% werden, kann ein leeres Argument |[]| angegeben werden.
 %    \begin{macrocode}
-\newcommand*\tud@trace@markup[2]{}
-\newcommand*\tracingmarkup{%
-  \renewcommand*\tud@trace@markup[2]{%
-    \typeout{+++++ markup ##1 on page \thepage^^J##2}%
+\newcommand*\tud@trace@ety@types{}
+\listadd\tud@trace@ety@types{declared}
+\listadd\tud@trace@ety@types{output}
+\newcommand*\tud@trace@ety@active{}
+\NewDocumentCommand\tracingentities{s O{declared}}{%
+  \newcommand*\tud@trace@ety@on@line{}%
+  \IfBooleanT{#1}{\let\tud@trace@ety@on@line\on@line}%
+  \tud@if@strempty{#2}{%
+    \let\tud@trace@ety@active\tud@trace@ety@types
+  }{%
+    \tud@trace@check@types[\listadd\tud@trace@ety@active]%
+      {\tud@trace@ety@types}{#2}%
   }%
 }
-\@onlypreamble\tracingmarkup
+\@onlypreamble\tracingentities
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@markup
-% \end{macro}^^A \tracingmarkup
-% \begin{macro}{\tracingbundle}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bdl@add}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% \begin{macro}{\tud@trace@bdl@list}
-% \changes{v2.05}{2015/10/29}{neu}^^A
-% Wird \cs{tracingbundle} in der Präambel verwendet, werden alle direkt oder 
-% indirekt durch \cs{Process@Markup} im Handbuch erzeugten Querverweise auf
-% Klassen oder Pakete aus dem \TUDScript-Bundle nachverfolgt und am Ende des
-% Logfiles ausgegeben. Damit kann im Zweifel übeprüft werden, ob eventuell eine
-% falsche Referenz genutzt wurde, wodurch u.\,U. Querverweise oder Einträge in
-% Index und Änderungsliste fehlerhaft werden oder erst gar nicht erscheinen.
+% Hiermit werden Entitätsbefehle aus der Liste im zweiten obligatorischen 
+% Argument der Typliste im ersten obligatorischen Argument hinzugefügt.
 %    \begin{macrocode}
-\newcommand*\tud@trace@bdl@add[1]{}
-\newcommand*\tud@trace@bdl@list{}
-\newcommand*\tracingbundle{%
-  \renewcommand*\tud@trace@bdl@add[1]{%
-    \begingroup%
-      \def\Class####1{class:####1}%
-      \def\Package####1{package:####1}%
-      \xifinlist{##1}{\tud@trace@bdl@list}{}{%
-        \listxadd\tud@trace@bdl@list{##1}%
-      }%
-    \endgroup%
-  }%
-  \AfterEndDocument{%
-    \typeout{+++++ bundle list +++++}%
-    \forlistloop\typeout{\tud@trace@bdl@list}%
-  }%
+\NewDocumentCommand\tud@trace@ety@add{m m}{%
+  \begingroup
+    \def\tud@res@a##1{%
+      \ifinlist{##1}{\tud@trace@ety@active}{%
+        \protected@edef\tud@res@b{#2}%
+        \@onelevel@sanitize\tud@res@b%
+        \wlog{%
+          +++++ entity ##1\tud@trace@ety@on@line\space+++++^^J%
+          \@spaces\tud@res@b%
+        }%
+      }{}%
+    }%
+    \tud@trace@check@types[\tud@res@a]{\tud@trace@ety@types}{#1}%
+  \endgroup
 }
-\@onlypreamble\tracingbundle
 %    \end{macrocode}
-% \end{macro}^^A \tud@trace@bdl@list
-% \end{macro}^^A \tud@trace@bfundle
-% \end{macro}^^A \tracingbundle
+% \end{macro}^^A \tud@trace@ety@add
+% \end{macro}^^A \tud@trace@ety@active
+% \end{macro}^^A \tud@trace@ety@types
+% \end{macro}^^A \tud@trace@ety@on@line
+% \end{macro}^^A \tracingentities
 %
 % \iffalse
 %</class>
