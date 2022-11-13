@@ -732,6 +732,7 @@
 % der Division expandiert werden soll, danach folgen Dividend und Divisor. Die 
 % Berechnung erfolgt in einer Gruppe, damit die benötigten Längenregister nach 
 % dieser erhalten bleiben.
+% \ToDo{mit \cs{fpeval} bzw. \cs{dimeval} ersetzen}[v2.06]
 %    \begin{macrocode}
 \newcommand*\tud@divide[3]{%
   \begingroup%
@@ -1078,7 +1079,7 @@
 %
 % \begin{macro}{\tud@patch@wrn}
 % \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
-% um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
+% um mit den Makros \cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd} etc. 
 % bereits definierte Befehle anzupassen. Falls dies nicht gelingt, wird eine 
 % Warnung ausgegeben, die hier definiert wird.
 % \ToDo{generelle Schnittstelle schaffen und failure hier behandeln}[v2.07]
@@ -1951,8 +1952,8 @@
         {\tud@res@b}%
         {\tud@res@b[]}%
     }%
-    \IfFileExists{#1.sty}{%
-      \openin\@inputcheck=#1.sty%
+    \openin\@inputcheck="#1.sty" %
+    \ifeof\@inputcheck\else
       \@tud@res@swatrue%
       \loop%
         \read\@inputcheck to\tud@res@c%
@@ -1965,8 +1966,8 @@
         \ifeof\@inputcheck\@tud@res@swafalse\fi%
         \if@tud@res@swa%
       \repeat%
-      \closein\@inputcheck%
-    }{}%
+    \fi
+    \closein\@inputcheck%
     \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}%
   \tud@res@a%
 }

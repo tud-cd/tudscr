@@ -427,7 +427,7 @@
 % \end{macro}^^A \tud@shellescape@wrn
 % \begin{macro}{\tud@latex@ext}
 % \changes{v2.06}{2019/06/21}{neu}^^A
-% Für das verschachtelte Aufrufen von \app{pdflatex} bzw. \app{lualatex}.
+% Für das Aufrufen von \app{pdflatex}, \app{lualatex} oder \app{xelatex}.
 %    \begin{macrocode}
 \newcommand*\tud@latex@ext{pdflatex\space}
 \iftutex
@@ -4081,15 +4081,21 @@
 % Anwenderhandbuch \enquote*{tudscr} im übergeordneten Ordner.
 % \ToDo{was soll das zweite Argument genau?!}[v2.06]
 %    \begin{macrocode}
-\newrobustcmd*\tud@lbl@ref[3]{%
 %<*class>
-  \tud@hyperref{#1}{#3}{#2}%
+\newrobustcmd*\tud@lbl@ref[3]{\tud@hyperref{#1}{#3}{#2}}
 %</class>
 %    \end{macrocode}
+% Mit \cs{tudhyperref} kann in Tutorials auf Labels im Handbuch verwiesen 
+% werden. Um auf Deklarationen von Entitäten im Handbuch zu referenzieren, 
+% wird intern \cs{tud@lbl@ref} genutzt.
+% \ToDo{\cs{tudhyperref} umbenennen in \cs{manualref}}[v2.06]
 % \ToDo{\pkg{xr-hyper} (zum prüfen der Labels) nutzen?}[v2.07]
 % \ToDo{Anwenderbefehl für Dateipfad, an \cs{externaldocument} übergeben}[v2.07]
+% \ToDo{\pkg{xr-hyper} zusammen mit \cs{nameref} verwenden}[v2.07]
 %    \begin{macrocode}
 %<*package>
+\newrobustcmd*\tudhyperref[2]{\tud@lbl@ref{#1}{}{#2}}
+\newrobustcmd*\tud@lbl@ref[3]{%
 %%  \PackageWarning{tudscrmanual}{Change me if you can!}%
 %%  xr-hyper direkt
 %%     \hyperref[prefix-#1]{#2}%
@@ -4097,15 +4103,7 @@
 %%     \href[pdfnewwindow]{run:./../<file>\#<category>.#1}{#2}%
 %%     \hyperref{../<file>}{<category>}{#1}{#2}%
   \hyperref{../tudscr.pdf}{}{#1}{#3}{#2}%
-%</package>
 }
-%    \end{macrocode}
-% Hiermit kann in Tutorials auf Labels im Handbuch verwiesen werden.
-% \ToDo{\cs{tudhyperref} umbenennen in \cs{manualref}}[v2.06]
-% \ToDo{\pkg{xr-hyper} zusammen mit \cs{nameref} verwenden}[v2.07]
-%    \begin{macrocode}
-%<*package>
-\newrobustcmd*\tudhyperref[2]{\tud@lbl@ref{#1}{}{#2}}
 %</package>
 %    \end{macrocode}
 % \end{macro}^^A \tud@lbl@ref
@@ -5665,9 +5663,7 @@
 % Die Aufteilung der Änderungsliste in die einzelnen \TUDScript-Bundle-Elemente 
 % erfolgt entweder anhand des explizit angegebenen optionalen Argumentes in
 % runden Klammern oder aber implizit über den gegenwärtigen Inhalt des Makros
-% \cs{tud@ety@crnt}. Dafür wird das Makro \cs{@tempa} so definiert, dass es
-% das angegebene Argument in einer Box ausführt und die gesuchte Entität in
-% \cs{@tempb} gespeichert ist.
+% \cs{tud@ety@crnt}.
 %
 % Nachdem klar ist, für welche Entität ggf. der Änderungslisteneintrag erzeugt
 % werden soll, wird nun bestimmt, ob dieser im allgemeinen Teil oder in den 
@@ -7553,23 +7549,29 @@
 %    \end{macrocode}
 % \end{macro}^^A \GitHubFile
 %
-% \begin{macro}{\HyperTutorial}
+% \begin{macro}{\TUDScriptTutorial}
 % \changes{v2.02}{2014/08/22}{neu}^^A
-% \changes{v2.02}{2014/10/22}{Reimplementierung}^^A
+% \changes{v2.06p}{2022/11/13}{Reimplementierung}^^A
+% \begin{macro}{\tud@tutorial@list}
+% \changes{v2.06p}{2022/11/13}{neu}^^A
+% \begin{macro}{\tud@tutorial@compile}
+% \changes{v2.06p}{2022/11/13}{neu}^^A
 % \begin{macro}{\tud@bash@write}
 % Die gegebenenfalls notwendige Kompilierung und die Referenzierung eines 
-% Tutorials aus dem Handbuch erfolgt mit \cs{Tutorial}. Um mit verschachtelten
-% Aufrufen von \app{pdflatex} umgehen zu können, wird das ganze Prozedere in
-% ein Skript ausgelagert. Somit können die Aufrufe von \app{pdflatex} für die
-% Tutorials aus dem entsprechenden Ordner und mit den notwendigen Optionen
-% erfolgen.
+% \TUDScript-Tutorials aus dem Handbuch erfolgt mit \cs{TUDScriptTutorial}. 
+% Um mit kaskadierten Aufrufen von \cs{tud@latex@ext} umgehen zu können, wird 
+% das ganze Prozedere in ein Skript ausgelagert. Somit können die Aufrufe von 
+% \cs{tud@latex@ext} für die Tutorials aus dem entsprechenden Ordner und mit 
+% den notwendigen Optionen erfolgen.
+% \ToDo{generate via \app{make}}[v2.06]
+% \ToDo{direkter Link im Index oder auf label im Dokument?!}[v2.06]
 %    \begin{macrocode}
-%<class>\tud@newwrite\tud@bash@write
-\newcommand*\HyperTutorial[1]{%
 %<*class>
-  \ifnum\pdf@shellescape=\@ne\relax%
+\tud@newwrite\tud@bash@write
+\newrobustcmd*\TUDScriptTutorial[1]{%
+  \ifnum\pdf@shellescape=\@ne\relax
     \filemodCmp{tutorials/#1.pdf}{tutorials/#1.tex}{}{%
-      \let\tud@res@a\@empty%
+      \let\tud@res@a\@empty
       \ifdef\tudfinalflag{\appto\tud@res@a{\def\noexpand\tudfinalflag{}}}{}%
       \ifdef\tudprintflag{\appto\tud@res@a{\def\noexpand\tudprintflag{}}}{}%
       \appto\tud@res@a{\noexpand\input{#1.tex}}%
@@ -7605,43 +7607,47 @@
 %    \end{macrocode}
 % Hier erfolgt die Unterscheidung der Befehle für die unterschiedlichen OS.
 %    \begin{macrocode}
-      \ifwindows%
+      \ifwindows
         \ShellEscape{rename tutorials.sh tutorials.bat}%
         \ShellEscape{tutorials.bat}%
         \ShellEscape{del tutorials.bat}%
-      \else%
+      \else
         \ShellEscape{bash tutorials.sh}%
         \ShellEscape{rm tutorials.sh}%
-      \fi%
+      \fi
     }%
-  \fi%
+  \fi
 %    \end{macrocode}
 % Hyperlink und verlinkter Indexeintrag.
 % \ToDo{verwenden von SuppressMarkupSuffix im Index}[v2.07]
 %^^A \index[files]{#2.pdf Tutorial@\Tutorial{#2}{\suffix{Tutorial}}}%
 %    \begin{macrocode}
   \IfFileExists{tutorials/#1.pdf}{%
-    \href[pdfnewwindow]{tutorials/#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+    \href[pdfnewwindow]{tutorials/#1.pdf}{\Tutorial''{#1}}%
   }{%
     \tud@shellescape@wrn{tutorials/#1.pdf}%
     \Tutorial{#1}%
   }%
+}
 %</class>
 %    \end{macrocode}
 % Der Befehl für die Querverweise innerhalb von Tutorials.
 %    \begin{macrocode}
 %<*package>
+\newrobustcmd*\TUDScriptTutorial[1]{%
   \IfFileExists{#1.pdf}{%
-    \href[pdfnewwindow]{#1.pdf}{\InlineDeclaration{\Tutorial''{#1}}}%
+    \href[pdfnewwindow]{#1.pdf}{\Tutorial''{#1}}%
   }{%
     \tud@shellescape@wrn{#1.pdf}%
     \Tutorial{#1}%
   }%
-%</package>
 }
+%</package>
 %    \end{macrocode}
+% \end{macro}^^A \tud@tutorial@compile
+% \end{macro}^^A \tud@tutorial@list
 % \end{macro}^^A \tud@bash@write
-% \end{macro}^^A \HyperTutorial
+% \end{macro}^^A \TUDScriptTutorial
 %
 % \subsubsection{Tabelle mit abschließender Mehrspaltenzellen}
 %
@@ -7696,7 +7702,7 @@
 % \end{macro}^^A \if@tud@code@used
 % \end{environment}^^A Example
 %
-% \subsection{Einbindung und Kompilierung von \Lettering{LaTeX}-Quelltexten}
+% \subsection{Darstellung und Einbindung von \Lettering{LaTeX}-Quelltexten}
 %
 % Hier werden allerlei Befehle und Umgebungen für die Formatierung, Ausgabe und 
 % Ausführung von Quelltextauszügen mit dem Paket \pkg{listings} definiert.
@@ -7718,105 +7724,15 @@
 % Umgebung \env{Hint} steht für zusätzliche Erläuterungen bereit, welche jedoch
 % nicht in das Copy"~\&"~Paste"~Beispiel übernommen werden.
 %
-% \iffalse
-%<*class>
-% \fi
-%
-% \begin{macro}{\IncludeExample}
-% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
-% Mit diesem Befehl wird eine \Lettering{LaTeX}-Datei ggf. übersetzt und 
-% anschließend als PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige 
-% Quelltext mittels \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl 
-% wird lediglich für die Klasse \cls{tudscrmanual} benötigt.
-%    \begin{macrocode}
-\newcommand*\IncludeExample[2][1]{%
-  \begingroup
-    \lstinputlisting[style=tudscr]{examples/#2}%
-%    \end{macrocode}
-% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
-% oder noch gar kein entsprechendes PDF"~Dokument existiert.
-%    \begin{macrocode}
-    \ifnum\pdf@shellescape=\@ne\relax%
-      \filemodCmp{examples/#2.pdf}{examples/#2.tex}{}{%
-        \edef\tud@res@a{%
-          \tud@latex@ext -output-directory examples examples/#2.tex%
-        }%
-        \ShellEscape{\tud@res@a}%
-        \ShellEscape{\tud@res@a}%
-      }%
-%    \end{macrocode}
-% Sollte es eine spezielle Version eines beispiels für die Druckausgabe geben, 
-% wird auch dieses kompiliert.
-%    \begin{macrocode}
-      \filemodCmp{examples/#2_print.pdf}{examples/#2_print.tex}{}{%
-        \edef\tud@res@a{%
-          \tud@latex@ext -output-directory examples examples/#2_print.tex%
-        }%
-        \ShellEscape{\tud@res@a}%
-        \ShellEscape{\tud@res@a}%
-      }%
-    \fi%
-%    \end{macrocode}
-% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden, wobei 
-% gegebenenfalls die Druckversion verwendet wird, falls vorhanden.
-%    \begin{macrocode}
-    \def\tud@res@a{examples/#2.pdf}%
-    \ifdef\tudprintflag{%
-      \IfFileExists{examples/#2_print.pdf}{%
-        \def\tud@res@a{examples/#2_print.pdf}%
-      }{}%
-    }{}%
-    \IfFileExists{\tud@res@a}{%
-      \edef\tud@res@a{%
-        \noexpand\includepdf[%
-          pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
-          height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
-        ]{\tud@res@a}%
-      }%
-      \tud@res@a%
-    }{%
-%    \end{macrocode}
-% Andernfalls wird eine Warnung mit dem Hinweis auf die notwendige Verwendung
-% von \app{pdflatex} mit dem Parameter \file{-{}-shell-escape} erzeugt und ein 
-% Platzhalter für das fehlende Dokument eingefügt, wbeo das optionale Argument 
-% die Anzahl der erwarteten Seiten angibt.
-%    \begin{macrocode}
-      \begingroup
-        \tud@shellescape@wrn{\tud@res@a}%
-        \tud@res@cnt=#1\relax%
-        \@whilenum\tud@res@cnt>\z@\relax\do{%
-          \advance\tud@res@cnt\m@ne%
-          \clearpage%
-          \fboxsep=-\arrayrulewidth%
-          \noindent\fbox{\vbox to\textheight{%
-            \vss\vss%
-            \hbox to\textwidth{\hss\texttt{\tud@res@a}\hss}%
-            \vskip\smallskipamount%
-            \hbox to\textwidth{%
-              \hss\texttt{\the\numexpr#1-\tud@res@cnt\relax/#1}\hss%
-            }%
-            \vss\vss\vss%
-          }}%
-        }%
-      \endgroup
-      \clearpage%
-    }%
-  \endgroup
-}
-%    \end{macrocode}
-% \end{macro}^^A \IncludeExample
-%
-% \iffalse
-%</class>
-% \fi
-%
 % \begin{environment}{Code}
 % Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
 % Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele 
 % ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung innerhalb
 % von \env{Example} oder \env{quoting} zu verwenden, um den Quelltext etwas
 % abzuheben.
-% \ToDo{\env{quoting} loswerden, automatischer Einzug}[v2.06]
+% \ToDo{
+%   \env{quoting} loswerden, automatischer Einzug, an tutorial angleichen
+% }[v2.06]
 %    \begin{macrocode}
 \lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
 \NoIndentAfterEnv{Code}
@@ -7834,116 +7750,118 @@
 %<*package>
 % \fi
 %
+% \begin{macro}{\tud@read}
+% \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@write@a}
 % \changes{v2.02}{2014/10/22}{neu}^^A
 % \begin{macro}{\tud@write@b}
 % \changes{v2.02}{2014/11/02}{neu}^^A
-% \begin{macro}{\tud@read}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% Die notwendigen Ein- und Ausgabestreams.
+% \begin{macro}{\tud@read@to@outputstream}
+% \changes{v2.02}{2014/12/16}{neu}^^A
+% Für die Tutorials werden ein Eingabe- sowie zwei Ausgabestreams benötigt.
 %    \begin{macrocode}
 \tud@newwrite\tud@write@a
 \tud@newwrite\tud@write@b
 \tud@newread\tud@read
 %    \end{macrocode}
-% \end{macro}^^A \tud@read
-% \end{macro}^^A \tud@write@b
-% \end{macro}^^A \tud@write@a
-% \begin{macro}{\tud@tut@temp}
-% \changes{v2.05}{2016/05/01}{neu}^^A
-% \begin{macro}{\tud@tut@inputtostream}
-% \changes{v2.02}{2014/12/16}{neu}^^A
-% \begin{macro}{\tud@tut@append}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel für
-% Copy~\&~Paste gegeben werden. Um dieses zusammenzubauen, werden alle im 
-% Dokument innerhalb der Varianten der \env{Trunk}-Umgebungen gegebenen
-% Codefragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu
-% können, werden zwei Eingabe- sowie ein Ausgabestream benötigt, welche bereits 
-% zuvor initialisiert wurden.
-%
-% Mit \cs{tud@tut@inputtostream} wird der Inhalt der Datei im ersten Argument 
-% in den Ausgabestream des zweiten Argumentes geschrieben. Dies wird durch 
-% \cs{tud@tut@append} genutzt.
-% \ToDo{inputtostream überhaupt notwendig?}
+% Mit \cs{tud@read@to@outputstream} wird der Inhalt der Datei aus dem ersten 
+% Argument in den Ausgabestream des zweiten Argumentes geschrieben.
 %    \begin{macrocode}
-\newcommand*\tud@tut@temp{}
-\edef\tud@tut@temp{\@currname-temp}
-\newcommand*\tud@tut@inputtostream[2]{%
-  \begingroup%
+\newcommand*\tud@read@to@outputstream[2]{%
+  \begingroup
+    \set@curr@file{#1}%
     \endlinechar=\m@ne\relax%
-    \openin\tud@read=#1%
+    \openin\tud@read="\@curr@file" %
 %    \end{macrocode}
-% Der Schalter \cs{if@tempswa} wird verwendet, um unnötige Leerzeilen in der
+% Der Schalter \cs{if@tud@res@swa} wird genutzt, um unnötige Leerzeilen in der 
 % Ausgabedatei zu entfernen. Wurde eine nicht leere Zeile gefunden, wird diese 
-% auf jeden Fall geschrieben, indem \cs{@tempswatrue} gesetzt wird. Eine leere 
-% Zeile wird~-- bis auf den Sonderfall, dass es sich um die letzte Zeile in der
-% Datei handelt~-- zunächst nicht weiter beachtet. Im Zweifelsfall wird diese
-% (erste) Leerzeile geschrieben. 
+% auf jeden Fall geschrieben, indem \cs{@tud@res@swatrue} gesetzt wird. Eine 
+% leere Zeile wird~-- bis auf den Sonderfall, dass es sich um die letzte Zeile 
+% in der Datei handelt~-- zunächst nicht weiter beachtet. Im Zweifelsfall wird 
+% diese (erste) Leerzeile geschrieben. 
 %    \begin{macrocode}
-    \@tempswafalse%
+    \@tud@res@swafalse
     \loop\unless\ifeof\tud@read%
       \readline\tud@read to\tud@res@a%
-      \ifx\tud@res@a\@empty%
-        \ifeof\tud@read\@tempswafalse\fi%
-      \else%
-        \@tempswatrue%
-      \fi%
+      \ifx\tud@res@a\@empty
+        \ifeof\tud@read\@tud@res@swafalse\fi
+      \else
+        \@tud@res@swatrue
+      \fi
 %    \end{macrocode}
 % Hier erfolgt das eigentliche Schreiben im selektierten Stream.
 %    \begin{macrocode}
-      \if@tempswa%
+      \if@tud@res@swa
         \immediate\write#2{\expandonce\tud@res@a}%
-      \fi%
+      \fi
 %    \end{macrocode}
 % Im Nachgang wird überprüft, ob die aktuell geschriebene Zeile leer war. Ist 
-% dies der Fall, so wird \cs{@tempswafalse} gesetzt, um eine etwaig folgende 
-% Leerzeile nicht in die Ausgabedatei zu schrieben.
+% dies der Fall, so wird \cs{@tud@res@swafalse} gesetzt, um eine etwaig 
+% folgende Leerzeile nicht in die Ausgabedatei zu schrieben.
 %    \begin{macrocode}
-      \ifx\tud@res@a\@empty\@tempswafalse\fi%
+      \ifx\tud@res@a\@empty\@tud@res@swafalse\fi
     \repeat%
     \closein\tud@read%
-  \endgroup%
+  \endgroup
 }
+%    \end{macrocode}
+% \end{macro}^^A \tud@read@to@outputstream
+% \end{macro}^^A \tud@write@b
+% \end{macro}^^A \tud@write@a
+% \end{macro}^^A \tud@read
+%
+% \subsubsection{Sammeln von Quelltextauszügen}
+%
+% \begin{macro}{\tud@code@temp}
+% \changes{v2.05}{2016/05/01}{neu}^^A
+% \begin{macro}{\tud@code@append}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% Bei den Tutorials soll zum Schluss ein komplett kompilierbares Beispiel in 
+% eine separate Datei \file{\string\jobname-example.tex} mit allen darin 
+% diskutierten Inhalten erzeugt werden. Um dieses zusammenzubauen, werden alle 
+% im Dokument innerhalb der Varianten der \env{Trunk}-Umgebungen gegebenen 
+% Fragmente zusammengesetzt. Um die Quelltexte einlesen und verarbeiten zu 
+% können, werden zwei Eingabe- sowie ein Ausgabestream benötigt, welche bereits 
+% zuvor initialisiert wurden.
+%    \begin{macrocode}
+\newcommand*\tud@code@temp{}
+\edef\tud@code@temp{\@currname-temp}
 %    \end{macrocode}
 % Der innerhalb der Umgebungen \env{Preamble} und \env{Trunk}~-- sowie deren 
 % Derivaten~-- angegebene Inhalt wird beim Schließen dieser Umgebungen in die 
-% Hilfsdatei \cs{tud@tut@temp.tex} zwischengespeichert. Mit \cs{tud@tut@append}
-% wird der Inhalt dieser Datei ausgelesen und den Hilfsdateien
-% \cs{tud@tut@temp-preamble.tex} respektive \cs{tud@tut@temp-trunk.tex}
-% angehangen und damit gesichert, um die jeweiligen Quelltextauszüge aus dem
-% Tutorial für die Präambel sowie den Dokumentteil trennen beziehungsweise
-% sortieren zu können.
+% Hilfsdatei \cs{tud@code@temp.tex} gespeichert. Mit \cs{tud@code@append}
+% wird deren Inhalt ausgelesen und den Dateien \cs{tud@code@temp-preamble.tex} 
+% respektive \cs{tud@code@temp-trunk.tex} angehangen und damit gesichert, um 
+% die jeweiligen Quelltextauszüge aus dem Tutorial für die Präambel sowie den 
+% Dokumentteil trennen beziehungsweise sortieren zu können.
 %    \begin{macrocode}
-\newcommand*\tud@tut@append[1]{%
+\newcommand*\tud@code@append[1]{%
   \tud@if@strequal{#1}{preamble}{%
-    \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@a}%
+    \tud@read@to@outputstream{\tud@code@temp.tex}{\tud@write@a}%
   }{%
     \tud@if@strequal{#1}{trunk}{%
-      \tud@tut@inputtostream{\tud@tut@temp.tex}{\tud@write@b}%
+      \tud@read@to@outputstream{\tud@code@temp.tex}{\tud@write@b}%
     }{%
-      \tud@tut@inputtostream{\tud@tut@temp.tex}{#1}%
+      \tud@read@to@outputstream{\tud@code@temp.tex}{#1}%
     }%
   }%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@tut@append
-% \end{macro}^^A \tud@tut@inputtostream
-% \end{macro}^^A \tud@tut@temp
+% \end{macro}^^A \tud@code@append
+% \end{macro}^^A \tud@code@temp
+%
 % \begin{macro}{\StartTutorial}
 % \changes{v2.02}{2014/08/21}{neu}^^A
 % \begin{macro}{\FinishTutorial}
 % \changes{v2.02}{2014/08/21}{neu}^^A
-% Mit \cs{StartTutorial} wird ein Hyperlink für den Querverweis aus dem 
-% Handbuch definiert. Außerdem wird gleich der Titel und~-- falls im optionalen 
-% Argument angegeben~-- eine Zusammenfassung gesetzt. Die Sternversion gibt 
-% nach der optionalen Beschreibung einen einleitenden Satz zur Dokumnentklasse 
-% und sinnvollen Paketen an. Diese sollten direkt nach \cs{StartTutorial} in 
-% der \env{Preamble}-Umgebung angegeben werden.
+% Mit \cs{StartTutorial} werden die Ausgabestreams der benötigten Hilfsdateien 
+% zur Erstellung von \file{\string\jobname-example.tex} geöffnet. Außerdem 
+% wird gleich der Titel und~-- falls im optionalen Argument angegeben~-- eine 
+% Zusammenfassung gesetzt.
 %    \begin{macrocode}
 \newcommand\StartTutorial[1][]{%
-  \immediate\openout\tud@write@a=\tud@tut@temp-preamble.tex\relax%
-  \immediate\openout\tud@write@b=\tud@tut@temp-trunk.tex\relax%
+  \immediate\openout\tud@write@a="\tud@code@temp-preamble.tex"\relax%
+  \immediate\openout\tud@write@b="\tud@code@temp-trunk.tex"\relax%
   \immediate\write\tud@write@b{^^J\string\begin{document}^^J}%
   \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
@@ -7958,16 +7876,18 @@
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
-% Der Befehl \cs{FinishTutorial} schleißt den noch offenen Ausgabestream und
-% gibt den vorgestellten Quelltext vollständig aus.
+% Der Befehl \cs{FinishTutorial} schließt die offenen Ausgabestream und führt 
+% die Inhalte nach \file{\string\jobname-example.tex} zusammen.
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
   \immediate\write\tud@write@b{^^J\string\end{document}^^J}%
   \immediate\closeout\tud@write@b%
   \immediate\closeout\tud@write@a%
-  \immediate\openout\tud@write@a\jobname-example.tex\relax%
-  \tud@tut@inputtostream{\tud@tut@temp-preamble.tex}{\tud@write@a}%
-  \tud@tut@inputtostream{\tud@tut@temp-trunk.tex}{\tud@write@a}%
+  \immediate\openout\tud@write@a="\tud@code@temp.tex"\relax%
+  \immediate\closeout\tud@write@a%
+  \immediate\openout\tud@write@a="\jobname-example.tex"\relax%
+  \tud@read@to@outputstream{\tud@code@temp-preamble.tex}{\tud@write@a}%
+  \tud@read@to@outputstream{\tud@code@temp-trunk.tex}{\tud@write@a}%
   \immediate\closeout\tud@write@a%
   \clearpage%
   \addsec{Copy~\&~Paste}%
@@ -7985,22 +7905,284 @@
   \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-example.tex}%
   \end{quoting}%
-%    \end{macrocode}
-% Falls es möglich ist, werden nach dem Durchlauf alle nicht mehr benötigten 
-% Hilfsdateien gelöscht.
-%    \begin{macrocode}
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \ifwindows%
-      \def\@tempa{del}%
-    \else%
-      \def\@tempa{rm}%
-    \fi%
-    \ShellEscape{\@tempa\space\tud@tut@temp*.*}%
-  \fi%
 }
 %    \end{macrocode}
 % \end{macro}^^A \FinishTutorial
 % \end{macro}^^A \StartTutorial
+%
+% \begin{macro}{\filec@ntents@silent}
+% \changes{v2.06e}{2019/10/10}{neu}^^A
+% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
+% Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
+% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
+% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
+% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
+% definierten Parameter \prm{silent} unterbunden.
+%    \begin{macrocode}
+\providecommand*\filec@ntents@silent{%
+  \let\@latex@warning@no@line\@gobble%
+}
+%    \end{macrocode}
+% \end{macro}^^A \filec@ntents@silent
+%
+% \begin{macro}{\tud@code@pre}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% \begin{macro}{\tud@code@post}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% Dies sind Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
+% \env{Preamble}, \env{Trunk} und \env{Hint} für das Sichern der Inhalte in
+% eine Hilfsdatei verantwortlich sind, wofür die \env{filecontents}-Umgebung 
+% genutzt wird.
+%    \begin{macrocode}
+\newcommand*\tud@code@pre{%
+  \csuse{filecontents*}[nosearch,force,silent]{\tud@code@temp.tex}%
+}
+\newcommand*\tud@code@post{%
+  \csuse{endfilecontents*}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@code@post
+% \end{macro}^^A \tud@code@pre
+%
+% \iffalse
+%</package>
+% \fi
+%
+% \subsubsection{Einbindung alleinstehender \Lettering{LaTeX}-Dokumente}
+%
+% \begin{macro}{\tud@file@compile}
+% \changes{v2.06p}{2022/11/13}{neu}^^A
+% \begin{macro}{\tud@file@stub}
+% \changes{v2.06p}{2022/11/13}{neu}^^A
+% Hiermit können alleinstehende \Lettering{LaTeX}-Dateien kompiliert werden, 
+% wobei dies nur erfolgt, wenn sich deren Quelldatei geändert hat oder noch gar
+% kein entsprechendes PDF"~Dokument existiert. Sollte die Quelldatei dabei 
+% nicht dem Namen der verwendeten \Lettering{LaTeX}-Datei entsprechen, weil 
+% letztere beispielsweise aus einer anderen Quelle generiert wird, kann diese 
+% über das optionale Argument in runden Klammern als Referenz für den Vergleich 
+% des Zeitstempels angegben werden. Über das gewöhnliche optionale Argument 
+% lassen sich Kommadozeilenargumente für den \Lettering{LaTeX}-Lauf angeben.
+% \ToDo{compile via \app{make}}[v2.07]
+%    \begin{macrocode}
+\NewDocumentCommand\tud@file@compile{D(){#3.tex} o m}{%
+  \filemodCmp{#3.pdf}{#1}{}{%
+    \ifnum\pdf@shellescape=\@ne\relax
+      \edef\tud@res@a{\tud@latex@ext\space#2\space"#3.tex"}%
+      \ShellEscape{\tud@res@a}%
+      \ShellEscape{\tud@res@a}%
+    \fi
+    \tud@file@check{#3.pdf}%
+  }%
+}
+%    \end{macrocode}
+% Setzt einen Platzhalter, falls eine mit \cs{tud@file@compile} zu erstellende 
+% PDF"~Datei (noch) nicht vorhanden ist.
+%    \begin{macrocode}
+\newcommand*\tud@file@stub[3]{
+  \begingroup
+    \fboxsep=-\arrayrulewidth%
+    \noindent\fbox{\vbox to #1{%
+      \vss\vss%
+      \hbox to #2{\hss\texttt{#3}\hss}%
+      \vss\vss\vss%
+    }}%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@file@stub
+% \end{macro}^^A \tud@file@compile
+%
+% \iffalse
+%<*class>
+% \fi
+%
+% \begin{macro}{\IncludeExample}
+% \changes{v2.02}{2014/07/25}{Skalierung der eingefügten Seiten}^^A
+% Mit diesem Befehl wird eine \Lettering{LaTeX}-Datei ggf. übersetzt und 
+% anschließend als PDF"~Datei wieder eingebunden. Zuvor wird der dazugehörige 
+% Quelltext mittels \cs{lstinputlisting} im Dokument ausgegeben. Dieser Befehl 
+% wird lediglich für die Klasse \cls{tudscrmanual} benötigt.
+%    \begin{macrocode}
+\newcommand*\IncludeExample[1]{%
+  \begingroup
+    \lstinputlisting[style=tudscr]{examples/#1.tex}%
+%    \end{macrocode}
+% Die Beispiele werden nur erneut kompiliert, wenn sich diese geändert haben 
+% oder noch gar kein entsprechendes PDF"~Dokument existiert. Sollte es eine 
+% spezielle Version eines Beispiels für die Druckausgabe geben, wird auch 
+% dieses kompiliert.
+%    \begin{macrocode}
+    \tud@file@compile[-output-directory examples]{examples/#1}%
+    \tud@file@compile[-output-directory examples]{examples/#1_print}%
+%    \end{macrocode}
+% Ist die gesuchte Datei vorhanden, wird diese auch eingebunden, wobei 
+% gegebenenfalls die Druckversion verwendet wird, falls vorhanden.
+%    \begin{macrocode}
+    \def\tud@res@a{examples/#1.pdf}%
+    \IfFileExists{examples/#1_print.tex}{%
+      \ifdefined\tudprintflag\def\tud@res@a{examples/#1_print.pdf}\fi
+    }{}%
+    \IfFileExists{\tud@res@a}{%
+      \edef\tud@res@b{\noexpand\includepdf[%
+        pages=-,noautoscale,frame,keepaspectratio,pagecommand={},%
+        height=\noexpand\textheight,width=\noexpand\textwidth,offset=5mm 0mm%
+      ]}%
+      \tud@res@b{\tud@res@a}%
+    }{%
+%    \end{macrocode}
+% Andernfalls wird ein Platzhalter für das fehlende Dokument eingefügt.
+%    \begin{macrocode}
+      \clearpage%
+      \tud@file@stub{\textheight}{\textwidth}{\tud@res@a}%
+      \clearpage%
+    }%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \IncludeExample
+%
+% \iffalse
+%</class>
+%<*package>
+% \fi
+%
+% \begin{macro}{\IncludeStandalone}
+% \changes{v2.02}{2014/09/10}{neu}^^A
+% Der Befehl \cs{IncludeStandalone} bindet die mit den Umgebungen \env{Trunk!} 
+% und \env{Hint!} generierten PDF"~Dateien ein. Das optionale Argument in 
+% runden Klammern dient zur Angabe der einzubindenden Seiten der PDF"~Datei, 
+% wobei diese automatisch auf die Breite des ersten optionalen Argumentes 
+% skaliert werden. Da es vorkommen kann, dass die resultierende Datei vor dem 
+% eigentlichen Quelltextauszug eingebunden werden soll, wird die Kompilierung 
+% erst nach dem Durchlauf ausgeführt.
+%    \begin{macrocode}
+\NewDocumentCommand\IncludeStandalone{O{\textwidth} D(){1} m}{%
+  \AfterReadingMainAux{\tud@file@compile(\jobname.tex){\jobname-temp-#3}}%
+  \begingroup
+    \tud@res@cnt=\z@%
+    \@for\tud@res@a:=#2\do{\advance\tud@res@cnt\@ne}%
+    \ifnum\tud@res@cnt>\z@\relax%
+      \tud@setdim\tud@res@glue{#1}%
+      \divide\tud@res@glue\tud@res@cnt%
+      \advance\tud@res@cnt\m@ne%
+      \multiply\tud@res@cnt2%
+      \tud@addtodim\tud@res@glue{-\tud@res@cnt\tabcolsep}%
+      \@for\tud@res@a:=#2\do{%
+        \advance\tud@res@cnt\m@ne%
+        \IfFileExists{\jobname-temp-#3.pdf}{%
+          \edef\tud@res@b{\noexpand\includegraphics[%
+            keepaspectratio,width=\the\tud@res@glue,page=\tud@res@a%
+          ]}%
+          \fbox{\tud@res@b{\jobname-temp-#3.pdf}}%
+        }{%
+          \tud@file@stub{\fpeval{\the\tud@res@glue/\textwidth}\textheight}%
+            {\tud@res@glue}{\jobname-temp-#3.pdf}%
+        }%
+        \ifnum\tud@res@cnt>\z@\relax\hfill\fi%
+      }%
+    \fi%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \IncludeStandalone
+% \begin{macro}{\tud@code@standalone}
+% \changes{v2.02}{2014/10/22}{neu}^^A
+% Die Umgebungen \env{Trunk!} und \env{Hint!} verwenden nach der Ausgabe des 
+% Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Die dafür 
+% notwendige \Lettering{LaTeX}-Datei \file{\string\jobname-temp-\#1.tex} wird 
+% hier erzeugt und kann mit \cs{IncludeStandalone} kompiliert und eingebunden 
+% werden.
+%    \begin{macrocode}
+\newcommand*\tud@code@standalone[1]{%
+  \begingroup
+%    \end{macrocode}
+% Die benötigten Pakete und Einstellungen der Präambel.
+%    \begin{macrocode}
+    \def\tud@res@a{%
+      \documentclass[english,ngerman]{tudscrreprt}^^J%
+      \iftutex^^J%
+        \usepackage{fontspec}^^J%
+      \else^^J%
+        \usepackage[T1]{fontenc}^^J%
+        \usepackage[ngerman=ngerman-x-latest]{hyphsubst}^^J%
+      \fi^^J%
+      \usepackage{babel}^^J%
+      \usepackage[babel]{microtype}^^J%
+      \usepackage{tudscrsupervisor}^^J%
+      \usepackage{isodate}^^J%
+      \usepackage{enumitem}^^J%
+      \setlist{noitemsep}^^J%
+    }%
+    \eappto\tud@res@a{\expandafter\noexpand\csname begin\endcsname{document}}%
+%    \end{macrocode}
+% Das Datum der aktuellen Datei wird ebenfalls extrahiert.
+%    \begin{macrocode}
+    \def\tud@res@c{\today}%
+    \ifx\@date\tud@res@c\else
+      \let\printdate\@firstofone
+      \eappto\tud@res@a{^^J\noexpand\date{\@date}}%
+    \fi
+    \edef\tud@res@b{\expandafter\noexpand\csname end\endcsname{document}}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{\detokenize\expandafter{\tud@res@b}}%
+%    \end{macrocode}
+% Um keinen weiteren Ausgabestream reservieren zu müssen, wird auf den bereits 
+% von der \env{filecontents}-Umgebung genutzten zurückgegriffen. Nach dem 
+% Schreiben der Präambel (\cs{tud@res@a})wird der im Dokument angegebene Code 
+% aus \file{\string\tud@code@temp.tex} eingelesen.
+%    \begin{macrocode}
+    \chardef\reserved@c\ifx\directlua\@undefined 15 \else 127 \fi%
+    \ch@ck7\reserved@c\write\relax%
+    \set@curr@file{\jobname-temp-#1.tex}%
+    \immediate\openout\reserved@c="\@curr@file"\relax%
+    \immediate\write\reserved@c{\tud@res@a}%
+    \tud@read@to@outputstream{\tud@code@temp.tex}{\reserved@c}%
+    \immediate\write\reserved@c{\tud@res@b}%
+    \immediate\closeout\reserved@c%
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@code@standalone
+%
+% \subsubsection{Verarbeitung von Quelltextauszügen}
+%
+% \begin{macro}{\tud@with@batchmode}
+% \changes{v2.06p}{2022/09/30}{neu}^^A
+% Das Argument wird im temporär aktivierten \cs{batchmode} ausgeführt.
+%    \begin{macrocode}
+\newcommand*\tud@with@batchmode[1]{%
+  \begingroup
+    \edef\tud@res@a{%
+      \endgroup
+      \batchmode%
+      \unexpanded{#1}%
+      \interactionmode\the\interactionmode\space%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@with@batchmode
+% \begin{macro}{\tud@code@input@lst}
+% \changes{v2.02}{2014/10/07}{neu}^^A
+% Damit wird der Quelltext eingezogen ausgegeben.
+%    \begin{macrocode}
+\newcommand*\tud@code@input@lst{%
+  \begin{quoting}[rightmargin=0pt]%
+    \tud@with@batchmode{\lstinputlisting[style=tudscr]{\tud@code@temp.tex}}%
+  \end{quoting}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@code@input@lst
+% \begin{macro}{\InputCode}
+% \changes{v2.02}{2014/10/21}{neu}^^A
+% Mit \cs{InputCode} kann der Inhalt der letzen \env{Trunk}-Umgebung 
+% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@code@input@tex} zu 
+% prüfen und zu formatieren.
+%    \begin{macrocode}
+\newcommand*\InputCode{\tud@with@batchmode{\input{\tud@code@temp.tex}}}
+%    \end{macrocode}
+% \end{macro}^^A \InputCode
+%
 % \begin{macro}{\CodePreamble}
 % \changes{v2.02}{2014/08/20}{neu}^^A
 % \begin{macro}{\Code@Preamble}
@@ -8009,7 +8191,10 @@
 % \changes{v2.02}{2014/10/11}{neu}^^A
 % \begin{macro}{\Code@Hook}
 % \changes{v2.02}{2014/10/11}{neu}^^A
-% Bereitstellung von Hilfsmakros für die formatierte Ausgabe von Quelltexten.
+% Bereitstellung von Hilfsmakros für die formatierte Ausgabe von Quelltexten. 
+% Diese werden im Normalfall erst aufgelistet und daran anschließend folgt die 
+% Ausgabe des Ergebnisses. Mit \cs{CodePreamble} kann zwischen den beiden 
+% Teilen etwas erläuternder Text eingefügt werden.
 %    \begin{macrocode}
 \newcommand\Code@Preamble{}
 \let\Code@Preamble\relax
@@ -8027,262 +8212,14 @@
 % \end{macro}^^A \CodeHook
 % \end{macro}^^A \Code@Preamble
 % \end{macro}^^A \CodePreamble
-% \begin{macro}{\filec@ntents@silent}
-% \changes{v2.06e}{2019/10/10}{neu}^^A
-% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
-% Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
-% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
-% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
-% definierten Parameter \prm{silent} unterbunden.
-%    \begin{macrocode}
-\providecommand*\filec@ntents@silent{%
-  \let\@latex@warning@no@line\@gobble%
-}
-%    \end{macrocode}
-% \end{macro}^^A \filec@ntents@silent
-% \begin{macro}{\tud@tut@pre}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% \begin{macro}{\tud@tut@post}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% Dies sind Hilfsmakros, welche zu Beginn und Ende der Quelltextumgebungen 
-% \env{Preamble}, \env{Trunk} und \env{Hint} für das Sichern der Inhalte in
-% eine Hilfsdatei verantwortlich sind, wofür die \env{filecontents}-Umgebung 
-% genutzt wird.
-%    \begin{macrocode}
-\newcommand*\tud@tut@pre{%
-  \csuse{filecontents*}[force,silent,nosearch]{\tud@tut@temp.tex}%
-}
-\newcommand*\tud@tut@post{%
-  \csuse{endfilecontents*}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@post
-% \end{macro}^^A \tud@tut@pre
-% Die nachfolgenden Umgebungen verwenden die beiden, gerade zuvor eingeführten 
-% Hilfsmakros \cs{tud@tut@pre} und \cs{tud@tut@post}, welche den gegebenen 
-% Inhalt in die temporäre Datei \file{\string\tud@tut@temp.tex} schreiben. Die 
-% im Dokument in den Umgebungen gesetzten Quelltextauszüge werden mit dem Makro
-% \cs{tud@tut@append}~-- abhängig vom gegebenen Argument~-- zusätzlich für ein 
-% Copy"~\&"~Paste"~Beispiel in \file{\string\tud@tut@temp-preamble.tex} oder
-% \file{\string\tud@tut@temp-trunk.tex} gespeichert. Die damit gesammelten 
-% Inhalte werden am Ende mit \cs{FinishTutorial} ausgegeben.
-% \begin{environment}{Preamble}
-% \changes{v2.02}{2014/11/02}{neu}^^A
-% \begin{environment}{Preamble*}
-% \changes{v2.02}{2014/11/03}{neu}^^A
-% \begin{environment}{Preamble+}
-% \changes{v2.02}{2014/11/03}{neu}^^A
-% Die Umgebung \env{Preamble} dient für die Ausgabe von Quelltextauszügenen, 
-% welche in einem \Lettering{LaTeX}-Dokument in der Präambel verwendet werden 
-% müssen oder sollten. Die in ihr gesetzten Inhalte werden für das 
-% Copy"~\&"~Paste-Beispiel vor den Inhalten aus der Umgebung \env{Trunk} 
-% ausgegeben. Die Sternversion führt den Inhalt zusätzlich im Dokument aus. Die 
-% Pluszeichen-Version fügt dem Ausgabestream ihren Inhalt hinzu, ohne das 
-% dieser ausgegeben oder ausgeführt wird.
-% \ToDo{noindentafter?}[v2.06]
-%    \begin{macrocode}
-\newenvironment{Preamble}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{preamble}%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Preamble*}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{preamble}%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \tud@tut@input%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Preamble+}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{preamble}%
-  \gdef\@tempa{%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-%    \end{macrocode}
-% \end{environment}^^A Preamble+
-% \end{environment}^^A Preamble*
-% \end{environment}^^A Preamble
-% \begin{environment}{Trunk}
-% \changes{v2.02}{2014/08/16}{neu}^^A
-% \begin{environment}{Trunk*}
-% \changes{v2.02}{2014/08/19}{neu}^^A
-% \begin{environment}{Trunk+}
-% \changes{v2.02}{2014/11/03}{neu}^^A
-% \begin{environment}{Trunk!}
-% \changes{v2.02}{2014/10/07}{neu}^^A
-% Die Umgebung \env{Trunk} dient zur Ausgabe von exemplarischen Quelltexten, 
-% die in einem \Lettering{LaTeX}-Dokument innerhalb der \env{document}-Umgebung 
-% verwendet werden müssen oder sollten. Für das Copy"~\&"~Paste-Beispiel werden 
-% die gegebenen Inhalte nach den Inhalten aus der Umgebung \env{Preamble} 
-% ausgegeben. Die Sternversion der Umgebung führt ihren Inhalt zusätzlich im
-% Dokument aus. Die Pluszeichen"=Version fügt dem Ausgabestream ihren Inhalt
-% hinzu, ohne diesen auszugeben oder auszuführen. Die Ausrufezeichen"=Version
-% fügt den Quelltext im Dokument ein und führt diesen zusätzlich in einer
-% separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine
-% PDF-Datei zu erzeugen, welche im Nachhinein mit \cs{IncludeStandalone} als
-% Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht,
-% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt
-% werden sollen.
-% \ToDo{noindentafter?}[v2.06]
-%    \begin{macrocode}
-\newenvironment{Trunk}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{trunk}%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Trunk*}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{trunk}%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \tud@tut@input%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Trunk+}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \tud@tut@append{trunk}%
-  \gdef\@tempa{%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\NewDocumentEnvironment{Trunk!}{m}{%
-  \tud@tut@pre%
-}{%
-  \tud@tut@post%
-  \tud@tut@append{trunk}%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \tud@tut@pdf{#1}%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-%    \end{macrocode}
-% \end{environment}^^A Trunk!
-% \end{environment}^^A Trunk+
-% \end{environment}^^A Trunk*
-% \end{environment}^^A Trunk
-% \begin{environment}{Hint}
-% \changes{v2.02}{2014/09/16}{neu}^^A
-% \begin{environment}{Hint*}
-% \changes{v2.02}{2014/10/13}{neu}^^A
-% \begin{environment}{Hint?}
-% \changes{v2.02}{2014/12/09}{neu}^^A
-% \begin{environment}{Hint!}
-% \changes{v2.02}{2014/11/13}{neu}^^A
-% Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
-% Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
-% Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
-% Copy"~\&"~Paste"~Beispiel übernommen. Ansonsten entsprechen alle Umgebungen 
-% in ihren Eigenschaften den äquivalenten \env{Trunk}-Umgebungen. Die Version 
-% mit Fragezeichen ist für Quelltextauszüge gedacht, die ungeprüft \emph{vor}
-% dessen Ausgabe ausgeführt werden sollen. 
-% \ToDo{optionales Argument für \cs{hfuzz}; \cs{pcolumnfuzz} treatise}[v2.06]
-% \ToDo{noindentafter?}[v2.06]
-%    \begin{macrocode}
-\newenvironment{Hint}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Hint*}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \tud@tut@input%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\newenvironment{Hint?}{\tud@tut@pre}{%
-  \tud@tut@post%
-  \gdef\@tempa{%
-    \InputCode%
-    \tud@tut@lst%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-\NewDocumentEnvironment{Hint!}{m}{%
-  \tud@tut@pre%
-}{%
-  \tud@tut@post%
-  \gdef\@tempa{%
-    \tud@tut@lst%
-    \tud@tut@pdf{#1}%
-    \global\let\Code@Preamble\relax%
-  }%
-  \aftergroup\@tempa%
-}
-%    \end{macrocode}
-% \end{environment}^^A Hint!
-% \end{environment}^^A Hint?
-% \end{environment}^^A Hint*
-% \end{environment}^^A Hint
-% \begin{macro}{\tud@with@batchmode}
-% \changes{v2.06p}{2022/09/30}{neu}^^A
-% Das Argument wird im temporär aktivierten \cs{batchmode} ausgeführt.
-%    \begin{macrocode}
-\newcommand*\tud@with@batchmode[1]{%
-  \begingroup
-    \edef\tud@res@a{%
-      \endgroup
-      \batchmode%
-      \unexpanded{#1}%
-      \interactionmode\the\interactionmode\space%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@with@batchmode
-% \begin{macro}{\tud@tut@lst}
-% \changes{v2.02}{2014/10/07}{neu}^^A
-% Damit wird der Quelltext eingezogen ausgegeben.
-%    \begin{macrocode}
-\newcommand*\tud@tut@lst{%
-  \begin{quoting}[rightmargin=0pt]%
-    \tud@with@batchmode{\lstinputlisting[style=tudscr]{\tud@tut@temp.tex}}%
-  \end{quoting}%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@lst
-% \begin{macro}{\InputCode}
-% \changes{v2.02}{2014/10/21}{neu}^^A
-% Mit \cs{InputCode} kann der Inhalt der letzen \env{Trunk}-Umgebung 
-% direkt ausgeführt werden, ohne diesen zuvor mit \cs{tud@tut@input} zu prüfen 
-% und zu formatieren.
-%    \begin{macrocode}
-\newcommand*\InputCode{\tud@with@batchmode{\input{\tud@tut@temp.tex}}}
-%    \end{macrocode}
-% \end{macro}^^A \InputCode
-% \begin{macro}{\tud@tut@input}
+%
+% \begin{macro}{\tud@code@input@tex}
 % \changes{v2.02}{2014/10/13}{neu}^^A
 % Für die Ausgabe des Quelltextergebnisses erfolgt ein linker Einzug. Außerdem 
 % werden unter anderem abhängig von der Verwendung eines erklärenden Textes die 
 % eingefügten vertikalen Abstände angepasst.
 %    \begin{macrocode}
-\newcommand*\tud@tut@input{%
+\newcommand*\tud@code@input@tex{%
 %    \end{macrocode}
 % Nach dem Ausführen des ersten Argumentes von \cs{@tempa} wird geprüft, ob
 % dieses überhaupt eine sichtbare Ausgabe erzeugt hat. Nur für diesen Fall wird
@@ -8314,7 +8251,7 @@
   \tud@setdim\@tempdimc{\leftskip}%
   \tud@setdim\leftskip{\leftmargin}%
 %    \end{macrocode}
-% Durch die zweimalige Verwendung von \file{\string\tud@tut@temp.tex}~-- einmal 
+% Durch die doppelte Verwendung von \file{\string\tud@code@temp.tex}~-- einmal 
 % direkt und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
 % \cs{newcommand} zu Fehlern führen. Mit dem Makro \cs{CodeHook} lassen sich 
 % diese Konflikte durch eine lokale Redefinition ebensolcher Befehle auflösen
@@ -8326,123 +8263,189 @@
   \noindent\ignorespaces%
 }
 %    \end{macrocode}
-% \end{macro}^^A \tud@tut@input
-% \begin{macro}{\tud@tut@pdf}
-% \changes{v2.02}{2014/10/22}{neu}^^A
-% Die Umgebungen \env{Trunk!} und \env{Hint!} verwenden nach der Ausgabe des
-% Quelltextes diesen abermals, um daraus eine PDF-Datei zu erzeugen. Dafür wird
-% eine temporäre \Lettering{LaTeX}-Datei mittels \env{filecontents}-Umgebung 
-% erzeugt. Diese bindet die mit \env{Trunk!} respektive \env{Hint!} erzeugte 
-% Datei ein und wird anschließend via \cs{ShellEscape} kompiliert. Dabei sollte 
-% man sich nicht von der doppelten Verwendung von \cs{jobname} verwirren 
-% lassen. Der Dateiname der temporär erzeugten Datei ist abhängig vom gesetzten 
-% Tutorial. Beim Aufruf von \app{pdflatex} wird \cs{jobname} über den 
-% entsprechenden Kommandozeilenparameter angepasst (siehe \cs{tud@tut@pdf}).
+% \end{macro}^^A \tud@code@input@tex
+%
+% Die nachfolgenden Umgebungen verwenden die beiden, gerade zuvor eingeführten 
+% Hilfsmakros \cs{tud@code@pre} und \cs{tud@code@post}, welche den gegebenen 
+% Inhalt in die temporäre Datei \file{\string\tud@code@temp.tex} schreiben. Die 
+% im Dokument in den Umgebungen gesetzten Quelltextauszüge werden mit dem Makro
+% \cs{tud@code@append}~-- abhängig vom gegebenen Argument~-- zusätzlich für ein 
+% Copy"~\&"~Paste"~Beispiel in \file{\string\tud@code@temp-preamble.tex} oder
+% \file{\string\tud@code@temp-trunk.tex} gespeichert. Die damit gesammelten 
+% Inhalte werden am Ende mit \cs{FinishTutorial} ausgegeben.
+% \begin{environment}{Preamble}
+% \changes{v2.02}{2014/11/02}{neu}^^A
+% \begin{environment}{Preamble*}
+% \changes{v2.02}{2014/11/03}{neu}^^A
+% \begin{environment}{Preamble+}
+% \changes{v2.02}{2014/11/03}{neu}^^A
+% Die Umgebung \env{Preamble} dient für die Ausgabe von Quelltextauszügenen, 
+% welche in einem \Lettering{LaTeX}-Dokument in der Präambel verwendet werden 
+% müssen oder sollten. Die in ihr gesetzten Inhalte werden für das 
+% Copy"~\&"~Paste-Beispiel vor den Inhalten aus der Umgebung \env{Trunk} 
+% ausgegeben. Die Sternversion führt den Inhalt zusätzlich im Dokument aus. Die 
+% Pluszeichenversion fügt dem Ausgabestream ihren Inhalt hinzu, ohne das 
+% dieser ausgegeben oder ausgeführt wird.
+% \ToDo{noindentafter?}[v2.06]
 %    \begin{macrocode}
-\IfFileExists{\tud@tut@temp-standalone.tex}{\@tempswafalse}{\@tempswatrue}
-\if@tempswa
-\begin{filecontents*}[force,silent,nosearch]{\tud@tut@temp-standalone.tex}
-\documentclass[english,ngerman]{tudscrreprt}
-\iftutex
-  \usepackage{fontspec}
-\else
-  \usepackage[T1]{fontenc}
-  \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
-\fi
-\usepackage{babel}
-\usepackage[babel]{microtype}
-\usepackage{tudscrsupervisor}
-\usepackage{isodate}
-\usepackage{enumitem}
-\setlist{noitemsep}
-\begin{document}
-\input{\jobname.tex}%
-\end{document}
-\end{filecontents*}
-\fi
-%    \end{macrocode}
-% Der Quelltext der Umgebungen \env{Trunk!} und \env{Hint!} wird~-- wie bei
-% allen anderen \env{Trunk}"~ und \env{Hint!}"~Derivaten~-- in der Datei
-% \file{\string\tud@tut@temp.tex} gesichert. Diese wird für das Procederre 
-% in \file{\string\jobname-standalone-\#1.tex} umbenannt. Anschließend wird 
-% beim Aufruf von \app{pdflatex} durch die Nutzung des Kommandozeilenparameters
-% \file{-jobname=\string\jobname-standalone-\#1} der Befehl \cs{jobname} in der 
-% aufgerufenen Datei \file{\string\tud@tut@temp-standalone.tex} überschrieben
-% und der Inhalt von \file{\string\jobname-standalone-\#1.tex} wie gewünscht
-% eingebunden und kompiliert. Die so erstellte PDF"~Datei kann anschließend mit 
-% \cs{IncludeStandalone} in das Tutorial eingebunden werden.
-% \ToDo{Kompilieren mit \app{make}}[v2.07]
-%    \begin{macrocode}
-\newcommand*\tud@tut@pdf[1]{%
-  \ifnum\pdf@shellescape=\@ne\relax%
-    \filemodCmp{\jobname-standalone-#1.pdf}{\jobname.tex}{}{%
-      \begingroup%
-        \ShellEscape{%
-          \ifwindows%
-            copy%
-          \else%
-            cp%
-          \fi%
-          \space"\tud@tut@temp.tex"\space"\jobname-standalone-#1.tex"%
-        }%
-        \edef\@tempa{%
-          \tud@latex@ext -jobname="\jobname-standalone-#1"\space%
-          "\unexpanded{\noexpand\input}{\tud@tut@temp-standalone.tex}"%
-        }%
-        \ShellEscape{\@tempa}%
-        \ShellEscape{\@tempa}%
-        \ShellEscape{\@tempa}%
-        \ShellEscape{%
-          \ifwindows%
-            del%
-          \else%
-            rm%
-          \fi%
-          \space"\jobname-standalone-#1.tex"%
-        }%
-      \endgroup%
-    }%
-  \fi%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@tut@pdf
-% \begin{macro}{\IncludeStandalone}
-% \changes{v2.02}{2014/09/10}{neu}^^A
-% Der Befehl \cs{IncludeStandalone} bindet die mit den Umgebungen \env{Trunk!} 
-% und \env{Hint!} generierten PDF"~Dateien ein. Das angehängte optionale 
-% Argument dient zur Angabe der einzubindenden Seiten der PDF-Datei, wobei
-% diese automatisch auf die passende Breite skaliert werden.
-%    \begin{macrocode}
-\NewDocumentCommand\IncludeStandalone{o m !O{1}}{%
-  \IfFileExists{\jobname-standalone-#2.pdf}{%
-    \@tempcnta\z@%
-    \@for\@tempa:=#3\do{\advance\@tempcnta\@ne}%
-    \ifnum\@tempcnta>\z@\relax%
-      \tud@setdim\@tempdima{\textwidth}%
-      \divide\@tempdima\@tempcnta%
-      \advance\@tempcnta\m@ne%
-      \multiply\@tempcnta 2%
-      \tud@addtodim\@tempdima{-\@tempcnta\tabcolsep}%
-      \@for\@tempa:=#3\do{%
-        \advance\@tempcnta\m@ne%
-        \edef\@tempb{%
-          keepaspectratio,page=\@tempa,width=\the\@tempdima,%
-          \IfValueT{#1}{#1}%
-        }%
-        \fbox{%
-          \expandafter\includegraphics\expandafter[\@tempb]{%
-            \jobname-standalone-#2.pdf%
-          }%
-        }%
-        \ifnum\@tempcnta>\z@\relax\hfill\fi%
-      }%
-    \fi%
-  }{%
-    \tud@shellescape@wrn{\jobname-standalone-#2.pdf}%
+\newenvironment{Preamble}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{preamble}%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \global\let\Code@Preamble\relax%
   }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Preamble*}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{preamble}%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \tud@code@input@tex%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Preamble+}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{preamble}%
+  \gdef\@tempa{%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
 }
 %    \end{macrocode}
-% \end{macro}^^A \IncludeStandalone
+% \end{environment}^^A Preamble+
+% \end{environment}^^A Preamble*
+% \end{environment}^^A Preamble
+% \begin{environment}{Trunk}
+% \changes{v2.02}{2014/08/16}{neu}^^A
+% \begin{environment}{Trunk*}
+% \changes{v2.02}{2014/08/19}{neu}^^A
+% \begin{environment}{Trunk+}
+% \changes{v2.02}{2014/11/03}{neu}^^A
+% \begin{environment}{Trunk!}
+% \changes{v2.02}{2014/10/07}{neu}^^A
+% Die Umgebung \env{Trunk} dient zur Ausgabe von exemplarischen Quelltexten, 
+% die in einem \Lettering{LaTeX}-Dokument innerhalb der \env{document}-Umgebung 
+% verwendet werden müssen oder sollten. Für das Copy"~\&"~Paste-Beispiel werden 
+% die gegebenen Inhalte nach den Inhalten aus der Umgebung \env{Preamble} 
+% ausgegeben. Die Sternversion der Umgebung führt ihren Inhalt zusätzlich im
+% Dokument aus. Die Pluszeichenversion fügt dem Ausgabestream ihren Inhalt 
+% hinzu, ohne diesen auszugeben oder auszuführen. Die Ausrufezeichenversion 
+% fügt den Quelltext im Dokument ein und führt diesen zusätzlich in einer 
+% separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine 
+% PDF"~Datei zu erzeugen, welche im Nachhinein mit \cs{IncludeStandalone} als 
+% Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
+% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
+% werden sollen.
+% \ToDo{noindentafter?}[v2.06]
+%    \begin{macrocode}
+\newenvironment{Trunk}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{trunk}%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Trunk*}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{trunk}%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \tud@code@input@tex%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Trunk+}{\tud@code@pre}{%
+  \tud@code@post%
+  \tud@code@append{trunk}%
+  \gdef\@tempa{%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\NewDocumentEnvironment{Trunk!}{m}{%
+  \tud@code@pre%
+}{%
+  \tud@code@post%
+  \tud@code@append{trunk}%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \tud@code@standalone{#1}%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+%    \end{macrocode}
+% \end{environment}^^A Trunk!
+% \end{environment}^^A Trunk+
+% \end{environment}^^A Trunk*
+% \end{environment}^^A Trunk
+% \begin{environment}{Hint}
+% \changes{v2.02}{2014/09/16}{neu}^^A
+% \begin{environment}{Hint*}
+% \changes{v2.02}{2014/10/13}{neu}^^A
+% \begin{environment}{Hint?}
+% \changes{v2.02}{2014/12/09}{neu}^^A
+% \begin{environment}{Hint!}
+% \changes{v2.02}{2014/11/13}{neu}^^A
+% Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
+% Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
+% Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
+% Copy"~\&"~Paste"~Beispiel übernommen. Ansonsten entsprechen alle Umgebungen 
+% in ihren Eigenschaften den äquivalenten \env{Trunk}-Umgebungen. Die Version 
+% mit Fragezeichen ist für Quelltextauszüge gedacht, die ungeprüft \emph{vor}
+% dessen Ausgabe ausgeführt werden sollen. 
+% \ToDo{optionales Argument für \cs{hfuzz}; \cs{pcolumnfuzz} treatise}[v2.06]
+% \ToDo{noindentafter?}[v2.06]
+%    \begin{macrocode}
+\newenvironment{Hint}{\tud@code@pre}{%
+  \tud@code@post%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Hint*}{\tud@code@pre}{%
+  \tud@code@post%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \tud@code@input@tex%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\newenvironment{Hint?}{\tud@code@pre}{%
+  \tud@code@post%
+  \gdef\@tempa{%
+    \InputCode%
+    \tud@code@input@lst%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+\NewDocumentEnvironment{Hint!}{m}{\tud@code@pre}{%
+  \tud@code@pre%
+}{%
+  \tud@code@post%
+  \gdef\@tempa{%
+    \tud@code@input@lst%
+    \tud@code@standalone{#1}%
+    \global\let\Code@Preamble\relax%
+  }%
+  \aftergroup\@tempa%
+}
+%    \end{macrocode}
+% \end{environment}^^A Hint!
+% \end{environment}^^A Hint?
+% \end{environment}^^A Hint*
+% \end{environment}^^A Hint
 %
 % \subsection{Automatische Erstellung von \pkg{pstricks}-Grafiken}
 %
@@ -8458,18 +8461,19 @@
 \AfterPackage*{pstricks}{%
   \ifpdf
     \def\@tempa{off}%
-    \ifnum\pdf@shellescape=\@ne\relax
-      \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{}{%
+    \filemodCmp{\jobname-pics.pdf}{\jobname.tex}{}{%
+      \ifnum\pdf@shellescape=\@ne\relax
 %    \end{macrocode}
-% Da kleinere Beispieldokumente (\file{\string\tud@tut@temp-standalone.tex}) 
+% Da kleinere Beispieldokumente (\file{\string\tud@code@temp-standalone.tex}) 
 % separat kompiliert werden, erstellt \pkg{auto-pst-pdf} auch für diese die 
 % entsprechenden Hilfsdateien. Deshalb werden diese hier rigoros gelöscht,
 % nachdem \pkg{auto-pst-pdf} seine Arbeit verrichtet hat.
 %    \begin{macrocode}
         \def\@tempa{on,runs=2,cleanup={}}%
         \AfterReadingMainAux{\app@exe{\app@rm "*-\app@suffix*"}}%
-      }%
-    \fi
+      \fi
+      \tud@file@check{\jobname-pics.pdf}%
+    }%
     \PassOptionsToPackage{\@tempa}{auto-pst-pdf}%
   \else
     \disable@package@load{hyperref}{}%
@@ -8555,8 +8559,8 @@
 \listadd\tud@trace@lbl@types{ignored}
 \listadd\tud@trace@lbl@types{url}
 \NewDocumentCommand\tracinglabels{s O{missing} d<>}{%
-  \newcommand*\tud@trace@lbl@on@line{\on@line}%
-  \IfBooleanT{#1}{\let\tud@trace@lbl@on@line\@empty}%
+  \newcommand*\tud@trace@lbl@on@line{}%
+  \IfBooleanT{#1}{\let\tud@trace@lbl@on@line\on@line}%
   \begingroup
     \def\do##1{%
       \expandafter\newcommand\csname tud@trace@lbl@##1@list\endcsname{}%
@@ -8730,8 +8734,8 @@
 \listadd\tud@trace@ety@types{output}
 \newcommand*\tud@trace@ety@active{}
 \NewDocumentCommand\tracingentities{s O{declared}}{%
-  \newcommand*\tud@trace@ety@on@line{\on@line}%
-  \IfBooleanT{#1}{\let\tud@trace@ety@on@line\@empty}%
+  \newcommand*\tud@trace@ety@on@line{}%
+  \IfBooleanT{#1}{\let\tud@trace@ety@on@line\on@line}%
   \tud@if@strempty{#2}{%
     \let\tud@trace@ety@active\tud@trace@ety@types
   }{%
@@ -8798,7 +8802,7 @@
 }
 %    \end{macrocode}
 % Wurde eine oder beide der Optionen \opt{final} oder \opt{print} gesetzt bzw.
-% vor einem externen \app{pdflatex}-Aufruf die Flags \cs{tudfinalflag} und/oder
+% mit einem Aufruf über die Kommandozeile die Flags \cs{tudfinalflag} und/oder
 % \cs{tudprintflag} definiert, werden die entsprechenden Einstellungen zur
 % finalen Ausgabe und/oder unbunten Druck vorgenommen und anschließend die 
 % entsprechenden Optionen unschädlich gemacht.
@@ -8812,19 +8816,19 @@
 {%
   \TUD@key@toolate{final}%
   \TUD@key@toolate{print}%
-  \ifdef\tudfinalflag{%
+  \ifdefined\tudfinalflag
     \TUDoptions{ToDo=false}%
     \TUD@key{ToDo}{\FamilyKeyStateProcessed}%
-  }{%
+  \else
     \TUD@KOMAoptions{overfullrule}%
-  }%
-  \ifdef\tudprintflag{%
-    \ifnum\tud@cd@num>\z@\relax%
+  \fi
+  \ifdefined\tudprintflag
+    \ifnum\tud@cd@num>\z@\relax
       \TUDoptions{cd=true}%
-    \fi%
+    \fi
     \PassOptionsToPackage{hidelinks}{hyperref}%
     \AfterEndPreamble{\hypersetup{hidelinks}}%
-  }{}%
+  \fi
   \TUD@key@toolate{cd}%
 %<*class> 
   \ClassInfoNoLine{tudscrmanual}%
