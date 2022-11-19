@@ -57,7 +57,7 @@
 \DeclareCaptionSubType[alph]{figure}
 \DeclareCaptionSubType[alph]{table}
 \usepackage{floatrow}
-\renewcommand{\floatpagefraction}{0.7}
+\renewcommand*\floatpagefraction{0.7}
 
 \usepackage{tikz}
 \usetikzlibrary{chains}
@@ -81,7 +81,7 @@
     nogroupskip,%
     nostyles,%
   ]{glossaries}
-  \renewcommand*{\glsglossarymark}[1]{}
+  \renewcommand*\glsglossarymark[1]{}
   \newignoredglossary{abbreviation}
   \newcommand*\newabbreviation[4][]{%
     \newacronym[type=abbreviation,#1]{#2}{#3}{#4}%
@@ -92,7 +92,17 @@
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
 \addbibresource{\jobname.bib}
-\begin{filecontents}{\jobname.bib}
+\addbibresource{\jobname-temp.bib}
+\DeclareSourcemap{
+  \maps[datatype=bibtex]{
+    \map[overwrite]{
+      \perdatasource{\jobname-temp.bib}
+      \step[fieldset=keywords, fieldvalue={,}, appendstrict]
+      \step[fieldset=keywords, fieldvalue={\jobname-temp}, append]
+    }
+  }
+}
+\begin{filecontents}[nosearch,force,silent]{\jobname.bib}
 @book{talbot2012,
   author    = {Nicola L. C. Talbot},
   title     = {\LaTeX{} for Complete Novices},
@@ -262,11 +272,11 @@ die zuletzt angegebene als aktuelle Sprache aktiviert wird. Dadurch werden
 diese nicht nur an das Paket \Package{babel} sondern auch an andere Pakete 
 übergeben, welche sprachspezifische Einstellungen vornehmen.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \documentclass[english,ngerman]{tudscrreprt}
 \usepackage{babel}
-\end{Preamble}
-%
+\end{Code}
+
 Mit dem Paket \Package{fontenc} lässt sich die Zeichensatzkodierung für die 
 Ausgabe der verwendeten Schriften im Dokument spezifizieren, wobei mit der 
 Option~\Option(\Package{fontenc}){T1} die europäische Zeichensatzkodierung 
@@ -289,7 +299,7 @@ wesentlich verbesserte Worttrennung für die deutsche Sprache mit dem Paket
 Informationen zur Verwendung von \Package{hyphsubst} sowie zum Thema 
 \emph{Worttrennung} finden.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{iftex}
 \iftutex
   \usepackage{fontspec}
@@ -297,17 +307,17 @@ Informationen zur Verwendung von \Package{hyphsubst} sowie zum Thema
   \usepackage[T1]{fontenc}
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
-\end{Preamble}
-%
+\end{Code}
+
 Für die \KOMAScript-Klassen wird außerdem das Paket \Package{scrhack} 
 bereitgestellt. Dieses behebt einige Probleme bei der Kompatibilität mit 
 anderen Paketen bezüglich des Erstellens von Verzeichnissen. Deshalb sollte 
 dieses bei Bedarf frühzeitig in der Präambel geladen werden. 
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{scrhack}
-\end{Preamble}
-%
+\end{Code}
+
 Damit sind die allgemein notwendigen Pakete eingebunden. Es werden zwar weitere 
 benötigt, diese werden allerdings in den einzelnen Abschnitten dieses Tutorials 
 aufgeführt.
@@ -329,7 +339,7 @@ nächsten Schritt ist der zu verwendende Satzspiegel festzulegen. Hierfür kann
 die \TUDScript-Option \Option'manual'{cdgeometry} verwendet werden, welche im 
 \TUDScript-Handbuch beschrieben ist. Normalerweise wird das Dokument im 
 asymmetrischen Layout des \CDs gesetzt.
-%
+
 Dieses Verhalten wird mit \Option*'manual'{cdgeometry=false} deaktiviert und 
 der Satzspiegel durch das Paket \Package{typearea} nach typografischen 
 Gesichtspunkten konstruiert. Dabei ist für dessen Aufteilung maßgeblich die 
@@ -387,14 +397,14 @@ Ausgabe des nachfolgenden Quelltextauszugs ist in \autoref{fig:title} zu sehen
 und stellt eine mögliche Ausprägung von Umschlagseite und Titel dar.
 %
 \begin{figure}
-\IncludeStandalone{title}[1,2]
+\IncludeStandalone(1,2){title}
 \caption{%
   Umschlagseite und Titel%
   \label{fig:title}%
 }
 \end{figure}
 
-\begin{Trunk!}{title}
+\begin{Code}(title){trunk}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
@@ -427,7 +437,7 @@ und stellt eine mögliche Ausprägung von Umschlagseite und Titel dar.
 \makecover
 \maketitle
 
-\end{Trunk!}
+\end{Code}
 
 
 
@@ -458,11 +468,11 @@ Weitere Hinweise zu den genannten Befehlen sind im \scrguide nachzulesen.
 Das Erstellen der Aufgabenstellung einer Abschlussarbeit im \CD der \TnUD muss 
 das Paket \Package'manual'{tudscrsupervisor} geladen werden.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{tudscrsupervisor}
 
-\end{Preamble}
-%
+\end{Code}
+
 Dieses Paket stellt die Umgebung \Environment'manual'{task} sowie den Befehl 
 \Macro'manual'{taskform} bereit. Bei beiden Varianten wird zu Beginn eine 
 Tabelle mit Autoreninformationen erzeugt. Am Ende werden der oder die Betreuer 
@@ -477,14 +487,14 @@ zu nutzen ist. Das Resultat des folgenden Quelltextes ist in \autoref{fig:task}
 zu sehen. 
 %
 \begin{figure}
-\IncludeStandalone{task}[1,2]
+\IncludeStandalone(1,2){task}
 \caption{%
   Aufgabenstellung in freier und standardisierter Form%
   \label{fig:task}%
 }
 \end{figure}
 
-\begin{Hint!}{task}
+\begin{Code}(task){hint}
 \faculty{Juristische Fakultät}
 \department{Fachrichtung Strafrecht}
 \institute{Institut für Kriminologie}
@@ -512,7 +522,7 @@ zu sehen.
 \chairman{Prof. Dr. Primus von Quack}
 \professor{Prof. Dr. Kater Karlo}
 
-\newcommand{\taskcontent}{%
+\newcommand\taskcontent{%
   Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
   gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
   Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation 
@@ -539,9 +549,9 @@ zu sehen.
   \item Dokumentation und grafische Aufbereitung der Ergebnisse
 }
 
-\end{Hint!}
-\begin{Trunk+}
-\newcommand{\taskcontent}{%
+\end{Code}
+\begin{Code}[nolst]{trunk}
+\newcommand\taskcontent{%
   Momentan ist das besagte Thema in aller Munde. Insbesondere wird es
   gerade in vielen~-- wenn nicht sogar in allen~-- Medien diskutiert.
   Es ist momentan noch nicht abzusehen, ob und wann sich diese Situation 
@@ -561,7 +571,7 @@ zu sehen.
   \item Dokumentation und grafische Aufbereitung der Ergebnisse
 }
 
-\end{Trunk+}
+\end{Code}
 
 
 
@@ -579,14 +589,14 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
 %
 \begin{figure}
 \centering
-\IncludeStandalone[width=.5\textwidth]{abstract}
+\IncludeStandalone[.5\textwidth]{abstract}
 \caption{%
   Zusammenfassung in deutscher und englischer Sprache%
   \label{fig:abstr}%
 }
 \end{figure}
 
-\begin{Trunk!}{abstract}
+\begin{Code}(abstract){trunk}
 \TUDoption{abstract}{multiple,section}
 \begin{abstract}
   Dies ist der deutschsprachige Teil der Zusammenfassung, in dem die
@@ -597,7 +607,7 @@ Ausgabe ist in \autoref{fig:abstr} zu sehen.
   the content of the following academic treatise are briefly presented.
 \end{abstract}
 
-\end{Trunk!}
+\end{Code}
 
 
 
@@ -616,25 +626,25 @@ der Erklärungen ist in \autoref{fig:decl} abgebildet.
 %
 \begin{figure}
 \centering
-\IncludeStandalone[width=.5\textwidth]{declaration}
+\IncludeStandalone[.5\textwidth]{declaration}
 \caption{%
   Selbstständigkeitserklärung und Sperrvermerk%
   \label{fig:decl}%
 }
 \end{figure}
 
-\begin{Hint!}{declaration}
+\begin{Code}(declaration){hint}
 \title{%
   Entwicklung eines optimalen Verfahrens zur Eroberung des
   Geldspeichers in Entenhausen
 }
 \author{Mickey Mouse\and Donald Duck}
 \declaration[company=FIRMA]
-\end{Hint!}
-\begin{Trunk+}
+\end{Code}
+\begin{Code}[nolst]{trunk}
 \declaration[company=FIRMA]
 
-\end{Trunk+}
+\end{Code}
 
 
 
@@ -679,18 +689,19 @@ erfolgen. Weitere Informationen diesbezüglich sind dem \scrguide respektive der
 Anleitung zu \Package{caption} zu entnehmen. In \autoref{sec:floats} wird 
 genauer auf Gleitumgebungen eingegangen.
 %
-\begin{Trunk}
+\begin{Code}{trunk}
 \tableofcontents
 \listoffigures
 \listoftables
 
-\end{Trunk}
-\begin{Trunk+}
+\end{Code}
+
+\begin{Code}[nolst]{trunk}
 \printacronyms[style=acrotabu]
 \printsymbols[style=symblongtabu]
 
 \setchapterpreamble{%
-  \renewcommand*{\dictumwidth}{.4\textwidth}%
+  \renewcommand*\dictumwidth{.4\textwidth}%
   \dictum[Johann Wolfgang von Goethe]{%
     Es irrt der Mensch, solang er strebt.%
   }%
@@ -704,7 +715,7 @@ Verzeichnisse erfolgreich ausgegeben wurden, wird nun die Verwendung
 der weiteren Umgebungen und Befehle demonstriert, welche im Tutorial 
 \textcdrn{treatise.pdf} vorgestellt wurden.
 
-\end{Trunk+}
+\end{Code}
 
 
 
@@ -747,54 +758,54 @@ Argument gegebenen Quelltextes an das Ende der Dokumentpräambel direkt vor
 \Macro*{begin|\MPValue{document}} verschoben. Nachfolgend werden die für 
 \Package{glossaries} verwendeten Optionen kurz erläutert.
 %
-\begin{Preamble+}
+\begin{Code}[nolst]{preamble}
 \AtEndPreamble{%
-\end{Preamble+}
-\begin{Preamble}
+\end{Code}
+\begin{Code}{preamble}
 \usepackage[%
-\end{Preamble}
-%
+\end{Code}
+
 Die zwei Paketoptionen \Option(\Package{glossaries}){acronym} sowie 
 \Option(\Package{glossaries}){symbols} erzeugen die beiden Verzeichnisse für 
 Abkürzungen und Symbole. Die Option \Option(\Package{glossaries}){nomain} wird 
 immer dann verwendet, wenn im Dokument kein zusätzliches allgemeines oder 
 technisches Glossar erzeugt werden soll.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
   acronym,% Abkürzungen
   symbols,% Formelzeichen
   nomain,% kein Glossar
-\end{Preamble}
-%
+\end{Code}
+
 Durch \Option(\Package{glossaries}){nogroupskip} wird der automatische Abstand 
 zwischen den Einträgen zur Gruppierung innerhalb eines Glossars entfernt, die 
 Option \Option(\Package{glossaries}){toc} fügt alle erzeugten Verzeichnisse 
 dem Inhaltsverzeichnis hinzu, \Option(\Package{glossaries}){section} bestimmt 
 die Gliederungsebene der Überschrift.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
   nogroupskip,%
   toc,%
   section=chapter,%
-\end{Preamble}
-%
+\end{Code}
+
 Mit der Option \Option(\Package{glossaries}){nostyles} kann man gegebenenfalls 
 das Laden der von \Package{glossaries} vordefinierten Stilen verhindern. Dies 
 ist insbesondere sinnvoll, wenn für die einzelnen Glossare und Verzeichnisse 
 ohnehin eigene Stile erstellt werden, wie dies nachfolgend geschieht.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
   nostyles,%
-\end{Preamble}
-%
+\end{Code}
+
 Mit der Option \Option(\Package{glossaries}){translate} werden die Überschriften
 aller Glossare in der Dokumentsprache gesetzt, wobei \Option*{translate=babel} 
 die Nutzung des Paketes \Package{babel} erzwingt. 
 %
-\begin{Preamble}
+\begin{Code}{preamble}
   translate=babel,%
-\end{Preamble}
-%
+\end{Code}
+
 Das Paket \Package{glossaries} erzeugt bei der Kompilierung des Dokumentes 
 mehrere Hilfsdateien, anhand derer eine externe Anwendung die einzelnen 
 Glossare erzeugen kann. Durch eine \Distro* werden für gewöhnlich die 
@@ -814,14 +825,14 @@ als auch die gewünschte Eingabekodierung an \Application{xindy} übergeben
 werden. Beispielsweise wird mit \Option*{xindy=\MPValue{language=german-din}}
 die deutsche Sortierung nach~DIN aktiviert.
 %
-\begin{Hint}
+\begin{Code}{hint}
   xindy=§\{§language=german-din§\}§, % mit Tex Live einfach verwendbar
-\end{Hint}
-\begin{Preamble+}
+\end{Code}
+\begin{Code}[nolst]{preamble}
 % mit Tex Live einfach verwendbar
   xindy={language=german-din},
-\end{Preamble+}
-%
+\end{Code}
+
 Das Erstellen aller Glossare~-- unabhängig davon, ob \Application{xindy} oder 
 \Application{makeindex} für die Sortierung zum Einsatz kommt~-- sollte das 
 Perl"~Skript \File(\Package{glossaries}){makeglossaries} verwendet werden, 
@@ -853,21 +864,21 @@ der richtigen Parameter zu achten ist. Genaueres hierzu sowie Lösungen für
 Probleme beim Erstellen der Glossare und Verzeichnisse sind in der Dokumentation
 von \Package{glossaries} zu finden.
 %
-\begin{Hint}
+\begin{Code}{hint}
   automake,%
-\end{Hint}
-%
+\end{Code}
+
 Damit sind alle verwendeten Optionen erläutert. Schließlich sorgt der Befehl 
 \Macro(\Package{glossaries}){makeglossaries} für das Erstellen der 
 optionsabhängigen Stildateien für \Application{makeindex} respektive 
 \Application{xindy} sowie das Erzeugen der benötigten Hilfsdateien.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 ]{glossaries}
 \makeglossaries
 
-\end{Preamble}
-%
+\end{Code}
+
 Damit wäre der erste Teil zur Initialisierung überstanden und wir können zum 
 eigentlichen Problem kommen. Wie wird nun ein Abkürzungs- und/oder 
 Symbolverzeichnis erstellt?
@@ -886,39 +897,39 @@ genutzt werden können. Detaillierte Hinweise hierzu sind der Dokumentation von
 \Package{glossaries} nachzuschlagen. Für ein kleines Beispiel werden drei 
 Abkürzungen erstellt\dots
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \section{Die Verwendung von Akronymen und Symbolen}
 
-\end{Trunk+}
+\end{Code}
 \CodeHook{\renewcommand*\newglossaryentry[2]{}}
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \newacronym{apsp}{APSP}{All-Pairs Shortest Path}
 \newacronym{spsp}{SPSP}{Single-Pair Shortest Path}
 \newacronym{sssp}{SSSP}{Single-Source Shortest Path}
 
-\end{Trunk*}
-%
+\end{Code}
+
 \dots und diese in einer kurzen Textpassage mit dem \Package{glossaries}-Befehl
 \Macro(\Package{glossaries}){gls|\MPName{Label}} verwendet.
 %
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 In der Graphentheorie wird häufig die Lösung des Problems des kürzesten
 Pfades zwischen zwei Knoten gesucht. Dieses Problem wird häufig auch
 mit \gls{spsp} bezeichnet. Es lässt sich auf die Variationen \gls{sssp}
 und \gls{apsp} erweitern. Für die Lösung von \gls{spsp}, \gls{sssp} 
 oder \gls{apsp} kommen unterschiedliche Algorithmen zum Einsatz.
 
-\end{Trunk*}
-%
+\end{Code}
+
 Gut zu sehen ist, dass sich die Ausgabe der Abkürzung bei der ersten Verwendung 
 mit \Macro(\Package{glossaries}){gls} von der zweiten~-- und jeder weiteren~-- 
 unterscheidet. Das Verhalten lässt sich über verschiedene Stile mit 
 \Macro(\Package{glossaries}){setacronymstyle} anpassen. Die Ausgabe einer Liste 
 aller Abkürzungen erfolgt mit:
 %
-\begin{Hint}
+\begin{Code}{hint}
 \printacronyms
-\end{Hint}
+\end{Code}
 \newglossarystyle{simple}{%
   \renewenvironment{theglossary}{}{\par}%
   \renewcommand*{\glossentry}[2]{%
@@ -932,7 +943,7 @@ aller Abkürzungen erfolgt mit:
 \glsdisablehyper
 \printacronyms[style=simple]
 \end{quoting}
-%
+
 Dabei werden die Akronyme in einer \Environment*{description}-Umgebung gesetzt,
 was absolut ausreichend ist. Mir persönlich ist allerdings die Darstellung in 
 einer quasi"~tabellarischen Form lieber. Dabei soll der Stil mit fettgedruckten 
@@ -974,19 +985,19 @@ stattdessen die mit \Macro*{tabularx} sowie \Macro*{endtabularx} die
 Low"~Level"~Variante genutzt werden. Die Definition des neuen Stils 
 \PValue{acrotabularx} wird nachfolgend ausgegeben, die weitergehende 
 Erläuterung schließt sich daran an.
-%
+
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \newglossarystyle{acrotabularx}{%
   \renewenvironment{theglossary}{%
     \tabularx{\linewidth}{@{}lXl@{}}%
   }{%
     \endtabularx\par\bigskip%
   }%
-  \renewcommand*{\glossaryheader}{}%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
-  \renewcommand*{\glossentry}[2]{%
+  \renewcommand*\glossaryheader{}%
+  \renewcommand*\glsgroupheading[1]{}%
+  \renewcommand*\glsgroupskip{}%
+  \renewcommand*\glossentry[2]{%
     \glsentryitem{##1}% Entry number if required
     \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
     \glsentrydesc{##1} &
@@ -994,8 +1005,8 @@ Erläuterung schließt sich daran an.
   }
 }
 
-\end{Hint*}
-%
+\end{Code}
+
 Der Rest des Stils ist schnell erläutert. Zunächst wird auf Tabellenköpfe 
 (\Macro(\Package{glossaries}){glossaryheader}) sowie Überschriften und Abstände 
 bei Gruppierungen (\Macro(\Package{glossaries}){glsgroupheading} sowie 
@@ -1019,13 +1030,13 @@ Abkürzung mit \Macro(\Package{glossaries}){gls|\MPName{Label}} verwendet
 wurde, ausgegeben wird. Zum Abschluss die resultierende Ausgabe des 
 Abkürzungsverzeichnisses im neuen Stil.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \printacronyms[style=acrotabularx]
-\end{Hint}
+\end{Code}
 \begin{quoting}[rightmargin=0pt]
 \InputCode
 \end{quoting}
-%
+
 Sollte der Platz für die Erläuterungen wie in diesem Beispiel in der mittleren 
 Spalte mehr als ausreichend sein und kein Zeilenumbruch benötigt werden, kann 
 auch einfach eine \Environment{tabular}-Umgebung mit einer \PValue{l}"~Spalte 
@@ -1061,17 +1072,17 @@ automatisiert über einen neuen Spaltenstil ausgemerzt werden kann. Der Rest des
 Stils ist identisch zu \PValue{acrotabularx}.
 %
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \newglossarystyle{acrotabu}{%
   \renewenvironment{theglossary}{%
     \begin{tabu}{@{}lX<{\strut}l@{}}% 'spread 0pt' defekt in v2.9
   }{%
     \end{tabu}\par\bigskip%
   }%
-  \renewcommand*{\glossaryheader}{}%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
-  \renewcommand*{\glossentry}[2]{%
+  \renewcommand*\glossaryheader{}%
+  \renewcommand*\glsgroupheading[1]{}%
+  \renewcommand*\glsgroupskip{}%
+  \renewcommand*\glossentry[2]{%
     \glsentryitem{##1}% Entry number if required
     \glstarget{##1}{\sffamily\bfseries\glossentryname{##1}} &
     \glsentrydesc{##1} &
@@ -1079,15 +1090,15 @@ Stils ist identisch zu \PValue{acrotabularx}.
   }
 }
 
-\end{Preamble*}
-\begin{Hint}
+\end{Code}
+\begin{Code}{hint}
 \printacronyms[style=acrotabu]
-\end{Hint}
+\end{Code}
 \begin{quoting}[rightmargin=0pt]
 \glsdisablehyper
 \InputCode
 \end{quoting}
-%
+
 Welche Variante gewählt wird, ist letztendlich eine Frage, was für spezifische 
 Anforderungen an die Formatierung des Abkürzungsverzeichnis gestellt werden. 
 Natürlich ist auch die Definition eines eigenen Stils möglich. Wenn Sie wissen 
@@ -1117,7 +1128,7 @@ folgende Definition:
 \Macro|?|{newformulasymbol|%
   \OList\MPName{Label}\MPName{Name}\MPName{Symbol}\MPName{Einheit}}
 \end{quoting}
-%
+
 Mit \PName{Label} erfolgt die eindeutige Kennzeichnung des Symbols. Außerdem 
 wird dies standardmäßig für die Sortierung verwendet, was unter Umständen etwas
 problematisch sein könnte. In diesem Fall ist eine manuelle Festlegung für den 
@@ -1127,8 +1138,8 @@ schließt der \PName{Name} für das Formelzeichen an, gefolgt vom \PName{Symbol}
 sowie der dazugehörige physikalische \PName{Einheit}.
 %
 \CodeHook{\let\newcommand\renewcommand}
-\begin{Preamble*}
-\newcommand*{\newformulasymbol}[5][]{%
+\begin{Code}[input]{preamble}
+\newcommand*\newformulasymbol[5][]{%
   \newglossaryentry{#2}{%
     type=symbols,%
     name={#3},%
@@ -1140,8 +1151,8 @@ sowie der dazugehörige physikalische \PName{Einheit}.
   }%
 }
 
-\end{Preamble*}
-%
+\end{Code}
+
 Da es sich zumeist um mathematische Symbole handelt, wird für das Symbol und 
 die Einheit mit \Macro{ensuremath} Sorge getragen, dass diese auch im 
 Textmodus ohne Probleme verwendet werden können. Für das aufrechte Setzen der 
@@ -1153,7 +1164,7 @@ Fließtext gut genutzt werden kann und ansehnlich ist, wird für diese der Befeh
 \Macro(\Package{xfrac}){sfrac} aus dem Paket \Package{xfrac} genutzt.
 %
 \CodeHook{\renewcommand*\newglossaryentry[2]{}}
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \newformulasymbol{l}{Länge}{l}{m}
 \newformulasymbol{m}{Masse}{m}{kg}
 \newformulasymbol{a}{Beschleunigung}{a}{\sfrac{m}{s^2}}
@@ -1161,28 +1172,28 @@ Fließtext gut genutzt werden kann und ansehnlich ist, wird für diese der Befeh
 \newformulasymbol{f}{Frequenz}{f}{s^{-1}}
 \newformulasymbol{F}{Kraft}{F}{m \cdot kg \cdot s^{-2} = \sfrac{J}{m}}
 
-\end{Trunk*}
-%
+\end{Code}
+
 Die soeben definierten Symbole werden für ein kleines Beispiel mit dem Befehl 
 \Macro(\Package{glossaries}){gls|\MPName{Label}} in einer kurzen 
 Textpassage verwendet.
 %
-\begin{Hint*}
+\begin{Code}[input]{hint}
 Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den 
 SI"~Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
 Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
 Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
 Punktmasse lautet:
 \[\gls{F} = \gls{m} \cdot \gls{a}\]
-\end{Hint*}
-%
+\end{Code}
+
 Das Ergebnis ist nur bedingt befriedigend. Sowohl im Fließtext als auch im 
 Mathematikmodus werden lediglich die Bezeichnungen jedoch nicht die Symbole 
 selbst verwendet. Damit die Formelzeichen auch für den mathematischen Satz 
 sinnvoll nutzbar sind, sollte das Erscheinungsbild der Einträge mit 
 \Macro(\Package{glossaries}){defglsentryfmt} angepasst werden.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \defglsentryfmt[symbols]{%
   \ifmmode%
     \glssymbol{\glslabel}%
@@ -1190,14 +1201,14 @@ sinnvoll nutzbar sind, sollte das Erscheinungsbild der Einträge mit
     \glsgenentryfmt~\glsentrysymbol{\glslabel}%
   \fi%
 }
-\end{Preamble*}
-%
+\end{Code}
+
 Bei der Verwendung von \Macro(\Package{glossaries}){gls|\MPName{Label}} 
 führt diese Definition dazu, dass im Mathematikmodus allein das Symbol 
 verwendet wird. Im Fließtext wird diesem zusätzlich die Bezeichnung 
 vorangestellt. Das nachfolgende Beispiel macht dies deutlich.
 %
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 Die Einheiten für die \gls{f} sowie die \gls{F} werden aus den
 SI"~Einheiten der Basisgrößen \gls{l}, \gls{m} und \gls{t} abgeleitet.
 Und dann gibt es noch die Grundgleichung der Mechanik, welche für den
@@ -1205,20 +1216,20 @@ Fall einer konstanten Kraftwirkung in die Bewegungsrichtung einer
 Punktmasse lautet:
 \[\gls{F} = \gls{m} \cdot \gls{a}\]
 
-\end{Trunk*}
-%
+\end{Code}
+
 Als nächstes kümmern wir uns um die Ausgabe des Symbolverzeichnisses. Momentan 
 erzeugt der Befehl \Macro(\Package{glossaries}){printsymbols} jedenfalls kein 
 sinnvolles Verzeichnis:
 %
-\begin{Hint}
+\begin{Code}{hint}
 \printsymbols
-\end{Hint}
+\end{Code}
 \begin{quoting}[rightmargin=0pt]
 \glsdisablehyper
 \printsymbols[style=simple]
 \end{quoting}
-%
+
 Für dieses muss erst ein Stil definiert werden, was nachfolgend ähnlich zum 
 Stil \PValue{acrotabularx} respektive \PValue{acrotabu} geschieht. Allerdings 
 wird hier eine Variante gezeigt, mit der die Tabelle einen Seitenumbruch 
@@ -1258,23 +1269,23 @@ für unterschiedliche horizontale Linien stammen allesamt aus dem Paket
 Hilfe ist.
 %
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \newglossarystyle{symblongtabu}{%
   \renewenvironment{theglossary}{%
     \begin{longtabu}[l]{ccX<{\strut}l}% 'spread 0pt' defekt in v2.9
   }{%
     \end{longtabu}%
   }%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
-  \renewcommand*{\glossaryheader}{%
+  \renewcommand*\glsgroupheading[1]{}%
+  \renewcommand*\glsgroupskip{}%
+  \renewcommand*\glossaryheader{%
     \toprule
     \bfseries Symbol & \bfseries Einheit &
     \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule\endhead%
     \bottomrule\endfoot%
   }%
-  \renewcommand*{\glossentry}[2]{%
+  \renewcommand*\glossentry[2]{%
     \glsentryitem{##1}% Entry number if required
     \glstarget{##1}{\glossentrysymbol{##1}} &
     \glsentryuseri{##1} &
@@ -1282,8 +1293,12 @@ Hilfe ist.
     ##2\tabularnewline%
   }%
 }
-\end{Preamble*}
-%
+\end{Code}
+\begin{Code}[nolst]{preamble}
+}% Ende von AtEndPreamble
+
+\end{Code}
+
 Innerhalb von \Macro(\Package{glossaries}){newglossarystyle} wird der Befehl 
 \Macro(\Package{glossaries}){glossaryheader} für einen Tabellenkopf definiert, 
 wie er auch für eine \Environment(\Package{longtable}){longtable}-Umgebung 
@@ -1291,17 +1306,11 @@ erscheinen würde. In hier vorgestellten Fall werden der Kopf mit dem Makro
 \Macro(\Package{longtable}){endhead} beziehungsweise der Fuß durch 
 \Macro(\Package{longtable}){endfoot} terminiert. Diese werden beim 
 einem möglichen Seitenumbruch zu Beginn und am Ende auf jeder Seite gesetzt.
-%
-\begin{Preamble+}
-}% Ende von AtEndPreamble
-
-\end{Preamble+}
-%
 Das Symbolverzeichnis kann sich nun durchaus sehen lassen.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \printsymbols[style=symblongtabu]
-\end{Hint}
+\end{Code}
 \begin{quoting}[rightmargin=0pt]
 \newglossarystyle{symbtabu}{%
   \setglossarystyle{symblongtabu}%
@@ -1333,7 +1342,7 @@ Realisiert wird das Ganze, indem die zwei Kategorien respektive Elterneinträge
 Formelzeichen einem der beiden als Untereintrag zugeordnet werden.
 %
 \CodeHook{\renewcommand*\newglossaryentry[2]{}}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \providecommand*\greeklettersname{Greek letters}
 \providecommand*\romanlettersname{Roman letters}
 \newglossaryentry{greekletters}{%
@@ -1348,8 +1357,8 @@ Formelzeichen einem der beiden als Untereintrag zugeordnet werden.
   description={\nopostdesc},%
   sort={b}%
 }
-\end{Hint*}
-%
+\end{Code}
+
 Die Bezeichnungen der Kategorien könnten mit \PValue{name=\PName{Bezeichung}} 
 auch direkt als Parameter von \Macro(\Package{glossaries}){newglossaryentry} 
 eingetragen werden. Um bei der Definition jedoch eine gewisse Flexibilität zu 
@@ -1357,7 +1366,7 @@ gewährleisten, wird dies über die zwei Befehle \Macro*{greeklettersname} sowie
 \Macro*{romanlettersname} realisiert. Diese werden mit \KOMAScript-Mitteln 
 als sprachabhängige Bezeichner definiert.
 %
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \providecaptionname{%
   american,australian,british,canadian,english,newzealand%
 }{\greeklettersname}{Greek letters}
@@ -1370,8 +1379,8 @@ als sprachabhängige Bezeichner definiert.
 \providecaptionname{%
   german,ngerman,austrian,naustrian,swissgerman,nswissgerman%
 }{\romanlettersname}{Lateinische Symbole}
-\end{Hint*}
-%
+\end{Code}
+
 Für die Ausgabe wird der Glossarstil \PValue{symbsplitlongtabu} in ähnlicher 
 Manier wie die Stile zuvor definiert. Dieser wird darauf ausgelegt, dass alle 
 aufzulistenden Formelzeichen als Untereintrag von einem der beiden zuvor 
@@ -1383,7 +1392,7 @@ innerhalb der Tabelle. Die Erläuterung des Quelltextauszugs erfolgt nach dessen
 Ausgabe.
 %
 \CodeHook{\let\newglossarystyle\renewglossarystyle}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \newglossarystyle{symbsplitlongtabu}{%
   \newcommand*\symbollevel{-1}%
   \renewenvironment{theglossary}{%
@@ -1391,21 +1400,21 @@ Ausgabe.
   }{%
     \end{longtabu}%
   }%
-  \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glsgroupskip}{}%
+  \renewcommand*\glsgroupheading[1]{}%
+  \renewcommand*\glsgroupskip{}%
   \newcommand*\symbolhead{%
     \toprule
     \bfseries Symbol & \bfseries Einheit &
     \bfseries Bezeichnung & \bfseries Seite(n)
     \tabularnewline\midrule
   }%
-  \renewcommand*{\glossaryheader}{%
+  \renewcommand*\glossaryheader{%
     \endfirsthead%
     \symbolhead\endhead%
     \bottomrule\endfoot%
     \gdef\symbollevel{-1}%
   }%
-  \renewcommand*{\glossentry}[2]{%
+  \renewcommand*\glossentry[2]{%
     \ifglshaschildren{##1}{%
       \ifnum\symbollevel>0\relax%
         \tabularnewline\bottomrule\tabularnewline[\smallskipamount]%
@@ -1423,7 +1432,7 @@ Ausgabe.
       }%
     }%
   }%
-  \renewcommand*{\subglossentry}[3]{%
+  \renewcommand*\subglossentry[3]{%
     \ifnum\symbollevel=0\relax%
       \tabularnewline[\medskipamount]\symbolhead%
     \else%
@@ -1437,8 +1446,8 @@ Ausgabe.
     ##3%
   }%
 }
-\end{Hint*}
-%
+\end{Code}
+
 Der neu definierte Befehl \Macro*{symbollevel} wird benötigt, um bei der 
 Ausgabe zu überprüfen, um es sich beim zuletzt gesetzten Eintrag um einen 
 Elterneintrag (\Macro*{glossentry}) oder Untereintrag (\Macro*{subglossentry}) 
@@ -1501,7 +1510,7 @@ Anschließend werden alle Anteile für Hoch- sowie Tiefstellung abgeschnitten un
 das Resultat mit der Liste \Macro*{greeksymbollist} abgeglichen.
 %
 \CodeHook{\let\newcommand\renewcommand}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \makeatletter
 \newcommand*\greeksymbollist{}
 \def\@tempa#1{\ifdefvoid{#1}{}{\listadd\greeksymbollist{#1}}}
@@ -1536,21 +1545,21 @@ das Resultat mit der Liste \Macro*{greeksymbollist} abgeglichen.
   \endgroup%
 }
 \makeatother
-\end{Hint*}
-%
+\end{Code}
+
 Mit \Macro*{ifisgreeksymbol} kann jetzt auf die Art des Symbols getestet. Dies 
 wird innerhalb von \Macro|?|{newformulasymbol} genutzt, um den passenden 
 Elterneintrag auszuwählen. Über das optionale Argument kann jederzeit mit 
 \OPValue{parent={greekletters/romanletters}} der automatische ermittelte 
 Elterneintrag überschrieben werden.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \newcommand*\symbollettergroup{}
-\newcommand*{\newformulasymbol}[5][]{%
+\newcommand*\newformulasymbol[5][]{%
   \ifisgreeksymbol{#4}{%
-    \renewcommand*{\symbollettergroup}{greekletters}%
+    \renewcommand*\symbollettergroup{greekletters}%
   }{%
-    \renewcommand*{\symbollettergroup}{romanletters}%
+    \renewcommand*\symbollettergroup{romanletters}%
   }%
   \newglossaryentry{#2}{%
     type=symbols,%
@@ -1563,7 +1572,7 @@ Elterneintrag überschrieben werden.
     #1%
   }%
 }
-\end{Hint}
+\end{Code}
 
 
 
@@ -1589,12 +1598,12 @@ durch das optionale Argument beim Laden des Paketes festlegen. Damit die
 Zitierstile das optimale Ergebnis erzielen wird das Laden von 
 \Package{csquotes} sehr empfohlen.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 
-\end{Preamble}
-%
+\end{Code}
+
 Die Erstellung einer Literaturdatenbank kann entweder von Hand oder mithilfe 
 einer externen Anwendung erfolgen. Für die letztgenannte Variante sind die 
 Programme \Application{Citavi} respektive \Application{JabRef} empfehlenswert. 
@@ -1614,10 +1623,10 @@ wie das verwendete Dokument. Diese Funktionalität wird für dieses Tutorial
 benötigt, weshalb auf das Laden des Paketes \Package{filecontents} nicht 
 verzichtet werden kann. 
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{filecontents}
-\end{Preamble}
-%
+\end{Code}
+
 Folgend wird eine Literaturdatenbank mit drei Einträge definiert. Jeder Eintrag 
 einer \File*{.bib}"~Datei beginnt mit \PValue{@}\PName{Eintragstyp}. Direkt 
 danach ist für jeden Eintrag ein \emph{eindeutiges} \MPValue{Label} 
@@ -1626,8 +1635,8 @@ Werte eingetragen werden. Die verwendbaren Eintragstypen sowie die für den
 jeweiligen Typ obligatorischen und optionalen Felder sind in der Dokumentation 
 von \Package{biblatex} zu finden.
 %
-\begin{Preamble*}
-\begin{filecontents}{\jobname-temp.bib}
+\begin{Code}[input]{preamble}
+\begin{filecontents}[nosearch]{\jobname-temp.bib}
 @book{goossens94,
   author    = {Goossens, Michel and Mittelbach, Frank
                and Samarin, Alexander},
@@ -1656,50 +1665,48 @@ von \Package{biblatex} zu finden.
   language  = {german},
 }
 \end{filecontents}
-\end{Preamble*}
-%
+\end{Code}
+
 Nachdem die Literaturdatenbank erstellt wurde, muss diese auch noch eingebunden 
 werden:
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \addbibresource{\jobname-temp.bib}
 
-\end{Preamble}
-%
+\end{Code}
+
 Im einfachsten Fall werden die gewünschten Einträge der Literaturdatenbank im 
 Dokument mit \Macro(\Package{biblatex}){cite|\MPName{key}} referenziert, 
 von \Package{biblatex} werden zusätzliche Möglichkeiten angeboten.
 %
-\begin{refsection}[\jobname-temp.bib]
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \section{Referenzen und das Literaturverzeichnis}
 
 Das Literaturverzeichnis wird auf Basis der nachfolgend verwendeten 
 Zitate erstellt und ist auf Seite~\pageref{sec:bibliography} zu finden.
-\end{Trunk+}
-\begin{Trunk*}
+\end{Code}
+\begin{Code}[input]{trunk}
 In diesem Textabschnitt werden die zwei bekannten \LaTeX-Bücher
 \cite{knuth84} und \cite{goossens94} sowie das Anwenderhandbuch
 \cite{hanisch14} zitiert.
 
-\end{Trunk*}
-%
+\end{Code}
+
 Das Literaturverzeichnis wird mit \Macro(\Package{biblatex}){printbibliography} 
 ausgegeben, wobei nicht alle Einträge der Literaturdatenbank sondern lediglich 
 die tatsächlich referenzierten verwendet werden. Der Parameter 
 \PValue{heading=bibintoc} führt zu einem Eintrag in das Inhaltsverzeichnis.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \printbibliography[heading=bibintoc]
-\end{Hint}
+\end{Code}
 \begin{quoting}[rightmargin=0pt]
 \makeatletter
 \let\markboth\@gobbletwo
 \let\markright\@gobble
 \makeatother
-\printbibliography
+\expanded{\noexpand\printbibliography[keyword=\jobname-temp]}
 \end{quoting}
-\end{refsection}
 
 
 
@@ -1707,7 +1714,9 @@ die tatsächlich referenzierten verwendet werden. Der Parameter
 
 \renewcommand*\dictumwidth{.4\textwidth}%
 \dictum[Johann Wolfgang von Goethe]{Es irrt der Mensch, solang er strebt.}%
-\bigskip\noindent
+
+\bigskip
+\noindent
 Oftmals möchte der Autor einer wissenschaftlichen Arbeit für das erste oder 
 auch jedes Kapitel ein Zitat oder ähnliches voranstellen. Dies kann mit dem 
 Befehl \Macro(\Bundle{koma-script}){dictum|\OPName{Autor}\MPName{Text}}
@@ -1721,7 +1730,7 @@ hierzu und zu den weiteren Möglichkeiten, die Gestalt eines Zitats zu
 beeinflussen, ist in der \scrguide[Anleitung von \KOMAScript] zu finden. Es 
 folgt ein Beispiel zur Verwendung.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \setchapterpreamble{%
   \dictum[Johann Wolfgang von Goethe]{%
     Es irrt der Mensch, solang er strebt.%
@@ -1730,7 +1739,7 @@ folgt ein Beispiel zur Verwendung.
 }
 \chapter{Einleitung}
 
-\end{Hint}
+\end{Code}
 
 
 
@@ -1769,7 +1778,7 @@ geachtet werden, dass der Befehl \Macro{label} immer erst \emph{nach}
 \Macro(\Bundle{koma-script},\Package{caption}){caption} verwendet wird, da 
 der erzeugte Anker sich sonst nicht auf das Objekt bezieht.
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \section{Grafiken und Tabellen in Gleitumgebungen}
 
 Es folgt die Demonstration von Gleitumgebungen, welche sowohl für 
@@ -1794,17 +1803,17 @@ ist entscheidend, dass dieser Anker erst \emph{nach} der Beschriftung des
 Objektes, welche mit \texttt{\textbackslash caption} zu erstellen ist, 
 definiert werden sollte.
 
-\end{Trunk+}
-\begin{Trunk}
+\end{Code}
+\begin{Code}{trunk}
 \begin{figure}
 \centering
 \includegraphics{TUD-black}
 \caption{Beispielgrafik\label{fig:example}}
 \end{figure}
 
-\end{Trunk}
-\InputCode\noindent
-%
+\end{Code}
+\InputCode
+
 In der Konsequenz ist dies hier ein Plädoyer, bei der Platzierung von Tabellen 
 und Abbildungen vollständig auf \Lettering{LaTeX} zu vertrauen. Anfangs kann 
 der Anwender dies als Kontrollverlust empfinden. Sobald Sie jedoch Änderungen 
@@ -1869,41 +1878,45 @@ gezeigt, wie sich dies automatisiert für alle Gleitobjekte im Dokument ändern
 lässt. Die \emph{Formatierung} der Bezeichnungen von Gleitobjekten kann 
 mithilfe des Paketes \Package{caption} angepasst werden.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{caption}
-\end{Preamble}
-%
+\end{Code}
+
 Diese stellt den Befehl \Macro(\Package{caption}){captionsetup} bereit. Mit 
 diesem werden die Beschriftungen in Serifenlosen und das Label zur besseren 
 Unterscheidung im fetter Schriftstärke gesetzt.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \captionsetup{font=sf,labelfont=bf,labelsep=space}
-\end{Preamble*}
-%
+\end{Code}
+
 Um die \emph{Platzierung} der Beschriftungen beeinflussen sowie den Inhalt 
 einer Gleitumgebung formatieren zu können, wird \Package{floatrow} geladen. 
-\begin{Preamble}
-\usepackage{floatrow}
-\end{Preamble}
 %
+\begin{Code}{preamble}
+\usepackage{floatrow}
+\end{Code}
+
 Der Inhalt von Gleitobjekten wird~-- entgegen des normalen Verhaltens~-- durch 
 \Package{floatrow} automatisch zentriert gesetzt. Zusätzlich soll der Inhalt 
 noch die serifenlose Schriftfamilie verwenden. Dies lässt sich mit der Nutzung 
 des Befehls \Macro(\Package{floatrow}){floatsetup} realisieren.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \floatsetup{font=sf}
-\end{Preamble*}
-%
+\end{Code}
+
 Ohne weitere Maßnahmen werden durch \Package{floatrow} alle Beschriftungen 
 unterhalb der Gleitobjekte ausgegeben. Da das Ziel jedoch die Verwendung von 
 Tabellenüberschriften und Abbildungsunterschriften ist, wird dies für Tabellen
 angepasst.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \floatsetup[table]{style=plaintop}
-\end{Preamble*}
+\end{Code}
+
+Damit wären alle Einstellungen soweit erfolgt, in \autoref{tab:tabularnew} ist 
+das Ergebnis zu sehen. 
 %
 \begin{table}
 \tableexample[%
@@ -1913,11 +1926,10 @@ angepasst.
   }%
 ]
 \end{table}%
-%
-Damit wären alle Einstellungen soweit erfolgt, in \autoref{tab:tabularnew} ist 
-das Ergebnis zu sehen. Zumeist soll die Beschriftung für Gleitobjekte nicht 
-zentriert sondern linksbündig gesetzt werden. Dies lässt sich ebenfalls mit den 
-Mitteln des Paketes \Package{caption} und der passenden Paketoption 
+
+Zumeist soll die Beschriftung für Gleitobjekte nicht zentriert sondern 
+linksbündig gesetzt werden. Dies lässt sich ebenfalls mit den Mitteln des 
+Paketes \Package{caption} und der passenden Paketoption 
 \Option(\Package{caption}){justification} erreichen. Damit dies auch für 
 einzeilige Beschriftungen angewendet wird, muss zusätzlich die Einstellung 
 \Option(\Package{caption}){singlelinecheck} deaktiviert werden. Mit der 
@@ -1925,10 +1937,10 @@ Paketoption \Option(\Package{caption}){format} kann außerdem beeinflusst
 werden, ob eine mehrzeilige Beschriftung nach einem Zeilenumbruch direkt unter 
 dem Label oder mit Einzug fortgesetzt werden soll.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \captionsetup{singlelinecheck=off,format=hang,justification=raggedright}
-\end{Preamble*}
-%
+\end{Code}
+
 In \autoref{tab:tabularnew} fällt die Beschriftung auf, welche die Breite der 
 Tabelle überragt. Falls linksbündige Gleitumgebungsbezeichnungen verwendet 
 werden, wie dies gerade eingestellt wurde, besteht das Problem quasi bei jeder 
@@ -1942,7 +1954,7 @@ gegebenenfalls gefolgt von einem mit \Macro{label} gesetzten Textanker. Im
 zweiten Argument wird das Objekt selbst~-- sprich Tabelle oder Abbildung~-- 
 angegeben. Zu verwenden sind diese folgendermaßen:
 %
-\begin{Hint}
+\begin{Code}{hint}
 \begin{table}
 \ttabbox
   §\MPName{Tabellendefinition}§
@@ -1953,8 +1965,8 @@ angegeben. Zu verwenden sind diese folgendermaßen:
   §\MPName{Abbildungsdefinition}§
   {\caption{§\PName{Beschriftung}§\label{§\PName{Abbildungslabel}§}}}
 \end{figure}
-\end{Hint}
-%
+\end{Code}
+
 Diese beiden Befehle sorgen dafür, dass die Beschriftungen in der jeweiligen 
 Breite des Objektes gesetzt werden. Entspricht das zu setzende Objekt in seiner 
 Breite dem Wert \Length{textwidth}~-- es ist genauso Breit wie die Laufweite 
@@ -2002,27 +2014,27 @@ für Abbildungen und Tabellen definiert werden. Dies geschieht mit dem Befehl
 \Macro(\Package{subcaption}){DeclareCaptionSubType} aus dem Paket 
 \Package{subcaption}.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \DeclareCaptionSubType[alph]{figure}
 \DeclareCaptionSubType[alph]{table}
-\end{Preamble}
-%
+\end{Code}
+
 Anschließend werden die Untergleitobjekte formatiert. Dabei wird zum einen nach 
 dem alphanumerischen Label eine schließende Klammer gesetzt. Zum andern wird 
 ein Eintragen der Untergleitobjekte in das Abbildungsverzeichnis unterdrückt. 
 Lediglich die Bildunterschrift der Hauptabbildung wird in dieses eingetragen.
 %
-\begin{Preamble*}
+\begin{Code}[input]{preamble}
 \captionsetup[subfloat]{labelformat=brace,list=off}
 
-\end{Preamble*}
-%
+\end{Code}
+
 Mit diesen Einstellungen wird eine gleitende Abbildung erstellt, welche in 
 \autoref{fig:logos} zu sehen ist. Wurde der entsprechende Anker gesetzt, kann 
 zusätzlich auf die untergeordnete \autoref{fig:tud} sowie \autoref{fig:ddc} 
 verwiesen werden.
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \subsection{Untergleitobjekte}
 
 Nachdem nun schon eine gleitende Abbildung und zwei gleitende Tabellen 
@@ -2031,8 +2043,8 @@ Unterabbildungen. Durch die drei gesetzten Anker kann im Fließtext
 sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie 
 \autoref{fig:ddc} verwiesen werden.
 
-\end{Trunk+}
-\begin{Trunk}
+\end{Code}
+\begin{Code}{trunk}
 \begin{figure}
 \ffigbox[\FBwidth]%
   {\begin{subfloatrow}%
@@ -2046,7 +2058,7 @@ sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
   {\caption{Eine Gleitumgebung mit zwei Abbildungen\label{fig:logos}}}%
 \end{figure}
 
-\end{Trunk}
+\end{Code}
 \InputCode
 
 
@@ -2071,7 +2083,7 @@ sind:
 \item[\OPValue{p} (page)]
   Auf einer separaten Seite für mindestens ein Gleitobjekt
 \end{description}
-%
+
 Sie können eine, mehrere oder alle Optionen angeben, wobei die Reihenfolge 
 keine Rolle spielt. Der Algorithmus arbeitet alle ihm zur Verfügung gestellten 
 Optionen immer in der zuvor aufgezählten Reihenfolge ab, wobei diese nur als 
@@ -2123,7 +2135,7 @@ ohne die bekannten Gleitumgebungen \Environment{figure} respektive
 \Environment{table} erzeugen. Das Vorgehen wird folgend demonstriert, in 
 \autoref{fig:nonfloating-A} ist das Ergebnis zu sehen.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \begin{center}
 \captionsetup{type=figure}
 \includegraphics[scale=0.75]{TUD-black}
@@ -2133,15 +2145,15 @@ ohne die bekannten Gleitumgebungen \Environment{figure} respektive
 }
 \end{center}
 
-\end{Hint}
-\InputCode\noindent
-%
+\end{Code}
+\InputCode
+
 \ToDo{\Environment{table-} und \Environment{figure-}}
 Alternativ zu diesem Ansatz kann das Paket \Package{float} zum Einsatz kommen, 
 welches für Gleitumgebungen den Platzierungsparameter \OPValue{H} 
 bereitstellt. Das Resultat ist identisch zu \autoref{fig:nonfloating-A}.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \begin{figure}[H]
 \includegraphics[scale=0.75]{TUD-black}
 \caption{%
@@ -2150,14 +2162,14 @@ bereitstellt. Das Resultat ist identisch zu \autoref{fig:nonfloating-A}.
 }
 \end{figure}
 
-\end{Hint}
-%
+\end{Code}
+
 Mit dem Paket \Package{floatrow} lässt sich eine weitere Variante entwickeln, 
 wobei für eine mehrmalige Anwendung ein eigenes Makro mit den passenden 
 Argumenten definiert werden sollte. Zum Verständnis des Quelltextauszuges ist 
 die Dokumentation des Paketes zu beachten.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \floatbox[\captionsetup{type=figure}]{figure}[\FBwidth][%
   \dimexpr\FBheight+\abovedisplayskip\relax%
 ][b]{\includegraphics[scale=0.75]{TUD-black}}{%
@@ -2166,9 +2178,9 @@ die Dokumentation des Paketes zu beachten.
     \label{fig:nonfloating-C}%
   }%
 }
-\end{Hint}
-\InputCode\noindent
-%
+\end{Code}
+\InputCode
+
 Es wird hier trotz der vorhergehenden Ausführungen abermals ausdrücklich 
 empfohlen, Tabellen und Abbildungen in Gleitumgebungen zu setzen und die 
 korrekte Platzierung dem \Lettering{LaTeX}"=Algorithmus zu überlassen.
@@ -2193,17 +2205,17 @@ in jedem Fall beachtet werden:
 \item keine vertikalen Linien
 \item keine doppelten Linien
 \end{enumerate}
-%
+
 Das Paket \Package{booktabs} ist für den Satz von hochwertigen Tabellen eine 
 große Hilfe und stellt die Befehle \Macro(\Package{booktabs}){toprule}, 
 \Macro(\Package{booktabs}){midrule} sowie \Macro(\Package{booktabs}){cmidrule} 
 und \Macro(\Package{booktabs}){bottomrule} für unterschiedliche horizontale 
 Linien bereit.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{booktabs}
-\end{Preamble}
-%
+\end{Code}
+
 Außerdem existiert das Paket \Package{array}, welches mit dem Befehl 
 \Macro(\Package{array}){newcolumntype} die Definition eigener Spaltentypen 
 sowie die Verwendung von \enquote{Hooks} vor (\PValue{>\MPValue{\dots}}) und 
@@ -2211,10 +2223,10 @@ nach (\PValue{<\MPValue{\dots}}) Einträgen innerhalb einer Spalte
 (\PValue{>\MPValue{\dots}}\PName{Spaltentyp}\PValue{<\MPValue{\dots}}) 
 ermöglicht.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{array}
-\end{Preamble}
-%
+\end{Code}
+
 Für alle im Folgenden vorgestellten Umgebungen zum Setzen von Tabellen gilt, 
 dass die Inhalte zeilenweise angegeben werden, wobei die Einträge für die 
 einzelnen Spalten mit~\PValue{\&} voneinander zu trennen sind. Das Beenden 
@@ -2251,7 +2263,7 @@ an der unteren Zeile erfolgt. Es folgt ein Beispiel zur Nutzung der
 %
 \begingroup
 \pcolumnfuzz{70pt}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \begin{tabular}{lcrp{33mm}}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
@@ -2261,9 +2273,9 @@ aa  & bb  & cc  & Auch Zeilenumbrüche sind vorhanden\tabularnewline
 aaa & bbb & ccc & Worttrennungsmusterkontrolle\tabularnewline
 \bottomrule
 \end{tabular}
-\end{Hint*}
+\end{Code}
 \endgroup
-%
+
 Die Tabellenbreite ergibt sich aus der Breite der einzelnen Spalten. Bei dieser 
 Umgebung liegt es allein beim Anwender, auf die korrekte Breite der Tabelle zu 
 achten, damit diese nicht über die Seitenränder hinausragt. Das kann auf Dauer 
@@ -2287,14 +2299,14 @@ stabil erwiesen. Das Paket \Package{tabu} ist relativ neu und versucht, viele
 Funktionalitäten ganz unterschiedlicher Pakete für den Tabellensatz in sich zu 
 vereinen und glänzt insbesondere durch seine Vielseitigkeit. 
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{tabularx}
 \usepackage{tabulary}
 \usepackage{tabu}
 \usepackage{longtable}
 
-\end{Preamble}
-%
+\end{Code}
+
 Jedes der Pakete stellt einen oder mehrere neue Spaltentypen zur Verfügung. 
 Dies bedeutet jedoch nicht, dass in den dazugehörigen Tabellenumgebungen 
 lediglich diese genutzt werden können. Vielmehr werden diese zusätzlich 
@@ -2322,7 +2334,7 @@ das vorherige Beispiel wiederholt.
 %
 \begingroup
 \pcolumnfuzz{70pt}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \begin{tabularx}{11.7cm}{lcrX}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
@@ -2333,9 +2345,9 @@ aaa  & bbb  & ccc  & Worttrennungsmusterkontrolle\tabularnewline
 aaaa & bbbb & cccc & \hspace{0pt}Worttrennungsmusterkontrolle
 \tabularnewline\bottomrule
 \end{tabularx}
-\end{Hint*}
+\end{Code}
 \endgroup
-%
+
 Die Breite der letzten Spalte wurde dabei aus der Angabe der Gesamtbreite mit 
 \PValue{11.7cm} berechnet. Des Weiteren ist zu sehen, wie das Problem des 
 Zeilenumbruchs behandelt werden kann. Normalerweise wird das erste Wort in 
@@ -2354,7 +2366,7 @@ Spalte den Phantomabstand automatisch einfügt. Darauf basierend werden drei
 Spaltentypen für den links- und rechtsbündigen sowie zentrierten Textsatz mit 
 einem möglichen Zeilenumbruch erstellt.
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \subsection{Tabellen als Gleitobjekte}
 
 Tabellen sollten in der Gleitumgebung \texttt{table} gesetzt werden. 
@@ -2371,19 +2383,19 @@ Es wird eine Tabelle mithilfe der \texttt{tabularx}-Umgebung erstellt.
 Zu sehen ist diese in \autoref{tab:tabularx}. Für diese werden zuvor 
 neue Spaltentypen definiert.
 
-\end{Trunk+}
-\CodeHook{\renewcommand*{\newcolumntype}[2]{}}
-\begin{Trunk*}
+\end{Code}
+\CodeHook{\renewcommand*\newcolumntype[2]{}}
+\begin{Code}[input]{trunk}
 \newcolumntype{Y}{>{\hspace{0pt}}X}
 \newcolumntype{D}{>{\raggedright}Y}
 \newcolumntype{E}{>{\centering}Y}
 \newcolumntype{F}{>{\raggedleft}Y}
 
-\end{Trunk*}
-%
+\end{Code}
+
 Nachfolgend wird die Tabelle gesetzt mit den neuen Spaltentypen gesetzt.
 %
-\begin{Trunk}
+\begin{Code}{trunk}
 \begin{table}
 \begin{tabularx}{\textwidth}{@{}DEFY@{}}
 \toprule
@@ -2403,9 +2415,9 @@ Ein längerer Blindtext im Blocksatz
 \caption{Eine \texttt{tabularx}-Tabelle\label{tab:tabularx}}
 \end{table}
 
-\end{Trunk}
-\InputCode\noindent
-%
+\end{Code}
+\InputCode
+
 Die Breite der einzelnen \PValue{X}"~Spalten und deren Derivaten ist dabei 
 identisch. Ein Gewichten der Spaltenbreiten untereinander ist prinzipiell 
 möglich, allerdings mit einigen Einschränkungen verbunden. Genaueres hierzu ist 
@@ -2448,14 +2460,14 @@ dem Makro \Macro(\Package{tabulary}){tyformat} bereits ein breitenloses
 Leerzeichen einsetzen, womit sich das manuelle Einfügen von selbigem durch den 
 Anwender erübrigt.
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \subsubsection{Eine gleitende tabulary-Tabelle}
 
 Es wird eine Tabelle mithilfe der \texttt{tabulary}-Umgebung erstellt. 
 Zu sehen ist diese in \autoref{tab:tabulary}. 
 
-\end{Trunk+}
-\begin{Trunk}
+\end{Code}
+\begin{Code}{trunk}
 \begin{table}
 \begin{tabulary}{\textwidth}{@{}LCRJ@{}}
 \toprule
@@ -2474,7 +2486,7 @@ Ein wesentlich längerer und absolut inhaltsleerer Blindtext im Blocksatz
 \caption{Eine \texttt{tabulary}-Tabelle\label{tab:tabulary}}
 \end{table}
 
-\end{Trunk}
+\end{Code}
 \InputCode
 
 
@@ -2510,7 +2522,7 @@ als auch die Positionierung zur Grundlinie sowie die Ausrichtung des Inhaltes
 %
 \begingroup
 \pcolumnfuzz{70pt}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \begin{tabu} to 11.7cm {lcrX}
 \toprule
 \textbf{Linksbündig} & \textbf{Zentriert} & 
@@ -2521,9 +2533,9 @@ aaaa & bbbb & cccc & Worttrennungsmus\-terkontrolle\tabularnewline
 aaa  & bbb  & ccc  & Worttrennungsmusterkontrolle
 \tabularnewline\bottomrule
 \end{tabu}
-\end{Hint*}
+\end{Code}
 \endgroup
-%
+
 Das Beispiel zeigt auch gleich das momentan meiner Meinung nach größte Problem 
 des Paketes: Bei mehrzeiligen Zellen fehlt vertikale Zwischenraum zur nächsten 
 Tabellenzeile. Nun besteht entweder die Möglichkeit, bei jeder Angabe einer 
@@ -2535,7 +2547,7 @@ schwieriger, da \Macro(\Package{array}){newcolumntype} normalerweise die
 Definition eines optionalen Argumentes nicht vorgesehen ist. Mit ein wenig 
 Trickserei ist das dennoch möglich:
 %
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \subsubsection{Eine gleitende tabu-Tabelle}
 
 In \autoref{tab:tabu} ist eine weitere Tabelle mit variabler Breite der 
@@ -2545,18 +2557,18 @@ Spaltentyp definiert, der die Unzulänglichkeiten der Umgebung reduziert.
 Mit \texttt{\textbackslash ttabbox} aus dem Paket \texttt{floatrow} wird 
 die Beschriftung auf die Breite der Tabelle begrenzt.
 
-\end{Trunk+}
-\CodeHook{\renewcommand*{\newcolumntype}[2]{}}
-\begin{Trunk*}
+\end{Code}
+\CodeHook{\renewcommand*\newcolumntype[2]{}}
+\begin{Code}[input]{trunk}
 \makeatletter
 \newcolumntype{Z}{}
-\renewcommand*{\NC@rewrite@Z}[1][]{%
+\renewcommand*\NC@rewrite@Z[1][]{%
   \NC@find>{\hspace{0pt}}X[#1]<{\@finalstrut\@arstrutbox}%
 }
 \makeatother
 
-\end{Trunk*}
-%
+\end{Code}
+
 Anschließend kann der \PValue{Z}"~Spaltentyp äquivalent zu \PValue{X} genutzt 
 werden. Zu beachten ist dabei insbesondere die Möglichkeit, die Spalten in 
 ihrer resultierenden Breite sehr einfach zueinander gewichten zu können~-- im 
@@ -2566,7 +2578,7 @@ ist die Verwendung von \Macro(\Package{floatrow}){ttabbox} aus dem Paket
 \Package{floatrow}, um die Beschriftung an die Breite der Tabelle anzupassen. 
 Genaueres dazu in \autoref{sec:floatlayout}.
 %
-\begin{Trunk}
+\begin{Code}{trunk}
 \begin{table}
 \ttabbox{%
   \begin{tabu} to .85\textwidth {@{}Z[8,l]Z[7,c]Z[8,r]Z[9,j]@{}}
@@ -2593,7 +2605,7 @@ Genaueres dazu in \autoref{sec:floatlayout}.
 }
 \end{table}
 
-\end{Trunk}
+\end{Code}
 \InputCode
 
 
@@ -2614,11 +2626,11 @@ hingewiesen wird, dass diese nach \Package{hyperref} zu laden sind, sollten
 auch danach folgen. Eines dieser wenigen Pakete ist das in diesem Tutorial 
 verwendete \Package{glossaries}. 
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
 
-\end{Hint}
-%
+\end{Code}
+
 Um auf ein bestimmtes Objekt wie beispielsweise eine Tabelle, eine Abbildung 
 oder einen bestimmten Anschnitt im Dokument referenzieren zu können, muss mit 
 \Macro{label|\MPName{label}} ein Anker für selbiges an der entsprechenden 
@@ -2658,10 +2670,10 @@ Dieses stellt den Befehl \Macro(\Package{csquotes}){enquote} bereit, der die
 kennzeichnenden Anführungszeichen automatisch in Abhängigkeit der verwendeten 
 Dokumentsprache setzt. 
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage{csquotes}
-\end{Hint}
-%
+\end{Code}
+
 Da für die unterschiedlichen Fachdisziplinen teils sehr unterschiedliche 
 Zitierrichtlinien existieren, kann hier keine allgemeingültige Empfehlung zu 
 Stilfragen gegeben werden. Zu beachten ist auf jeden Fall, dass zu wörtlichen 
@@ -2669,23 +2681,22 @@ Zitaten eine Quellenangabe erfolgen \emph{muss}. Dabei sollte darauf geachtet
 werden, dass nicht nur die Quelle selbst sondern zumindest auch die Seitenzahl 
 des Zitats angegeben wird.
 %
-\begin{refsection}[\jobname-temp.bib]
-\begin{Trunk+}
+\begin{Code}[nolst]{trunk}
 \section{Zitate}
 
 Bei der Verwendung von wörtlichen Zitaten sollten diese als solche 
 gekennzeichnet werden.
-\end{Trunk+}
-\begin{Trunk*}
+\end{Code}
+\begin{Code}[input]{trunk}
 \enquote{Dies ist ein zugegebenermaßen nicht sehr sinnvolles Zitat.}
 \cite[58]{hanisch14}
-\end{Trunk*}
-\begin{Trunk+}
+\end{Code}
+\begin{Code}[nolst]{trunk}
 Für eine möglichst gut nachvollziehbare Referenz sollte nicht nur 
 das Werk selber sondern zumindest die Seitenzahl und gegebenenfalls 
 der Absatz der originalen Textstelle angegeben werden. 
-\end{Trunk+}
-%
+\end{Code}
+
 Längere Zitate sollten abgesetzt vom Fließtext ausgegeben werden. Hierfür 
 bieten sowohl die Standard- als auch die \KOMAScript-Klassen standardmäßig 
 die Umgebungen \Environment(\Bundle{koma-script}){quote} und 
@@ -2696,12 +2707,12 @@ beachtet werden, so bietet sich das Paket \Package{quoting} an, welches die
 gleichnamige Umgebung \Environment(\Package{quoting}){quoting} definiert und 
 die Absätze wie im restlichen Dokument auszeichnet.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{quoting}
 
-\end{Preamble}
-%
-\begin{Trunk*}
+\end{Code}
+
+\begin{Code}[input]{trunk}
 \begin{quoting}
 \enquote{%
   Dies ist ein noch sinnloseres Zitat. Allerdings wird zumindest die
@@ -2713,22 +2724,14 @@ die Absätze wie im restlichen Dokument auszeichnet.
 }
 \cite[sinngemäß nach][\pno{} 12, zweiter Absatz]{hanisch14}
 \end{quoting}
-\end{Trunk*}
-\begin{Trunk+}
+\end{Code}
+\begin{Code}[nolst]{trunk}
 Ebenfalls sollten sinngemäße Zitate mit einer möglichst genauen Referenz 
 angegeben werden. Dies kann im Laufe der Arbeit auch für einen selbst von 
 Vorteil sein, wenn beispielsweise die originale Textpassage noch einmal 
 analysiert werden soll.
 
-\end{Trunk+}
-\begin{quoting}[rightmargin=0pt]
-\makeatletter
-\let\markboth\@gobbletwo
-\let\markright\@gobble
-\makeatother
-\printbibliography
-\end{quoting}
-\end{refsection}
+\end{Code}
 
 
 
@@ -2759,7 +2762,7 @@ richtig getrennt werden, ist zudem das Paket \Package{fontenc} mit der
 \PValue{T1}"~Zeichensatzkodierung respektive \Package{fontspec} notwendig. Der 
 Beginn einer Dokumentpräambel könnte folgendermaßen aussehen:
 %
-\begin{Hint}
+\begin{Code}{hint}
 \documentclass[ngerman,§\PName{Klassenoptionen}§]§\MPName{Dokumentklasse}§
 \usepackage{iftex}
 \iftutex
@@ -2769,8 +2772,8 @@ Beginn einer Dokumentpräambel könnte folgendermaßen aussehen:
   \usepackage[ngerman=ngerman-x-latest]{hyphsubst}
 \fi
 \usepackage{babel}
-\end{Hint}
-%
+\end{Code}
+
 Die Option \Option(\Package{hyphsubst}){ngerman} lädt dabei die Trennungsmuster 
 für die neue deutsche Rechtschreibung, wobei der Wert \PValue{ngerman-x-latest} 
 die neuesten aller verfügbaren Trennungsmuster lädt. Für die alte Orthografie 
@@ -2819,16 +2822,16 @@ Feinheiten des Schriftsatzes verstanden:
 \item optischer Randausgleich
 \end{itemize}
 
-\noindent Die letzten beiden Punkte werden sehr gut und automatisch durch das 
+Die letzten beiden Punkte werden sehr gut und automatisch durch das 
 Paket \Package{microtype} bearbeitet. Dieses muss lediglich in der Präambel 
 geladen werden, wobei die Option \Option(\Package{microtype}){babel} zur 
 Beachtung sprachlicher Besonderheiten führt.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage[babel]{microtype}
 
-\end{Preamble}
-%
+\end{Code}
+
 Die Option \Option(\Package{microtype}){babel} ist nur notwendig, wenn einzelne 
 Textpassagen oder das gesamte Dokument in Englisch oder Französisch verfasst 
 werden und hierfür die genutzte Sprache mit den entsprechenden Möglichkeiten 
@@ -2850,40 +2853,40 @@ verwendete Abkürzungen sehr einfach im Dokument verwendet werden können und
 dabei typografisch richtig gesetzt werden. Beispielsweise gelingt dies für die 
 Abkürzung \enquote{zum~Beispiel~(z.\,B.)} mit dieser Definition:
 %
-\begin{Hint}
-\newcommand{\zB}{\mbox{z.\,B.}\xspace}
-\end{Hint}
-%
+\begin{Code}{hint}
+\newcommand*\zB{\mbox{z.\,B.}\xspace}
+\end{Code}
+
 Wenn ohnehin das Paket \Package{glossaries} für Akronyme verwendet wird, kann 
 alternativ dazu auch dessen Funktionalität genutzt werden. Nach dem Einbinden 
 muss in der Präambel lediglich Folgendes eingefügt werden:
 %
-\begin{Hint}
+\begin{Code}{hint}
   \newignoredglossary{abbreviation}
-  \newcommand*{\newabbreviation}[4][]{%
+  \newcommand*\newabbreviation[4][]{%
     \newacronym[type=abbreviation,#1]{#2}{\mbox{#3\xspace}}{#4}%
   }%
-\end{Hint}
-%
+\end{Code}
+
 Mit \Macro(\Package{glossaries}){newignoredglossary} wird dabei ein Glossar 
 erstellt, welche bei der Ausgabe aller Glossare mit 
 \Macro(\Package{glossaries}){printglossaries} ignoriert wird. Im Dokument kann 
 die gewünschte Abkürzung mit 
 %
 \CodeHook{\renewcommand*\newglossaryentry[2]{}}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \newabbreviation{zB}{z.\,B.}{zum Beispiel}
-\end{Hint*}
-%
+\end{Code}
+
 definiert und über die gewohnten Befehlen aus \Package{glossaries} verwendet 
 werden.
 %
-\begin{Hint*}
+\begin{Code}[input]{hint}
 Die Ausgabe der soeben definierten Abkürzung \enquote{\acrshort{zB}}
 erfolgt mit dem Befehl \texttt{\textbackslash acrshort}. Wurde das
 Paket \texttt{glossaries} mit der Option \texttt{shortcut} geladen, 
 kann auch das Makro \texttt{\textbackslash acs} genutzt werden.
-\end{Hint*}
+\end{Code}
 
 
 
@@ -2903,41 +2906,42 @@ welche sehr häufig als zu groß empfunden werden. Eine Aufzählung erscheint oh
 Anpassungen wie folgt:
 %
 \CodePreamble{Aufzählung mit vertikalen Standardabständen}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \begin{itemize}
 \item erster Punkt
 \item zweiter Punkt
 \item dritter Punkt
 \end{itemize}
-\end{Hint*}
-%
+\end{Code}
+
 Dabei wirken die Abstände zwischen den Punkten tatsächlich etwas 
 überdimensioniert. Mit \Package{enumitem} können alle Listenumgebungen an die 
 individuellen Bedürfnisse angepasst werden. 
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{enumitem}
-\end{Preamble}
-%
+\end{Code}
+
 Um diese ungewollten Abstände zwischen den Listenpunkten zu entfernen, kann der 
 Schlüssel \Option(\Package{enumitem}){noitemsep} verwendet werden. Mit dem 
 Befehl \Macro(\Package{enumitem}){setlist} werden~-- ohne zusätzliche Angaben 
 im optionalen Argument~-- alle Umgebungen für Aufzählungen global geändert. 
 Hier soll dies lediglich für die Umgebung \Environment*{itemize} geschehen:
-\begin{Preamble*}
+%
+\begin{Code}[input]{preamble}
 \setlist[itemize]{noitemsep}
 
-\end{Preamble*}
+\end{Code}
 \CodePreamble{Aufzählung ohne vertikale Abstände}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \begin{itemize}
 \item erster Punkt
 \item zweiter Punkt
 \item dritter Punkt
 \end{itemize}
 
-\end{Hint*}
-%
+\end{Code}
+
 Alternativ zur globalen Änderung einer speziellen oder aller Aufzählungslisten 
 kann der Schlüssel \PValue{noitemsep} auch nur gezielt an einzelne Umgebung 
 über das optionale Argument weitergereicht werden 
@@ -2972,16 +2976,16 @@ Das typografisch richtige Setzen von Auslassungspunkten mit den Befehlen
 beschrieben, weshalb hier nur kurz darauf eingegangen wird. Es wird das Paket 
 \Package{ellipsis} benötigt.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{ellipsis}
-\end{Preamble}
-%
+\end{Code}
+
 Für deutschsprachige Texte sollten außerdem noch folgendes ausgeführt werden:
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \let\ellipsispunctuation\relax
 
-\end{Preamble}
+\end{Code}
 
 
 
@@ -2994,9 +2998,9 @@ Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
 Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
 Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
 großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. Außerdem 
-stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} zwei weitere Tutorials 
-zur Verfügung, die sich explizit mit der Thematik eines guten mathematischen 
-Satz beschäftigen.
+stehen mit \TUDScriptTutorial{mathtype} und \TUDScriptTutorial{mathswap} zwei 
+weitere Tutorials zur Verfügung, die sich explizit mit der Thematik eines guten 
+mathematischen Satz beschäftigen.
 
 Das Paket \Package{amsmath} stellt für \Lettering{LaTeX} den 
 De"~facto"~Standard für den mathematischen Satz dar. Allerdings wird es~-- 
@@ -3013,10 +3017,10 @@ Für ansehnliche und insbesondere im Fließtext gut lesbare mathematische Brüch
 stellt das Paket \Package{xfrac} den Befehl \Macro(\Package{xfrac}){sfrac} zur 
 Verfügung.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{xfrac}
 
-\end{Preamble}
+\end{Code}
 
 
 
@@ -3041,10 +3045,10 @@ wird der genannte Befehl automatisch für alle bereitgestellten Datumsfelder
 verwendet. Alternativ dazu kann das Paket \Package{datetime2} genutzt werden, 
 dessen Befehl \Macro(\Package{datetime2}){DTMDate} wird ebenfalls unterstützt.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{isodate}
 
-\end{Preamble}
+\end{Code}
 
 
 
@@ -3085,13 +3089,13 @@ Dokumentpräambel einbinden und es kann losgehen. Für das nachfolgende Beispiel
 sind außerdem noch zwei weitere Programmbibliotheken für \Package{tikz}<pgf> 
 notwendig.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage{tikz}
 \usetikzlibrary{chains}
 \usetikzlibrary{decorations.markings}
 \tikzset{on grid}
-\end{Hint}
-%
+\end{Code}
+
 Ein kurze Anmerkungen zur Skalierung der Grafiken möchte ich mir erlauben. 
 Normalerweise verwendet \Package{tikz}<pgf> Koordinaten im Zentimeterraster. 
 Ich persönlich bevorzuge der relativierte Skalierung auf die Textbreite des 
@@ -3099,12 +3103,12 @@ Dokumentes, wobei eine Einheit genau \SI{1}{\percent} dieser entspricht. Das
 kann mit folgendem Quelltext erreicht werden:
 %
 \CodeHook{\renewcommand\newlength[1]{}}
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \newlength{\tikzunit}
 \setlength{\tikzunit}{.01\textwidth}
 \tikzset{x=\tikzunit,y=\tikzunit}
-\end{Hint*}
-%
+\end{Code}
+
 Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung exemplarisch 
 erstellt. Das Ergebnis ist in \autoref{fig:tikz} zu sehen.
 
@@ -3138,7 +3142,7 @@ erstellt. Das Ergebnis ist in \autoref{fig:tikz} zu sehen.
     postaction={decorate},
     shorten >=0.7pt
   ]
-  \newcommand{\tikzparbox}[2][9]{%
+  \newcommand\tikzparbox[2][9]{%
     \parbox{#1\tikzunit}{\centering\hspace{0pt}#2}%
   }
   \begin{scope}[start chain]
@@ -3210,10 +3214,10 @@ erstellen. Ähnlich wie bei \Package{tikz}<pgf> gibt es ein Kernpaket und
 zusätzliche Ergänzungen. Diese werden jedoch nicht als Programmbibliotheken 
 sondern ganz normal als \Lettering{LaTeX}-Pakete eingebunden.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage{pstricks,pst-node}
-\end{Hint}
-%
+\end{Code}
+
 Die Verwendung von PostScript hat zahlreiche Vorteile, macht die direkte 
 Nutzung von \Format{pdfLaTeX} etwas schwierig. Das Paket \Package{auto-pst-pdf} 
 schafft hier jedoch Abhilfe. Wird das Textsatzsystem \Format{pdfLaTeX} über die 
@@ -3222,10 +3226,10 @@ zusätzliche Option \Option(\Format{pdfLaTeX}){-{}-shell-escape} beziehungsweise
 aufgerufen, so werden die Abbildungen automatisch im PDF"~Format erzeugt und 
 eingebunden.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage{auto-pst-pdf}
-\end{Hint}
-%
+\end{Code}
+
 Bei einigen Pakete kommt es in der Kombination mit \Package{auto-pst-pdf} zu 
 kleineren Problemen, die sich jedoch meist relativ leicht beheben lassen. Im 
 Handbuch wird die \tudhyperref{sec:tips:auto-pst-pdf}{gleichzeitige Verwendung} 
@@ -3239,7 +3243,7 @@ gegebenenfalls beachten.
 eine Einheit genau \SI{1}{\percent} dieser entspricht. Außerdem werden noch ein 
 paar weitere Einstellungen gemacht. Dies geschieht mit:
 %
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \psset{%
   unit=.01\textwidth,%
   cornersize=absolute,%
@@ -3247,19 +3251,20 @@ paar weitere Einstellungen gemacht. Dies geschieht mit:
   linewidth=.4pt,%
   arrowscale=1.5,%
 }
-\end{Hint*}
-%
+\end{Code}
+
 Die innerhalb einer Gleitumgebung erzeugte \Package{pstricks}-Grafik ist in 
 \autoref{fig:pstricks} dargestellt.
+
 \begin{Hint?}
 \begin{figure}
 \begin{pspicture}(0,-2)(100,64)
-\newcommand{\fnodetext}{}
+\newcommand\fnodetext{}
 \def\fnodetext(#1)#2#3{%
   \fnode[framesize=18 8](#1){#2}%
   \rput(#1){\parbox{17\psunit}{\centering\hspace{0pt}#3}}%
 }
-\newcommand{\scriptbox}[2][24]{%
+\newcommand\scriptbox[2][24]{%
   \parbox{#1\psunit}{\scriptsize\centering\hspace{0pt}#2}%
 }
 \rput(15,10){%
@@ -3335,14 +3340,14 @@ Programmiersprache hervorzuheben. Zusätzlich lässt sich ein Verzeichnis mit
 allen eingebundenen sowie direkt im Dokument angegebenen Quelltextauszügen 
 erstellen.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage{listings}
-\end{Hint}
-%
+\end{Code}
+
 Wird im Dokument die UTF"~8"=Eingabekodierung verwendet, sollte dies dem Paket 
 mitgeteilt werden:
 %
-\begin{Hint}
+\begin{Code}{hint}
 \lstset{%
   inputencoding=utf8,extendedchars=true,
   literate=%
@@ -3350,15 +3355,15 @@ mitgeteilt werden:
     {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
     {~}{{\textasciitilde}}1 {ß}{{\ss}}1
 }
-\end{Hint}
-%
+\end{Code}
+
 Nachdem nun die Grundeinstellungen erfolgt sind, kann ein eigener Stil für eine 
 gewünschte Programmiersprache definiert werden. Im folgenden Beispiel wird dies 
 für ein MATLAB"~Skript demonstriert. Als erstes wird mit dem Befehl 
 \Macro(\Package{listings}){lstdefinestyle} ein eigener \Package{listings}"~Stil 
 erstellt:
 %
-\begin{Hint*}
+\begin{Code}[input]{hint}
 \lstdefinestyle{matlab}{%
   language=Matlab,%
   basicstyle=\ttfamily,%
@@ -3366,19 +3371,19 @@ erstellt:
   keywordstyle={\color{blue!75!black}},%
   columns=flexible,keepspaces,%
 }
-\end{Hint*}
-%
+\end{Code}
+
 Dabei wird die verwendete Programmiersprache definiert sowie die Formatierung 
 für die Quelltextauszüge festgelegt. Für weitere Einstellungsmöglichkeiten 
 sollte die Dokumentation zum Paket zu Rate gezogen werden. Der so definierte 
 Stil lässt sich anschließend folgendermaßen verwenden.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \begin{lstlisting}[style=matlab]
 §\dots§
 \end{lstlisting}
-\end{Hint}
-%
+\end{Code}
+
 Soll innerhalb eines Quelltextauszuges ein Abschnitt nicht ausgegeben sondern 
 als \Lettering{LaTeX}-Code interpretiert und ausgeführt werden, lässt sich mit 
 \Macro(\Package{listings}){lstset|\MPValue{\PValue{escapechar=\PName{Zeichen}}}}
@@ -3449,19 +3454,19 @@ Anfragen kann ich unter anderem folgende Foren empfehlen:
 \item \hrfn{http://tex.stackexchange.com/}{\Lettering{LaTeX} Stack Exchange}
 \item \hrfn{http://www.latex-community.org/forum/}{\Lettering{LaTeX} Community}
 \end{itemize} 
-%
-Insbesondere alle \TUDScript betreffende Fragen sollten natürlich direkt im 
-dazugehörigen \Forum gestellt werden.
 
-\begin{Trunk+}
-\printbibliography[heading=bibintoc,label=sec:bibliography]%
-\end{Trunk+}
+Insbesondere alle \TUDScript betreffende Fragen sollten natürlich direkt im 
+dazugehörigen \Forum oder im \GitHubRepo'discussions' gestellt werden.
+
+\begin{Code}[nolst]{trunk}
+\printbibliography[heading=bibintoc,label=sec:bibliography]
+\end{Code}
 \printbibliography[heading=bibintoc]
 
-\begin{Preamble+}
+\begin{Code}[nolst]{preamble}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
 
-\end{Preamble+}
+\end{Code}
 
 \PrintIndex(main,misc)[
 Da das Tutorial etwas umfangreicher ist, wird für alle erläuterten Optionen, 
