@@ -68,7 +68,7 @@ Bevor das eigentliche Tutorial beginnt, werden sowohl eine Dokumentklasse als
 auch die für jedes \Lettering{LaTeX}-Dokument meiner Meinung nach sinnvollen 
 Pakete geladen.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \documentclass[ngerman]{tudscrartcl}% andere Klassen sind möglich
 \usepackage{iftex}
 \iftutex
@@ -80,21 +80,21 @@ Pakete geladen.
 \usepackage{babel}
 \usepackage{microtype}
 
-\end{Preamble}
-%
+\end{Code}
+
 Zusätzlich wird das Paket \Package{amsmath} geladen, welches unter anderem die 
 in diesem Tutorial verwendeten Mathematikumgebungen \Environment{equation}, 
 \Environment{gathered} und \Environment{aligned} zur Verfügung stellt.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{amsmath}
-\end{Preamble}
-%
+\end{Code}
+
 Zunächst wird ein kurzes Beispiel gegeben, welches für die nachfolgenden 
 Ausführungen als Grundlage dienen soll. 
 %
 \CodePreamble{}%
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \begin{equation*}
 \begin{gathered}
 M_{EM} = \frac{M_{Rad}}{i_g \cdot i_A} - M_{VM} \\
@@ -106,8 +106,8 @@ M_{EMmin}\leq M_{EM}\leq M_{EMmax}
 \end{gathered}
 \end{equation*}
 
-\end{Trunk*}
-%
+\end{Code}
+
 Ein guter Mathematiksatz ist in \Lettering{LaTeX} durchaus Sisyphusarbeit. Wenn 
 mikrotypografisch alles richtig gemacht werden soll, gibt es einiges zu 
 beachten. Generell gilt, dass Variablen kursiv oder geneigt, Bezeichnungen und 
@@ -118,7 +118,7 @@ respektive \Macro{mathnormal|\MPValue{\dots}} wohl oder übel notwendig.
 Aus dem vorhergehenden Beispiel wird mit ziemlich viel Anpassungsarbeit:
 %
 \CodePreamble{}%
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \begin{equation*}
 \begin{gathered}
 M_\mathrm{EM} = \frac{M_\mathrm{Rad}}{i_g \cdot i_A} - M_\mathrm{VM} \\
@@ -130,8 +130,8 @@ M_\mathrm{EM_{min}}\leq M_\mathrm{EM}\leq M_\mathrm{EM_{max}}
 \end{gathered}
 \end{equation*}
 
-\end{Trunk*}
-%
+\end{Code}
+
 Augenscheinlich ist dabei sehr viel Handarbeit notwendig. Allerdings lässt sich 
 dies relativ gut vereinfachen. Zu diesem Zwecke wird für das Setzen von Indizes 
 bei Formelzeichen der Befehl \Macro{ind|\MPValue{\dots}} definiert. Danach 
@@ -146,13 +146,13 @@ Definition möglich:%
 }
 %
 \CodeHook{\let\newcommand\renewcommand}
-\begin{Trunk*}
-\newcommand*{\ind}[1]{\ensuremath{\kern.03em_\mathrm{#1}}}
-\newcommand*{\M}[1]{\ensuremath{M\ind{#1}}}
+\begin{Code}[input]{trunk}
+\newcommand*\ind[1]{\ensuremath{\kern.03em_\mathrm{#1}}}
+\newcommand*\M[1]{\ensuremath{M\ind{#1}}}
 
-\end{Trunk*}
+\end{Code}
 \CodePreamble{}
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \begin{equation*}
 \begin{gathered}
 \M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
@@ -164,8 +164,8 @@ Definition möglich:%
 \end{gathered}
 \end{equation*}
 
-\end{Trunk*}
-%
+\end{Code}
+
 Ein gewünschter Nebeneffekt der vorhergehenden Definition ist, dass dieser 
 Befehl aufgrund der Verwendung von \Macro{ensuremath|\MPValue{\dots}} nun 
 auch im Fließtext verwenden werden kann. Beispielsweise lässt sich im Textteil 
@@ -182,20 +182,20 @@ Variante \Macro{M|\MPName{Index}\OPName{Indexindex}} mit nachgelagertem
 optionalen Argument genutzt werden kann.
 %
 \CodeHook{\let\newcommand\renewcommand}
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \makeatletter
-\renewcommand*{\M}[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
-\newcommand*{\n@M}{}
-\newcommand*{\o@M}{}
+\renewcommand*\M[1]{\@ifnextchar[{\o@M{#1}}{\n@M{#1}}}
+\newcommand*\n@M{}
+\newcommand*\o@M{}
 \def\n@M#1{\ensuremath{M\ind{#1}}}
 \def\o@M#1[#2]{\ensuremath{M\ind{#1_{#2}}}}
 \makeatother
 
-\end{Trunk*}
-%
+\end{Code}
+
 Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 %
-\begin{Trunk*}
+\begin{Code}[input]{trunk}
 \begin{equation*}
 \begin{gathered}
 \M{EM} = \frac{\M{Rad}}{i_g \cdot i_A} - \M{VM} \\
@@ -206,8 +206,8 @@ Somit vereinfacht sich das zu Beginn vorgestellte Beispiel recht deutlich:
 \end{aligned}
 \end{gathered}
 \end{equation*}
-\end{Trunk*}
-%
+\end{Code}
+
 Das Definieren von \Macro{M|\MPName{Index}\OPName{Indexindex}} mit 
 angehängtem optionalen Argument ist ehrlich gesagt nur ein wenig Spielerei und 
 soll zeigen, wie dies prinzipiell mit \Lettering{LaTeX}-Mitteln funktioniert. 
@@ -215,12 +215,13 @@ Das Paket \Package{xparse} könnte alternativ zum hier vorgestellten Vorgehen
 für die Befehlsdeklaration des optionalen \textbf{nach} dem obligatorischen 
 Argument genutzt werden. Damit würde die Befehlsdeklaration für \Macro{M} 
 folgendermaßen lauten:
-\begin{Hint}
+%
+\begin{Code}{hint}
 \NewDocumentCommand \M { m o } {%
   \ensuremath{M\ind{#1\IfValueT{#2}{_{#2}}}}%
 }
-\end{Hint}
-%
+\end{Code}
+
 \FinishTutorial
 \ListOfToDo
 \end{document}
