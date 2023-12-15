@@ -177,7 +177,7 @@
 \RequirePackage{trimspaces}
 %    \end{macrocode}
 %
-% \subsection{Erweiterte Definition von \TeX-Primitiven}
+% \subsection{Erweiterte Definition von \Lettering{TeX}-Primitiven}
 %
 % \begin{macro}{\tud@newif}
 % \changes{v2.06o}{2022/07/27}{neu}^^A
@@ -189,8 +189,8 @@
 % \changes{v2.06o}{2022/07/27}{neu}^^A
 % \begin{macro}{\tud@newwrite}
 % \changes{v2.06o}{2022/07/27}{neu}^^A
-% Mit \LaTeX{} lassen sich einige Primitiven definieren, ohne zu Prüfen, ob 
-% ggf. bereits eine Definition vorhanden ist. Dies wird hiermit umgangen.
+% Mit \Lettering{LaTeX} lassen sich einige Primitiven definieren, ohne zu 
+% Prüfen, ob bereits eine Definition vorhanden ist. Dies wird hiermit umgangen.
 %    \begin{macrocode}
 \newcommand*\tud@newif[1]{\@ifdefinable#1{\newif#1}}
 \newcommand*\tud@newcount[1]{\@ifdefinable#1{\newcount#1}}
@@ -218,13 +218,13 @@
 % \changes{v2.06o}{2022/07/28}{neu}^^A
 % \begin{macro}{\tud@addtodim}
 % \changes{v2.06o}{2022/07/28}{neu}^^A
-% Der \LaTeX"~Kernel stellt lediglich \cs{newlength} zur Verfügung, um bereits 
-% bestehende Makros nicht zu überschreiben. Soll jedoch ein \cs{dimen}-Register 
-% definiert werden, gibt es keinen entsprechenden Befehl. Auch die Zuweisung 
-% von Längenwerte kann mit \cs{setlength} nicht sauber erfolgen, da nicht 
-% geprüft wird, ob die Zuweisung an ein \cs{skip}"~ oder \cs{dimen}-Register 
-% erfolgt. Deshalb werden hier für diese Aufgabe interne Befehle definiert.
-% Siehe dazu auch \GitHubRepo(latex3/latex2e)<227>.
+% Der \Lettering{LaTeXe}"~Kernel stellt lediglich \cs{newlength} zur Verfügung, 
+% um bereits bestehende Makros nicht zu überschreiben. Soll jedoch ein 
+% \cs{dimen}-Register definiert werden, gibt es keinen entsprechenden Befehl. 
+% Auch die Zuweisung von Längenwerte kann mit \cs{setlength} nicht sauber 
+% erfolgen, da nicht geprüft wird, ob die Zuweisung an ein \cs{skip}- oder 
+% \cs{dimen}-Register erfolgt. Deshalb werden hier für diese Aufgabe interne 
+% Befehle definiert. Siehe dazu auch \GitHubRepo<latex3/latex2e>'227'.
 %    \begin{macrocode}
 \newcommand*\tud@newglue[1]{\@ifdefinable#1{\newskip#1}}
 \newcommand*\tud@newdim[1]{\@ifdefinable#1{\newdimen#1}}
@@ -281,7 +281,7 @@
 % \end{macro}^^A \tud@res@glue
 % \begin{macro}{\tud@if@lengthregister}
 % \changes{v2.06o}{2022/07/28}{neu}^^A
-% Prüft, ob der übergebene Befehl ein \cs{skip}"~ oder \cs{dimen}-Register ist.
+% Prüft, ob der übergebene Befehl ein \cs{skip}- oder \cs{dimen}-Register ist.
 %    \begin{macrocode}
 \newcommand*\tud@if@lengthregister[1]{%
   \begingroup%
@@ -364,8 +364,8 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % Es wird ein token-Regsiter reserviert, welches im weiteren Verlauf an allen
 % möglichen Punkten verwendet wird. Mit \cs{addto@hook@expandafter} wird~-- in 
-% Ergänzung zu \cs{addto@hook} aus dem \LaTeX"~Kernel~-- ein Makro zum Anfügen
-% des expandierten Arguments an ein token-Register bereitgestellt.
+% Ergänzung zu \cs{addto@hook} aus dem \Lettering{LaTeXe}"~Kernel~-- ein Makro 
+% zum Anfügen des expandierten Arguments an ein token-Register bereitgestellt.
 %    \begin{macrocode}
 \tud@newtoks\tud@toks@
 \newcommand*\addto@hook@expandafter[2]{%
@@ -382,9 +382,9 @@
 % Mit \KOMAScript~v3.37 wurde das Aktivieren des Schalters \cs{if@atdocument} 
 % aufgrund des stark veränderten und damit leider nur bedingt deterministischen 
 % \hrfn{https://sourceforge.net/p/koma-script/tickets/23/}{Hook-Managements} 
-% des Kernels auf |begindocument/before| verschoben. Dieser Befehl wird als
-% Gegenstück definiert und führt in Abhängigkeit von |begindocument/after| 
-% Quelltext verzweigt aus.
+% des \Lettering{LaTeXe}"~Kernels auf |begindocument/before| verschoben. Dieser 
+% Befehl wird als Gegenstück definiert und führt Quelltext in Abhängigkeit von 
+% |begindocument/after| verzweigt aus.
 %    \begin{macrocode}
 \newcommand*\tud@if@preamble{}
 \let\tud@if@preamble\@firstoftwo
@@ -539,6 +539,97 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@remove@spaces@within
 %
+% \minisec{Entfernen umhüllender Zeichen}
+%
+% \begin{macro}{\tud@remove@enfold@char}
+% \changes{v2.06p}{2022/10/24}{neu}^^A
+% Entfernt aus der im ersten Argument als Makro gegebenen Zeichenkette am 
+% Anfang und Ende sämtliche Leerzeichen sowie das im zweiten Argument 
+% angegebene Zeichen.
+%    \begin{macrocode}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \expandafter\def\expandafter\tud@res@a\expandafter{#1}%
+    \trim@spaces@in\tud@res@a%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@a}%
+    \ifin@%
+      \let\tud@res@b\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@b\@empty%
+            \def\tud@res@b{##1}%
+          \else%
+            \appto\tud@res@b{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@a#2\@nil%
+      \trim@spaces@in\tud@res@b%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@remove@enfold@char
+%
+% \minisec{Ersetzen von Zeichen}
+%
+% \begin{macro}{\tud@replace@in}
+% \changes{v2.05}{2015/11/01}{neu}^^A
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.06o}{2022/08/08}{neu}^^A
+% Ersetzt innerhalb der im ersten Argument als Makro gegebenen Zeichenkette 
+% alle im zweiten Argument gegebene \meta{Suchzeichen} durch die im dritten 
+% Argument angegebene \meta{Ersatzzeichen} rekursiv.
+%    \begin{macrocode}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
+% behandelt werden. Die zurückgelieferte Zeichenkette enthält demzufolge nur 
+% noch Zeichen mit \val{catcode 12}.
+%    \begin{macrocode}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@replace@@in
+% \end{macro}^^A \tud@replace@in
+%
 % \subsubsection{Test auf verfügbare Sprachen}
 %
 % Aktuell gibt es leider keine gemeinsame Schnittstelle für die Sprachpakete 
@@ -630,32 +721,11 @@
 %    \end{macrocode}
 % \end{macro}^^A \tud@if@language@main
 %
-% \subsubsection{Prüfen auf nicht vorhandene optionale Argumente}
-%
-% \begin{macro}{\tud@if@nil}
-% Für einige optionale Argumente wird \cs{@nil} als Standardwert gesetzt, um 
-% zwischen einem nicht gegebenen und einem leeren Argument differenzieren zu
-% können. Mit diesem Makro kann darauf getestet werden.
-% \ToDo{im Quelltext verwenden!, leere optionale Argumente anpassen}[v2.07]
-%    \begin{macrocode}
-\newcommand*\tud@if@nil[1]{%
-  \begingroup%
-    \def\tud@res@a{#1}%
-    \ifx\tud@res@a\@nnil%
-      \aftergroup\@firstoftwo%
-    \else%
-      \aftergroup\@secondoftwo%
-    \fi%
-  \endgroup%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@if@nil
-%
 % \subsubsection{Division für rationale Zahlen}
 %
-% Mit \LaTeX{} kann~-- ohne die Verwendung zusätzlicher Pakete~-- nicht ohne 
-% Weiteres eine Division durchgeführt werden, die als Ergenis eine rationale 
-% Zahl liefert. Dem wird hier Abhilfe geleistet.
+% Mit \Lettering{LaTeX} kann~-- ohne die Nutzung zusätzlicher Pakete~-- nicht 
+% ohne Weiteres eine Division durchgeführt werden, die eine rationale Zahl als 
+% Ergebnis liefert. Dem wird hier Abhilfe geleistet.
 % \begin{macro}{\tud@divide}
 % \changes{v2.04}{2015/04/09}{neu}^^A
 % Der Befehl erwartet im ersten Argument das Makro, in welches das Ergebnis 
@@ -782,7 +852,7 @@
 %
 % Der Befehl \cs{tud@cs@letltx} nutzt intern \cs{LetLtxMacro} aus dem Paket 
 % \pkg{letltxmacro}, um auch robust definierte Befehle korrekt zu sichern.
-% \ToDo{Kernel stellt mittlerweiele \cs{NewCommandCopy} bereit}[v2.07]
+% \ToDo{Kernel stellt \cs{NewCommandCopy} bereit}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@cs@letltx[2]{%
   \expandafter\expandafter\expandafter\LetLtxMacro%
@@ -960,12 +1030,12 @@
 %
 % \begin{macro}{\protected@expandtwoargs}
 % \changes{v2.02}{2014/11/13}{neu}^^A
-% Im \LaTeX"~Kernel wird der Befehl \cs{@expandtwoargs} definiert, welcher zwei
-% Argumente in ein angegebenes Makro vollständig expandiert. Dabei erfolgt die 
-% Expansion der beiden Argumente aufgrund der standardmäßigen Verwendung von 
-% \cs{edef} allerdings vollständig und ohne die Beachtung von \cs{protect}.
-% Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt werden, 
-% lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
+% Im \Lettering{LaTeXe}"~Kernel wird der Befehl \cs{@expandtwoargs} definiert, 
+% welcher zwei Argumente in ein angegebenes Makro vollständig expandiert. Dabei 
+% erfolgt die Expansion der beiden Argumente aufgrund der standardmäßigen 
+% Verwendung von \cs{edef} allerdings vollständig und ohne die Beachtung von 
+% \cs{protect}. Der Befehl \cs{protected@expandtwoargs} kann äquivalent genutzt 
+% werden, lässt dabei aber mit \cs{protect} geschützte Makros unberührt.
 %    \begin{macrocode}
 \providecommand*\protected@expandtwoargs[3]{%
   \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
@@ -975,7 +1045,7 @@
 %
 % \begin{macro}{\tud@patch@wrn}
 % \TUDScript verwendet die Möglichkeiten von \pkg{etoolbox} und \pkg{xpatch}, 
-% um mit den Makros  (\cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd}) 
+% um mit den Makros \cs{[x]apptocmd}, \cs{[x]pretocmd}, \cs{[x]patchcmd} etc. 
 % bereits definierte Befehle anzupassen. Falls dies nicht gelingt, wird eine 
 % Warnung ausgegeben, die hier definiert wird.
 % \ToDo{generelle Schnittstelle schaffen und failure hier behandeln}[v2.07]
@@ -1292,8 +1362,8 @@
 % eine gültige Einheit ohne Maßzahl (\cs{Ifdimen}|{pt}|) angegeben wird.
 % Für Werte ohne Dimensionsangabe wird gegebenenfalls einfach das optionale
 % Argument als intendierte angenommen. Sollte es sich bei dem Argument nicht um
-% einen String sondern um eine \TeX"~Primitive oder ein geschütztes Makro
-% handeln, wird kein \val{true}-Zweig durchlaufen.
+% einen String sondern um eine \Lettering{TeX}"~Primitive oder ein geschütztes 
+% Makro handeln, wird kein \val{true}-Zweig durchlaufen.
 %    \begin{macrocode}
     \@tud@res@swatrue%
     \Ifdimen{\tud@res@a}{}{%
@@ -1612,7 +1682,7 @@
 }
 %    \end{macrocode}
 % Mit \cs{TUD@parameter@let}\marg{Name}\marg{Name} kann äquivalent zur
-% \TeX"~Primitive~\cs{let} die Definition der Verarbeitung eines
+% \Lettering{TeX}"~Primitive~\cs{let} die Definition der Verarbeitung eines
 % Parameters auf einen weiteren übertragen werden.
 %    \begin{macrocode}
 \newcommand*\TUD@parameter@let[3][\TUD@parameter@@family]{%
@@ -1816,8 +1886,8 @@
 % geladen. Damit lässt sich sicherstellen, dass beispielsweise Schriftdateien 
 % in einer bestimmten Version vorhanden sind, ohne diese durch das Paket selbst 
 % zu laden. Ist das Paket gar nicht installiert, wird durch den Aufruf von 
-% \cs{RequirePackage} ein Fehler erzeugt respektive MiKTeX zur automatischen 
-% Nachinstallation animiert.
+% \cs{RequirePackage} ein Fehler erzeugt respektive \Lettering{MiKTeX} zur 
+% automatischen Nachinstallation animiert.
 % \ToDo{.aux schreiben, wenn existent und so ggf. nur einmalig ausführen}[v2.07]
 %    \begin{macrocode}
 \newcommand*\TUD@CheckPackage[2]{%
@@ -1904,7 +1974,7 @@
 % \begin{macro}{\TUD@AfterPackage@do}
 % \changes{v2.03}{2015/02/15}{neu}^^A
 % Mit diesen beiden Befehlen wird die Ausführung von Quellcode erst nach dem 
-% Laden des gewünschten Paketes oder~-- falls das Paket geladen wurde~--  
+% Laden des gewünschten Paketes oder~-- falls das Paket geladen wurde~-- 
 % direkt im Dokument ausgeführt. Im ersten Argument wird das Paket angegeben, 
 % im zweiten der Quellcode.
 %    \begin{macrocode}

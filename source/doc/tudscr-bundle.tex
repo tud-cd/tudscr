@@ -3,7 +3,7 @@
     Zusätzlich zu den bisher im Anwenderhandbuch vorgestellten Klassen und 
     Paketen werden im \TUDScript-Bundle weitere Paket bereitgestellt. Diese 
     sind nicht zwingend an die Verwendung einer der \TUDScript-Klassen 
-    angewiesen sondern können prinzipiell mit jeder \hologo{LaTeX}"~Klasse 
+    angewiesen sondern können prinzipiell mit jeder \Lettering{LaTeX}-Klasse 
     genutzt werden.%
   \end{abstract}
 }
@@ -12,16 +12,16 @@
   \label{sec:bundle}%
 }
 \section[%
-  Das Paket \PackageRaw{tudscrcolor}{\BooleanFalse}
-  -- Farben im \CD%
+  Das Paket \Package{tudscrcolor} -- Farben im \CD%
 ]{%
   Farben im \CD%
-  \tudmarkuplabel{\Package{tudscrcolor}}%
-  \index{Farben|(}%
-  \index{Layout!Farben|?(}%
+  \entitylabel{\Package{tudscrcolor}}%
+  \index{Farben|?(}%
+  \index{Layout!Farbgestaltung|?(}%
 }
-\begin{Entity*}{\Package{tudscrcolor}}
-\ToDo[doc]{als separates Kapitel}[v2.07]
+
+\begin{DeclareEntity}{\Package{tudscrcolor}}
+\ToDo[doc]{tudscrcolor als separates Kapitel, der Rest in Anhang}[v2.07]
 Zur Verwendung der Farben des \CDs wird das Paket \Package{tudscrcolor} 
 genutzt. Falls dieses nicht in der Präambel geladen wird~-- um beispielsweise 
 zusätzliche Optionen aufzurufen~-- binden die \TUDScript-Klassen dieses 
@@ -34,30 +34,31 @@ Hausfarbe \Color{HKS41}, danach folgen die Farben für Auszeichnungen der ersten
 Diese Farben dürfen sowohl in ihrer Grundform als auch in helleren Tönen mit 
 einer Abstufung in 10\,\%"~Schritten verwendet werden. Das ohnehin verwendete 
 Paket \Package{xcolor} stellt genau diese Funktionalität zur Verfügung. Jede 
-der Farben kann sowohl mit \Color*{HKS\PName{Zahl}} als auch über ein Pseudonym 
-\Color*{cd\PName{Farbe}} genutzt werden.
+der Farben kann sowohl mit \Color*{HKS\PName{Zahl}} als auch über ein 
+Pseudonym \Color*{cd\PName{Farbe}} genutzt werden.
 %
 \begin{Example*}
 Die Grundfarbe \Color{HKS44} soll in der auf 20\% reduzierten, helleren 
 Abstufung genutzt werden. Innerhalb eines Befehls, der als Argument eine 
 gültige Farbe erwartet, muss lediglich \PValue{HKS44!20} angegeben werden. 
 Dies wird hier exemplarisch mit der folgenden \colorbox{HKS44!20}{%
-  Box \Macro{colorbox}[\MPValue{HKS44!20}\MPValue{Box}](\Package{xcolor})%
+  Box \Macro(\Package{xcolor}){colorbox|\MPValue{HKS44!20}\MPValue{Box}}%
 }
 demonstriert.
 \end{Example*}
 %
-Bei der farbigen Gestaltung des \CDs (\Option{cd=\PMisc}()'page') ist~-- je 
-nach gewählter Ausprägung~-- der Hintergrund respektive Querbalken von 
-Umschlagseite, Titel sowie Teilen in \Color{HKS41} und die Schrift auf selbigen 
-in \Color{HKS41}[!30] gehalten. Der Hintergrund von Kapitelseiten erscheint 
-gegebenenfalls in \Color{HKS41}[!10], die Schrift in \Color{HKS41}. Bei 
-geringerem Farbeinsatz werden lediglich die Schriften der Gliederungsseiten 
-auf \Color{HKS41} gesetzt.
+Bei der farbigen Gestaltung des \CDs ist~-- je nach spezifisch gewählter 
+Ausprägung (\Option'page'(){cd=\PMisc})~-- der Hintergrund 
+respektive Querbalken von Umschlagseite, Titel sowie Teilen in \Color{HKS41} 
+und die Schrift auf selbigen in \Color{HKS41|!30} gehalten. Der 
+Hintergrund von separaten Kapitelseiten erscheint gegebenenfalls in 
+\Color{HKS41|!10}, die Schrift in \Color{HKS41}. Bei geringerem 
+Farbeinsatz werden lediglich die Schriften der Gliederungsseiten auf 
+\Color{HKS41} gesetzt.
 
 Soll das Paket \Package{xcolor} mit speziellen Optionen genutzt werden, lassen 
 sich diese \emph{vor} dem Laden der genutzten Dokumentklasse mit 
-\Macro{PassOptionsToPackage}[\MPName{Paketoptionen}\MPValue{xcolor}] an dieses 
+\Macro{PassOptionsToPackage|\MPName{Paketoptionen}\MPValue{xcolor}} an dieses 
 übergeben. Alternativ kann das Paket \Package{tudscrcolor} mit den gewünschten 
 Optionen geladen werden, da dieses Paket unbekannte Einstellungen an 
 \Package{xcolor} durchreicht.
@@ -65,12 +66,18 @@ Optionen geladen werden, da dieses Paket unbekannte Einstellungen an
 
 
 \subsection{Generelle Farbdefinitionen}
+
 \newcommand*\cdcolorcalc{}
 \newcommand*\cdcolorname{}
 \newcommand*\cdcolorvalue{}
 \newcommand*\cdcolortext{}
 \newcommand*\cdcolor[2][0]{%
-  \vskip\medskipamount\noindent%
+  \ifhmode%
+    \vskip\medskipamount%
+  \else%
+    \addvspace{\medskipamount}%
+  \fi%
+  \noindent%
   \begin{tikzpicture}[%
     every node/.style={%
       rectangle, minimum height=.1\linewidth, minimum width=7em%
@@ -95,30 +102,53 @@ Optionen geladen werden, da dieses Paket unbekannte Einstellungen an
   \end{tikzpicture}%
   \par%
 }
+
+
 \minisec{Primäre Hausfarbe}
-\begin{Declaration}{\Color{HKS41}[cddarkblue]}
-\printdeclarationlist%
+
+\begin{Declaration}
+  {\Color{HKS41}}
+  (Alternativ:\Color*'none'{cddarkblue})
+\printdeclarationlist
 \cdcolor[6]{41}
 \end{Declaration}
 
+
 \minisec{Sekundäre Hausfarbe (Geschäftsausstattung)}
-\begin{Declaration}{\Color{HKS92}[cdgray]}
-\printdeclarationlist%
+
+\begin{Declaration}
+  {\Color{HKS92}}
+  (Alternativ:\Color*'none'{cdgray})
+\printdeclarationlist
 \cdcolor[4]{92}
 \end{Declaration}
 
+
 \minisec{Auszeichnungsfarbe 1.\,Kategorie}
-\begin{Declaration}{\Color{HKS44}[cdblue]}
-\printdeclarationlist%
+
+\begin{Declaration}
+  {\Color{HKS44}}
+  (Alternativ:\Color*'none'{cdblue})
+\printdeclarationlist
 \cdcolor[4]{44}
 \end{Declaration}
 
+
 \minisec{Auszeichnungsfarbe 2.\,Kategorie}
-\begin{Declaration}{\Color{HKS36}[cdindigo]}
-\begin{Declaration}{\Color{HKS33}[cdpurple]}
-\begin{Declaration}{\Color{HKS57}[cddarkgreen]}
-\begin{Declaration}{\Color{HKS65}[cdgreen]}
-\printdeclarationlist%
+
+\begin{Declaration}
+  {\Color{HKS36}}
+  (Alternativ:\Color*'none'{cdindigo})
+\begin{Declaration}
+  {\Color{HKS33}}
+  (Alternativ:\Color*'none'{cdpurple})
+\begin{Declaration}
+  {\Color{HKS57}}
+  (Alternativ:\Color*'none'{cddarkgreen})
+\begin{Declaration}
+  {\Color{HKS65}}
+  (Alternativ:\Color*'none'{cdgreen})
+\printdeclarationlist
 \cdcolor[4]{36}
 \cdcolor[4]{33}
 \cdcolor[2]{57}
@@ -128,19 +158,26 @@ Optionen geladen werden, da dieses Paket unbekannte Einstellungen an
 \end{Declaration}
 \end{Declaration}
 
+
 \minisec{Ausnahmefarbe}
-\begin{Declaration}{\Color{HKS07}[cdorange]}
-\printdeclarationlist%
+
+\begin{Declaration}
+  {\Color{HKS07}}
+  (Alternativ:\Color*'none'{cdorange})
+\printdeclarationlist
 \cdcolor{07}
 \end{Declaration}
+\index{Layout!Farbgestaltung|?)}%
 
 
 
 \subsection{Zusätzliche Farbdefinitionen}
-%
-\begin{Declaration}{\Option{reduced}}[]
-\printdeclarationlist%
-%
+
+\begin{Declaration}
+  {\Option{reduced}}
+  ()
+\printdeclarationlist
+
 Das Paket \Package{tudscrcolor} definiert lediglich die zuvor beschriebenen 
 Grundfarben \Color{HKS41}, \Color{HKS92}, \Color{HKS44}, \Color{HKS36}, 
 \Color{HKS33}, \Color{HKS57}, \Color{HKS65} sowie \Color{HKS07}. 
@@ -148,9 +185,10 @@ Alle anderen farblichen Abstufungen können mit den beschrieben Möglichkeiten
 des Paketes \Package{xcolor} generiert werden.
 \end{Declaration}
 
-\begin{Declaration}{\Option{extended}}
-\printdeclarationlist%
-%
+\begin{Declaration}
+  {\Option{extended}}
+\printdeclarationlist
+
 Neben dem \TUDScript-Bundle existieren viele verschiedene Klassen und Pakete 
 für das \CD, welche teilweise abweichende Farbdefinitionen nutzen. Durch die 
 Paketoption \Option{extended} werden hierfür Farben nach dem Schema 
@@ -164,60 +202,61 @@ der angestellte Zahlenwert aus der 10er"~Reihe kommen muss.
   Umstellung des Farbmodells%
   \index{Farben!Farbmodell}%
 }
-Normalerweise verwendet \Package{tudscrcolor} das CMYK"~Farbmodell. Außerdem 
-wird weiterhin noch der RGB"~Farbraum unterstützt. Eine Umschaltung des 
+
+Normalerweise verwendet \Package{tudscrcolor} das CMYK"=Farbmodell. Außerdem 
+wird weiterhin noch der RGB"=Farbraum unterstützt. Eine Umschaltung des 
 Farbmodells ist beispielsweise für gewisse Funktionen des Paketes 
 \Package{tikz} notwendig.
 
-\begin{Declaration}{\Option{RGB}}
-\printdeclarationlist%
-%
+\begin{Declaration}
+  {\Option{RGB}}
+\printdeclarationlist
+
 Diese Option wird an das Paket \Package{xcolor} durchgereicht, wodurch bereits 
 beim Laden des Paketes die globale Farbdefinition nicht nach dem 
-CMYK"~Farbmodell sondern im RGB"~Farbraum erfolgt.
+CMYK"=Farbmodell sondern im RGB"=Farbraum erfolgt.
 \end{Declaration}
 
-\begin{Declaration}{\Macro{setcdcolors}[\MPName{Farbmodell}]}
-\printdeclarationlist%
-%
+\begin{Declaration}
+  {\Macro{setcdcolors|\MPName{Farbmodell}}}
+\printdeclarationlist
+
 Mit diesem Befehl kann innerhalb des Dokumentes das verwendete Farbmodell 
 angepasst werden. Damit ist es möglich, lokal innerhalb einer Umgebung den 
 Farbmodus zu ändern und so nur in bestimmten Situationen beispielsweise aus dem 
-CMYK"~Farbmodell in den RGB"~Farbraum zu wechseln. Unterstützte Werte für 
+CMYK"=Farbmodell in den RGB"=Farbraum zu wechseln. Unterstützte Werte für 
 \PName{Farbmodell} sind \PValue{CMYK} und \PValue{RGB} beziehungsweise 
 \PValue{rgb}.
 \end{Declaration}
 
-\smallskip\noindent
+\medskip\noindent
 \Attention{%
   Die Darstellung der Farben kann im jeweiligen Farbmodus 
   (\PValue{CMYK} oder \PValue{RGB}) je nach verwendeter Bildschirm"~, Drucker- 
   und Softwarekonfiguration verschieden ausfallen. Die Farbwerte entstammen dem 
   Handbuch zum \CD und sind lediglich Näherungswerte. Abweichungen vom 
-  gedruckten HKS"~Farbregister und selbst ermittelten Werten sind technisch 
-  nicht zu vermeiden.%
-}%
-\index{Farben|)}%
-\index{Layout!Farben|?)}%
-\end{Entity*}
+  gedruckten HKS"=Farbregister und selbst ermittelten Werten sind technisch 
+  nicht zu vermeiden.
+}
+\end{DeclareEntity}
+\index{Farben|?)}%
 
 
 
 \section[%
-  Das Paket \PackageRaw{tudscrfonts}{\BooleanFalse}
-  -- Schriften im \CD%
+  Das Paket \Package{tudscrfonts} -- Schriften im \CD%
 ]{%
   Schriften im \CD%
-  \tudmarkuplabel{\Package{tudscrfonts}}%
+  \entitylabel{\Package{tudscrfonts}}%
 }
-\begin{Entity*}[%
-  v2.02:Neues Paket zur Nutzung Hausschriften ohne \TUDScript-Klassen;%
-  v2.04:Unterstützung der Klassen \Class{tudposter} und \Class{tudmathposter};%
-  v2.06:\OpenSans als neue Hausschrift standardmäßig aktiviert;%
-]{\Package{tudscrfonts}}
-%
+
+\begin{DeclareEntity}{\Package{tudscrfonts}}
+[
+  v2.02:Neues Paket zur Nutzung Hausschriften ohne \TUDScript-Klassen;
+  v2.06:\OpenSans als neue Hausschrift standardmäßig aktiviert;
+]
 Das Paket \Package{tudscrfonts} stellt die Hausschriften des \TUDCDs für 
-\hologo{LaTeX}"~Klassen bereit, welche \emph{nicht} zum \TUDScript-Bundle 
+\Lettering{LaTeX}-Klassen bereit, welche \emph{nicht} zum \TUDScript-Bundle 
 gehören. Das Paket unterstützt einen Großteil der normalerweise für die 
 \TUDScript-Klassen bereitgestellten Optionen und Befehle für die 
 Schriftauswahl. Um Dopplungen in der Dokumentation zu vermeiden, wird an dieser 
@@ -233,7 +272,7 @@ Für die Auswahl der Schreibmaschinenschriften ist \Option{ttfont} verfügbar.
 Weiterhin wird die Option \Option{relspacing} bereitgestellt. Alle genannten 
 Optionen können entweder direkt als Klassenoption oder als Paketoptionen im 
 optionalen Argument von 
-\Macro*{usepackage}[\OPName{Paketoptionen}\MPValue{tudscrfonts}] angegeben 
+\Macro*{usepackage|\OPName{Paketoptionen}\MPValue{tudscrfonts}} angegeben 
 werden. Zusätzlich ist nach dem Laden des Paketes die Optionenwahl mit 
 \Macro{TUDoption} respektive \Macro{TUDoptions} möglich.
 
@@ -247,123 +286,63 @@ unter \autoref{sec:install:fonts} zu finden. Um diese zu aktivieren, sei auf
 \Option{tudscrver=2.05} und \Option{cdoldfont} verwiesen.
 
 \ChangedAt{v2.04;v2.05}%
-Ursprünglich war das Paket \Package{tudscrfonts} für die Verwendung zusammen 
-mit einer der Klassen \Class{tudbook}, \Class{tudbeamer}, \Class{tudletter}, 
-\Class{tudfax}, \Class{tudhaus}, \Class{tudform} und seit der Version~v2.04 
-auch \Class{tudmathposter} sowie \Class{tudposter} vorgesehen. Allerdings 
-traten bei der Verwendung des Paketes mit einer dieser Klassen einige kleinere 
-Unzulänglichkeiten auf. Deshalb wird seit der Version~v2.05 empfohlen, für 
-diese Klassen das Paket \Package{fix-tudscrfonts} zu verwenden.
-\end{Entity*}
+Ursprünglich war das Paket \Package{tudscrfonts} vorrangig zur Verwendung in 
+Verbindung mit Dokumentklassen im \TUDCD, welche nicht zu \TUDScript gehören, 
+vorgesehen. Allerdings traten dabei einige Unzulänglichkeiten auf, weshalb seit 
+der Version~v2.05 empfohlen wird, hierfür das Paket \Package{fix-tudscrfonts} 
+zu verwenden. Die unterstützen Klassen sind bei dessen Beschreibung gelistet. 
+\end{DeclareEntity}
 
 
 
 \section[%
-  Das Paket \PackageRaw{fix-tudscrfonts}{\BooleanFalse}
-  -- Schriftkompatibilität%
-]{%
-  Schriftkompatibilität mit anderen TUD-Klassen%
-  \tudmarkuplabel{\Package{fix-tudscrfonts}}%
-}%
-\begin{Entity*}[%
-  v2.05:Neues Paket zur Nutzung der Hausschriften für Dokumentklassen im 
-  \TUDCD, welche nicht zu \TUDScript gehören;%
-  v2.06:\OpenSans als neue Hausschrift standardmäßig aktiviert;%
-]{\Package{fix-tudscrfonts}}
-%
-\ToDo{Verschieben in tudscr-obsolete}
-Das Paket \Package{fix-tudscrfonts} ist für die Nutzung mit einer der folgenden 
-Klassen vorgesehen:
-\begin{itemize}
-\item \Class{tudbook}
-\item \Class{tudbeamer}
-\item \Class{tudletter}
-\item \Class{tudfax}
-\item \Class{tudhaus}
-\item \Class{tudform}
-\item \Class{tudmathposter}
-\item \Class{tudposter}
-\end{itemize}
-%
-Für das \TUDCD wird vom \TUDScript-Bundle standardmäßig \OpenSans als 
-Schriftfamilie verwendet. Diese unterscheidet sich stark von den ursprünglich 
-durch die gerade genannten Klassen genutzten Schriftfamilien. Wird nun das 
-Paket \Package{fix-tudscrfonts} zusammen mit einer dieser Klassen verwendet, 
-hat dies den Vorteil, dass auch bei diesen die aktuelle Hausschrift verwendet 
-wird und der stark verbesserte Mathematiksatz zum Tragen kommen.
-\Attention{%
-  In diesem Fall kann sich das Ausgabeergebnis im Vergleich zu der Varianten 
-  mit den alten Schriften ändern. Zum Setzen von Dokumenten mit den alten 
-  Schriftfamilien \Univers und \DIN müssen diese installiert werden. Hinweise 
-  hierzu sind unter \autoref{sec:install:fonts} zu finden. Um diese zu 
-  aktivieren, sei auf \Option{tudscrver=2.05} und \Option{cdoldfont} verwiesen.
-}%
-
-Um alle notwendigen Einstellung korrekt und ohne unnötige Warnungen vornehmen 
-zu können, muss das Paket \Package{fix-tudscrfonts} bereits \emph{vor} der 
-Dokumentklasse geladen werden, wobei die gleichen Paketoptionen wie für das 
-Paket \Package{tudscrfonts} verwendet werden können:
-%
-\begin{Code}[escapechar=§]
-\RequirePackage§\OPName{Paketoptionen}§{fix-tudscrfonts}
-\documentclass§\OPName{Klassenoptionen}\MPName{Dokumentklasse}§
-§\dots§
-\begin{document}
-§\dots§
-\end{document}
-\end{Code}
-%
-Dabei wird spätestens zum Ende der Präambel das Paket \Package{tudscrfonts} 
-geladen. Alternativ kann dies auch durch den Benutzer in der Dokumentpräambel 
-erfolgen.
-\end{Entity*}
-
-
-
-\section[%
-  Das Paket \PackageRaw{mathswap}{\BooleanFalse}
-  -- Dezimal- und Tausendertrennzeichen%
+  Das Paket \Package{mathswap} -- Dezimal- und Tausendertrennzeichen%
 ]{%
   Formatierung von Dezimal- und Tausendertrennzeichen%
-  \tudmarkuplabel{\Package{mathswap}}%
+  \entitylabel{\Package{mathswap}}%
   \index{Mathematiksatz|(}%
   \index{Zifferngruppierung|(}%
 }
-\begin{Entity*}{\Package{mathswap}}
+
+\begin{DeclareEntity}{\Package{mathswap}}
 Die Verwendung von Dezimal- und Tausendertrennzeichen im mathematischen Satz 
 sind regional sehr unterschiedlich. In den meisten englischsprachigen Ländern 
 wird der Punkt als Dezimaltrennzeichen und das Komma zur Zifferngruppierung 
-verwendet, im restlichen Europa wird dies genau entgegengesetzt praktiziert.
-Das Paket \Package{mathswap} soll dazu dienen, beliebige formatierte Zahlen in 
-ihrer Ausgabe anzupassen. Dafür werden die Zeichen Punkt (\ .\ ) und Komma (\ 
-,\ ) als aktive Zeichen im Mathematikmodus definiert.
+verwendet, im restlichen Europa wird dies genau entgegengesetzt praktiziert. 
+Generell sollte beim mathematischen Satz der 
+Unterschied beachtet werden, ob es sich bei einem zu setzenden Komma um eine 
+gewöhnliche Interpunktion ($z=f(x,y)$)~-- wo ein Abstand nach dem Komma 
+gewünscht ist~-- oder ein Dezimaltrennzeichen ($t=1,\!2$) handelt. Im Idealfall 
+geschieht dies automatisiert.
+\ToDo{in Tipps \& Tricks, Paket mathswap sollte verschwinden}[v2.07]
 
-Ähnliche Funktionalitäten werden bereits durch die Pakete \Package{icomma} und 
-\Package{ziffer} bereitgestellt. Bei \Package{icomma} muss jedoch beim
-Verfassen des Dokumentes durch den Autor beachtet werden, ob das verwendete
-Komma einem Dezimaltrennzeichen entspricht ($t=1,\!2$) oder einem normalen 
-Komma im Mathematiksatz ($z=f(x,y)$), wo ein gewisser Abstand nach dem Komma 
-durchaus gewünscht ist. Das Paket \Package{ziffer} liefert dafür die gewünschte 
-Funktionalität,%
-\footnote{kein Leerraum nach Komma, wenn direkt danach eine Ziffer folgt}
-ist allerdings etwas unflexibel, was den Umgang mit den Trennzeichen anbelangt.
-Als Alternative zu diesem Paket kann außerdem \Package{ionumbers} verwendet 
-werden.
+Das Paket \Package{mathswap} stellt diese Funktionalität bereit, indem Punkt 
+(\:\textbf{.}\:) respektive Komma (\:\textbf{,}\:) im Mathematikmodus als 
+Trennzeichen direkt vor einer Ziffer erkannt und nach bestimmten Vorgaben 
+ersetzt werden. Sollte sich jedoch zwischen Trennzeichen und Ziffer Leerraum 
+befinden, wird dieser als solcher auch gesetzt. Für ein Beispiel zur Verwendung 
+des Paketes sei auf das Tutorial \Tutorial{mathswap} in \autoref{sec:tut} 
+hingewiesen.
 
-Das Paket \Package{mathswap} sorgt dafür, dass Trennzeichen direkt vor einer 
-Ziffer erkannt und nach bestimmten Vorgaben ersetzt werden. Sollte sich jedoch 
-zwischen Trennzeichen und Ziffer Leerraum befinden, wird dieser als solcher
-auch gesetzt. Für ein Beispiel zur Verwendung des Paketes sei auf das Tutorial 
-\Tutorial{mathswap} in \autoref{sec:tut} hingewiesen.
+Das Paket \Package{ionumbers} verfolgt dasselbe Ziel mit einem ähnlichen 
+Ansatz, stellt allerdings wesentlich mehr Anpassungsmöglichkeiten bereit und 
+sollte deshalb als bevorzugte Alternative angesehen werden. Auch die Pakete 
+\Package{ziffer} und \Package{icomma} stellen ähnliche Funktionalitäten 
+bereit. Ersteres ist leider etwas unflexibel, was den Umgang mit Trennzeichen 
+anbelangt und bei letzterem wird standardmäßig jedes Komma ohne Leerraum 
+gesetzt, sodass der Autor manuell Leerzeichen einfügen muss, falls diese 
+gewünscht sind. 
 
-\begin{Declaration}{\Macro{commaswap}[\MPName{Trennzeichen}]}
-\begin{Declaration}{\Macro{dotswap}[\MPName{Trennzeichen}]}
-\printdeclarationlist%
-%
+\begin{Declaration}
+  {\Macro{commaswap|\MPName{Trennzeichen}}}
+\begin{Declaration}
+  {\Macro{dotswap|\MPName{Trennzeichen}}}
+\printdeclarationlist
+
 Die beiden Befehle \Macro{commaswap} und \Macro{dotswap} sind die zentrale 
 Benutzerschnittstelle des Paketes. Das Makro \Macro{commaswap} definiert das 
 Trennzeichen oder den Inhalt, wodurch ein Komma ersetzt werden soll, auf 
-welches direkt danach eine Ziffer folgt. Normalerweise setzt \hologo{LaTeX}
+welches direkt danach eine Ziffer folgt. Normalerweise setzt \Lettering{LaTeX}
 nach einem Komma im mathematischen Satz zusätzlich einen horizontalen Abstand.
 Bei der Ersetzung durch \Macro{commaswap} entfällt dieser. Die Voreinstellung
 für \Macro{commaswap} ist deshalb auf ein Komma (,) gesetzt. Mit dem Makro 
@@ -375,91 +354,96 @@ definiert (\Macro*{,}).
 \end{Declaration}
 \end{Declaration}
 
-\begin{Declaration}[v2.02]{\Macro{mathswapon}}
-\begin{Declaration}[v2.02]{\Macro{mathswapoff}}
-\printdeclarationlist%
-%
-\ChangedAt*{v2.02:Funktionalität im Dokument umschaltbar}%
+\begin{Declaration}
+  {\Macro{mathswapon}}
+\begin{Declaration}
+  {\Macro{mathswapoff}}
+\printdeclarationlist
+
+\ChangedAt{v2.02:Funktionalität im Dokument umschaltbar}%
 Die Funktionalität von \Package{mathswap} kann innerhalb des Dokumentes mit 
 diesen beiden Befehlen an- und abgeschaltet werden. Beim Laden des Paketes ist 
 es standardmäßig aktiviert.%
 \end{Declaration}
 \end{Declaration}
+\end{DeclareEntity}
 \index{Mathematiksatz|)}%
 \index{Zifferngruppierung|)}%
-\end{Entity*}
 
 
 
 \section[%
-  Das Paket \PackageRaw{twocolfix}{\BooleanFalse}
-  -- Bugfix für den zweispaltigen Satz%
+  Das Paket \Package{twocolfix} -- Bugfix für den zweispaltigen Satz%
 ]{%
   Bugfix für den zweispaltigen Satz%
-  \tudmarkuplabel{\Package{twocolfix}}%
-  \index{Satzspiegel!zweispaltig|?}%
+  \entitylabel{\Package{twocolfix}}%
+  \index{Satzspiegel!zweispaltig|!}%
 }
-\begin{Entity*}{\Package{twocolfix}}
-Der \hologo{LaTeXe}"~Kernel enthält einen Fehler, der Kapitelüberschriften im
-zweispaltigen Layout höher setzt, als im einspaltigen. Der 
-\hrfn{http://www.latex-project.org/cgi-bin/ltxbugs2html?pr=latex/3126}{Fehler}
-ist zwar schon länger bekannt, allerdings bisher noch nicht in den 
-\hologo{LaTeXe}"~Kernel übernommen worden. Das Paket \Package{twocolfix} behebt 
-das Problem. Eine Integration dieses Bugfixes in \KOMAScript{} wurde bereits 
-bei Markus Kohm angefragt, jedoch von ihm bis jetzt 
-\hrfn{http://www.komascript.de/node/1681}{nicht weiter verfolgt}.
-\end{Entity*}
+
+\begin{DeclareEntity}{\Package{twocolfix}}
+Aufgrund eines Fehlers im \Lettering{LaTeXe}"~Kernel werden im zweispaltigen 
+Layout Kapitelüberschriften höher gesetzt, als im einspaltigen. Das Problem ist 
+schon seit mehr als zwei Dekaden bekannt, allerdings bisher noch nicht gelöst 
+worden und \GitHubRepo<latex3/latex2e>'509'[zumindest mittelfristig] auch 
+weiterhin existent. Die Integration eines möglichen Bugfixes in \KOMAScript 
+wurde mit Markus~Kohm \href{http://www.komascript.de/node/1681}{diskutiert}, 
+jedoch von ihm bis jetzt nicht weiter verfolgt. Das Paket \Package{twocolfix} 
+versucht sich an einer Lösung des Problems. Als Alternative lässt sich für den 
+zwei- oder auch mehrspaltigen Satz das Paket \Package{multicol} nutzen.
+\end{DeclareEntity}
+
 
 
 \addsec*{Zukünftige Arbeiten}
+
 Diese Dinge sollen langfristig in das \TUDScript-Bundle eingearbeitet werden:
 
 %\chapter[%
-%  Das Paket \PackageRaw{tudscrletter} -- Briefe im \CD%
+%  Das Paket \Package{tudscrletter} -- Briefe im \CD%
 %]{%
 %  Briefe im \CD%
-%  \tudmarkuplabel{\Package{tudscrletter}}%
+%  \entitylabel{\Package{tudscrletter}}%
 %}
-%\begin{Entity*}{\Package{tudscrletter}}
+%\begin{DeclareEntity}{\Package{tudscrletter}}
 \ToDo[imp]{%
   Paket \Package*{tudscrletter} für Briefe im \CD, 
   \url{https://komascript.de/node/2200}%
 }[v2.07]
-Es soll das Paket \Package*{tudscrletter}'none' für Briefe im \TUDCD entstehen. 
+Es soll das Paket \Package*'none'{tudscrletter} für Briefe im \TUDCD entstehen. 
 Auch Klassen für Fax und Hausmitteilungen sollen dabei abfallen.
-%\end{Entity*}
+%\end{DeclareEntity}
 
 %\chapter[%
-%  Das Paket \PackageRaw{tudscrbeamer} -- Präsentationen im \CD%
+%  Das Paket \Package{tudscrbeamer} -- Präsentationen im \CD%
 %]{%
 %  Präsentationen im \CD%
-%  \tudmarkuplabel{\Package{tudscrbeamer}}%
+%  \entitylabel{\Package{tudscrbeamer}}%
 %}
-%\begin{Entity*}{\Package{tudscrbeamer}}
+%\begin{DeclareEntity}{\Package{tudscrbeamer}}
 \ToDo[imp]{Paket \Package*{tudscrbeamer} für Präsentationen im \CD}[v2.08]
-Mit \Package*{tudscrbeamer}'none' soll ein Paket entstehen, mit dem sich
-\hologo{LaTeX}"~Beamer"=Präsentationen im Stil des \TUDCDs mit den 
+Mit \Package*'none'{tudscrbeamer} soll ein Paket entstehen, mit dem sich
+\Lettering{LaTeX}"~Beamer"=Präsentationen im Stil des \TUDCDs mit den 
 Einstellungsmöglichkeiten von \TUDScript erstellen lassen. Dies ist jedoch als 
 sehr langfristiges Projekt anzusehen und eine Umsetzung momentan nicht 
-absehbar. Aktuell können hierfür die Pakete aus dem \GitHubRepo(tud-cd/tud-cd) 
+absehbar. Aktuell können hierfür die Pakete aus dem \GitHubRepo<tud-cd/tud-cd> 
 genutzt werden.
-%\end{Entity*}
+%\end{DeclareEntity}
 
 %\chapter[%
-%  Das Paket \PackageRaw{tudscrlayout} -- Seitenstil und Satzspiegel im \CD%
+%  Das Paket \Package{tudscrlayout} -- Seitenstil und Satzspiegel im \CD%
 %]{%
 %  Seitenstil und Satzspiegel im \CD%
-%  \tudmarkuplabel{\Package{tudscrlayout}}%
+%  \entitylabel{\Package{tudscrlayout}}%
 %}
-%\begin{Entity*}{\Package{tudscrlayout}}
+%\begin{DeclareEntity}{\Package{tudscrlayout}}
 \ToDo[imp]{%
-  Paket \Package*{tudscrlayout} \GitHubRepo(tud-cd/tud-cd)<6> für Satzspiegel, 
+  Paket \Package*{tudscrlayout} \GitHubRepo<tud-cd/tud-cd>'6' für Satzspiegel, 
   evtl. auch für die Klasse über \Option*{cdgeometry=forced}
 }[v2.09]
-Außerdem ist ein Paket \Package*{tudscrlayout}'none' vorstellbar, welches den 
+Außerdem ist ein Paket \Package*'none'{tudscrlayout} vorstellbar, welches den 
 durch das \CD vorgegebene Satzspiegel aktiviert ohne den Seitenstil selbst zu 
 verwenden, um beispielsweise bereits mit dem Kopf der \TnUD bedrucktes Papier 
 nutzen zu können. Ebenfalls wäre es denkbar, für andere Klassen die 
 \PageStyle{tudheadings}"=Seitenstile verfügbar zu machen ohne dabei den 
 Satzspiegel des \CDs umzusetzen. Dies hat jedoch nur geringe Priorität.
-%\end{Entity*}
+%\end{DeclareEntity}
