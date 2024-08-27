@@ -90,7 +90,7 @@
 %<*body>
 % \fi
 %
-% \subsection{Patches für den \Lettering{LaTeXe}"~Kernel}
+% \subsection{Patches für den \Lettering{LaTeX}"~Kernel}
 %
 % Für Inhaltsverzeichnis sowie~-- insbesondere im Hinblick auf Kolumnentitel~-- 
 % Ausgaberoutine sind Anpassungen notwendig, weshalb hierfür entsprechende 
@@ -435,6 +435,7 @@
 }
 %    \end{macrocode}
 % \begin{macro}{\autoref}
+% \begin{macro}{\autorefname}
 % \begin{macro}{\partautorefname}
 % \begin{macro}{\chapterautorefname}
 % \begin{macro}{\sectionautorefname}
@@ -464,6 +465,7 @@
 % \end{macro}^^A \sectionautorefname
 % \end{macro}^^A \chapterautorefname
 % \end{macro}^^A \partautorefname
+% \end{macro}^^A \autorefname
 % \end{macro}^^A \autoref
 %
 % \begin{macro}{\tud@hyperdef}
@@ -1250,6 +1252,7 @@
     {\@index[main]}%
 }
 \def\@index[#1]#2{\endgroup\@esphack}
+\tud@outputpage@initialize{\let\index\@gobbleopt@one}
 \tud@addtocontents@initialize*{\let\index\@gobbleopt@one}
 %    \end{macrocode}
 % \end{macro}^^A \@index
@@ -1427,9 +1430,9 @@
     \let\tud@res@a\@empty%
     \def\tud@res@b{#2}%
 %    \end{macrocode}
-% Im Index erzeugte Verweise mit \verb+|+|see| werden vor Seitenzahlen angegben 
-% und von diesen durch |\\| getrennt. Bei der Ausgabe soll diese Reihenfolge 
-% jedoch getauscht werden.
+% Im Index mit \verb+|see+ erzeugte Verweise werden in der Hilfsdatei vor 
+% Seitenzahlen angegeben und von diesen durch |\\| getrennt. Bei der Ausgabe 
+% soll diese Reihenfolge jedoch getauscht werden.
 %    \begin{macrocode}
     \def\tud@res@c##1\\##2\@nil{%
       \appto\tud@res@a{##1}%
@@ -1759,6 +1762,7 @@
       \let\PSet\@firstofone%
       \let\PMisc\@empty%
       \let\PBoolean\@empty%
+      \let\PLength\@empty%
       \let\textOR\@empty%
       \let\emph\@firstofone%
 %    \end{macrocode}
@@ -1798,6 +1802,7 @@
   \let\PSet\@gobble%
   \let\PMisc\@empty%
   \let\PBoolean\@empty%
+  \let\PLength\@empty%
   \let\textOR\@empty%
 }
 %    \end{macrocode}
@@ -1825,6 +1830,7 @@
 % \begin{macro}{\PSet}
 % \begin{macro}{\PMisc}
 % \begin{macro}{\PBoolean}
+% \begin{macro}{\PLength}
 % Diese Befehle dienen zum Auszeichnen von obligatorischen und optionalen 
 % Parametern und Befehlen oder bestimmten Wertzuweisungen.
 %    \begin{macrocode}
@@ -1843,7 +1849,9 @@
 \newrobustcmd*\PSet[1]{\PName{#1}}
 \newrobustcmd*\PMisc{\PSet{Einstellung}}
 \newrobustcmd*\PBoolean{\PSet{Ein-Aus-Wert}}
+\newrobustcmd*\PLength{\PSet{L\"angenwert}}
 %    \end{macrocode}
+% \end{macro}^^A \PLength
 % \end{macro}^^A \PBoolean
 % \end{macro}^^A \PMisc
 % \end{macro}^^A \PSet
@@ -2889,6 +2897,7 @@
 %   \oarg{Ausgabesuffix}\parg{Entität}^^A
 %   |<|\meta{CTAN-Paket}|>||'|\meta{Referenzvariante}|'|^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %
 % In eingen Fällen ist es beim Aufruf eines Entitätsbefehls nicht erwünscht, 
 % dass dieser auch tatsächlich ausgegeben wird. Für diesen Fall wird gleich zu
@@ -3059,6 +3068,7 @@
 % Mit \cs{Process@@MarkupDeclare} wird die formatierte Ausgabe der Deklaration 
 % realisiert. Wie diese genau gestaltet ist, wird durch \cs{tud@declare@num}
 % bestimmt. Folgende Werte sind möglich:
+% \ToDo{\val{-1/-2} dokumentieren}[v2.07]
 % \begin{description}
 %   \item[\val{0}:] Ausgabe von Markup, Erzeugen eines Labels
 %   \item[\val{1}:] Ausgabe von Markup, kein Label
@@ -3433,6 +3443,7 @@
 %   |=|\meta{Wert}|=|\oarg{Anmerkung}\parg{Entität}^^A
 %   \verb+|+\meta{Indexmarkup}\verb+|+^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
 \NewDocumentCommand\Process@Index{m r[] m d// d== o d() d||}{%
   \ifboolexpr{%
@@ -3441,7 +3452,7 @@
   }{}{%
     \IfBooleanTF{#1}{%
       \IfValueT{#8}{%
-%<*class> 
+%<*class>
         \ClassWarning{tudscrmanual}%
 %</class>
 %<*package>
@@ -3598,6 +3609,7 @@
 %   \cs{tud@idx@val}\marg{Elem.}|=|\meta{Wert}|=|\oarg{Anm.}^^A
 %   \parg{Entität}\verb+|+\meta{Indexmark.}\verb+|+^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
 \newcommand*\tud@idx@key{}
 \newcommand*\tud@idx@fmt{}
@@ -3920,6 +3932,7 @@
 %   \cs{Process@ChangedAt}\marg{Element}|=|\meta{Wert}|=|^^A
 %   \oarg{Ausgabesuffix}\parg{Entität}^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
 \NewDocumentCommand\Process@ChangedAt{m d// d== o d()}{%
   \tud@idx@get*{#1}/#2/=#3=[{#4}](#5)%
@@ -4099,6 +4112,7 @@
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline^^A
 % gespeichert wird, wobei der Untereintrag auch leer bleiben kann.
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
   \IfValueTF{#1}{%
     \toks@{#3!Implementierung}%
@@ -4129,6 +4143,7 @@
 %   \meta{Versionsnummer}|!Allgemein!|\meta{Änderungsnotiz}^^A
 % \endgroup\newline^^A
 % in der Liste \cs{tud@changedat@list} gespeichert. Für den allgemeinen Teil 
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 % wird mit der Angabe eines \TUDScript-Bundle-Elements etwas anders verfahren.
 % Wurde dieses~-- wenn auch nur indirekt über eine der beiden Spezialumgebungen
 % \env{DeclareEntity} bzw. \env{DeclareEntity*}~-- angegeben, so wird der 
@@ -4237,6 +4252,7 @@
 %   \meta{Versionsnummer}|!Implementierung!|\meta{Entitätsbefehl}^^A
 %   |!|\meta{Untereintrag}|!|\meta{Änderungsnotiz}^^A
 % \endgroup
+% \ToDo{vorherige doc überarbeiten oder raus}[v2.07]
 %    \begin{macrocode}
 \newcommand*\Changed@At@@CreateEntry[5]{%
   \IfValueT{#3}{%
@@ -5788,6 +5804,7 @@
 %    \end{macrocode}
 % Der Befehl \cs{FinishTutorial} schließt die offenen Ausgabestream und führt 
 % die Inhalte nach \file{\string\jobname-example.tex} zusammen.
+% \ToDo{C+P sollte raus}[v2.06]
 %    \begin{macrocode}
 \newcommand\FinishTutorial[1][]{%
   \immediate\write\tud@write@b{^^J\string\end{document}^^J}%
@@ -5800,19 +5817,19 @@
   \tud@read@to@outputstream{\tud@code@temp-trunk.tex}{\tud@write@a}%
   \immediate\closeout\tud@write@a%
   \clearpage%
-  \addsec{Copy\nobreakspace\&\nobreakspace Paste}%
+  \addsec{Copy~\&~Paste}%
   \thispagestyle{empty}%
   \pagestyle{empty}%
-  Zum Ende des Dokumentes wird das vorgestellte Tutorial als \"ubersetzbarer 
-  Quelltext ausgegeben, um dieses via Copy~\&~Paste verwenden und alle Punkte 
-  nachvollziehen zu k\"onnen. Bitte beachten Sie, dass~-- abh\"angig vom 
-  genutzten PDF-Betrachter~-- beim Kopieren die dargestellten Einz\"uge und 
-  Abs\"atze m\"oglicherweise verloren gehen k\"onnen. Dies kann insbesondere 
-  aufgrund fehlender Leerzeilen zu einem unvorteilhaften Ausgabeergebnis 
-  f\"uhren. Alternativ finden Sie den folgenden \Lettering{LaTeX}-Quelltext 
-  auch im Pfad \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} als 
-  Datei \File{\jobname-example.tex}. \par#1\par\medskip%
-  \begin{quoting}[leftmargin=0pt,rightmargin=0pt]%
+  Der zuvor beschriebene Quelltext wird folgend ausgegeben, um diesen via %
+  Copy~\&~Paste nutzen und nachvollziehen zu k\"onnen. Bitte beachten Sie, %
+  dass~-- abh\"angig vom verwendeten PDF-Betrachter~-- beim Kopieren die hier %
+  dargestellten Einz\"uge und Abs\"atze m\"oglicherweise verloren gehen %
+  k\"onnen. Dies kann insbesondere aufgrund fehlender Leerzeilen zu einem %
+  falschen Ausgabeergebnis f\"uhren. Alternativ finden Sie den folgenden %
+  \Lettering{LaTeX}-Quelltext auch im Pfad %
+  \Path{\PName{texmf}/source/latex/tudscr/doc/examples/} %
+  als Datei \File{\jobname-example.tex}. \par #1%
+  \begin{quoting}[rightmargin=0pt]%
   \lstinputlisting[style=tudscr]{\jobname-example.tex}%
   \end{quoting}%
 }
@@ -5828,8 +5845,10 @@
 % darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
 % Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
 % definierten Parameter \prm{silent} unterbunden.
+% \ToDo{silent on nowarn}
 %    \begin{macrocode}
 \providecommand*\filec@ntents@silent{%
+  \let\@latex@warning@no@line\@latex@note@no@line%
   \let\@latex@warning@no@line\@gobble%
 }
 %    \end{macrocode}
@@ -5845,6 +5864,7 @@
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@code@pre{%
+  \ClassWarning{xxxx}{change me!}%
   \csuse{filecontents*}[nosearch,force,silent]{\tud@code@temp.tex}%
 }
 \newcommand*\tud@code@post{%
@@ -6105,6 +6125,8 @@
 % Diese werden im Normalfall erst aufgelistet und daran anschließend folgt die 
 % Ausgabe des Ergebnisses. Mit \cs{CodePreamble} kann zwischen den beiden 
 % Teilen etwas erläuternder Text eingefügt werden.
+% \ToDo{remove \cs{CodePreamble}}
+% \ToDo{adapt \cs{CodeHook}}
 %    \begin{macrocode}
 \newcommand\Code@Preamble{}
 \let\Code@Preamble\relax
@@ -6117,6 +6139,13 @@
 \newcommand*\Code@Hook{}
 \let\Code@Hook\relax
 \newcommand*\CodeHook[1]{\gdef\Code@Hook{#1}}
+% TODO \newcommand*\GlobalCodeHook{\AddToHook{env/Code/measuring}}
+% TODO Sternversion für einmalige oder lokale Zuweisung?!
+\NewHook{env/Code/measuring}
+\AddToHook{env/Code/measuring}{%
+  \let\newcommand\renewcommand
+  \let\newlength\@gobble
+}
 %    \end{macrocode}
 % \end{macro}^^A \Code@Hook
 % \end{macro}^^A \CodeHook
@@ -6138,18 +6167,24 @@
 % \cs{vbox} verwendet, um damit auch mathematische Umgebungen testen zu können. 
 % Das Ganze findet innerhalb einer Gruppierung statt, um keine Änderungen zu
 % erzeugen.
+% \ToDo{\cs{@tempa} ist ein sehr merkwürdiges Konstrukt!}[v2.06]
 %    \begin{macrocode}
   \def\@tempa##1##2{%
-    ##1%
     \begingroup%
-      ##2%
-      \settoheight\@tempdima{\vbox{##1}}%
-      \ifdim\@tempdima>\z@\relax%
-        \endgraf%
-        \medskip%
-        \noindent\ignorespaces%
-      \fi%
+      \settoheight\tud@res@glue{\vbox{##1}}%
     \endgroup%
+    ##1%
+%    ##1%
+%    \begingroup%
+%      ##2%
+%      \settoheight\@tempdima{\vbox{##1}}%
+%      \ifdim\@tempdima>\z@\relax%
+%        \ClassWarning{xxxxx}{warning text}%
+%        \endgraf%
+%        \medskip%
+%        \noindent\ignorespaces%
+%      \fi%
+%    \endgroup%
   }%
 %    \end{macrocode}
 % Da aufgrund der Verwendung der \env{filecontents}-Umgebung ein optionales
@@ -6157,9 +6192,9 @@
 % wird \cs{CodePreamble} bereitgestellt, womit der Ausgabe ein erläuternder
 % Text vorangestellt werden kann.
 %    \begin{macrocode}
-  \@tempa{\Code@Preamble}{}%
-  \tud@setdim\@tempdimc{\leftskip}%
-  \tud@setdim\leftskip{\leftmargin}%
+  \ifdefvoid\Code@Preamble{}{\Code@Preamble}%
+%  \tud@setdim\@tempdimc{\leftskip}%
+%  \tud@setdim\leftskip{\leftmargin}%
 %    \end{macrocode}
 % Durch die doppelte Verwendung von \file{\string\tud@code@temp.tex}~-- einmal 
 % direkt und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
@@ -6169,8 +6204,8 @@
 %    \begin{macrocode}
   \@tempa{\InputCode}{\Code@Hook}%
   \global\let\Code@Hook\relax%
-  \tud@setdim\leftskip{\@tempdimc}%
-  \noindent\ignorespaces%
+  %\tud@setdim\leftskip{\@tempdimc}%
+  %\noindent\ignorespaces%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@code@input@tex
@@ -6189,7 +6224,7 @@
 \tud@newcount\tud@code@type@num
 \TUD@key[.code]{type}{%
   \TUD@set@numkey{type}{@tempa}{%
-    {preamble}{0},{trunk}{1},{}{2},{hint}{2}%
+    {preamble}{0},{trunk}{1},{hint}{2}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
     \tud@code@type@num=\@tempa\relax%
@@ -6256,6 +6291,9 @@
 % Teile für Präambel und Dokument an einer Stelle beschrieben, jedoch für die 
 % erstellte Beispieldatei \file{\string\jobname-example.tex} separat gehalten 
 % werden.
+% \ToDo{replace \cs{pcolumnfuzz}}
+% \ToDo{listings order}
+% \ToDo{output=...}
 %    \begin{macrocode}
 %<*package>
 \NewDocumentEnvironment{Code}{d() O{} m}{%
@@ -6268,6 +6306,7 @@
   \filecontents[noheader,nosearch,force,silent]{\tud@code@temp.tex}%
 }{%
   \endfilecontents%
+\ClassWarning{xxx}{change me!}%
   \tud@code@process{Code*}(#1)[input,#2]{#3}%
 }
 %</package>
@@ -6310,6 +6349,8 @@
 % ausgegeben. Die Sternversion führt den Inhalt zusätzlich im Dokument aus. Die 
 % Pluszeichenversion fügt dem Ausgabestream ihren Inhalt hinzu, ohne das 
 % dieser ausgegeben oder ausgeführt wird.
+% \ToDo{\cs{@tempa} ist ein sehr merkwürdiges Konstrukt!}[v2.06]
+% \ToDo{generalisiertes Konstrukt für alle Umgebungen?!}[v2.06]
 % \ToDo{noindentafter?}[v2.06]
 %    \begin{macrocode}
 \newenvironment{Preamble}{\tud@code@pre}{%
