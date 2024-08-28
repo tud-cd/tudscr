@@ -88,7 +88,17 @@
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \DefineBibliographyStrings{ngerman}{urlseen = {Am:}}
 \addbibresource{\jobname.bib}
-\begin{filecontents}[force,silent,nosearch]{\jobname.bib}
+\addbibresource{\jobname-temp.bib}
+\DeclareSourcemap{
+  \maps[datatype=bibtex]{
+    \map[overwrite]{
+      \perdatasource{\jobname-temp.bib}
+      \step[fieldset=keywords, fieldvalue={,}, appendstrict]
+      \step[fieldset=keywords, fieldvalue={\jobname-temp}, append]
+    }
+  }
+}
+\begin{filecontents}[nosearch,force,silent]{\jobname.bib}
 @book{talbot2012,
   author    = {Nicola L. C. Talbot},
   title     = {\LaTeX{} for Complete Novices},
@@ -639,6 +649,7 @@ der Erklärungen ist in \autoref{fig:decl} abgebildet.
   Geldspeichers in Entenhausen
 }
 \author{Mickey Mouse\and Donald Duck}
+\date{10.09.2014}
 \declaration[company=FIRMA]
 \end{Code}
 \begin{Code}[nolst]{trunk}
@@ -689,7 +700,7 @@ werden, kann dies entweder mit dem Befehl
 oder~-- falls die beiden Pakete \Package{caption} und \Package{hyperref} 
 genutzt werden~-- auch wie gewohnt mit 
 \Macro(\Bundle{koma-script},\Package{caption}){caption} allerdings zusätzlich 
-ergänzt mit einem zuvor aufgerufenem 
+ergänzt mit einem zuvor aufgerufenem
 \Macro(\Package{caption}){captionsetup|\MPValue{type=figure/table}} 
 erfolgen. Weitere Informationen diesbezüglich sind dem \scrguide respektive der 
 Anleitung zu \Package{caption} zu entnehmen. In \autoref{sec:floats} wird 
@@ -842,28 +853,28 @@ die deutsche Sortierung nach~DIN aktiviert.
 
 Das Erstellen aller Glossare~-- unabhängig davon, ob \Application{xindy} oder 
 \Application{makeindex} für die Sortierung zum Einsatz kommt~-- sollte das 
-Perl"~Skript \File(\Package{glossaries}){makeglossaries} verwendet werden, 
-welches alle notwendigen Optionen an die jeweilige Anwendung weiterleitet.
+Perl"~Skript \Application(\Package{glossaries}){makeglossaries} verwendet 
+werden, welches alle notwendigen Optionen an die jeweilige Anwendung 
+weiterleitet.
 
 \Attention{%
   Für den Aufruf von \Application{xindy} selbst als auch für die Ausführung des 
-  Skriptes \File(\Package{glossaries}){makeglossaries} ist ein Perl"=Interpreter
-  notwendig. Dieser wird lediglich von \TeXLive nicht jedoch von \MiKTeX direkt 
-  bereitgestellt, was gegebenenfalls die zusätzliche Installation eines solchen 
-  erfordert.
+  Skriptes \Application(\Package{glossaries}){makeglossaries} ist ein 
+  Perl"=Interpreter notwendig. Dieser wird lediglich von \TeXLive nicht jedoch 
+  von \MiKTeX direkt bereitgestellt, was gegebenenfalls die zusätzliche 
+  Installation eines solchen erfordert.
 }
 
-Kann das Skript \File(\Package{glossaries}){makeglossaries} nicht genutzt 
-werden, kann alternativ dazu die Option \Option(\Package{glossaries}){automake}
-aktiviert werden. Diese sorgt dafür, dass am Ende des \Format{pdfLaTeX}"~Laufs 
-der Aufruf von \Application{xindy} oder \Application{makeindex} direkt erfolgt. 
-Soll \Application{xindy} verwendet werden, sind dafür allerdings erweiterte 
-Schreibrechte notwendig, weshalb für diese Variante \Format{pdfLaTeX} mit dem 
-Parameter \Path{-{}-shell-escape} aufgerufen werden muss. Für die Verwendung 
-von \Application{xindy} ist außerdem die Angabe der Sprache über die Option 
-\Option*{xindy=\MPValue{language=\dots}} zwingend notwendig. 
+Kann das Perl"~Skript \Application(\Package{glossaries}){makeglossaries} nicht 
+genutzt werden, steht die Option \Option(\Package{glossaries}){automake} 
+alternativ dazu bereit. Mit dieser erfolgt der Aufruf von \Application{xindy} 
+respektive \Application{makeindex} direkt. Soll \Application{xindy} verwendet 
+werden, sind dafür allerdings erweiterte Schreibrechte notwendig, weshalb 
+\Format{LaTeX} hierfür mit dem Parameter \Path{-{}-shell-escape}aufgerufen 
+werden muss. Für \Application{xindy} ist außerdem die Angabe der Sprache über 
+die Option \Option*{xindy=\MPValue{language=\dots}} zwingend notwendig. 
 
-Ist weder die Nutzung des Skriptes \File(\Package{glossaries}){makeglossaries} 
+Ist weder die Nutzung von \Application(\Package{glossaries}){makeglossaries} 
 noch der~-- im Zweifel sicherheitskritische~-- Aufruf von \Format{pdfLaTeX} mit 
 erweiterten Schreibrechten möglich, so muss die gewünschte Anwendung für die 
 Sortierung explizit durch den Anwender aufgerufen werden, wobei auf die Angabe 
@@ -1100,10 +1111,6 @@ des Stils ist identisch zu \PValue{acrotabularx}.
 \begin{Code}[input]{hint}
 \printacronyms[style=acrotabu]
 \end{Code}
-\begin{quoting}[rightmargin=0pt]
-\glsdisablehyper
-\InputCode
-\end{quoting}
 
 Welche Variante gewählt wird, ist letztendlich eine Frage, was für spezifische 
 Anforderungen an die Formatierung des Abkürzungsverzeichnis gestellt werden. 
@@ -1233,11 +1240,7 @@ sinnvolles Verzeichnis:
 \begin{Code}[input]{hint}
 \printsymbols
 \end{Code}
-\begin{quoting}[rightmargin=0pt]
-\glsdisablehyper
-\printsymbols[style=simple]
-\end{quoting}
-%
+
 Für dieses muss erst ein Stil definiert werden, was nachfolgend ähnlich zum 
 Stil \PValue{acrotabularx} respektive \PValue{acrotabu} geschieht. Allerdings 
 wird hier eine Variante gezeigt, mit der die Tabelle einen Seitenumbruch 
@@ -1355,13 +1358,13 @@ als Untereintrag zugeordnet werden.
 \CodeHook{\renewcommand*\newglossaryentry[2]{}}
 \begin{Code}{hint}
 \providecommand*\greeklettersname{Greek letters}
-\providecommand*\romanlettersname{Roman letters}
 \newglossaryentry{greekletters}{%
   type=symbols,%
   name={\greeklettersname},%
   description={\nopostdesc},%
   sort={a}%
 }
+\providecommand*\romanlettersname{Roman letters}
 \newglossaryentry{romanletters}{%
   type=symbols,%
   name={\romanlettersname},%
@@ -1677,11 +1680,12 @@ von \Package{biblatex} zu finden.
 }
 \end{filecontents}
 \end{Code}
-\begingroup%
-\makeatletter
-\appto\filec@ntents@nosearch{\filec@ntents@force\filec@ntents@silent}
-\InputCode
-\endgroup
+% TODO: was soll das? lieber [nosearch,force,silent]
+% \begingroup%
+% \makeatletter
+% \appto\filec@ntents@nosearch{\filec@ntents@force\filec@ntents@silent}
+% \InputCode
+% \endgroup
 %
 Nachdem die Literaturdatenbank erstellt wurde, muss diese auch noch eingebunden 
 werden:
@@ -1789,7 +1793,7 @@ Beschriftung des Objektes, welche mit \texttt{\textbackslash caption} zu
 erstellen ist, definiert werden sollte.
 
 \end{Code}
-\begin{Code}{trunk}
+\begin{Code}[input]{trunk}
 \begin{figure}
 \centering
 \includegraphics{TUD-black}
@@ -1797,7 +1801,6 @@ erstellen ist, definiert werden sollte.
 \end{figure}
 
 \end{Code}
-\InputCode
 
 In der Konsequenz ist dies hier ein Plädoyer, bei der Platzierung von Tabellen 
 und Abbildungen vollständig auf \Lettering{LaTeX} zu vertrauen. Anfangs kann 
@@ -1900,7 +1903,6 @@ angepasst.
 \floatsetup[table]{style=plaintop}
 \end{Code}
 
-%
 \begin{table}
 \tableexample[%
   \caption{%
@@ -2027,7 +2029,7 @@ sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
 \autoref{fig:ddc} verwiesen werden.
 
 \end{Code}
-\begin{Code}{trunk}
+\begin{Code}[input]{trunk}
 \begin{figure}
 \ffigbox[\FBwidth]%
   {\begin{subfloatrow}%
@@ -2042,7 +2044,6 @@ sowohl auf \autoref{fig:logos} als auch auf \autoref{fig:tud} sowie
 \end{figure}
 
 \end{Code}
-\InputCode
 
 
 
@@ -2109,7 +2110,7 @@ zum einen etwas Abstand vor und nach dem Objekt zum umgebenden Text erzeugt
 und zum anderen die Abbildung respektive Tabelle und die dazugehörige 
 Bezeichnung zusammenhält. \autoref{fig:nonfloating-A} zeigt das Ergebnis.
 %
-\begin{Code}{hint}
+\begin{Code}[input]{hint}
 \begin{center}
 \captionsetup{type=figure}
 \includegraphics[scale=0.75]{TUD-black}
@@ -2120,7 +2121,6 @@ Bezeichnung zusammenhält. \autoref{fig:nonfloating-A} zeigt das Ergebnis.
 \end{center}
 
 \end{Code}
-\InputCode
 
 Zu beachten ist die Nutzung von 
 \Macro(\Package{caption}){captionsetup|\MPValue{type=figure/table}}, womit
@@ -2154,7 +2154,7 @@ Variante entwickeln, wobei für eine mehrmalige Anwendung ein eigenes Makro mit
 passenden Argumenten definiert werden sollte. Zum Verständnis des 
 Quelltextauszuges sei auf die Dokumentation von \Package{floatrow} verwiesen.
 %
-\begin{Code}{hint}
+\begin{Code}[input]{hint}
 \floatbox[\captionsetup{type=figure}]{figure}[\FBwidth][%
   \dimexpr\FBheight+\abovedisplayskip\relax%
 ][b]{\includegraphics[scale=0.75]{TUD-black}}{%
@@ -2164,7 +2164,6 @@ Quelltextauszuges sei auf die Dokumentation von \Package{floatrow} verwiesen.
   }%
 }
 \end{Code}
-\InputCode
 
 Es wird hier trotz der vorhergehenden Ausführungen abermals ausdrücklich 
 empfohlen, Tabellen und Abbildungen in Gleitumgebungen zu setzen und die 
@@ -2381,7 +2380,7 @@ neue Spaltentypen definiert.
 
 Nachfolgend wird die Tabelle gesetzt mit den neuen Spaltentypen gesetzt.
 %
-\begin{Code}{trunk}
+\begin{Code}[input]{trunk}
 \begin{table}
 \begin{tabularx}{\textwidth}{@{}DEFY@{}}
 \toprule
@@ -2402,7 +2401,6 @@ Ein längerer Blindtext im Blocksatz
 \end{table}
 
 \end{Code}
-\InputCode
 
 Die Breite der einzelnen, vom \PValue{X}"~Spaltentyp abgeleiteten Derivate ist 
 dabei identisch. Ein Gewichten der Spaltenbreiten untereinander ist prinzipiell 
@@ -2454,7 +2452,7 @@ Es wird eine Tabelle mithilfe der \texttt{tabulary}-Umgebung erstellt.
 Zu sehen ist diese in \autoref{tab:tabulary}. 
 
 \end{Code}
-\begin{Code}{trunk}
+\begin{Code}[input]{trunk}
 \begin{table}
 \begin{tabulary}{\textwidth}{@{}LCRJ@{}}
 \toprule
@@ -2474,7 +2472,6 @@ Ein wesentlich längerer und absolut inhaltsleerer Blindtext im Blocksatz
 \end{table}
 
 \end{Code}
-\InputCode
 
 
 
@@ -2573,7 +2570,7 @@ Variante mit der Umgebung \Environment*{tabularx}. Das Ergebnis ist in
 Beschriftung an die Breite der Tabelle anzupassen. 
 Genaueres dazu in \autoref{sec:floatlayout}.
 %
-\begin{Code}{trunk}
+\begin{Code}[input]{trunk}
 \begin{table}
 \ttabbox{%
   \begin{tabu} to .85\textwidth {@{}Z[8,l]Z[7,c]Z[8,r]Z[9,j]@{}}
@@ -2601,7 +2598,6 @@ Genaueres dazu in \autoref{sec:floatlayout}.
 \end{table}
 
 \end{Code}
-\InputCode
 
 
 
@@ -2704,7 +2700,7 @@ hierzu und zu den weiteren Möglichkeiten, die Gestalt eines Zitats zu
 beeinflussen, ist in der \scrguide[Anleitung von \KOMAScript] zu finden. Es 
 folgt ein Beispiel zur Verwendung.
 %
-\begin{Hint}
+\begin{Code}{hint}
 \setchapterpreamble{%
   \dictum[Johann Wolfgang von Goethe]{%
     Es irrt der Mensch, solang er strebt.%
@@ -2713,7 +2709,7 @@ folgt ein Beispiel zur Verwendung.
 }
 \chapter{Einleitung}
 
-\end{Hint}
+\end{Code}
 
 
 
@@ -2733,10 +2729,10 @@ hingewiesen wird, dass diese nach \Package{hyperref} zu laden sind, sollten
 auch danach folgen. Eines dieser wenigen Pakete ist das in diesem Tutorial 
 verwendete \Package{glossaries}. 
 %
-\begin{Hint}
+\begin{Code}{hint}
 \usepackage[colorlinks,linkcolor=blue]{hyperref}
 
-\end{Hint}
+\end{Code}
 %
 Um auf ein bestimmtes Objekt wie beispielsweise eine Tabelle, eine Abbildung 
 oder einen bestimmten Anschnitt im Dokument referenzieren zu können, muss mit 
@@ -3010,9 +3006,9 @@ Anforderungen eines Nutzers an den Mathematiksatz erfüllen können. Das Paket
 Setzen von einzeiligen und mehrzeiligen sowie ausgerichteter Formeln zur 
 Verfügung. Auf eine Einführung in das Paket wird~-- aufgrund der bereits in 
 großer Zahl vorhandenen Einführungen~-- in diesem Tutorial verzichtet. Außerdem 
-stehen mit \Tutorial{mathtype} und \Tutorial{mathswap} zwei weitere Tutorials 
-zur Verfügung, die sich explizit mit der Thematik eines guten mathematischen 
-Satz beschäftigen.
+stehen mit \TUDScriptTutorial{mathtype} und \TUDScriptTutorial{mathswap} zwei 
+weitere Tutorials zur Verfügung, die sich explizit mit der Thematik eines guten 
+mathematischen Satz beschäftigen.
 
 Das Paket \Package{amsmath} stellt für \Lettering{LaTeX} den 
 De"~facto"~Standard für den mathematischen Satz dar. Allerdings wird es~-- 
@@ -3055,16 +3051,16 @@ Das typografisch richtige Setzen von Auslassungspunkten mit den Befehlen
 beschrieben, weshalb hier nur kurz darauf eingegangen wird. Es wird das Paket 
 \Package{ellipsis} benötigt.
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \usepackage{ellipsis}
-\end{Preamble}
+\end{Code}
 %
 Für deutschsprachige Texte sollten außerdem noch folgendes ausgeführt werden:
 %
-\begin{Preamble}
+\begin{Code}{preamble}
 \let\ellipsispunctuation\relax
 
-\end{Preamble}
+\end{Code}
 
 
 
@@ -3072,10 +3068,10 @@ Für deutschsprachige Texte sollten außerdem noch folgendes ausgeführt werden:
 
 Das Paket \Package{isodate} stellt \Macro(\Package{isodate}){printdate} bereit. 
 Dieser Befehl kann für die Formatierung von Datumsangaben verwendet werden. 
-Wird das Paket mit einer der Dokumentklassen aus dem \TUDScript-Bundle geladen, 
-wird der genannte Befehl automatisch für alle bereitgestellten Datumsfelder 
-verwendet. Alternativ dazu kann das Paket \Package{datetime2} genutzt werden, 
-dessen Befehl \Macro(\Package{datetime2}){DTMDate} wird ebenfalls unterstützt.
+Wird das Paket mit einer der \TUDScript-Klassen geladen, wird der genannte 
+Befehl automatisch für alle bereitgestellten Datumsfelder verwendet. Alternativ 
+dazu kann das Paket \Package{datetime2} genutzt werden, dessen Befehl 
+\Macro(\Package{datetime2}){DTMDate} wird ebenfalls unterstützt.
 %
 \begin{Code}{preamble}
 \usepackage{isodate}
@@ -3140,7 +3136,7 @@ kann mit folgendem Quelltext erreicht werden:
 \tikzset{x=\tikzunit,y=\tikzunit}
 \end{Code}
 
-Nachfolgend wird eine Grafik innerhalb einer Gleitumgebung exemplarisch 
+Nachfolgend wird eine Grafik direkt innerhalb einer Gleitumgebung exemplarisch 
 erstellt. Das Ergebnis ist in \autoref{fig:tikz} zu sehen.
 
 \begin{Hint?}
@@ -3250,7 +3246,7 @@ sondern ganz normal als \Lettering{LaTeX}-Pakete eingebunden.
 
 Die Grafiken werden im PostScript-Format erzeugt, was zwar zahlreiche Vorteile 
 hat, allerdings nicht direkt mit \Format{pdfLaTeX} genutzt werden kann. Das 
-Paket \Package{auto-pst-pdf} schafft hier Abhilfe. Wird \Path{pdflatex} 
+Paket \Package{auto-pst-pdf} schafft hier Abhilfe. Wird \Format{pdfLaTeX} 
 zusätzlich mit dem Parameter \Path{-{}-shell-escape} aufgerufen, so werden 
 mithilfe erweiterter Schreibrechte die Grafiken automatisch im PDF"~Format 
 erzeugt und eingebunden. Ohne erweiterte Schreibrechte lässt sich der Prozess 
@@ -3286,7 +3282,7 @@ Einstellungen gemacht. Dies geschieht mit:
 Die innerhalb einer Gleitumgebung erzeugte Grafik ist in \autoref{fig:pstricks} 
 dargestellt.
 %
-\begin{Hint?}
+\begin{Code}[swap]{hint}
 \begin{figure}
 \begin{pspicture}(0,-2)(100,64)
 \newcommand\fnodetext{}
@@ -3346,7 +3342,7 @@ dargestellt.
 \end{pspicture}
 \caption{Eine mit PSTricks erstellte Grafik\label{fig:pstricks}}
 \end{figure}
-\end{Hint?}
+\end{Code}
 
 
 
@@ -3512,16 +3508,15 @@ noch \KOMAScript zuzuordnen sind, wird das dazugehörige Paket mit angeführt.
 \FinishTutorial[%
   Um das im kopierten Beispiel erstellte Literaturverzeichnis in das Dokument 
   einbinden zu können, bedarf es dem einmaligen Aufruf von \Application{biber} 
-  frühestens nach dem ersten Durchlauf von \Format{pdfLaTeX}. Dies erfolgt mit 
+  frühestens nach dem ersten Durchlauf von \Format{LaTeX}. Dies erfolgt mit 
   dem Aufruf \Path{biber~\PName{Dateiname}}. Für das Erzeugen von Abkürzungs- 
   und Symbolverzeichnis ist das Ausführen des Perl"~Skriptes 
-  \Path{makeglossaries~\PName{Dateiname}} ausreichend. Danach ist ein weiteres 
-  mal die Verwendung von \Path{pdflatex~\PName{Dateiname}} notwendig, um die 
-  Verzeichnisse in das Dokument einzubinden. Gegebenenfalls ist für korrekte 
-  Seitenangaben in Abkürzungs- und Symbolverzeichnis ein abermaliges Ausführen 
-  des Skriptes notwendig.
+  \Path{makeglossaries~\PName{Dateiname}} ausreichend. Danach ist ein weiterer
+  Lauf von \Format{LaTeX} notwendig, um die Verzeichnisse in das Dokument 
+  einzubinden. Gegebenenfalls ist für korrekte Seitenangaben in Abkürzungs- 
+  und Symbolverzeichnis ein abermaliges Ausführen des Skriptes notwendig.
   \Attention{%
-    Zur Nutzung des Perl"~Skriptes \File(\Package{glossaries}){makeglossaries} 
+    Zur Nutzung von \Application(\Package{glossaries}){makeglossaries} 
     mit \MiKTeX muss gegebenenfalls ein separater Perl"=Interpreter installiert 
     werden. In \autoref{sec:glossaries} ist dazu mehr zu finden.%
   }

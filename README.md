@@ -25,9 +25,7 @@ Zusammenfassung
 Das TUD-Script-Bundle stellt sowohl Klassen als auch Pakete bereit, um
 LaTeX-Dokumente im Corporate Design der Technischen Universität Dresden zu
 erstellen. Es basiert auf dem KOMA-Script-Bundle, welches zwingend vorhanden
-sein muss. Bei Fragen, Problemen und Anmerkungen sei entweder auf das 
-[LaTeX-Forum der Technischen Universität Dresden](https://latex.wcms-file3.tu-dresden.de/phpBB3/)
-oder das 
+sein muss. Bei Fragen, Problemen und Anmerkungen sei auf das 
 [GitHub-Repository *tudscr*](https://github.com/tud-cd/tudscr/issues)
 verwiesen:
 
