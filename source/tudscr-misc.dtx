@@ -767,7 +767,6 @@
 %    \begin{macrocode}
 \RequirePackage{xspace}
 \xspaceaddexceptions{"=}
-\AtBeginDocument{\robustify{~}}
 %    \end{macrocode}
 % Das Paket \pkg{marginnote} stellt nicht fließenden Randnotizen bereit, welche 
 % für die Kennzeichnung von Änderungen, Hinweise oder ToDo-Notizen verwendet 
@@ -985,7 +984,7 @@
 % \end{macro}^^A \tud@unique@eadd
 % \end{macro}^^A \tud@unique@add
 %
-% \subsubsection{Sortieren von Listen}
+% \subsection{Sortieren von Listen}
 %
 % \begin{macro}{\tud@list@sort}
 % \changes{v2.02}{2014/07/25}{neu}^^A
@@ -1022,7 +1021,7 @@
 % \cs{tud@res@a} als Hilfsmakro verwendet, in welches die aktuelle Liste 
 % innerhalb der \cs{forlistloop}-Schleife stückweise expandiert wird. Wenn das 
 % aktuelle Element an der passenden Stelle eingesetzt wurde, wird der Rest von 
-% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt und  \cs{if@tud@list@sorted} 
+% \cs{tud@list@sorted} an \cs{tud@res@a} angehängt und \cs{if@tud@list@sorted} 
 % gesetzt.
 %    \begin{macrocode}
   \@tud@list@sortedfalse%
@@ -1076,23 +1075,25 @@
 % \end{macro}^^A \tud@list@@sort
 % \end{macro}^^A \tud@list@sort
 %
-% \subsection{Hilfslisten}
+% \subsection{Externalisierte Hilfslisten}
 %
-% Mit den nachfolgenden Makros werden Hilfslisten definiert, die am Ende des 
-% Dokumentes in die aux"~Datei geschrieben werden, um dieses beim nachfolgenden 
-% Durchlauf wieder einlesen und verarbeiten zu können.
+% Mit den nachfolgenden Makros werden Hilfslisten für die Externalisierung in
+% die bei einem \Lettering{LaTeX}"~Lauf erzeugten |aux|"~Datei definiert.
+%
 % \begin{macro}{\tud@auxlist@register}
 % \changes{v2.07}{2019/11/08}{neu}^^A
 % Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
-% diese für die aux"~Datei zu lesen und zu schreiben. Das erste optionale 
-% Argument dient dazu, vor dem eigentlichen Einlesen der Liste diese mit einem 
-% Element zu initialisieren. Das obligatorische Argument enthält den Namen der 
-% Liste. Das nachfolgende optionale Argument wird bei der Verabeitung auf jedes 
-% Listenelement angewendet, bevor es zur Liste hinzugefügt oder mit dieser 
-% verglichen wird.
+% diese am Ende des Dokumentes in die aux"~Datei schreiben und im nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
 %
-% Dabei werden drei Makros verwendet. Der Befehl \cs{\meta{listname}@auxlist} 
-% enthält die importierte Liste. In \cs{\meta{listname}@auxlist@positive} 
+% Das obligatorische Argument enthält den Namen der Liste. Das vorherige 
+% optionale Argument wird bei der Verarbeitung auf jedes Listenelement 
+% angewendet, bevor es zur Liste hinzugefügt oder mit dieser verglichen wird.
+% Die Sternversion führt nach dem Einlesen der Liste die enthaltenen Elemente 
+% einzeln aus.
+%
+% Dabei werden drei Makros verwendet. Der Befehl |\|\meta{listname}|@auxlist| 
+% enthält die importierte Liste. In |\|\meta{listname}|@auxlist@positive| 
 % werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
 % exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
 % Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
@@ -1100,16 +1101,16 @@
 % möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
 % obwohl diese später der Positivliste hinzugefügt werden könnten.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@auxlist@register{o m !O{\@firstofone}}{%
-  \expandafter\newcommand\expandafter*\csname#2@auxlist\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#2@auxlist@positive\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#2@auxlist@negative\endcsname{}%
-  \expandafter\newcommand\expandafter*\csname#2@auxlist@handler\endcsname{#3}%
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
   \BeforeClosingMainAux{%
-    \forlistcsloop{\listcsremove{#2@auxlist@positive}}{#2@auxlist@negative}%
-    \tud@auxlist@export{#2}%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
   }%
-  \AtBeginDocument{\tud@auxlist@import{#1}{#2}}%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@auxlist@register
@@ -1117,17 +1118,17 @@
 % \changes{v2.07}{2019/11/08}{neu}^^A
 % \begin{macro}{\tud@auxlist@import}
 % \changes{v2.07}{2019/11/08}{neu}^^A
-%    \begin{macrocode}
 % Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
 % Token-Liste umgewandelt.
+%    \begin{macrocode}
 \newcommand*\tud@auxlist@export[1]{%
   \if@filesw%
     \let\tud@res@a\@empty%
-    \def\tud@res@b##1{\eappto\tud@res@a{{##1}}}%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
     \forlistcsloop\tud@res@b{#1@auxlist@positive}%
     \immediate\write\@mainaux{%
       \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
-        {\expandonce\tud@res@a}%
+        {\expandonce\tud@res@a\@percentchar^^J}%
     }%
   \fi%
 }
@@ -1137,21 +1138,15 @@
 %    \begin{macrocode}
 \newcommand*\tud@auxlist@import[2]{%
   \begingroup%
-    \edef\tud@res@a{%
-      \unexpanded{\@tfor\tud@res@c:=}%
-      \expandafter\expandonce\csname #2@auxlist\endcsname%
-    }%
-    \letcs\tud@res@b{#2@auxlist@handler}%
-    \global\cslet{#2@auxlist}\@empty%
-    \IfValueT{#1}{%
-      \edef\tud@res@c{\tud@res@b{#1}}%
-      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
-    }%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
     \tud@res@a\do{%
       \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
-      \listcsxadd{#2@auxlist}{\expandonce\tud@res@c}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
     }%
   \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@auxlist@import
@@ -1160,33 +1155,24 @@
 % \changes{v2.07}{2019/11/08}{neu}^^A
 % \begin{macro}{\tud@auxlist@remove}
 % \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Befehle für das Hinzufügen, Entfernen und Prüfen von Elementen in den Listen.
 %    \begin{macrocode}
 \newcommand*\tud@auxlist@add[2]{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
     \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \xifinlistcs{\tud@res@a}{#1@auxlist@positive}{}{%
-      \listcsxadd{#1@auxlist@positive}{\tud@res@a}%
-    }%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
   \endgroup%
 }
 \newcommand*\tud@auxlist@remove[2]{%
   \begingroup%
     \protected@edef\tud@res@a{#2}%
     \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \xifinlistcs{\tud@res@a}{#1@auxlist@negative}{}{%
-      \listcsxadd{#1@auxlist@negative}{\tud@res@a}%
-    }%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
   \endgroup%
 }
-%    \end{macrocode}
-% \end{macro}^^A \tud@auxlist@remove
-% \end{macro}^^A \tud@auxlist@add
-% \begin{macro}{\tud@auxlist@ifin}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-% \begin{macro}{\tud@auxlist@forloop}
-% \changes{v2.07}{2019/11/08}{neu}^^A
-%    \begin{macrocode}
 \newcommand*\tud@auxlist@ifin[2]{%
   \begingroup%
     \protected@edef\tud@res@a{#1}%
@@ -1197,79 +1183,13 @@
     }%
   \tud@res@a%
 }
-\newcommand*\tud@auxlist@forloop[2]{\forlistcsloop#1{#2@auxlist}}
 %    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@ifin
 % \end{macro}^^A \tud@auxlist@remove
 % \end{macro}^^A \tud@auxlist@add
 %
 % \iffalse
 %</manual>
-% \fi
-%
-% \subsection{Stringmanipulation}
-%
-% \begin{macro}{\tud@replace@in}
-% \changes{v2.05}{2015/11/01}{neu}^^A
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% \begin{macro}{\tud@replace@@in}
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% Mit diesem Befehl kann in einem gegebenen Makro ein bestimmtes Zeichen durch 
-% ein anderes ersetzt werden. Dies wird verwendet, um für Indexbefehle die 
-% möglicherweise enthaltenen |@|"~Zeichen oder in Datei- und Pfadangaben 
-% Unterstriche zu ersetzen.
-%    \begin{macrocode}
-\newcommand*\tud@replace@in[3]{%
-  \begingroup%
-%    \end{macrocode}
-% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
-% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
-% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
-% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
-% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer is. Dabei wird der 
-% erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
-% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
-% Ersatzzeichen vervollständigt.
-%    \begin{macrocode}
-    \edef\tud@res@a{\expandonce{#1}}%
-    \let\tud@res@c\@empty%
-    \def\tud@res@b##1#2##2\@nil{%
-      \IfArgIsEmpty{##2}{%
-        \appto\tud@res@c{##1}%
-      }{%
-        \appto\tud@res@c{##1#3}%
-        \tud@res@b##2\@nil%
-      }%
-    }%
-    \expandafter\tud@res@b\tud@res@a#2\@nil%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\expandonce\tud@res@c}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
-% behandelt werden.
-%    \begin{macrocode}
-\newcommand*\tud@replace@@in[3]{%
-  \begingroup%
-    \protected@edef\tud@res@a{#1}%
-    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
-    \edef\tud@res@b{%
-      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
-    }%
-    \tud@res@b%
-    \edef\tud@res@a{%
-      \endgroup%
-      \unexpanded{\def#1}{\tud@res@a}%
-    }%
-  \tud@res@a%
-}
-%    \end{macrocode}
-% \end{macro}^^A \tud@replace@@in
-% \end{macro}^^A \tud@replace@in
-%
-% \iffalse
 %</option>
 %<*body>
 % \fi
