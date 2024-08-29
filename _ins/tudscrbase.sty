@@ -1,0 +1,1090 @@
+%%
+%% This is file `tudscrbase.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% tudscr-version.dtx  (with options: `package,base,identify')
+%% tudscr-base.dtx  (with options: `package,base')
+%% 
+%% TUD-Script -- Corporate Design of Technische Universitaet Dresden
+%%               2022/09/01 v2.06p TUD-Script
+%% 
+%% Copyright (C) Falk Hanisch <hanisch.latex@outlook.com>, 2012-2022
+%%               https://github.com/tud-cd/tudscr
+%%               https://latex.wcms-file3.tu-dresden.de/phpBB3/
+%% 
+%% This file was generated from file(s) of the TUD-Script bundle.
+%% ----------------------------------------------------------------------------
+%% 
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or
+%% any later version. The latest version of this license is in
+%%   https://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of
+%% LaTeX version 2008-05-04 or later.
+%% 
+%% This work has the LPPL maintenance status "maintained".
+%% 
+%% The current maintainer and author of this work is Falk Hanisch.
+%% 
+%%%% From File: tudscr-version.dtx (no git version info was found)
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
+\begingroup
+  \catcode`\@11\relax%
+  \ifx\TUD@Version\@undefined%
+    \newcommand*\TUD@@Version[2]{%
+      \gdef\TUD@Version{#1}%
+      \gdef\TUD@KOMAVersion{#2}%
+    }%
+  \else%
+    \newcommand*\TUD@@Version[2]{%
+      \def\@tempa{#1}%
+      \ifx\TUD@Version\@tempa\else%
+        \@latex@warning@no@line{%
+          \noexpand\TUD@Version\space is `\TUD@Version',\MessageBreak%
+          but `#1' was expected!\MessageBreak%
+          You should not use classes, packages or files from\MessageBreak%
+          different TUD-Script bundle versions%
+        }%
+      \fi%
+    }%
+  \fi%
+  \TUD@@Version{2022/09/01 v2.06p TUD-Script}{2022/05/01 v3.36 KOMA-Script}%
+  \ifx\TUDScriptVersion\@undefined%
+    \xdef\TUDScriptVersion{\TUD@Version}%
+    \def\@tempa#1 v#2 #3\relax#4\relax#5{\gdef#5{#2}}%
+    \expandafter\@tempa\TUD@Version ? ?\relax\relax{\TUDScriptVersionNumber}%
+    \expandafter\@tempa\TUD@KOMAVersion ? ?\relax\relax{\TUD@KOMAVersionNumber}%
+    \def\@tempa#1.#2#3#4\relax#5\relax{\gdef#5{#1.#2#3}}%
+    \expandafter\@tempa%
+      \TUDScriptVersionNumber\relax\TUDScriptVersion@Number\relax%
+    \expandafter\@tempa%
+      \TUD@KOMAVersionNumber\relax\TUD@KOMAVersion@Number\relax%
+  \fi%
+\endgroup
+\@ifundefined{TUDScript}{%
+  \DeclareRobustCommand\TUDScript{%
+    \mbox{%
+      \textsf{%
+        T\kern.05em U\kern.05em D\kern.1em-\kern.1em Script%
+      }%
+    }\ifcsname xspace\endcsname\expandafter\xspace\fi%
+  }%
+}{}
+\providecommand*\TUDScriptRepository{https://github.com/tud-cd/tudscr}
+\providecommand*\TUDScriptContact{hanisch.latex@outlook.com}
+\providecommand*\TUD@BugReport{%
+  \TUDScriptRepository\MessageBreak\TUDScriptContact%
+}
+%%%% From File: tudscr-base.dtx (no git version info was found)
+\ProvidesPackage{tudscrbase}[%
+  2022/09/01 v2.06p TUD-Script
+  package (basics for the bundle)%
+]
+\AtBeginDocument{%
+  \ifcsundef{scr@v@first}{}{%
+    \ifcsundef{scr@v@\TUD@KOMAVersionNumber}{%
+      \PackageError{tudscrbase}{%
+        KOMA-Script v\TUD@KOMAVersionNumber\space is required%
+      }{%
+        \TUD@Version\space must be used at least with\MessageBreak%
+        \TUD@KOMAVersion, but only\MessageBreak%
+        \KOMAScriptVersion\space was found.%
+      }%
+    }{%
+      \expandafter\ifnum\scr@v@is@lt{3.12}\relax%
+        \PackageError{tudscrbase}{%
+          KOMA-Script compatibility level too low%
+        }{%
+          \TUD@Version\space must be used at least with\MessageBreak%
+          `version=3.12' KOMA-Script compatibility option.%
+        }%
+      \fi%
+    }%
+  }%
+}
+\RequirePackage{scrbase}[%
+  2022/05/01 v3.36 KOMA-Script
+]
+\RequirePackage{iftex}
+\RequirePackage{etoolbox}
+\RequirePackage{xpatch}
+\RequirePackage{letltxmacro}
+\RequirePackage{kvsetkeys}
+\RequirePackage{trimspaces}
+\newcommand*\tud@newif[1]{\@ifdefinable#1{\newif#1}}
+\newcommand*\tud@newcount[1]{\@ifdefinable#1{\newcount#1}}
+\newcommand*\tud@newtoks[1]{\@ifdefinable#1{\newtoks#1}}
+\newcommand*\tud@newread[1]{\@ifdefinable#1{\newread#1}}
+\newcommand*\tud@newwrite[1]{\@ifdefinable#1{\newwrite#1}}
+\newcommand*\tud@newglue[1]{\@ifdefinable#1{\newskip#1}}
+\newcommand*\tud@newdim[1]{\@ifdefinable#1{\newdimen#1}}
+\newrobustcmd*\tud@setglue[2]{%
+  \ifdefdimen{#1}{%
+    \PackageWarning{tudscrbase}{%
+      You tried to assign dimen \string#1\MessageBreak%
+      so \string\tud@setdim\space is used%
+    }%
+    \tud@setdim{#1}{#2}%
+  }{%
+    \setlength#1{\glueexpr#2\relax}%
+  }%
+}
+\newrobustcmd*\tud@setdim[2]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \setlength\@tempskipa{\glueexpr#2\relax}%
+    \ifdim\gluestretch\@tempskipa=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \ifdim\glueshrink\glueexpr\@tempskipa\relax=\z@\relax\else%
+      \@tud@res@swatrue%
+    \fi%
+    \if@tud@res@swa%
+      \PackageWarning{tudscrbase}{%
+        You tried to use \string\tud@setdim\string#1\MessageBreak%
+        with glue \detokenize{#2} (\the\@tempskipa)\MessageBreak%
+        but only the base value is used%
+      }%
+    \fi%
+  \endgroup%
+  \setlength#1{\dimexpr\glueexpr#2\relax\relax}%
+}
+\newrobustcmd*\tud@addtoglue[2]{%
+  \tud@setglue#1{\glueexpr#1+#2\relax}%
+}
+\newrobustcmd*\tud@addtodim[2]{%
+  \tud@setdim#1{\glueexpr#1+#2\relax}%
+}
+\tud@newglue\tud@res@glue
+\newcommand*\tud@if@lengthregister[1]{%
+  \begingroup%
+    \@tud@res@swafalse%
+    \ifdeflength{#1}{\@tud@res@swatrue}{}%
+    \ifdefdimen{#1}{\@tud@res@swatrue}{}%
+    \if@tud@res@swa%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+\newcommand*\tud@length@setabsolute[1]{%
+  \tud@if@lengthregister{#1}{%
+    \ifdim#1<\z@%
+      \setlength#1{-\glueexpr#1\relax}%
+    \fi%
+  }{%
+    \protected@edef#1{%
+      \noexpand\ifdim\noexpand\glueexpr\expandonce#1\relax<\z@-\noexpand\fi%
+      \noexpand\glueexpr\expandonce#1\relax%
+    }%
+  }%
+}
+\newcommand*\tud@reserved{}
+\newcommand*\tud@res@a{}
+\newcommand*\tud@res@b{}
+\newcommand*\tud@res@c{}
+\newcommand*\tud@res@d{}
+\tud@newif\if@tud@res@swa
+\tud@newcount\tud@res@cnt
+\tud@newtoks\tud@toks@
+\newcommand*\addto@hook@expandafter[2]{%
+  \expandafter\addto@hook\expandafter#1\expandafter{#2}%
+}
+\newcommand*\tud@if@preamble{}
+\let\tud@if@preamble\@firstoftwo
+\AfterEndPreamble{\let\tud@if@preamble\@secondoftwo}
+\newcommand*\tud@if@strequal[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifstrequal{#1}{#2}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strstart[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\Ifstrstart{\noexpand\detokenize{#1}}{\noexpand\detokenize{#2}}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strempty{\tud@if@strequal{}}
+\newcommand*\tud@if@strblank[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifblank{#1}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@if@strbool[4]{%
+  \TUD@set@ifkey{strbool}{@tempswa}{#1}%
+  \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+    \if@tempswa#2\else#3\fi%
+  \else%
+    #4
+  \fi%
+}
+\newcommand*\tud@strlowercase[2]{%
+  \protected@edef#1{%
+    \lowercase{\def\noexpand#1{#2}}%
+  }#1%
+}
+\newcommand*\tud@strlength[2]{%
+  \begingroup%
+    \def\tud@res@c{\glueexpr#2\relax}%
+    \edef\tud@res@a{\strip@pt\dimexpr\tud@res@c\relax pt}%
+    \edef\tud@res@b{\strip@pt\dimexpr\gluestretch\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@plus\space\tud@res@b%
+        \ifcase\gluestretchorder\tud@res@c pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@b{\strip@pt\dimexpr\glueshrink\tud@res@c\relax}%
+    \ifdim\tud@res@b\p@=\z@\relax\else%
+      \eappto\tud@res@a{%
+        \space\@minus\space\tud@res@b%
+        \ifcase\glueshrinkorder\tud@res@c pt\or fil\or fill\or filll\fi%
+      }%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@remove@spaces@within[1]{%
+  \begingroup%
+    \protected@edef\tud@res@a{\noexpand\zap@space#1\space\noexpand\@empty}%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@remove@enfold@char[2]{%
+  \begingroup%
+    \expandafter\def\expandafter\tud@res@a\expandafter{#1}%
+    \trim@spaces@in\tud@res@a%
+    \expandafter\in@\expandafter#2\expandafter{\tud@res@a}%
+    \ifin@%
+      \let\tud@res@b\@empty%
+      \def\tud@res@c##1#2##2\@nil{%
+        \IfArgIsEmpty{##1}{}{%
+          \ifx\tud@res@b\@empty%
+            \def\tud@res@b{##1}%
+          \else%
+            \appto\tud@res@b{#2##1}%
+          \fi%
+        }%
+        \IfArgIsEmpty{##2}{}{\tud@res@c##2\@nil}%
+      }%
+      \expandafter\tud@res@c\tud@res@a#2\@nil%
+      \trim@spaces@in\tud@res@b%
+      \let\tud@res@a\tud@res@b%
+    \fi%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@in[3]{%
+  \begingroup%
+    \edef\tud@res@a{\expandonce{#1}}%
+    \let\tud@res@c\@empty%
+    \def\tud@res@b##1#2##2\@nil{%
+      \IfArgIsEmpty{##2}{%
+        \appto\tud@res@c{##1}%
+      }{%
+        \appto\tud@res@c{##1#3}%
+        \tud@res@b##2\@nil%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a#2\@nil%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\expandonce\tud@res@c}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@replace@@in[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@b{%
+      \unexpanded{\tud@replace@in\tud@res@a}{\detokenize{#2}}{\detokenize{#3}}%
+    }%
+    \tud@res@b%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@language@wrn[1]{%
+  \PackageWarning{tudscrbase}{%
+    Loading either package `babel' or `polyglossia'\MessageBreak%
+    with appropriate settings is required. Language\MessageBreak%
+    `#1' is not available%
+  }%
+}
+\newcommand*\tud@language@loaded{}
+\newcommand*\tud@if@language@loaded[1]{%
+  \@expandtwoargs\in@{,#1,}{,\tud@language@loaded,}%
+  \ifin@%
+    \expandafter\@firstoftwo%
+  \else%
+    \expandafter\@secondoftwo%
+  \fi%
+}
+\AfterPackage*{babel}{\def\tud@language@loaded{\bbl@loaded}}
+\AfterPackage*{polyglossia}{\def\tud@language@loaded{\xpg@loaded,\xpg@bloaded}}
+\newcommand*\tud@if@language@main[3]{\tud@language@wrn{#1}#3}
+\AfterPackage*{babel}{
+  \def\tud@if@language@main#1{%
+    \begingroup%
+      \tud@strlowercase\tud@res@a{#1}%
+      \def\tud@res@c##1{%
+        \getlocaleproperty*\tud@res@b\bbl@main@language{identification/##1}%
+        \ifx\tud@res@b\relax\else\tud@strlowercase\tud@res@b{\tud@res@b}\fi%
+      }%
+      \tud@res@c{name.polyglossia}%
+      \ifx\tud@res@b\relax%
+        \tud@res@c{name.english}%
+        \protected@expandtwoargs\in@{\tud@res@a}{\tud@res@b}%
+        \ifin@%
+          \aftergroup\@firstoftwo%
+        \else%
+          \aftergroup\@secondoftwo%
+        \fi%
+      \else%
+        \tud@if@strequal{\tud@res@b}{\tud@res@a}%
+          {\aftergroup\@firstoftwo}%
+          {\aftergroup\@secondoftwo}%
+      \fi%
+    \endgroup%
+  }%
+}
+\AfterPackage*{polyglossia}{%
+  \def\tud@if@language@main#1{%
+    \begingroup%
+      \tud@strlowercase\tud@res@a{#1}%
+      \tud@strlowercase\tud@res@b{\mainlanguagename}%
+      \tud@if@strequal{\tud@res@b}{\tud@res@a}%
+        {\aftergroup\@firstoftwo}%
+        {\aftergroup\@secondoftwo}%
+    \endgroup%
+  }%
+}
+\newcommand*\tud@if@nil[1]{%
+  \begingroup%
+    \def\tud@res@a{#1}%
+    \ifx\tud@res@a\@nnil%
+      \aftergroup\@firstoftwo%
+    \else%
+      \aftergroup\@secondoftwo%
+    \fi%
+  \endgroup%
+}
+\newcommand*\tud@absnum{}
+\def\tud@absnum#1\relax{%
+  \numexpr\ifnum\numexpr#1\relax<\z@-\fi\numexpr#1\relax\relax%
+}
+\newcommand*\tud@divide[3]{%
+  \begingroup%
+    \@defaultunits\@tempdima #2pt\relax\@nnil%
+    \@defaultunits\@tempdimb #3pt\relax\@nnil%
+    \ifdim\@tempdima>\@tempdimb\relax%
+      \@whiledim\@tempdimb>1pt\relax\do{%
+        \setlength\@tempdima{\dimexpr\@tempdima/10\relax}%
+        \setlength\@tempdimb{\dimexpr\@tempdimb/10\relax}%
+      }%
+      \setlength\@tempdimc{\@tempdima}%
+    \else%
+      \@whiledim\@tempdima>1pt\relax\do{%
+        \setlength\@tempdima{\dimexpr\@tempdima/10\relax}%
+        \setlength\@tempdimb{\dimexpr\@tempdimb/10\relax}%
+      }%
+      \setlength\@tempdimc{\@tempdimb}%
+    \fi%
+    \@tempcnta=1\relax%
+    \@whiledim%
+      \dimexpr\@tempcnta\@tempdimc\relax<\dimexpr\maxdimen/100\relax%
+    \do{%
+      \multiply\@tempcnta by 10\relax%
+    }%
+    \setlength\@tempdimc{\dimexpr(\@tempcnta\@tempdima/\@tempdimb*\p@)\relax}%
+    \setlength\@tempdimc{\dimexpr\@tempdimc/\@tempcnta\relax}%
+    \edef\@tempa{\endgroup\def\noexpand#1{\strip@pt\@tempdimc}}%
+  \@tempa%
+}
+\newcommand*\tud@if@fdfileexists[2]{%
+  \begingroup%
+    \@tud@res@swatrue%
+    \tud@strlowercase\tud@res@a{#1#2.fd}%
+    \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \if@tud@res@swa%
+      \tud@strlowercase\tud@res@a{#1}%
+      \edef\tud@res@a{\tud@res@a#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+    \if@tud@res@swa%
+      \edef\tud@res@a{#1#2.fd}%
+      \IfFileExists{\tud@res@a}{\@tud@res@swafalse}{}%
+    \fi%
+    \if@tud@res@swa%
+      \aftergroup\@secondoftwo%
+    \else%
+      \aftergroup\@firstoftwo%
+    \fi%
+  \endgroup%
+}
+\newcommand*\tud@cs@letltx[2]{%
+  \expandafter\expandafter\expandafter\LetLtxMacro%
+  \expandafter\csname #1\expandafter\endcsname\csname #2\endcsname%
+}
+\newrobustcmd*\tud@cs@store[1]{%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }%
+  }%
+}
+\newrobustcmd*\tud@cs@restore[1]{%
+  \ifcsdef{#1}{}{%
+    \ifcsdef{@@tud@#1}{%
+      \cslet{#1}{\relax}%
+    }{}%
+  }%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+      \csundef{@@tud@#1}%
+    }{}%
+  }%
+}
+\newrobustcmd*\tud@cs@reset[1]{%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{#1}{@@tud@#1}%
+    }{}%
+  }%
+}
+\newrobustcmd*\tud@cs@update[1]{%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \tud@cs@letltx{@@tud@#1}{#1}%
+    }{}%
+  }%
+}
+\newrobustcmd*\tud@cs@use[1]{%
+  \tud@cs@check{#1}{%
+    \ifcsdef{@@tud@#1}{%
+      \csuse{@@tud@#1}%
+    }{%
+      \csuse{#1}%
+    }%
+  }%
+}
+\newrobustcmd*\tud@cs@expand[2]{%
+  \let#1\relax%
+  \tud@cs@check{#2}{%
+    \ifcsdef{@@tud@#2}{%
+      \protected@edef#1{\csuse{@@tud@#2}}%
+    }{%
+      \protected@edef#1{\csuse{#2}}%
+    }%
+  }%
+}
+\newrobustcmd*\tud@cs@check[1]{%
+  \begingroup%
+    \ifcsdef{#1}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+    \if@tud@res@swa%
+      \ifcscounter{#1}{\@tud@res@swafalse}{}%
+      \ifcslength{#1}{\@tud@res@swafalse}{}%
+      \ifcsdimen{#1}{\@tud@res@swafalse}{}%
+    \fi%
+    \if@tud@res@swa%
+      \aftergroup\@firstofone%
+    \else%
+      \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined macro}{%
+        The macro `\@backslashchar#1' is undefined. \MessageBreak%
+        Please submit a bug report via\MessageBreak%
+        \TUD@BugReport\MessageBreak%
+        A bugfix is urgently required.%
+      }%
+      \aftergroup\@gobble%
+    \fi%
+  \endgroup%
+}
+\newcommand*\tud@cslength@store[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{%
+      \csedef{@@tud@length@#1}{\expandafter\the\csname #1\endcsname}%
+    }{}%
+  }%
+}
+\newcommand*\tud@cslength@restore[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
+      \expandafter\setlength\csname #1\endcsname{%
+        \csname @@tud@length@#1\endcsname%
+      }%
+      \csundef{@@tud@length@#1}%
+    }%
+  }%
+}
+\newcommand*\tud@cslength@reset[1]{%
+  \tud@cslength@check{#1}{%
+    \ifcsundef{@@tud@length@#1}{}{%
+      \expandafter\setlength\csname #1\endcsname{%
+        \csname @@tud@length@#1\endcsname%
+      }%
+    }%
+  }%
+}
+\newcommand*\tud@cslength@check[1]{%
+  \expandafter\tud@if@lengthregister\expandafter{\csname #1\endcsname}{%
+    \expandafter\@firstofone%
+  }{%
+    \PackageError{tudscrbase}{`\@backslashchar#1' is not a defined length}{%
+      The length `\@backslashchar#1' is undefined. \MessageBreak%
+      Please submit a bug report via\MessageBreak%
+      \TUD@BugReport\MessageBreak%
+      A bugfix is urgently required.%
+    }%
+    \expandafter\@gobble%
+  }%
+}
+\providecommand*\protected@expandtwoargs[3]{%
+  \protected@edef\reserved@a{\noexpand#1{#2}{#3}}\reserved@a%
+}
+\newcommand*\tud@patch@wrn[1]{%
+  \PackageWarning{tudscrbase}{%
+    Failed to patch `\@backslashchar#1'\MessageBreak%
+    Please submit a bug report via\MessageBreak%
+    \TUD@BugReport\MessageBreak%
+    An erroneous output may occur%
+  }%
+}
+\DefineFamily{TUD}
+\newcommand*\TUDProcessOptions[1][.\@currname.\@currext]{%
+  \FamilyProcessOptions[{#1}]{TUD}%
+}
+\newcommand*\TUDExecuteOptions[1][.\@currname.\@currext]{%
+  \FamilyExecuteOptions[{#1}]{TUD}%
+}
+\newcommand*\TUDoptions{\FamilyOptions{TUD}}
+\newcommand*\TUDoption{\FamilyOption{TUD}}
+\newcommand*\TUD@key[2][.\@currname.\@currext]{%
+  \providebool{@tud@key@#2@set}%
+  \DefineFamilyMember[{#1}]{TUD}%
+  \kernel@ifnextchar[%]
+    {\TUD@key@define{#1}{#2}}%
+    {\TUD@key@@define{#1}{#2}}%
+}
+\newcommand*\TUD@key@define{}
+\def\TUD@key@define#1#2[#3]#4{%
+  \DefineFamilyKey[{#1}]{TUD}{#2}[{#3}]{%
+    #4%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \booltrue{@tud@key@#2@set}%
+    \fi%
+  }%
+}
+\newcommand*\TUD@key@@define{}
+\def\TUD@key@@define#1#2#3{%
+  \DefineFamilyKey[{#1}]{TUD}{#2}{%
+    #3%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \booltrue{@tud@key@#2@set}%
+    \fi%
+  }%
+}
+\newcommand*\TUD@key@preset[2]{%
+  \ifbool{@tud@key@#1@set}{}{%
+    \TUDoption{#1}{#2}%
+    \boolfalse{@tud@key@#1@set}%
+  }%
+}
+\newcommand*\TUD@set@ifkey[3]{%
+  \begingroup%
+    \tud@strlowercase\tud@res@a{#3}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\FamilySetBool{TUD}{#1}{#2}}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\TUD@set@numkey[4]{%
+  \begingroup%
+    \tud@strlowercase\tud@res@a{#4}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \unexpanded{\FamilySetNumerical{TUD}{#1}{#2}{#3}}{\tud@res@a}%
+    }%
+  \tud@res@a%
+}
+\newcommand*\TUD@bool@numkey{%
+  {false}{0},{off}{0},{no}{0},{true}{1},{on}{1},{yes}{1}%
+}
+\newcommand*\TUD@set@gluekey[4][pt]{%
+  \begingroup%
+    \tud@strlowercase\tud@res@a{#4}%
+    \edef\tud@res@b{\detokenize\expandafter{\tud@res@a}}%
+    \edef\tud@res@c{\detokenize\expandafter{\@backslashchar}}%
+    \@expandtwoargs\in@{\tud@res@c}{\tud@res@b}%
+    \ifin@\else%
+      \tud@normalize@gluekey\tud@res@a{#1}%
+    \fi%
+    \protected@edef\tud@res@a{%
+      \endgroup%
+      \ifx\tud@res@a\@empty%
+        \noexpand\FamilyKeyStateUnknownValue%
+      \else%
+        \unexpanded{\tud@validate@gluekey{#2}}{\tud@res@a}{#4}%
+        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      \fi%
+    }%
+  \tud@res@a%
+}
+\newcommand*\tud@normalize@gluekey[2]{%
+  \begingroup%
+    \edef\tud@res@c{#1}%
+    \def\tud@res@a##1plus##2plus##3\@nil{%
+      \let\tud@res@a\@empty%
+      \tud@res@b##1minusminus\@nil%
+      \tud@res@b##2minusminus\@nil%
+    }%
+    \def\tud@res@b##1minus##2minus##3\@nil{%
+      \eappto\tud@res@a{{\trim@spaces{##1}}{\trim@spaces{##2}}}%
+    }%
+    \expandafter\tud@res@a\tud@res@c plusplus\@nil%
+    \def\tud@res@b##1##2##3##4{%
+      \IfArgIsEmpty{##2}{%
+        \def\tud@res@a{{##1}{##3}{##4}}%
+      }{%
+        \def\tud@res@a{{##1}{##3}{##2}}%
+      }%
+    }%
+    \expandafter\tud@res@b\tud@res@a%
+    \edef\tud@res@b{%
+      \unexpanded{\@tfor\tud@res@b:=}\tud@res@a%
+    }%
+    \let\tud@res@c\@empty%
+    \@tud@res@swatrue%
+    \tud@res@b\do{%
+      \tud@normalize@@gluekey\tud@res@a{\tud@res@b}{#2}%
+      \ifx\tud@res@a\relax%
+        \@tud@res@swafalse%
+        \@break@tfor%
+      \else%
+        \eappto\tud@res@c{{\tud@res@a}}%
+      \fi%
+    }%
+    \let\tud@res@a\@empty%
+    \if@tud@res@swa%
+      \def\tud@res@b##1##2##3{%
+        \IfArgIsEmpty{##1}{\def\tud@res@b{0#2}}{\def\tud@res@b{##1}}%
+        \Ifdimen{\tud@res@b}{%
+          \edef\tud@res@a{%
+            \tud@res@b%
+            \IfArgIsEmpty{##2}{}{\space\@plus\space##2}%
+            \IfArgIsEmpty{##3}{}{\space\@minus\space##3}%
+          }%
+        }{}%
+      }%
+      \expandafter\tud@res@b\tud@res@c%
+    \fi%
+    \edef\tud@res@c{%
+      \endgroup%
+      \unexpanded{\def#1}{\tud@res@a}%
+    }%
+  \tud@res@c%
+}
+\newcommand*\tud@normalize@@gluekey[3]{%
+  \begingroup%
+    \edef\tud@res@a{#2}%
+    \@tud@res@swafalse%
+    \expandafter\if\expandafter\@car\tud@res@a\relax\@nil+\@tud@res@swatrue\fi%
+    \expandafter\if\expandafter\@car\tud@res@a\relax\@nil-\@tud@res@swatrue\fi%
+    \if@tud@res@swa%
+      \protected@edef\tud@res@b{\expandafter\@car\tud@res@a\relax\@nil}%
+      \protected@edef\tud@res@a{\expandafter\@gobble\tud@res@a}%
+    \else%
+      \let\tud@res@b\@empty%
+    \fi%
+    \@tud@res@swatrue%
+    \Ifdimen{\tud@res@a}{}{%
+      \Ifdimen{\tud@res@a#3}{%
+        \appto\tud@res@a{#3}%
+      }{%
+        \@tud@res@swafalse%
+      }%
+    }%
+    \if@tud@res@swa%
+      \Ifisdimension{\tud@res@a}{}{%
+        \let\tud@res@a\@empty%
+        \let\tud@res@b\@empty%
+      }%
+    \else%
+      \def\tud@res@c##1fil##2fil##3\@nil{%
+        \IfArgIsEmpty{##1}{\def\tud@res@a{1}}{\def\tud@res@a{##1}}%
+        \Ifdimen{\tud@res@a pt}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+        \if@tud@res@swa%
+          \appto\tud@res@a{fil##2}%
+          \tud@if@strequal{##2}{}{}{%
+            \tud@if@strequal{##2}{l}{}{%
+              \tud@if@strequal{##2}{ll}{}{\@tud@res@swafalse}%
+            }%
+          }%
+        \fi%
+      }%
+      \expandafter\tud@res@c\tud@res@a filfil\@nil%
+    \fi%
+    \edef\tud@res@c{%
+      \endgroup%
+      \if@tud@res@swa%
+        \unexpanded{\def#1}{\tud@res@b\tud@res@a}%
+      \else%
+        \unexpanded{\let#1\relax}%
+      \fi%
+    }%
+  \tud@res@c%
+}
+\newcommand*\tud@validate@gluekey[3]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \protected@edef\tud@res@b{#3}%
+    \tud@remove@spaces@within\tud@res@a%
+    \tud@remove@spaces@within\tud@res@b%
+    \ifx\tud@res@a\tud@res@b%
+      \aftergroup\@gobble%
+    \else%
+      \aftergroup\@firstofone%
+    \fi%
+  \endgroup{%
+    \PackageWarning{tudscrbase}{%
+      The length `#3'\MessageBreak%
+      seems to be wrong formatted. Assuming, you meant\MessageBreak%
+      `#1=#2'%
+    }%
+  }%
+}
+\newcommand*\TUD@set@dimkey[4][pt]{%
+  \begingroup%
+    \TUD@set@gluekey[{#1}]{#2}{\tud@res@a}{#4}%
+    \ifx\FamilyKeyState\FamilyKeyStateProcessed%
+      \@tud@res@swafalse%
+      \Ifisskip{\tud@res@a}{%
+        \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+        \def\tud@res@b{a \string\skip\space register}%
+        \@tud@res@swatrue%
+      }{%
+        \Ifisglueexpr{\tud@res@a}{%
+          \protected@edef\tud@res@a{\dimexpr\tud@res@a\relax}%
+          \def\tud@res@b{a glue expression}%
+          \@tud@res@swatrue%
+        }{%
+          \Ifisglue{\tud@res@a}{%
+            \Ifisdimension{\tud@res@a}{}{%
+              \setlength\@tempdima{\dimexpr\glueexpr\tud@res@a\relax\relax}%
+              \tud@strlength\tud@res@a{\@tempdima}%
+              \def\tud@res@b{something containing glue}%
+              \@tud@res@swatrue%
+            }%
+          }{}%
+        }%
+      }%
+      \if@tud@res@swa%
+        \PackageWarning{tudscrbase}{%
+          Using option `#2' with\MessageBreak%
+          \tud@res@b\space(#4)\MessageBreak%
+          is not recommended. You should consider to use\MessageBreak%
+          an expression for a dimen instead. Setting\MessageBreak%
+          `#2=\tud@res@a'%
+        }%
+      \fi%
+      \protected@edef\tud@res@a{%
+        \endgroup%
+        \unexpanded{\FamilySetUseLengthMacro{TUD}{#2}{#3}}{\tud@res@a}%
+      }%
+    \else%
+      \def\tud@res@a{\endgroup\FamilyKeyStateUnknownValue}%
+    \fi%
+  \tud@res@a%
+}
+\newcommand*\TUD@unknown@keyval{\FamilyUnknownKeyValue{TUD}}
+\newcommand*\tud@locked@newnum[2]{%
+  \expandafter\newcommand\expandafter*\csname #1\endcsname{#2}%
+  \newbool{#1@locked}%
+  \tud@num@set{#1}{#2}%
+}
+\newcommand*\tud@locked@num@preset[2]{%
+  \ifbool{#1@locked}{}{%
+    \tud@num@set{#1}{#2}%
+    \boolfalse{#1@locked}%
+  }%
+}
+\newcommand*\tud@locked@num@set[2]{%
+  \tud@num@set{#1}{#2}%
+  \booltrue{#1@locked}%
+}
+\newcommand*\tud@num@set[2]{%
+  \ifcsundef{#1}{%
+    \PackageError{tudscrbase}{%
+      `\@backslashchar#1' was never defined%
+    }{%
+      You tried using the numerical expression `\@backslashchar#1'\MessageBreak%
+      but you didn't define it with `\string\tud@locked@newnum'.%
+    }%
+  }{%
+    \Ifnumber{#2}{%
+      \csdef{#1}{#2}%
+    }{%
+      \PackageError{tudscrbase}{%
+        `#2' is not a valid numerical expression%
+      }{%
+        You set the numerical expression `\@backslashchar#1'\MessageBreak%
+        to value `#2', which isn't numerical.%
+      }%
+    }%
+  }%
+}
+\newcommand*\tud@locked@newbool[2][false]{%
+  \newbool{#2}%
+  \newbool{#2@locked}%
+  \tud@bool@set{#2}{#1}%
+}
+\newcommand*\tud@locked@bool@preset[2]{%
+  \ifbool{#1@locked}{}{%
+    \tud@bool@set{#1}{#2}%
+    \boolfalse{#1@locked}%
+  }%
+}
+\newcommand*\tud@locked@bool@set[2]{%
+  \tud@bool@set{#1}{#2}%
+  \booltrue{#1@locked}%
+}
+\newcommand*\tud@bool@set[2]{%
+  \tud@if@strbool{#2}{\booltrue{#1}}{\boolfalse{#1}}{%
+    \PackageError{tudscrbase}{%
+      `#2' is not a valid boolean expression%
+    }{%
+      You tried to set the boolean switch `\@backslashchar if#1'\MessageBreak%
+      to value `#2' but only `true' `on' and `yes' as well as \MessageBreak%
+      `false' `no' and `off' are valid values.%
+    }%
+  }%
+}
+\newcommand*\TUD@parameter@@family{}
+\newcommand*\TUD@parameter@family[2]{%
+  \xdef\TUD@parameter@@family{#1}%
+  #2%
+  \gdef\TUD@parameter@@family{}%
+}
+\newcommand*\TUD@parameter@checkfamily[2]{%
+  \tud@if@strblank{#1}{%
+    \PackageError{tudscrbase}{%
+      No family for \@backslashchar#2 defined%
+    }{%
+      You have to use \@backslashchar#2\space within the\MessageBreak%
+      second argument of \string\TUD@parameter@family. The first\MessageBreak%
+      argument of \string\TUD@parameter@family\space has to be\MessageBreak%
+      a unique family name. Alternatively, you can specify\MessageBreak%
+      the family name within the optional argument of\MessageBreak%
+      \@backslashchar#2.%
+    }%
+  }{}%
+}
+\newcommand*\TUD@parameter@def[1][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@def}%
+  \expandafter\define@key\expandafter{#1}%
+}
+\newcommand*\TUD@parameter@let[3][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@let}%
+  \@expandtwoargs{\csletcs}{KV@#1@#2}{KV@#1@#3}%
+  \@expandtwoargs{\csletcs}{KV@#1@#2@default}{KV@#1@#3@default}%
+}
+\newcommand*\TUD@parameter@nokey{@nokey@}
+\newcommand*\TUD@parameter@set[2]{%
+  \IfArgIsEmpty{#2}{}{%
+    \let\@tempb\@empty%
+    \def\@tempa##1{%
+      \@expandtwoargs\in@{=}{##1}%
+      \ifin@%
+        \appto\@tempb{##1,}%
+      \else%
+        \begingroup%
+          \let\IeC\@firstofone%
+          \def\"####1{####1e}%
+          \def\ss{ss}%
+          \def\SS{SS}%
+          \protected@edef\tud@reserved{%
+            \endgroup%
+            \noexpand\protected@edef\noexpand\@tempc{KV@#1@##1}%
+          }%
+        \tud@reserved%
+        \ifcsdef{\@tempc}{%
+          \appto\@tempb{##1,}%
+        }{%
+          \protected@eappto\@tempb{\TUD@parameter@nokey=##1,}%
+        }%
+      \fi%
+    }%
+    \forcsvlist\@tempa{#2}%
+    \@expandtwoargs\kvsetkeys{#1}{\@tempb}%
+  }%
+}
+\newcommand*\TUD@parameter@handler@macro[3][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@macro}%
+  \expandafter\kv@set@family@handler\expandafter{#1}{%
+    \tud@if@strequal{\kv@key}{\TUD@parameter@nokey}{#3}{#2}%
+  }%
+}
+\newcommand*\TUD@parameter@handler@value[2][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@value}%
+  \protected@edef\@tempa{%
+    \noexpand\TUD@parameter@set{#1}{#2=\noexpand\kv@value}%
+  }%
+  \def\@tempb{\TUD@parameter@handler@macro[{#1}]{\kv@handled@false}}%
+  \expandafter\@tempb\expandafter{\@tempa}%
+}
+\newcommand*\TUD@parameter@handler@default[2][\TUD@parameter@@family]{%
+  \TUD@parameter@checkfamily{#1}{TUD@parameter@handler@default}%
+  \tud@if@strblank{#2}{%
+    \def\@tempa{\let\tud@reserved\relax}%
+  }{%
+    \def\@tempa{\def\tud@reserved{#2=\kv@value}}%
+  }%
+  \appto\@tempa{%
+    \tud@if@strequal{\kv@value}{twocolumn}{\def\kv@value{2}}{}%
+    \Ifnumber{\kv@value}{\def\tud@reserved{columns=\kv@value}}{}%
+    \tud@if@language@loaded{\kv@value}{\def\tud@reserved{language=\kv@value}}{}%
+    \ifx\tud@reserved\relax%
+      \tud@if@strblank{\kv@value}{}{%
+        \PackageError{tudscrbase}{%
+          Unknown default value `\kv@value'%
+        }{%
+          If `\kv@value' is a language, you haven't loaded it. \MessageBreak%
+          Otherwise, there's no handler for the given value. \MessageBreak%
+          You should specify a certian key (<key>=\kv@value).%
+        }%
+      }%
+    \fi%
+  }%
+  \protected@eappto\@tempa{%
+    \noexpand\ifx\noexpand\tud@reserved\noexpand\relax\noexpand\else%
+      \noexpand\TUD@parameter@set{#1}{\noexpand\tud@reserved}%
+    \noexpand\fi%
+  }%
+  \def\@tempb{\TUD@parameter@handler@macro[{#1}]{\kv@handled@false}}%
+  \expandafter\@tempb\expandafter{\@tempa}%
+}
+\newcommand*\TUD@parameter@err[2]{%
+  \PackageError{tudscrbase}{Unsupported value for parameter `#1'}{%
+    `#1' can only be used with values:\MessageBreak#2%
+    \MessageBreak Please choose a valid one.%
+  }%
+}
+\NewDocumentCommand\TUD@UnwindPackage{s m m}{%
+  \IfBooleanT{#1}{\AfterPackage*{#2}{#3}}%
+  \AtEndPreamble{\@ifpackageloaded{#2}{}{#3}}%
+}
+\@onlypreamble\TUD@UnwindPackage
+\newcommand*\TUD@CheckPackage[2]{%
+  \tud@if@packagelater@exists{#1}{#2}{}{%
+    \PackageWarningNoLine{tudscrbase}{%
+      The version `#2' of package `#1'\MessageBreak%
+      is urgently required. An erroneous output\MessageBreak%
+      may occur. Please update your distribution%
+    }%
+    \IfFileExists{#1.sty}{}{\RequirePackage{#1}[#2]}%
+  }%
+}
+\@onlypreamble\TUD@CheckPackage
+\newcommand*\tud@if@packagelater@exists[2]{%
+  \begingroup%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b[##1]{\def\tud@res@a{##1}}%
+    \def\ProvidesPackage##1{%
+      \kernel@ifnextchar[%]
+        {\tud@res@b}%
+        {\tud@res@b[]}%
+    }%
+    \openin\@inputcheck="#1.sty" %
+    \ifeof\@inputcheck\else
+      \@tud@res@swatrue%
+      \loop%
+        \read\@inputcheck to\tud@res@c%
+        \@expandtwoargs\in@{\string\ProvidesPackage}%
+          {\expandafter\detokenize\expandafter{\tud@res@c}}%
+        \ifin@%
+          \@tud@res@swafalse%
+          \tud@res@c%
+        \fi%
+        \ifeof\@inputcheck\@tud@res@swafalse\fi%
+        \if@tud@res@swa%
+      \repeat%
+    \fi
+    \closein\@inputcheck%
+    \edef\tud@res@a{\endgroup\noexpand\@ifl@t@r{\tud@res@a}{#2}}%
+  \tud@res@a%
+}
+\@onlypreamble\tud@if@packagelater@exists
+\newcommand*\TUD@RecommendPackage[1]{%
+  \kernel@ifnextchar[%]
+    {\TUD@Recommend@Package#1}%
+    {\TUD@Recommend@Package#1[]}%
+}
+\@onlypreamble\TUD@RecommendPackage
+\newcommand*\TUD@Recommend@Package{}
+\def\TUD@Recommend@Package#1[#2]{%
+  \IfFileExists{#1.sty}{%
+    \RequirePackage{#1}[#2]%
+  }{%
+    \PackageWarning{tudscrbase}{%
+      The usage of package `#1' (#2) is\MessageBreak%
+      recommended but it isn't installed%
+    }%
+  }%
+}
+\@onlypreamble\TUD@Recommend@Package
+\newcommand*\TUD@AfterPackage@set[1]{%
+  \newbool{@tud@#1@loaded}%
+  \AfterAtEndOfPackage*{#1}{\booltrue{@tud@#1@loaded}}%
+}
+\newcommand*\TUD@AfterPackage@do[2]{%
+  \ifcsundef{if@tud@#1@loaded}{%
+    \PackageError{tudscrbase}{\string\TUD@AfterPackage@set{#1} missing}{%
+      You have to set \string\TUD@AfterPackage@set{#1} before\MessageBreak%
+      using \string\TUD@AfterPackage@do{#1}{<code>}.%
+    }%
+  }{%
+    \tud@if@preamble{%
+      \AfterAtEndOfPackage*{#1}{#2}%
+    }{%
+      \ifbool{@tud@#1@loaded}{#2}{}%
+    }%
+  }%
+}
+\newcommand*\TUD@KOMAoptions[1]{\KOMAoptions}
+\ifundef\KOMAClassName{%
+  \renewcommand*\TUD@KOMAoptions[1]{%
+    \PackageWarning{tudscrbase}{%
+      You should load package `scrextend' right after\MessageBreak%
+      the documentclass. The following option is gobbled:\MessageBreak%
+      \string\KOMAoptions{`#1'}%
+    }%
+  }%
+  \AfterPackage*{scrextend}{\def\TUD@KOMAoptions{\KOMAoptions}}%
+}{}
+\endinput
+%%
+%% End of file `tudscrbase.sty'.
