@@ -1,0 +1,2559 @@
+%%
+%% This is file `mathastext.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% mathastext.dtx  (with options: `package')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from mathastext.sty.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file mathastext.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%----------------------------------------------------------------
+%% Package: mathastext
+%% Info:    Use the text font in math mode (JFB)
+%% Version: 1.3z 2023/09/01
+%% License: LPPL 1.3c (http://www.latex-project.org/lppl/lppl-1-3c.txt)
+%% Copyright (C) 2011-2016, 2018, 2019, 2022, 2023 Jean-Francois Burnol
+%%                                                <jfbu at free dot fr>
+%% Examples of use of mathastext:
+%%        http://jf.burnol.free.fr/mathastext.html
+%%        http://jf.burnol.free.fr/showcase.html
+%%----------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage {mathastext}
+  [2023/09/01 v1.3z Use the text font in math mode (JFB)]
+\newif\ifmst@robust@obsessed@LaTeX@era
+\@ifl@t@r\fmtversion{2019/10/01}{\mst@robust@obsessed@LaTeX@eratrue}{}
+\edef\mst@robustifyingspace{\ifmst@robust@obsessed@LaTeX@era\space\fi}
+  \let\mst@Umathcharnumdef\Umathcharnumdef
+  \let\mst@Umathcodenum   \Umathcodenum
+  \let\mst@Umathcode      \Umathcode
+  \let\mst@Umathchardef   \Umathchardef
+  \let\mst@Umathaccent    \Umathaccent
+\newif\ifmst@XeTeX
+\ifx\XeTeXinterchartoks\@undefined
+  \mst@XeTeXfalse
+\else
+  \mst@XeTeXtrue
+  \ifx\mst@Umathcharnumdef\@undefined
+    \let\mst@Umathcharnumdef\XeTeXmathcharnumdef
+    \let\mst@Umathcodenum   \XeTeXmathcodenum
+    \let\mst@Umathcode      \XeTeXmathcode
+    \let\mst@Umathchardef   \XeTeXmathchardef
+    \let\mst@Umathaccent    \XeTeXmathaccent
+  \fi
+\fi
+\newif\ifmst@LuaTeX
+\ifx\directlua\@undefined
+  \mst@LuaTeXfalse
+\else
+  \mst@LuaTeXtrue
+  \ifx\mst@Umathcharnumdef\@undefined
+    \let\mst@Umathcharnumdef\luatexUmathcharnumdef
+    \let\mst@Umathcodenum   \luatexUmathcodenum
+    \let\mst@Umathcode      \luatexUmathcode
+    \let\mst@Umathchardef   \luatexUmathchardef
+    \let\mst@Umathaccent    \luatexUmathaccent
+  \fi
+\fi
+\newif\ifmst@XeOrLua
+\ifmst@LuaTeX\mst@XeOrLuatrue\fi
+\ifmst@XeTeX \mst@XeOrLuatrue\fi
+\def\mst@oti{OT1}
+\def\mst@eui{EU1}\def\mst@euii{EU2}\def\mst@tu{TU}
+\def\mst@OneifUniEnc {%
+    \ifx \mst@tmp@enc\mst@tu   1\else
+    \ifx \mst@tmp@enc\mst@eui  1\else
+    \ifx \mst@tmp@enc\mst@euii 1\else 0\fi\fi\fi }
+\newif\ifmst@goahead
+\newif\ifmst@abort
+  \def\mst@enc{\encodingdefault}
+  \def\mst@fam{\familydefault}
+  \def\mst@ser{\seriesdefault}
+  \def\mst@opsh{\shapedefault}  %% will be default shape for operator names
+  \def\mst@bold{\bfdefault}
+  \def\mst@ltsh{\shapedefault}  %% will be default shape for letters
+  \edef\mst@greekfont{\familydefault} %% v 1.15c
+\newif\ifmst@italic
+\newif\ifmst@frenchmath
+\newif\ifmst@ncccomma
+\newif\ifmst@binarysemicolon
+    \DeclareOption{italic}{\mst@italictrue
+        \def\mst@ltsh{\itdefault}}
+    \DeclareOption{frenchmath}{\mst@frenchmathtrue\mst@italictrue
+      \def\mst@ltsh{\itdefault}}
+    \DeclareOption{ncccomma}{\mst@ncccommatrue}
+    \DeclareOption{binarysemicolon}{\mst@binarysemicolontrue}
+    \DeclareOption{frenchmath*}{\mst@frenchmathtrue\mst@italictrue
+      \def\mst@ltsh{\itdefault}\mst@ncccommatrue\mst@binarysemicolontrue}
+\newif\ifmst@endash\mst@endashtrue
+    \DeclareOption{endash}{\mst@endashtrue}
+    \DeclareOption{noendash}{\mst@endashfalse}
+\newif\ifmst@emdash
+    \DeclareOption{emdash}{\mst@emdashtrue\mst@endashfalse}
+\newif\ifmst@alldelims
+\edef\mst@tmp{\encodingdefault}\ifx\mst@oti\mst@tmp\else\mst@alldelimstrue\fi
+    \DeclareOption{alldelims}{\mst@alldelimstrue}
+    \DeclareOption{nolessnomore}{\mst@alldelimsfalse}
+\newif\ifmst@nosmalldelims
+    \DeclareOption{nosmalldelims}{\mst@nosmalldelimstrue}
+\newif\ifmst@noplus
+    \DeclareOption{noplus}{\mst@noplustrue}
+\newif\ifmst@nominus
+    \DeclareOption{nominus}{\mst@nominustrue}
+\DeclareOption{noplusnominus}{\ExecuteOptions{noplus,nominus}}
+\newif\ifmst@noparen
+    \DeclareOption{noparenthesis}{\mst@noparentrue}
+\newif\ifmst@nopunct
+    \DeclareOption{nopunctuation}{\mst@nopuncttrue}
+\newif\ifmst@noequal
+    \DeclareOption{noequal}{\mst@noequaltrue}
+\newif\ifmst@noexclam
+    \DeclareOption{noexclam}{\mst@noexclamtrue}
+\newif\ifmst@asterisk
+    \DeclareOption{noasterisk}{\PackageWarningNoLine{mathastext}
+        {option `noasterisk\string' is deprecated.^^J\space\space\space
+         Check the documentation}}
+    \DeclareOption{asterisk}{\mst@asterisktrue}
+\newif\ifmst@nospecials
+    \DeclareOption{nospecials}{\mst@nospecialstrue}
+\newif\ifmst@basic % 1.3 to avoid unnecessary patch of amsmath \newmcodes@
+    \DeclareOption{basic}{\mst@basictrue
+    \ExecuteOptions{noparenthesis,nopunctuation,%
+                    noplusnominus,noequal,noexclam,nospecials,nolessnomore}}
+\newif\ifmst@nohbar
+    \DeclareOption{nohbar}{\mst@nohbartrue}
+\newif\ifmst@nodigits
+    \DeclareOption{nodigits}{\mst@nodigitstrue}
+\newif\ifmst@defaultimath
+    \DeclareOption{defaultimath}{\mst@defaultimathtrue}
+\newif\ifmst@mathaccents
+    \DeclareOption{mathaccents}{\mst@mathaccentstrue}
+\newif\ifmst@unimathaccents % 1.3u
+    \DeclareOption{unimathaccents}{\mst@mathaccentstrue\mst@unimathaccentstrue}
+\newif\ifmst@needsymbol
+\newif\ifmst@symboldelimiters
+    \DeclareOption{symboldelimiters}{\mst@needsymboltrue\mst@symboldelimiterstrue}
+\newif\ifmst@symboldigits
+    \DeclareOption{symboldigits}{\mst@needsymboltrue\mst@symboldigitstrue}
+\newif\ifmst@symbolgreek
+\newif\ifmst@customgreek %% new with 1.3d
+    \DeclareOption{symbolgreek}{\mst@needsymboltrue\mst@symbolgreektrue
+                                \mst@customgreektrue }
+\newif\ifmst@symbolre
+    \DeclareOption{symbolre}{\mst@needsymboltrue\mst@symbolretrue}
+\newif\ifmst@symbolmisc
+    \DeclareOption{symbolmisc}{\mst@needsymboltrue\mst@symbolmisctrue}
+    \DeclareOption{symbol}{\ExecuteOptions{symbolgreek,symbolmisc,symbolre}}
+    \DeclareOption{symbolmax}{\ExecuteOptions{symbol,symboldelimiters}}
+\newif\ifmst@needeuler
+\newif\ifmst@eulerdigits
+    \DeclareOption{eulerdigits}{\mst@needeulertrue\mst@eulerdigitstrue}
+\newif\ifmst@eulergreek
+    \DeclareOption{eulergreek}{\mst@needeulertrue\mst@eulergreektrue
+                               \mst@customgreektrue }
+\newif\ifmst@selfGreek
+    \DeclareOption{selfGreek}{\mst@selfGreektrue\mst@customgreektrue}
+\newif\ifmst@selfGreeks
+    \DeclareOption{selfGreeks}{\mst@selfGreekstrue\mst@selfGreektrue
+                               \mst@customgreektrue }
+\newif\ifmst@LGRgreek
+    \DeclareOption{LGRgreek}{\mst@LGRgreektrue\mst@customgreektrue}
+\newif\ifmst@LGRgreeks
+    \DeclareOption{LGRgreeks}{\mst@LGRgreekstrue\mst@LGRgreektrue
+                              \mst@customgreektrue}
+\def\mst@greek@select{0}
+\newif\ifmst@itgreek
+\newif\ifmst@upgreek
+    \DeclareOption{itgreek}{\mst@itgreektrue}
+    \DeclareOption{upgreek}{\mst@upgreektrue}
+    \DeclareOption{itGreek}{\def\mst@greek@select{1}}
+    \DeclareOption{upGreek}{\def\mst@greek@select{2}}
+\newif\ifmst@defaultnormal
+    \DeclareOption{defaultnormal}{\mst@defaultnormaltrue}
+\newif\ifmst@defaultrm
+    \DeclareOption{defaultrm}{\mst@defaultrmtrue}
+\newif\ifmst@defaultbf
+    \DeclareOption{defaultbf}{\mst@defaultbftrue}
+\newif\ifmst@defaultit
+    \DeclareOption{defaultit}{\mst@defaultittrue}
+\newif\ifmst@defaultsf
+    \DeclareOption{defaultsf}{\mst@defaultsftrue}
+\newif\ifmst@defaulttt
+    \DeclareOption{defaulttt}{\mst@defaulttttrue}
+\newif\ifmst@nonormalbold
+\DeclareOption{defaultalphabets}{\ExecuteOptions{defaultnormal,defaultrm,%
+defaultbf,defaultit,defaultsf,defaulttt}\mst@nonormalboldtrue}
+\newif\ifmst@defaultsizes
+    \DeclareOption{defaultmathsizes}{\mst@defaultsizestrue}
+\newif\ifmst@twelve
+    \DeclareOption{12pt}{\mst@twelvetrue}
+\newif\ifmst@fouriervec
+    \DeclareOption{fouriervec}{\mst@fouriervectrue}
+\newif\ifmst@subdued
+    \DeclareOption{subdued}{\mst@subduedtrue}
+\def\mst@unicodeminus {2013}
+\def\mst@checkoption #1unicodeminus#2\mst@#3\mst@@
+   {\ifx\\#3\\\PackageWarningNoLine{mathastext}
+               {Unknown option `\CurrentOption\string'}\else
+    \ifx\\#2\\\def\mst@unicodeminus {2212}\else
+    \expandafter\def\expandafter\mst@unicodeminus\expandafter{\@secondoftwo#2}%
+    \fi\fi}
+\DeclareOption*%
+  {\expandafter\mst@checkoption\CurrentOption\mst@ unicodeminus\mst@\mst@@}
+\ProcessOptions\relax
+\def\mst@DeclareMathAccent#1{\let#1\mst@undefined
+  \expandafter
+  \let\csname\expandafter\@gobble\string#1\space\endcsname\mst@undefined
+  \DeclareMathAccent{#1}}
+\def\mst@normalversionname{normal}%
+\def\mst@boldversionname{bold}%
+\newmuskip\mst@exists@muskip  %% v 1.15e
+\newmuskip\mst@forall@muskip
+\def\mst@exists@skip{1mu}
+\def\mst@forall@skip{.6667mu}
+\ifmst@italic\ifmst@frenchmath\else
+    \def\mst@exists@skip{0mu}
+    \def\mst@forall@skip{0mu}
+    \def\mst@prime@skip {0mu}
+\fi\fi
+\protected\def\mst@exists{\mst@exists@original\mskip\mst@exists@muskip}
+\protected\def\mst@forall{\mst@forall@original\mskip\mst@forall@muskip}
+\AtBeginDocument{%
+   \let\mst@exists@original\exists
+   \let\mst@forall@original\forall
+   \def\MTnormalexists   {\let\exists\mst@exists@original }%
+   \def\MTexistsdoesskip {\let\exists\mst@exists }%
+   \def\MTnormalforall   {\let\forall\mst@forall@original }%
+   \def\MTforalldoesskip {\let\forall\mst@forall }%
+   \ifmst@subdued
+   \else
+     \MTexistsdoesskip
+     \MTforalldoesskip
+   \fi
+}%
+\newcommand*\MTnormalexists   {\AtBeginDocument {\MTnormalexists   }}
+\newcommand*\MTexistsdoesskip {\AtBeginDocument {\MTexistsdoesskip }}
+\newcommand*\MTnormalforall   {\AtBeginDocument {\MTnormalforall   }}
+\newcommand*\MTforalldoesskip {\AtBeginDocument {\MTforalldoesskip }}
+\newmuskip\mst@prime@muskip   %% v 1.2
+\def\mst@prime@skip{.5mu}
+\ifmst@italic\ifmst@frenchmath\else\def\mst@prime@skip{0mu}\fi\fi
+\def\mst@active@math@prime{\sp\bgroup\mskip\mst@prime@muskip\prim@s}
+{\catcode`\'=12
+\gdef\mst@@modifyprime{\mst@mathactivate'{}\mst@active@math@prime}}
+\newcommand*\MTnormalprime   {\let\mst@modifyprime\@empty }
+\newcommand*\MTprimedoesskip {\let\mst@modifyprime\mst@@modifyprime}
+\ifmst@subdued
+    \MTnormalprime
+\else
+    \MTprimedoesskip
+\fi
+\AtBeginDocument{%
+  \everymath\expandafter
+           {\the\everymath    \mst@modifyprime \MTnormalprime}%
+  \everydisplay\expandafter
+           {\the\everydisplay \mst@modifyprime \MTnormalprime}%
+}
+\newcommand*\MTexistsskip[1]{\edef\mst@exists@skip{#1}%
+    \mst@exists@muskip\mst@exists@skip\relax}
+\newcommand*\MTforallskip[1]{\edef\mst@forall@skip{#1}%
+    \mst@forall@muskip\mst@forall@skip\relax}
+\newcommand*\MTprimeskip[1]{\edef\mst@prime@skip{#1}%
+    \mst@prime@muskip\mst@prime@skip\relax}
+\let\Mathastextexistsskip\MTexistsskip
+\let\Mathastextforallskip\MTforallskip
+\let\Mathastextprimeskip\MTprimeskip
+\let\mathastextexistsskip\MTexistsskip
+\let\mathastextforallskip\MTforallskip
+\let\mathastextprimeskip\MTprimeskip
+\ifmst@noparen\else
+\AtBeginDocument{%
+    \@ifundefined{resetMathstrut@}{% nothing to do, no amsmath
+    }{% amsmath loaded, and possibly patched by things such as lualatex-math
+    \let\mst@savedresetMathstrut@\resetMathstrut@
+    \PackageInfo{mathastext}{current meaning of amsmath
+      \string\resetMathstrut@\space saved}%
+    \ifx\mst@the\the % means that \MTnonlettersobeymathxx was used in preamble
+      \let\mst@the\@gobble\MTnonlettersobeymathxx
+   \fi}}
+\fi
+\newtoks\mst@do@nonletters
+\newtoks\mst@do@easynonletters
+\newtoks\mst@do@az
+\newtoks\mst@do@AZ
+\let\mst@the\@gobble
+\newcommand*\MTnonlettersdonotobeymathxx{%
+    \ifx\mst@the\@gobble
+    \else
+      \@ifundefined{mst@savedresetMathstrut@}{}{%
+        \PackageInfo{mathastext}{restoring (for this group or environment) amsmath \string\resetMathstrut@}%
+      \let\resetMathstrut@\mst@savedresetMathstrut@}%
+    \fi
+    \let\mst@the\@gobble
+}%
+\def\mst@OnlyIfNotSubdued#1{%
+    \ifmst@subdued
+      \ifx\math@version\mst@normalversionname
+      \else
+        \ifx\math@version\mst@boldversionname
+        \else
+          #1%
+        \fi
+      \fi
+    \else
+      #1%
+    \fi
+}%
+\def\mst@nonlettersobeymathxx{%
+    \ifx\mst@the\the
+    \else
+      \@ifundefined{mst@savedresetMathstrut@}{}{%
+        \ifmst@symboldelimiters
+          \def\resetMathstrut@{%
+           \setbox\z@\hbox{\the\textfont\symmtpsymbol\char40
+                        \the\textfont\symmtoperatorfont\char40
+                        \the\textfont\symoperators\char40}%
+           \ht\Mathstrutbox@\ht\z@ \dp\Mathstrutbox@\dp\z@}%
+        \else
+          \def\resetMathstrut@{%
+           \setbox\z@\hbox{\the\textfont\symmtoperatorfont\char40
+                        \the\textfont\symoperators\char40}%
+           \ht\Mathstrutbox@\ht\z@ \dp\Mathstrutbox@\dp\z@}%
+        \fi
+      \PackageInfo{mathastext}{\string\resetMathstrut@\space
+      from amsmath replaced (for this group or environment)}}%
+    \fi
+    \let\mst@the\the
+}%
+\newcommand*\MTnonlettersobeymathxx
+   {\mst@OnlyIfNotSubdued\mst@nonlettersobeymathxx}%
+\newcommand*\MTeasynonlettersdonotobeymathxx{\let\mst@theeasy\@gobble}%
+\def\mst@easynonlettersobeymathxx{\let\mst@theeasy\the}%
+\newcommand*\MTeasynonlettersobeymathxx
+   {\mst@OnlyIfNotSubdued\mst@easynonlettersobeymathxx}%
+\MTeasynonlettersobeymathxx % no-op here if subdued mode
+\def\mst@mathactiveletters{\let\mst@thef\the \let\mst@theF\the}%
+\newcommand*\MTmathactiveletters
+   {\mst@OnlyIfNotSubdued\mst@mathactiveletters}%
+\MTmathactiveletters % no-op here if subdued mode
+\def\mst@mathactiveLetters{\let\mst@theF\the}%
+\newcommand*\MTmathactiveLetters
+   {\mst@OnlyIfNotSubdued\mst@mathactiveLetters}%
+\newcommand*\MTmathstandardletters{\let\mst@thef\@gobble \let\mst@theF\@gobble}%
+\newcommand*\MTicinmath{%
+    \MTmathactiveletters
+    \def\mst@itcorr{\ifnum\fam=\m@ne\/\fi}%
+    \let\mst@ITcorr\mst@itcorr}
+\newcommand*\MTICinmath{%
+    \MTmathactiveLetters
+    \def\mst@ITcorr{\ifnum\fam=\m@ne\/\fi}}
+\newcommand*\MTnoicinmath{\let\mst@itcorr\@empty\let\mst@ITcorr\@empty}
+\newcommand*\MTnoICinmath{\let\mst@ITcorr\@empty}
+\newcommand*\MTicalsoinmathxx{%
+    \ifx\mst@itcorr\@empty\else\def\mst@itcorr{\/}\fi
+    \ifx\mst@ITcorr\@empty\else\def\mst@ITcorr{\/}\fi}
+\newcommand*\MTsetmathskips[3]{%
+    \@namedef{mst@before#1}{\ifnum\fam=\m@ne\mskip#2\relax\fi }%
+    \@namedef{mst@after#1}{\ifnum\fam=\m@ne\mskip#3\relax\fi }%
+}
+\newcommand*\MTunsetmathskips[1]{%
+    \@namedef{mst@before#1}{}%
+    \@namedef{mst@after#1}{}%
+}
+\def\mst@magic@v #1#2#3#4#5{#1#3#4}
+\def\mst@magic@vi #1#2#3#4#5#6{#1#2#4#5}
+\def\mst@fork{\ifmmode\mst@magic@v\fi\@thirdofthree}
+\def\mst@safefork{\ifmmode\if@safe@actives\else\mst@magic@vi\fi\fi\@thirdofthree}
+\def\mst@do@activecase#1#2#3{% #1 is a category 11 or 12 character token
+    \@ifundefined{active@char#1}{}{%
+         \ifcat #1a\mathcode`#1=#2\else
+         \ifx\relax #2\relax\mathcode`#1=`#1 \else\mathcode`#1=#3\fi\fi
+    \expandafter\expandafter\expandafter\let\expandafter\expandafter
+                   \csname mst@orig@user@active#1\endcsname
+                   \csname user@active#1\endcsname
+    \expandafter\expandafter\expandafter\let\expandafter\expandafter
+                   \csname mst@orig@normal@char#1\endcsname
+                   \csname normal@char#1\endcsname
+    \ifcat #1a%
+      \expandafter\edef\csname user@active#1\endcsname
+                   {\noexpand\mst@fork {{#2\noexpand#3}}{}\expandafter
+                    \noexpand\csname mst@orig@user@active#1\endcsname
+                   }%
+      \expandafter\edef\csname normal@char#1\endcsname
+                   {\noexpand\mst@safefork {{#2\noexpand#3}}{}\expandafter
+                    \noexpand\csname mst@orig@normal@char#1\endcsname
+                   }%
+    \else
+      \expandafter\edef\csname user@active#1\endcsname
+                   {\noexpand\mst@fork {#2}\noexpand#3\expandafter
+                    \noexpand\csname mst@orig@user@active#1\endcsname
+                   }%
+      \expandafter\edef\csname normal@char#1\endcsname
+                   {\noexpand\mst@safefork {#2}\noexpand#3\expandafter
+                    \noexpand\csname mst@orig@normal@char#1\endcsname
+                   }%
+    \fi}}
+\begingroup
+  \catcode`\~=\active
+  \def\x{\endgroup
+    \def\mst@mathactivate##1##2##3{% ##1 guaranteed of cat 11 or 12
+      \begingroup
+      \lccode`~=`##1
+      \lccode`##1=`##1
+      \lowercase{\endgroup
+          \ifnum\catcode`##1=\active
+            \mst@do@activecase ##1{##2}##3%
+            % careful as ##2 is empty in the asterisk and
+            % prime case!
+          \else
+            \mathcode`##1="8000
+            % version 1.3 adds the possibility of extra skips around letters,
+            % (only if non catcode active at the time of use).
+            \ifcat##1a\edef~{% extra braces for a^b for example
+               {\expandafter\noexpand\csname mst@before##1\endcsname
+                ##2\noexpand##3%
+                \expandafter\noexpand\csname mst@after##1\endcsname}}%
+            \else\def~{##2##3}\fi
+          \fi}}}
+\x
+\def\mst@addtodo@nonletters#1#2#3{%
+  % #1 will be of cat 11 or 12.
+  % #2 is empty for asterisk and right quote
+  \mst@do@nonletters\expandafter
+      {\the\mst@do@nonletters \mst@mathactivate#1{#2}#3}%
+}
+\def\mst@addtodo@easynonletters#1#2{% #1 is a one char control sequence
+  \mst@do@easynonletters\expandafter{\the\mst@do@easynonletters\mathcode`#1=#2}%
+}
+\def\mst@addtodo@az#1#2{%
+  \mst@do@az\expandafter{\the\mst@do@az\mst@mathactivate#1#2\mst@itcorr}
+}
+\def\mst@addtodo@AZ#1#2{%
+  \mst@do@AZ\expandafter{\the\mst@do@AZ\mst@mathactivate#1#2\mst@ITcorr}%
+}
+\ifmst@basic
+\else
+ \ifmst@XeOrLua
+  \AtBeginDocument {%
+  \ifx\newmcodes@\@undefined\else
+  \edef\mst@newmcodes@{%
+   \mst@Umathcode `\noexpand\' 0 \symmtoperatorfont 39\relax
+   \ifmst@asterisk
+    \mst@Umathcode `\noexpand\* 0 \symmtoperatorfont 42\relax
+   \else\mathcode`\noexpand\* 42
+   \fi
+   \ifmst@nopunct\mathcode `\noexpand\."613A \mathcode `\noexpand\: "603A
+   \else
+    \mst@Umathcode `\noexpand\. 6 \symmtoperatorfont 46\relax
+    \mst@Umathcode `\noexpand\: 6 \symmtoperatorfont 58\relax
+   \fi
+   \ifmst@nominus\mathcode`\noexpand\- 45
+   \else
+      \mst@Umathcode `\noexpand\- 0 \symmtoperatorfont 45\relax
+   \fi
+   \ifmst@noparen\mathcode `\noexpand\/  47
+   \else
+      \mst@Umathcode `\noexpand\/ 0 \symmtoperatorfont 47\relax
+   \fi
+  }%
+  \let\mst@originalnewmcodes@\newmcodes@
+  \fi
+  }% end of AtBeginDocument
+ \else
+  \AtBeginDocument {%
+  \ifx\newmcodes@\@undefined\else
+  \edef\mst@newmcodes@{%
+    \mathcode`\noexpand\' \the\numexpr\symmtoperatorfont*\@cclvi+39\relax
+    \mathcode`\noexpand\*
+      \the\numexpr\ifmst@asterisk\symmtoperatorfont*\@cclvi\fi+42\relax
+    \ifmst@nopunct\mathcode `\noexpand\."613A \mathcode `\noexpand\: "603A
+    \else
+      \mathcode`\noexpand\. \the\numexpr\mst@varfam@dot-"1000\relax
+      \mathcode`\noexpand\: \the\numexpr\mst@varfam@colon-"1000\relax
+    \fi
+    \mathcode`\noexpand\-
+     \the\numexpr\unless\ifmst@nominus\symmtoperatorfont*\@cclvi\fi+45\relax
+    \mathcode`\noexpand\/
+     \the\numexpr\unless\ifmst@noparen\symmtoperatorfont*\@cclvi\fi+47\relax\relax
+    }%
+  \let\mst@originalnewmcodes@\newmcodes@
+  \fi
+  }% end of second AtBeginDocument
+ \fi % mst@XeOrLua
+\fi % mst@basic
+\newcommand*\MTresetnewmcodes{\ifx\mst@originalnewmcodes@\undefined\else
+                               \let\newmcodes@\mst@originalnewmcodes@\fi}
+\newcommand*\MTcustomizenewmcodes{\ifx\mst@originalnewmcodes@\undefined\else
+                               \let\newmcodes@\mst@newmcodes@\fi}
+\DeclareSymbolFont{mtoperatorfont}{\mst@enc}{\mst@fam}{\mst@ser}{\mst@opsh}
+\newcommand*{\MTmathoperatorsobeymathxx}
+{\def\operator@font{\mathgroup\ifnum\fam=\m@ne\symmtoperatorfont\else\fam\fi}}
+\newcommand*{\MTmathoperatorsdonotobeymathxx}
+{\def\operator@font{\mathgroup\symmtoperatorfont}}
+\MTmathoperatorsobeymathxx
+\DeclareSymbolFont{mtletterfont}{\mst@enc}{\mst@fam}{\mst@ser}{\mst@ltsh}
+\begingroup
+\catcode`N 12
+\catcode`O 12
+\catcode`D 12
+\catcode`E 12
+\lowercase{\gdef\mst@fixmathfonts@ #1=NODE;#2#3\relax #4\@empty #5}%
+  {\ifx#2\empty\else\font\mst@mathfont=#1=base;#2#3\relax#5=\mst@mathfont\fi}
+\lowercase{\gdef\MTfixmathfonts
+{\expandafter\mst@fixmathfonts@
+  \fontname\textfont\symmtoperatorfont\relax\relax=NODE;\empty\relax\@empty
+   {\textfont\symmtoperatorfont}%
+ \expandafter\mst@fixmathfonts@
+  \fontname\scriptfont\symmtoperatorfont\relax\relax=NODE;\empty\relax\@empty
+   {\scriptfont\symmtoperatorfont}%
+ \expandafter\mst@fixmathfonts@
+  \fontname\scriptscriptfont\symmtoperatorfont\relax\relax=NODE;\empty\relax\@empty
+   {\scriptscriptfont\symmtoperatorfont}%
+ \expandafter\mst@fixmathfonts@
+  \fontname\textfont\symmtletterfont\relax\relax=NODE;\empty\relax\@empty
+   {\textfont\symmtletterfont}%
+ \expandafter\mst@fixmathfonts@
+  \fontname\scriptfont\symmtletterfont\relax\relax=NODE;\empty\relax\@empty
+   {\scriptfont\symmtletterfont}%
+ \expandafter\mst@fixmathfonts@
+  \fontname\scriptscriptfont\symmtletterfont\relax\relax=NODE;\empty\relax\@empty
+   {\scriptscriptfont\symmtletterfont}%
+  }%
+}%
+\endgroup
+\ifmst@LuaTeX
+  \everymath\expandafter{\the\everymath\mst@fixmathfonts}%
+  \everydisplay\expandafter{\the\everydisplay\mst@fixmathfonts}%
+\fi
+\newcommand*\MTfixfonts{\let\mst@fixmathfonts\MTfixmathfonts}%
+\newcommand*\MTdonotfixfonts{\let\mst@fixmathfonts\empty}%
+\MTfixfonts
+\let\mst@alph@omicron\mathnormal
+\@ifpackageloaded{fourier}{\ifsloped\else\let\mst@alph@omicron\mathrm\fi}{}
+\DeclareSymbolFontAlphabet{\Mathnormal}{mtletterfont}
+\DeclareSymbolFontAlphabet{\Mathrm}{mtoperatorfont}
+\ifmst@nonormalbold\else
+   \DeclareMathAlphabet{\mathnormalbold}{\mst@enc}{\mst@fam}{\mst@bold}{\mst@ltsh}
+\fi
+\ifmst@defaultbf\else
+   \DeclareMathAlphabet{\Mathbf}{\mst@enc}{\mst@fam}{\mst@bold}{\mst@opsh}
+\fi
+\ifmst@defaultit\else
+   \DeclareMathAlphabet{\Mathit}{\mst@enc}{\mst@fam}{\mst@ser}{\itdefault}
+\fi
+\ifmst@defaultsf\else
+   \DeclareMathAlphabet{\Mathsf}{\mst@enc}{\sfdefault}{\mst@ser}{\mst@opsh}
+\fi
+\ifmst@defaulttt\else
+   \DeclareMathAlphabet{\Mathtt}{\mst@enc}{\ttdefault}{\mst@ser}{\mst@opsh}
+\fi
+\let\mst@original@normal\mathnormal
+\let\mst@original@rm\mathrm
+\let\mst@original@bf\mathbf
+\let\mst@original@it\mathit
+\let\mst@original@sf\mathsf
+\let\mst@original@tt\mathtt
+\def\mst@restorealphabets{% for subdued
+    \let\mathnormal\mst@original@normal
+    \let\mathrm\mst@original@rm
+    \let\mathbf\mst@original@bf
+    \let\mathit\mst@original@it
+    \let\mathsf\mst@original@sf
+    \let\mathtt\mst@original@tt}
+\def\mst@setalphabets{%
+    \ifmst@defaultnormal\else\protected\def\mathnormal{\Mathnormal}\fi
+    \ifmst@defaultrm\else\protected\def\mathrm{\Mathrm}\fi
+    \ifmst@defaultbf\else\protected\def\mathbf{\Mathbf}\fi
+    \ifmst@defaultit\else\protected\def\mathit{\Mathit}\fi
+    \ifmst@defaultsf\else\protected\def\mathsf{\Mathsf}\fi
+    \ifmst@defaulttt\else\protected\def\mathtt{\Mathtt}\fi}
+\ifmst@subdued\else\mst@setalphabets\fi
+\providecommand*\MTgreekupdefault{n}
+\providecommand*\MTgreekitdefault{it}
+\newif\ifmst@greek@lower@up
+\newif\ifmst@greek@upper@up
+\def\mst@update@greeksh{
+    \def\mst@greek@lsh{\mst@ltsh}
+    \def\mst@greek@ush{\mst@opsh}
+      \mst@greek@lower@uptrue
+      \expandafter\in@\expanded{{\mst@ltsh.}}{it.,sl.}%
+      \ifin@\mst@greek@lower@upfalse\fi
+      \mst@greek@upper@uptrue
+      \expandafter\in@\expanded{{\mst@opsh.}}{it.,sl.}%
+      \ifin@\mst@greek@upper@upfalse\fi
+    \ifmst@itgreek
+      \def\mst@greek@lsh{\MTgreekitdefault}
+      \def\mst@greek@ush{\MTgreekitdefault}
+        \mst@greek@lower@upfalse
+        \mst@greek@upper@upfalse
+    \fi
+    \ifmst@upgreek
+      \def\mst@greek@lsh{\MTgreekupdefault}
+      \def\mst@greek@ush{\MTgreekupdefault}
+        \mst@greek@lower@uptrue
+        \mst@greek@upper@uptrue
+    \fi
+    \ifmst@frenchmath
+      \ifmst@itgreek\else
+      \ifmst@upgreek\else
+        \def\mst@greek@lsh{\mst@opsh}
+        \def\mst@greek@ush{\mst@opsh}
+          \mst@greek@lower@uptrue
+          \mst@greek@upper@uptrue
+      \fi\fi
+    \fi
+    \ifcase\mst@greek@select
+        \or
+          \def\mst@greek@ush{\MTgreekitdefault}
+            \mst@greek@upper@upfalse
+       \or
+          \def\mst@greek@ush{\MTgreekupdefault}
+            \mst@greek@upper@uptrue
+    \fi
+}
+\mst@update@greeksh
+\ifmst@LGRgreek
+    \DeclareFontEncoding{LGR}{}{}
+    \DeclareSymbolFont{mtgreekup}{LGR}{\mst@fam}{\mst@ser}{\MTgreekupdefault}
+    \DeclareSymbolFont{mtgreekit}{LGR}{\mst@fam}{\mst@ser}{\MTgreekitdefault}
+    \DeclareSymbolFontAlphabet{\mathgreekup}{mtgreekup}
+    \DeclareSymbolFontAlphabet{\mathgreekit}{mtgreekit}
+\else
+\ifmst@selfGreek
+    \DeclareSymbolFont{mtselfGreekfont}{OT1}{\mst@fam}{\mst@ser}{\mst@greek@ush}
+\fi\fi
+\ifmst@needeuler\typeout{** will use Euler font; command \string\MTEulerScale}
+\DeclareSymbolFont{mteulervm}{U}{zeur}{m}{n}
+\DeclareSymbolFontAlphabet{\MathEuler}{mteulervm}
+\DeclareMathAlphabet{\MathEulerBold}{U}{zeur}{\mst@bold}{n}
+\fi
+\newcommand*\MTEulerScale[1]{\edef\zeu@Scale{#1}}
+\let\MathastextEulerScale\MTEulerScale
+\ifmst@needsymbol\typeout{** will use Symbol font; command \string\MTSymbolScale}
+ \def\psy@scale{1}
+ \DeclareSymbolFont{mtpsymbol}{U}{psy}{m}{n}
+ \DeclareSymbolFontAlphabet{\MathPSymbol}{mtpsymbol}
+\AtBeginDocument{%
+  \DeclareFontFamily{U}{psy}{}%
+  \DeclareFontShape{U}{psy}{m}{n}{<->s*[\psy@scale] psyr}{}%
+}
+\fi
+\newcommand*\MTSymbolScale[1]{\edef\psy@scale{#1}}
+\let\MathastextSymbolScale\MTSymbolScale
+\DeclareRobustCommand*\pmvec[1]{\mathord{\stackrel{\raisebox{-.5ex}%
+{\tiny\boldmath$\mathord{\rightarrow}$}}{{}#1}}}
+\ifmst@fouriervec
+  \DeclareFontEncoding{FML}{}{}
+  \DeclareFontSubstitution{FML}{futm}{m}{it}
+  \DeclareSymbolFont{mathastextfourier}{FML}{futm}{m}{it}
+  \SetSymbolFont{mathastextfourier}{bold}{FML}{futm}{b}{it}
+  \mst@DeclareMathAccent{\fouriervec}{\mathord}{mathastextfourier}{"7E}
+\fi
+\newcommand*\MTencoding[1]{\def\mst@enc{#1}}
+\newcommand*\MTfamily[1]{\def\mst@fam{#1}}
+\newcommand*\MTseries[1]{\def\mst@ser{#1}}
+\newcommand*\MTshape[1]{\def\mst@opsh{#1}\ifmst@italic\else\def\mst@ltsh{#1}\fi}
+\newcommand*\MTboldvariant[1]{\def\mst@bold{#1}}
+\newcommand*\MTlettershape[1]{\def\mst@ltsh{#1}}
+\let\Mathastextencoding\MTencoding
+\let\Mathastextfamily\MTfamily
+\let\Mathastextseries\MTseries
+\let\Mathastextshape\MTshape
+\let\Mathastextboldvariant\MTboldvariant
+\let\Mathastextlettershape\MTlettershape
+\newcommand*\MTitgreek{\mst@itgreektrue\mst@upgreekfalse\def\mst@greek@select{0}}
+\newcommand*\MTupgreek{\mst@upgreektrue\mst@itgreekfalse\def\mst@greek@select{0}}
+\newcommand*\MTitGreek{\def\mst@greek@select{1}}
+\newcommand*\MTupGreek{\def\mst@greek@select{2}}
+\let\Mathastextitgreek\MTitgreek
+\let\Mathastextupgreek\MTupgreek
+\let\MathastextitGreek\MTitGreek
+\let\MathastextupGreek\MTupGreek
+    \newcommand*\MTgreekfont[1]{\def\mst@greekfont{#1}}
+\let\Mathastextgreekfont\MTgreekfont
+\def\mst@DeclareMathLetter #1{%
+    \DeclareMathSymbol {#1}{\mathalpha}{mtletterfont}{`#1}%
+    \expandafter
+    \DeclareMathSymbol \csname mst@#1\endcsname{\mathalpha}{mtletterfont}{`#1}%
+    \expandafter\mst@addtodo@az\expandafter #1\csname mst@#1\endcsname
+}%
+\@tfor\mst@tmp:=abcdefghijklmnopqrstuvwxyz\do
+     {\expandafter\mst@DeclareMathLetter\mst@tmp}%
+\ifmst@frenchmath \def\mst@font@tbu{mtoperatorfont}%
+   \else          \def\mst@font@tbu{mtletterfont}%
+\fi
+\def\mst@DeclareMathLetter #1{%
+    \DeclareMathSymbol {#1}{\mathalpha}{\mst@font@tbu}{`#1}%
+    \expandafter
+    \DeclareMathSymbol \csname mst@#1\endcsname{\mathalpha}{\mst@font@tbu}{`#1}%
+    \expandafter\mst@addtodo@AZ\expandafter #1\csname mst@#1\endcsname
+}%
+\@tfor\mst@tmp:=ABCDEFGHIJKLMNOPQRSTUVWXYZ\do
+     {\expandafter\mst@DeclareMathLetter\mst@tmp}%
+\let\mst@DeclareMathLetter\relax
+\ifmst@nodigits\else
+\def\mst@font@tbu{mtoperatorfont}%
+\ifmst@symboldigits \def\mst@font@tbu{mtpsymbol} \fi
+\ifmst@eulerdigits \def\mst@font@tbu{mteulervm} \fi
+\DeclareMathSymbol{0}{\mathalpha}{\mst@font@tbu}{`0}%
+\DeclareMathSymbol{1}{\mathalpha}{\mst@font@tbu}{`1}%
+\DeclareMathSymbol{2}{\mathalpha}{\mst@font@tbu}{`2}%
+\DeclareMathSymbol{3}{\mathalpha}{\mst@font@tbu}{`3}%
+\DeclareMathSymbol{4}{\mathalpha}{\mst@font@tbu}{`4}%
+\DeclareMathSymbol{5}{\mathalpha}{\mst@font@tbu}{`5}%
+\DeclareMathSymbol{6}{\mathalpha}{\mst@font@tbu}{`6}%
+\DeclareMathSymbol{7}{\mathalpha}{\mst@font@tbu}{`7}%
+\DeclareMathSymbol{8}{\mathalpha}{\mst@font@tbu}{`8}%
+\DeclareMathSymbol{9}{\mathalpha}{\mst@font@tbu}{`9}%
+\fi
+\ifmst@symboldelimiters
+\def\mst@font@tbu{mtpsymbol}%
+\mst@endashfalse
+\mst@emdashfalse
+\else
+\def\mst@font@tbu{mtoperatorfont}%
+\fi
+\ifmst@noexclam\else\typeout{** \string! and \string?}%
+\DeclareMathSymbol{!}{\mathclose}{\mst@font@tbu}{"21}%
+\DeclareMathSymbol{\mst@varfam@exclam}{\mathalpha}{\mst@font@tbu}{"21}%
+\expandafter\mst@addtodo@nonletters\string!\mathclose\mst@varfam@exclam
+\DeclareMathSymbol{?}{\mathclose}{\mst@font@tbu}{"3F}%
+\DeclareMathSymbol{\mst@varfam@question}{\mathalpha}{\mst@font@tbu}{"3F}%
+\expandafter\mst@addtodo@nonletters\string?\mathclose\mst@varfam@question
+\fi
+\def\mst@@doasterisk{\let\ast\mst@ast\mst@mathactivate*{}\mst@ast}%
+\newcommand*\MTnormalasterisk {\let\mst@doasterisk\relax}
+\newcommand*\MTactiveasterisk {\let\mst@doasterisk\mst@@doasterisk}
+\ifmst@asterisk\typeout{** asterisk: \string\ast\space and *}
+    \AtBeginDocument{%
+     \everymath\expandafter
+              {\the\everymath   \mst@doasterisk \MTnormalasterisk }%
+     \everydisplay\expandafter
+              {\the\everydisplay\mst@doasterisk \MTnormalasterisk }}
+  \ifmst@symbolmisc
+    \def\mst@bin@ast{%
+    \mathbin{\mathchoice{\raisebox{-.1\height}%
+                        {\the\textfont\symmtpsymbol\char42}}%
+                      {\raisebox{-.1\height}%
+                        {\the\textfont\symmtpsymbol\char42}}%
+                      {\raisebox{-.1\height}%
+                        {\the\scriptfont\symmtpsymbol\char42}}%
+                      {\raisebox{-.1\height}%
+                        {\the\scriptscriptfont\symmtpsymbol\char42}}}}%
+  \else
+    \def\mst@bin@ast{%
+    \mathbin{\mathchoice{\raisebox{-\mst@lowerast}%
+                        {\the\textfont\symmtoperatorfont\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\textfont\symmtoperatorfont\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\scriptfont\symmtoperatorfont\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\scriptscriptfont\symmtoperatorfont\char42}}}}%
+  \fi
+  \def\mst@varfam@ast{\ifnum\fam=\m@ne\mst@bin@ast\else
+    \mathbin{\mathchoice{\raisebox{-\mst@lowerast}%
+                        {\the\textfont\fam\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\textfont\fam\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\scriptfont\fam\char42}}%
+                      {\raisebox{-\mst@lowerast}%
+                        {\the\scriptscriptfont\fam\char42}}}\fi}%
+  \MTactiveasterisk
+  \DeclareRobustCommand*{\mst@ast}{\mst@bin@ast}
+  \newcommand*\MTlowerast[1]{\def\mst@lowerast{#1}}
+  \MTlowerast{.3\height}
+  \mst@do@easynonletters\expandafter\expandafter\expandafter
+    {\expandafter\the\expandafter\mst@do@easynonletters
+     \expandafter\def\csname mst@ast \endcsname{\mst@varfam@ast}}
+\fi
+\ifmst@nopunct\else\typeout{** punctuation\string: \string, \string. \string:
+    \string; and \string\colon}
+  \DeclareMathSymbol{,}{\mathpunct}{\mst@font@tbu}{"2C}
+  \DeclareMathSymbol{\mst@varfam@comma}{\mathalpha}{\mst@font@tbu}{"2C}
+  \ifmst@ncccomma
+    \typeout{** loading package ncccomma for `smart comma\string'}
+    \RequirePackage{ncccomma}%
+    \AtBeginDocument{\mathcode`\,="8000\relax
+    \@ifpackageloaded{babel}{%
+                 \addto\noextrasfrench{\mathcode`\,="8000\relax}%
+                 \addto\extrasfrench{\mathcode`\,="8000\relax}%
+                 }{}}
+    \let\mathcomma\relax
+    \DeclareMathSymbol{\mathcomma}{\mathpunct}{\mst@font@tbu}{"2C}
+    \edef\mst@NCC@comma{\let\noexpand\@empty\mathpunct
+                        \unexpanded\expandafter{\NCC@comma}%
+                        \let\noexpand\@empty\noexpand\empty}
+    \mst@do@nonletters\expandafter{\the\mst@do@nonletters
+      \let\mathcomma\mst@varfam@comma
+      \let\NCC@comma\mst@NCC@comma
+      }
+  \else
+    \expandafter\mst@addtodo@nonletters\string,\mathpunct\mst@varfam@comma
+  \fi % ncccomma true
+  \DeclareMathSymbol{.}{\mathord}{\mst@font@tbu}{"2E}
+  \DeclareMathSymbol{\mst@varfam@dot}{\mathalpha}{\mst@font@tbu}{"2E}
+  \mst@addtodo@easynonletters\.\mst@varfam@dot
+  \DeclareMathSymbol{:}{\mathrel}{\mst@font@tbu}{"3A} % relation spacing
+  \DeclareMathSymbol{\mst@varfam@colon}{\mathalpha}{\mst@font@tbu}{"3A}
+  \expandafter\mst@addtodo@nonletters\string:\mathrel\mst@varfam@colon
+  \@ifpackageloaded{amsmath}
+  {} % \colon defined in amsmath.sty in terms of : with some enlarged explicit
+     % spacing. No need to intervene.
+  {% no amsmath, use standard punctuation spacing
+    \let\colon\undefined
+    % the reason is if some package has redefined \colon which then
+    % can not be used in \cs{DeclareMathSymbol} anymore (we
+    % shamelessly overwrite...)
+    \DeclareMathSymbol{\colon}{\mathpunct}{\mst@font@tbu}{"3A}
+    \mst@do@nonletters\expandafter{\the\mst@do@nonletters
+        \protected\def\colon{\mathpunct{\mst@varfam@colon}}}%
+  }
+  \DeclareMathSymbol{\mst@varfam@pointvirgule}{\mathalpha}{\mst@font@tbu}{"3B}
+  \ifmst@binarysemicolon
+    \typeout{** semi-colon set to be of type \string\mathbin}
+    \DeclareMathSymbol{;}{\mathbin}{\mst@font@tbu}{"3B}
+    \expandafter\mst@addtodo@nonletters\string;\mathbin\mst@varfam@pointvirgule
+  \else
+    \DeclareMathSymbol{;}{\mathpunct}{\mst@font@tbu}{"3B}
+    \expandafter\mst@addtodo@nonletters\string;\mathpunct\mst@varfam@pointvirgule
+  \fi % binarysemicolno
+\fi % end \ifmst@nopunct else branch
+\ifmst@nominus
+\else
+  \ifmst@XeOrLua
+    \mst@Umathcharnumdef\mst@minus@sign=\mst@Umathcodenum`\-\relax
+  \else
+    \mathchardef\mst@minus@sign=\mathcode`\-\relax
+  \fi
+  \@ifpackageloaded{amsmath}
+    {\def\relbar{\mathrel{\mathpalette\mathsm@sh\mst@minus@sign}}}
+    {\DeclareRobustCommand\relbar{\mathrel{\smash\mst@minus@sign}}}
+  \ifmst@robust@obsessed@LaTeX@era\expandafter\DeclareRobustCommand
+   \else\expandafter\def\fi
+  \rightarrowfill{$\m@th\mathord{\relbar}\mkern-7mu%
+  \cleaders\hbox{$\mkern-2mu\relbar\mkern-2mu$}\hfill
+  \mkern-7mu\mathord\rightarrow$}
+  \ifmst@robust@obsessed@LaTeX@era\expandafter\DeclareRobustCommand
+   \else\expandafter\def\fi
+  \leftarrowfill{$\m@th\mathord\leftarrow\mkern-7mu%
+  \cleaders\hbox{$\mkern-2mu\relbar\mkern-2mu$}\hfill
+  \mkern-7mu\mathord{\relbar}$}
+\fi
+\let\mst@subduedminus\empty
+\let\mst@nonsubduedminus\empty
+\def\mst@dothe@endashstuff#1#2#3{%
+  \edef\mst@tmp@enc{#3}%
+  \if1\mst@OneifUniEnc
+    \mst@Umathchardef#1=2 \symmtoperatorfont "\mst@unicodeminus\relax
+    \mst@Umathchardef#2=7 \symmtoperatorfont "\mst@unicodeminus\relax
+  \else
+    \DeclareMathSymbol{#1}{\mathbin}{mtoperatorfont}
+                      {\csname\mst@tmp@enc\string\textendash\endcsname}
+    \DeclareMathSymbol{#2}{\mathalpha}{mtoperatorfont}
+                      {\csname\mst@tmp@enc\string\textendash\endcsname}
+  \fi}% mst@dothe@endashstuff
+\def\mst@dothe@emdashstuff#1#2#3{%
+  \edef\mst@tmp@enc{#3}%
+  \if1\mst@OneifUniEnc
+    \mst@Umathchardef#1=2 \symmtoperatorfont "2014\relax
+    \mst@Umathchardef#2=7 \symmtoperatorfont "2014\relax
+  \else
+    \DeclareMathSymbol{#1}{\mathbin}{mtoperatorfont}
+                      {\csname\mst@tmp@enc\string\textemdash\endcsname}
+    \DeclareMathSymbol{#2}{\mathalpha}{mtoperatorfont}
+                      {\csname\mst@tmp@enc\string\textemdash\endcsname}
+  \fi}% mst@dothe@emdashstuff
+\def\mst@dothe@hyphenstuff#1#2{%
+  \DeclareMathSymbol{#1}{\mathbin}{\mst@font@tbu}{"2D}%
+  \DeclareMathSymbol{#2}{\mathalpha}{\mst@font@tbu}{"2D}%
+}%
+\def\mst@varfam@minus{\@nameuse{mst@varfam@minus@mv\math@version}}%
+\ifmst@nominus\else
+  \expandafter\mst@addtodo@nonletters\string-\mathbin\mst@varfam@minus
+  \def\mst@nonsubduedminus{%
+    \edef\mst@tmp@enc{\csname mst@encoding@\math@version\endcsname}%
+    \if1\mst@OneifUniEnc
+     \mst@Umathcode`\-=\expandafter
+                       \mst@UmathchardefWorkAround@i
+                       \csname mst@minus@mv\math@version\endcsname
+                       \relax
+    \else
+     \mathcode`\-=\@nameuse{mst@minus@mv\math@version}% self-delimiting
+    \fi
+   }% \mst@nonsubduedminus
+  \ifmst@endash\else\ifmst@emdash\else
+    \def\mst@nonsubduedminus{%
+      \mathcode`\-=\@nameuse{mst@minus@mv\math@version}% self-delimiting
+      }% non Umathchardef \mst@minus@mv<mathversion> macros
+  \fi\fi
+\fi
+\def\mst@UmathchardefWorkAround@i
+    {\expandafter\mst@UmathchardefWorkAround@ii\meaning}%
+\def\mst@UmathchardefWorkAround@ii#1"{"}%
+\let\mst@subduedhbar\@empty
+\let\mst@nonsubduedhbar\@empty
+\ifmst@nohbar\else
+  \def\mst@subduedhbar{\let\hbar\mst@original@hbar}%
+  \def\mst@nonsubduedhbar{\expandafter
+       \let\expandafter\hbar\csname mst@hbar@mv\math@version\endcsname}%
+\fi
+\def\mst@mathrlap{\mathpalette\mst@mathrlapinternal}
+\def\mst@mathrlapinternal#1#2{\rlap{$\mathsurround=0pt#1{#2}$}}
+\def\mst@dothe@hbarstuff#1#2#3{%
+  \edef\mst@tmp@enc{#3}%
+  \if1\mst@OneifUniEnc % Unicode engine and font
+    \mst@Umathchardef#1="7 \symmtletterfont "0127 \relax %% or 210F?
+  \else
+    \begingroup
+    \def\@text@composite##1\@text@composite##2{##2}%
+    \let\add@accent\@firstoftwo
+    \mst@DeclareMathAccent{#2}{\mathalpha}{mtletterfont}%
+                      {\csname\mst@tmp@enc\string\=\endcsname{}}%
+    \endgroup
+    \protected\def#1{\mst@mathrlap{#2{\ }}\mst@h}%
+  \fi
+}% end of \mst@dothe@hbarstuff
+\ifmst@noplus\else\typeout{** \string+ and \string=}
+\DeclareMathSymbol{+}{\mathbin}{\mst@font@tbu}{"2B}
+\DeclareMathSymbol{\mst@varfam@plus}{\mathalpha}{\mst@font@tbu}{"2B}
+\expandafter\mst@addtodo@nonletters\string+\mathbin\mst@varfam@plus
+\fi
+\ifmst@noequal\else
+\ifmst@XeOrLua
+    \mst@Umathcharnumdef\mst@equal@sign=\mst@Umathcodenum`\=\relax
+\else
+    \mathchardef\mst@equal@sign=\mathcode`\=\relax
+\fi
+\@ifpackageloaded{amsmath}
+{\def\Relbar{\mathrel\mst@equal@sign}}
+{\DeclareRobustCommand\Relbar{\mathrel{\mst@equal@sign}}}
+\DeclareMathSymbol{=}{\mathrel}{\mst@font@tbu}{"3D}
+\DeclareMathSymbol{\mst@varfam@equal}{\mathalpha}{\mst@font@tbu}{"3D}
+\typeout{** adding \string= \string; and \string+ to \string\nfss@catcodes}
+\g@addto@macro\nfss@catcodes{%
+  \@makeother\=%
+  \@makeother\;%
+  \@makeother\+%
+}
+\expandafter\mst@addtodo@nonletters\string=\mathrel\mst@varfam@equal
+\fi
+\ifmst@noparen\else\typeout{** parentheses \string( \string) \string[ \string] and slash \string/}
+\ifmst@nosmalldelims
+    \DeclareMathSymbol{(}{\mathopen}{\mst@font@tbu}{"28}
+    \DeclareMathSymbol{)}{\mathclose}{\mst@font@tbu}{"29}
+    \DeclareMathSymbol{[}{\mathopen} {\mst@font@tbu}{"5B}
+    \DeclareMathSymbol{]}{\mathclose}{\mst@font@tbu}{"5D}
+    \DeclareMathSymbol{/}{\mathord}{\mst@font@tbu}{"2F}
+\else
+    \DeclareMathDelimiter{(}{\mathopen}{\mst@font@tbu}{"28}{largesymbols}{"00}
+    \DeclareMathDelimiter{)}{\mathclose}{\mst@font@tbu}{"29}{largesymbols}{"01}
+    \DeclareMathDelimiter{[}{\mathopen} {\mst@font@tbu}{"5B}{largesymbols}{"02}
+    \DeclareMathDelimiter{]}{\mathclose}{\mst@font@tbu}{"5D}{largesymbols}{"03}
+    \DeclareMathDelimiter{/}{\mathord}{\mst@font@tbu}{"2F}{largesymbols}{"0E}
+\fi
+\DeclareMathSymbol{\mst@varfam@lparen}{\mathalpha}{\mst@font@tbu}{40}
+\DeclareMathSymbol{\mst@varfam@rparen}{\mathalpha}{\mst@font@tbu}{41}
+\DeclareMathSymbol{\mst@varfam@lbrack}{\mathalpha}{\mst@font@tbu}{"5B}
+\DeclareMathSymbol{\mst@varfam@rbrack}{\mathalpha}{\mst@font@tbu}{"5D}
+\DeclareMathSymbol{\mst@varfam@slash}{\mathalpha}{\mst@font@tbu}{"2F}
+\expandafter\mst@addtodo@nonletters\string(\mathopen\mst@varfam@lparen
+\expandafter\mst@addtodo@nonletters\string)\mathclose\mst@varfam@rparen
+\expandafter\mst@addtodo@nonletters\string[\mathopen\mst@varfam@lbrack
+\expandafter\mst@addtodo@nonletters\string]\mathclose\mst@varfam@rbrack
+\mst@addtodo@easynonletters\/\mst@varfam@slash
+\fi
+\ifmst@alldelims\typeout{** alldelims: \string< \string>
+  \string\backslash\space\string\setminus\space\string|
+  \string\vert\space\string\mid\space\string\{\space and \string\}}
+\ifmst@nosmalldelims
+    \DeclareMathDelimiter{\mst@varfam@backslash}
+        {\mathalpha}{symbols}{"6E}{largesymbols}{"0F}
+\else
+    \DeclareMathDelimiter{<}{\mathopen}{\mst@font@tbu}{"3C}{largesymbols}{"0A}
+    \DeclareMathDelimiter{>}{\mathclose}{\mst@font@tbu}{"3E}{largesymbols}{"0B}
+    \DeclareMathDelimiter{\backslash}
+        {\mathord}{mtoperatorfont}{"5C}{largesymbols}{"0F}
+    \DeclareMathDelimiter{\mst@varfam@backslash}
+        {\mathalpha}{mtoperatorfont}{"5C}{largesymbols}{"0F}
+\fi
+\DeclareMathSymbol{<}{\mathrel}{\mst@font@tbu}{"3C}
+\DeclareMathSymbol{>}{\mathrel}{\mst@font@tbu}{"3E}
+\DeclareMathSymbol{\mst@varfam@less}{\mathalpha}{\mst@font@tbu}{"3C}
+\DeclareMathSymbol{\mst@varfam@more}{\mathalpha}{\mst@font@tbu}{"3E}
+\expandafter\mst@addtodo@nonletters\string<\mathrel\mst@varfam@less
+\expandafter\mst@addtodo@nonletters\string>\mathrel\mst@varfam@more
+\mst@do@easynonletters\expandafter{\the\mst@do@easynonletters
+            \let\backslash\mst@varfam@backslash}
+\DeclareMathSymbol{\setminus}{\mathbin}{mtoperatorfont}{"5C}
+\DeclareMathSymbol{\mst@varfam@setminus}{\mathalpha}{mtoperatorfont}{"5C}
+\mst@do@nonletters\expandafter{\the\mst@do@nonletters
+            \protected\def\setminus{\mathbin{\mst@varfam@setminus}}}
+\ifmst@XeOrLua
+  \mst@Umathcharnumdef\mst@vert@bar=\mst@Umathcodenum`\|\relax
+\else
+  \mathchardef\mst@vert@bar=\mathcode`\|\relax
+\fi
+\DeclareRobustCommand\models{\mathrel{\mst@vert@bar}\joinrel\Relbar}
+\ifmst@nosmalldelims
+    \DeclareMathSymbol{|}{\mathord}{\mst@font@tbu}{124}
+\else
+    \DeclareMathDelimiter{|}{\mathord}{\mst@font@tbu}{124}{largesymbols}{"0C}
+\fi
+\protected\def\vert{|}
+\DeclareMathSymbol{\mst@varfam@vbar}{\mathalpha}{\mst@font@tbu}{124}
+\mst@addtodo@easynonletters\|\mst@varfam@vbar
+\let\mid\undefined % 1.3: to avoid problems with some packages
+\DeclareMathSymbol{\mid}{\mathrel}{\mst@font@tbu}{124}
+\mst@do@nonletters\expandafter{\the\mst@do@nonletters
+    \protected\def\mid{\mathrel\mst@varfam@vbar}}
+  \ifmst@nosmalldelims
+  \else
+     \let\lbrace\undefined \let\rbrace\undefined
+     \DeclareMathDelimiter{\lbrace}
+        {\mathopen}{\mst@font@tbu}{123}{largesymbols}{"08}
+     \DeclareMathDelimiter{\rbrace}
+        {\mathclose}{\mst@font@tbu}{125}{largesymbols}{"09}
+  \fi
+\DeclareMathSymbol{\mst@varfam@lbrace}{\mathalpha}{\mst@font@tbu}{123}
+\DeclareMathSymbol{\mst@varfam@rbrace}{\mathalpha}{\mst@font@tbu}{125}
+\DeclareRobustCommand*{\mst@lbrace}
+        {\ifmmode\mathopen\mst@varfam@lbrace\else\textbraceleft\fi}
+\DeclareRobustCommand*{\mst@rbrace}
+        {\ifmmode\mathclose\mst@varfam@rbrace\else\textbraceright\fi}
+\mst@do@nonletters\expandafter{\the\mst@do@nonletters
+    \mst@dobraces{\expandafter\let\csname\string{ \expandafter\endcsname
+                                  \csname mst@lbrace \endcsname
+                  \expandafter\let\csname\string} \expandafter\endcsname
+                                  \csname mst@rbrace \endcsname}}
+\fi % end of \ifmst@alldelims
+\newcommand*{\MTexplicitbracesobeymathxx}{\let\mst@dobraces\@firstofone}
+\newcommand*{\MTexplicitbracesdonotobeymathxx}{\let\mst@dobraces\@gobble}
+\MTexplicitbracesdonotobeymathxx
+\ifmst@nospecials
+\else
+   \typeout{** \string\#\space\string\mathdollar\space
+               \string\%\space\string\&\space}
+  \ifmst@XeOrLua
+  \mst@Umathcode`\#=0 \symmtoperatorfont "23 \relax
+  \mst@Umathchardef\mathdollar=0 \symmtoperatorfont "24 \relax
+  \mst@Umathcode`\%=0 \symmtoperatorfont "25 \relax
+  \mst@Umathcode`\&=0 \symmtoperatorfont "26 \relax
+  \mst@do@easynonletters\expandafter{%
+    \the\mst@do@easynonletters
+    \mst@Umathcode`\#=7 \symmtoperatorfont "23 \relax
+    \mst@Umathchardef\mathdollar=7 \symmtoperatorfont "24 \relax
+    \mst@Umathcode`\%=7 \symmtoperatorfont "25 \relax
+    \mst@Umathcode`\&=7 \symmtoperatorfont "26 \relax
+    }
+  \else
+  \count@=\symmtoperatorfont
+  \multiply\count@ by \@cclvi
+  \advance\count@ by 35
+      \mathcode`\#\count@
+  \advance\count@ by \@ne
+      \mathchardef\mathdollar\count@
+  \advance\count@ by \@ne
+      \mathcode`\%\count@
+  \advance\count@ by \@ne
+      \mathcode`\&\count@
+  \count@=\symmtoperatorfont
+  \multiply\count@ by \@cclvi
+  \advance\count@ by 28707 % = "7023
+      \mathchardef\mst@varfam@mathhash\count@
+  \advance\count@ by \@ne
+      \mathchardef\mst@varfam@mathdollar\count@
+  \advance\count@ by \@ne
+      \mathchardef\mst@varfam@mathpercent\count@
+  \advance\count@ by \@ne
+      \mathchardef\mst@varfam@mathampersand\count@
+  \mst@do@easynonletters\expandafter{\the\mst@do@easynonletters
+    \mathcode`\#=\mst@varfam@mathhash
+    \let\mathdollar\mst@varfam@mathdollar
+    \mathcode`\%=\mst@varfam@mathpercent
+    \mathcode`\&=\mst@varfam@mathampersand}
+  \fi
+\fi
+\ifmst@symbolmisc\typeout{** symbolmisc: miscellaneous math symbols from Symbol font}
+\let\mst@prod\prod
+\let\MToriginalprod\prod
+\DeclareMathSymbol{\prodpsy}{\mathop}{mtpsymbol}{213}
+\protected\def\prod{\ifinner\prodpsy\else\mst@prod\fi}
+\let\mst@sum\sum
+\let\MToriginalsum\sum
+\DeclareMathSymbol{\sumpsy}{\mathop}{mtpsymbol}{229}
+\protected\def\sum{\ifinner\sumpsy\else\mst@sum\fi}
+\DeclareMathSymbol{\mst@implies}{\mathrel}{mtpsymbol}{222}
+\DeclareRobustCommand*{\implies}{\;\mst@implies\;}
+\DeclareMathSymbol{\mst@impliedby}{\mathrel}{mtpsymbol}{220}
+\DeclareRobustCommand*{\impliedby}{\;\mst@impliedby\;}
+\DeclareRobustCommand*{\iff}{\;\mst@impliedby\mathrel{\mkern-3mu}\mst@implies\;}
+\DeclareMathSymbol{\mst@iff}{\mathrel}{mtpsymbol}{219}
+\DeclareRobustCommand*{\shortiff}{\;\mst@iff\;}
+\DeclareMathSymbol{\mst@to}{\mathrel}{mtpsymbol}{174}
+\DeclareMathSymbol{\mst@trait}{\mathrel}{mtpsymbol}{190}
+\DeclareRobustCommand*\to{\mst@to}
+\DeclareRobustCommand*\longto{\mkern2mu\mst@trait\mathrel{\mkern-10mu}\mst@to}
+\DeclareRobustCommand*\mapsto{\mapstochar\mathrel{\mkern0.2mu}\mst@to}
+\DeclareRobustCommand*\longmapsto{%
+\mapstochar\mathrel{\mkern2mu}\mst@trait\mathrel{\mkern-10mu}\mst@to}
+\DeclareMathSymbol{\aleph}{\mathord}{mtpsymbol}{192}
+\DeclareMathSymbol{\inftypsy}{\mathord}{mtpsymbol}{165}
+\DeclareMathSymbol{\emptyset}{\mathord}{mtpsymbol}{198}
+\let\varnothing\emptyset
+\DeclareMathSymbol{\nabla}{\mathord}{mtpsymbol}{209}
+\DeclareMathSymbol{\surd}{\mathop}{mtpsymbol}{214}
+\let\angle\undefined
+\DeclareMathSymbol{\angle}{\mathord}{mtpsymbol}{208}
+\DeclareMathSymbol{\forall}{\mathord}{mtpsymbol}{34}
+\DeclareMathSymbol{\exists}{\mathord}{mtpsymbol}{36}
+\DeclareMathSymbol{\neg}{\mathord}{mtpsymbol}{216}
+\DeclareMathSymbol{\clubsuit}{\mathord}{mtpsymbol}{167}
+\DeclareMathSymbol{\diamondsuit}{\mathord}{mtpsymbol}{168}
+\DeclareMathSymbol{\heartsuit}{\mathord}{mtpsymbol}{169}
+\DeclareMathSymbol{\spadesuit}{\mathord}{mtpsymbol}{170}
+\DeclareMathSymbol{\smallint}{\mathop}{mtpsymbol}{242}
+\DeclareMathSymbol{\wedge}{\mathbin}{mtpsymbol}{217}
+\DeclareMathSymbol{\vee}{\mathbin}{mtpsymbol}{218}
+\DeclareMathSymbol{\cap}{\mathbin}{mtpsymbol}{199}
+\DeclareMathSymbol{\cup}{\mathbin}{mtpsymbol}{200}
+\DeclareMathSymbol{\bullet}{\mathbin}{mtpsymbol}{183}
+\DeclareMathSymbol{\div}{\mathbin}{mtpsymbol}{184}
+\DeclareMathSymbol{\otimes}{\mathbin}{mtpsymbol}{196}
+\DeclareMathSymbol{\oplus}{\mathbin}{mtpsymbol}{197}
+\DeclareMathSymbol{\pm}{\mathbin}{mtpsymbol}{177}
+\DeclareMathSymbol{\times}{\mathbin}{mtpsymbol}{180}
+\DeclareMathSymbol{\proptopsy}{\mathrel}{mtpsymbol}{181}
+\DeclareMathSymbol{\mid}{\mathrel}{mtpsymbol}{124}
+\DeclareMathSymbol{\leq}{\mathrel}{mtpsymbol}{163}
+\DeclareMathSymbol{\geq}{\mathrel}{mtpsymbol}{179}
+\DeclareMathSymbol{\approx}{\mathrel}{mtpsymbol}{187}
+\DeclareMathSymbol{\supset}{\mathrel}{mtpsymbol}{201}
+\DeclareMathSymbol{\subset}{\mathrel}{mtpsymbol}{204}
+\DeclareMathSymbol{\supseteq}{\mathrel}{mtpsymbol}{202}
+\DeclareMathSymbol{\subseteq}{\mathrel}{mtpsymbol}{205}
+\DeclareMathSymbol{\in}{\mathrel}{mtpsymbol}{206}
+\DeclareMathSymbol{\sim}{\mathrel}{mtpsymbol}{126}
+\let\cong\undefined
+\DeclareMathSymbol{\cong}{\mathrel}{mtpsymbol}{64}
+\DeclareMathSymbol{\perp}{\mathrel}{mtpsymbol}{94}
+\DeclareMathSymbol{\equiv}{\mathrel}{mtpsymbol}{186}
+\let\notin\undefined
+\DeclareMathSymbol{\notin}{\mathrel}{mtpsymbol}{207}
+\DeclareMathDelimiter{\rangle}
+   {\mathclose}{mtpsymbol}{241}{largesymbols}{"0B}
+\DeclareMathDelimiter{\langle}
+   {\mathopen}{mtpsymbol}{225}{largesymbols}{"0A}
+\fi
+\ifmst@symbolre\typeout{** symbolre: \string\Re\space and \string\Im\space from Symbol font}
+\DeclareMathSymbol{\Re}{\mathord}{mtpsymbol}{"C2}
+\DeclareMathSymbol{\Im}{\mathord}{mtpsymbol}{"C1}
+\DeclareMathSymbol{\DotTriangle}{\mathord}{mtpsymbol}{92}
+\fi
+\let\mst@mathord\mathalpha
+\mst@goaheadtrue
+\ifmst@selfGreek
+    \def\mst@font@tbu{mtselfGreekfont}
+\else
+    \ifmst@eulergreek
+        \def\mst@font@tbu{mteulervm}
+    \else
+      \ifmst@symbolgreek
+        \def\mst@font@tbu{mtpsymbol}
+        \let\mst@mathord\mathord
+      \else
+         \ifmst@LGRgreek
+            \mst@goaheadfalse
+         \else
+           \mst@goaheadfalse
+           \def\mst@omicron {\mst@alph@omicron{o}}
+         \fi
+      \fi
+   \fi
+\fi
+\ifmst@goahead
+  \DeclareMathSymbol{\mst@Alpha}{\mst@mathord}{\mst@font@tbu}{"41}
+  \DeclareMathSymbol{\mst@Beta}{\mst@mathord}{\mst@font@tbu}{"42}
+  \DeclareMathSymbol{\mst@Epsilon}{\mst@mathord}{\mst@font@tbu}{"45}
+  \DeclareMathSymbol{\mst@Zeta}{\mst@mathord}{\mst@font@tbu}{"5A}
+  \DeclareMathSymbol{\mst@Eta}{\mst@mathord}{\mst@font@tbu}{"48}
+  \DeclareMathSymbol{\mst@Iota}{\mst@mathord}{\mst@font@tbu}{"49}
+  \DeclareMathSymbol{\mst@Kappa}{\mst@mathord}{\mst@font@tbu}{"4B}
+  \DeclareMathSymbol{\mst@Mu}{\mst@mathord}{\mst@font@tbu}{"4D}
+  \DeclareMathSymbol{\mst@Nu}{\mst@mathord}{\mst@font@tbu}{"4E}
+  \DeclareMathSymbol{\mst@Omicron}{\mst@mathord}{\mst@font@tbu}{"4F}
+  \DeclareMathSymbol{\mst@Rho}{\mst@mathord}{\mst@font@tbu}{"50}
+  \DeclareMathSymbol{\mst@Tau}{\mst@mathord}{\mst@font@tbu}{"54}
+  \DeclareMathSymbol{\mst@Chi}{\mst@mathord}{\mst@font@tbu}{"58}
+  \ifx\mst@mathord\mathord
+%% attention le P de Symbol est un \Pi pas un \Rho
+    \DeclareMathSymbol{\mst@Rho}{\mathord}{mtpsymbol}{"52}
+%% attention le X de Symbol est un \Xi pas un \Chi
+    \DeclareMathSymbol{\mst@Chi}{\mathord}{mtpsymbol}{"43}
+%% attention le F de Symbol est un \Phi. Il n'y a pas de \Digamma
+    \DeclareMathSymbol{\mst@Gamma}{\mathord}{mtpsymbol}{"47}
+    \DeclareMathSymbol{\mst@Delta}{\mathord}{mtpsymbol}{"44}
+    \DeclareMathSymbol{\mst@Theta}{\mathord}{mtpsymbol}{"51}
+    \DeclareMathSymbol{\mst@Lambda}{\mathord}{mtpsymbol}{"4C}
+    \DeclareMathSymbol{\mst@Xi}{\mathord}{mtpsymbol}{"58}
+    \DeclareMathSymbol{\mst@Pi}{\mathord}{mtpsymbol}{"50}
+    \DeclareMathSymbol{\mst@Sigma}{\mathord}{mtpsymbol}{"53}
+    \DeclareMathSymbol{\mst@Upsilon}{\mathord}{mtpsymbol}{"A1}
+    \DeclareMathSymbol{\mst@Phi}{\mathord}{mtpsymbol}{"46}
+    \DeclareMathSymbol{\mst@Psi}{\mathord}{mtpsymbol}{"59}
+    \DeclareMathSymbol{\mst@Omega}{\mathord}{mtpsymbol}{"57}
+  \else % de \mst@mathord=\mathord
+    \DeclareMathSymbol\mst@Digamma  {\mathalpha}{\mst@font@tbu}{"46}
+    \DeclareMathSymbol\mst@Gamma    {\mathalpha}{\mst@font@tbu}{"00}
+    \DeclareMathSymbol\mst@Delta    {\mathalpha}{\mst@font@tbu}{"01}
+    \DeclareMathSymbol\mst@Theta    {\mathalpha}{\mst@font@tbu}{"02}
+    \DeclareMathSymbol\mst@Lambda   {\mathalpha}{\mst@font@tbu}{"03}
+    \DeclareMathSymbol\mst@Xi       {\mathalpha}{\mst@font@tbu}{"04}
+    \DeclareMathSymbol\mst@Pi       {\mathalpha}{\mst@font@tbu}{"05}
+    \DeclareMathSymbol\mst@Sigma    {\mathalpha}{\mst@font@tbu}{"06}
+    \DeclareMathSymbol\mst@Upsilon  {\mathalpha}{\mst@font@tbu}{"07}
+    \DeclareMathSymbol\mst@Phi      {\mathalpha}{\mst@font@tbu}{"08}
+    \DeclareMathSymbol\mst@Psi      {\mathalpha}{\mst@font@tbu}{"09}
+    \DeclareMathSymbol\mst@Omega    {\mathalpha}{\mst@font@tbu}{"0A}
+  \fi % de \mst@mathord=\mathord
+\fi % fin de goahead
+\ifmst@goahead
+ \ifmst@eulergreek
+  \DeclareMathSymbol{\mst@alpha}  {\mathalpha}{mteulervm}{"0B}
+  \DeclareMathSymbol{\mst@beta}   {\mathalpha}{mteulervm}{"0C}
+  \DeclareMathSymbol{\mst@gamma}  {\mathalpha}{mteulervm}{"0D}
+  \DeclareMathSymbol{\mst@delta}  {\mathalpha}{mteulervm}{"0E}
+  \DeclareMathSymbol{\mst@epsilon}{\mathalpha}{mteulervm}{"0F}
+  \DeclareMathSymbol{\mst@zeta}   {\mathalpha}{mteulervm}{"10}
+  \DeclareMathSymbol{\mst@eta}    {\mathalpha}{mteulervm}{"11}
+  \DeclareMathSymbol{\mst@theta}  {\mathalpha}{mteulervm}{"12}
+  \DeclareMathSymbol{\mst@iota}   {\mathalpha}{mteulervm}{"13}
+  \DeclareMathSymbol{\mst@kappa}  {\mathalpha}{mteulervm}{"14}
+  \DeclareMathSymbol{\mst@lambda} {\mathalpha}{mteulervm}{"15}
+  \DeclareMathSymbol{\mst@mu}     {\mathalpha}{mteulervm}{"16}
+  \DeclareMathSymbol{\mst@nu}     {\mathalpha}{mteulervm}{"17}
+  \DeclareMathSymbol{\mst@xi}     {\mathalpha}{mteulervm}{"18}
+  \DeclareMathSymbol{\mst@omicron}{\mathalpha}{mteulervm}{"6F}
+  \DeclareMathSymbol{\mst@pi}     {\mathalpha}{mteulervm}{"19}
+  \DeclareMathSymbol{\mst@rho}    {\mathalpha}{mteulervm}{"1A}
+  \DeclareMathSymbol{\mst@sigma}  {\mathalpha}{mteulervm}{"1B}
+  \DeclareMathSymbol{\mst@tau}    {\mathalpha}{mteulervm}{"1C}
+  \DeclareMathSymbol{\mst@upsilon}{\mathalpha}{mteulervm}{"1D}
+  \DeclareMathSymbol{\mst@phi}    {\mathalpha}{mteulervm}{"1E}
+  \DeclareMathSymbol{\mst@chi}    {\mathalpha}{mteulervm}{"1F}
+  \DeclareMathSymbol{\mst@psi}    {\mathalpha}{mteulervm}{"20}
+  \DeclareMathSymbol{\mst@omega}  {\mathalpha}{mteulervm}{"21}
+  \DeclareMathSymbol{\mst@varepsilon}{\mathalpha}{mteulervm}{"22}
+  \DeclareMathSymbol{\mst@vartheta}{\mathalpha}{mteulervm}{"23}
+  \DeclareMathSymbol{\mst@varpi}  {\mathalpha}{mteulervm}{"24}
+  \let\mst@varrho=\mst@rho
+  \let\mst@varsigma=\mst@sigma
+  \DeclareMathSymbol{\mst@varphi} {\mathalpha}{mteulervm}{"27}
+  \DeclareMathSymbol{\mst@partial}{\mathalpha}{mteulervm}{"40}
+  \DeclareMathSymbol{\mst@wp}{\mathalpha}{mteulervm}{"7D}
+  \DeclareMathSymbol{\mst@ell}{\mathalpha}{mteulervm}{"60}
+ \else
+  \ifmst@symbolgreek
+  \DeclareMathSymbol{\mst@alpha}{\mathord}{mtpsymbol}{"61}
+  \DeclareMathSymbol{\mst@beta}{\mathord}{mtpsymbol}{"62}
+  \DeclareMathSymbol{\mst@gamma}{\mathord}{mtpsymbol}{"67}
+  \DeclareMathSymbol{\mst@delta}{\mathord}{mtpsymbol}{"64}
+  \DeclareMathSymbol{\mst@epsilon}{\mathord}{mtpsymbol}{"65}
+  \DeclareMathSymbol{\mst@zeta}{\mathord}{mtpsymbol}{"7A}
+  \DeclareMathSymbol{\mst@eta}{\mathord}{mtpsymbol}{"68}
+  \DeclareMathSymbol{\mst@theta}{\mathord}{mtpsymbol}{"71}
+  \DeclareMathSymbol{\mst@iota}{\mathord}{mtpsymbol}{"69}
+  \DeclareMathSymbol{\mst@kappa}{\mathord}{mtpsymbol}{"6B}
+  \DeclareMathSymbol{\mst@lambda}{\mathord}{mtpsymbol}{"6C}
+  \DeclareMathSymbol{\mst@mu}{\mathord}{mtpsymbol}{"6D}
+  \DeclareMathSymbol{\mst@nu}{\mathord}{mtpsymbol}{"6E}
+  \DeclareMathSymbol{\mst@xi}{\mathord}{mtpsymbol}{"78}
+  \DeclareMathSymbol{\mst@omicron}{\mathord}{mtpsymbol}{"6F}
+  \DeclareMathSymbol{\mst@pi}{\mathord}{mtpsymbol}{"70}
+  \DeclareMathSymbol{\mst@rho}{\mathord}{mtpsymbol}{"72}
+  \DeclareMathSymbol{\mst@sigma}{\mathord}{mtpsymbol}{"73}
+  \DeclareMathSymbol{\mst@tau}{\mathord}{mtpsymbol}{"74}
+  \DeclareMathSymbol{\mst@upsilon}{\mathord}{mtpsymbol}{"75}
+  \DeclareMathSymbol{\mst@phi}{\mathord}{mtpsymbol}{"66}
+  \DeclareMathSymbol{\mst@chi}{\mathord}{mtpsymbol}{"63}
+  \DeclareMathSymbol{\mst@psi}{\mathord}{mtpsymbol}{"79}
+  \DeclareMathSymbol{\mst@omega}{\mathord}{mtpsymbol}{"77}
+  \let\mst@varepsilon=\mst@epsilon
+  \DeclareMathSymbol{\mst@vartheta}{\mathord}{mtpsymbol}{"4A}
+  \DeclareMathSymbol{\mst@varpi}{\mathord}{mtpsymbol}{"76}
+  \let\mst@varrho=\mst@rho
+  \DeclareMathSymbol{\mst@varsigma}{\mathord}{mtpsymbol}{"56}
+  \DeclareMathSymbol{\mst@varphi}{\mathord}{mtpsymbol}{"6A}
+  \DeclareMathSymbol{\mst@partial}{\mathord}{mtpsymbol}{"B6}
+  \DeclareMathSymbol{\mst@wp}{\mathord}{mtpsymbol}{"C3}
+  \fi
+ \fi
+\fi
+\ifmst@LGRgreek
+  \DeclareMathSymbol{\Alphaup}{\mathalpha}{mtgreekup}{65}
+  \DeclareMathSymbol{\Betaup}{\mathalpha}{mtgreekup}{66}
+  \DeclareMathSymbol{\Epsilonup}{\mathalpha}{mtgreekup}{69}
+  \DeclareMathSymbol{\Zetaup}{\mathalpha}{mtgreekup}{90}
+  \DeclareMathSymbol{\Etaup}{\mathalpha}{mtgreekup}{72}
+  \DeclareMathSymbol{\Iotaup}{\mathalpha}{mtgreekup}{73}
+  \DeclareMathSymbol{\Kappaup}{\mathalpha}{mtgreekup}{75}
+  \DeclareMathSymbol{\Muup}{\mathalpha}{mtgreekup}{77}
+  \DeclareMathSymbol{\Nuup}{\mathalpha}{mtgreekup}{78}
+  \DeclareMathSymbol{\Omicronup}{\mathalpha}{mtgreekup}{79}
+  \DeclareMathSymbol{\Rhoup}{\mathalpha}{mtgreekup}{82}
+  \DeclareMathSymbol{\Tauup}{\mathalpha}{mtgreekup}{84}
+  \DeclareMathSymbol{\Chiup}{\mathalpha}{mtgreekup}{81}
+  %
+  \DeclareMathSymbol{\Alphait}{\mathalpha}{mtgreekit}{65}
+  \DeclareMathSymbol{\Betait}{\mathalpha}{mtgreekit}{66}
+  \DeclareMathSymbol{\Epsilonit}{\mathalpha}{mtgreekit}{69}
+  \DeclareMathSymbol{\Zetait}{\mathalpha}{mtgreekit}{90}
+  \DeclareMathSymbol{\Etait}{\mathalpha}{mtgreekit}{72}
+  \DeclareMathSymbol{\Iotait}{\mathalpha}{mtgreekit}{73}
+  \DeclareMathSymbol{\Kappait}{\mathalpha}{mtgreekit}{75}
+  \DeclareMathSymbol{\Muit}{\mathalpha}{mtgreekit}{77}
+  \DeclareMathSymbol{\Nuit}{\mathalpha}{mtgreekit}{78}
+  \DeclareMathSymbol{\Omicronit}{\mathalpha}{mtgreekit}{79}
+  \DeclareMathSymbol{\Rhoit}{\mathalpha}{mtgreekit}{82}
+  \DeclareMathSymbol{\Tauit}{\mathalpha}{mtgreekit}{84}
+  \DeclareMathSymbol{\Chiit}{\mathalpha}{mtgreekit}{81}
+  \DeclareMathSymbol{\Digammaup}{\mathalpha}{mtgreekup}{195}
+  \DeclareMathSymbol{\Digammait}{\mathalpha}{mtgreekit}{195}
+  %
+  \DeclareMathSymbol{\Gammaup}{\mathalpha}{mtgreekup}{71}
+  \DeclareMathSymbol{\Deltaup}{\mathalpha}{mtgreekup}{68}
+  \DeclareMathSymbol{\Thetaup}{\mathalpha}{mtgreekup}{74}
+  \DeclareMathSymbol{\Lambdaup}{\mathalpha}{mtgreekup}{76}
+  \DeclareMathSymbol{\Xiup}{\mathalpha}{mtgreekup}{88}
+  \DeclareMathSymbol{\Piup}{\mathalpha}{mtgreekup}{80}
+  \DeclareMathSymbol{\Sigmaup}{\mathalpha}{mtgreekup}{83}
+  \DeclareMathSymbol{\Upsilonup}{\mathalpha}{mtgreekup}{85}
+  \DeclareMathSymbol{\Phiup}{\mathalpha}{mtgreekup}{70}
+  \DeclareMathSymbol{\Psiup}{\mathalpha}{mtgreekup}{89}
+  \DeclareMathSymbol{\Omegaup}{\mathalpha}{mtgreekup}{87}
+  %
+  \DeclareMathSymbol{\Gammait}{\mathalpha}{mtgreekit}{71}
+  \DeclareMathSymbol{\Deltait}{\mathalpha}{mtgreekit}{68}
+  \DeclareMathSymbol{\Thetait}{\mathalpha}{mtgreekit}{74}
+  \DeclareMathSymbol{\Lambdait}{\mathalpha}{mtgreekit}{76}
+  \DeclareMathSymbol{\Xiit}{\mathalpha}{mtgreekit}{88}
+  \DeclareMathSymbol{\Piit}{\mathalpha}{mtgreekit}{80}
+  \DeclareMathSymbol{\Sigmait}{\mathalpha}{mtgreekit}{83}
+  \DeclareMathSymbol{\Upsilonit}{\mathalpha}{mtgreekit}{85}
+  \DeclareMathSymbol{\Phiit}{\mathalpha}{mtgreekit}{70}
+  \DeclareMathSymbol{\Psiit}{\mathalpha}{mtgreekit}{89}
+  \DeclareMathSymbol{\Omegait}{\mathalpha}{mtgreekit}{87}
+  %
+  \def\mst@Alpha{\ifmst@greek@upper@up\Alphaup\else\Alphait\fi}%
+  \def\mst@Beta{\ifmst@greek@upper@up\Betaup\else\Betait\fi}%
+  \def\mst@Epsilon{\ifmst@greek@upper@up\Epsilonup\else\Epsilonit\fi}%
+  \def\mst@Zeta{\ifmst@greek@upper@up\Zetaup\else\Zetait\fi}%
+  \def\mst@Eta{\ifmst@greek@upper@up\Etaup\else\Etait\fi}%
+  \def\mst@Iota{\ifmst@greek@upper@up\Iotaup\else\Iotait\fi}%
+  \def\mst@Kappa{\ifmst@greek@upper@up\Kappaup\else\Kappait\fi}%
+  \def\mst@Mu{\ifmst@greek@upper@up\Muup\else\Muit\fi}%
+  \def\mst@Nu{\ifmst@greek@upper@up\Nuup\else\Nuit\fi}%
+  \def\mst@Omicron{\ifmst@greek@upper@up\Omicronup\else\Omicronit\fi}%
+  \def\mst@Rho{\ifmst@greek@upper@up\Rhoup\else\Rhoit\fi}%
+  \def\mst@Tau{\ifmst@greek@upper@up\Tauup\else\Tauit\fi}%
+  \def\mst@Chi{\ifmst@greek@upper@up\Chiup\else\Chiit\fi}%
+  %
+  \def\mst@Digamma{\ifmst@greek@upper@up\Digammaup\else\Digammait\fi}%
+  %
+  \def\mst@Gamma{\ifmst@greek@upper@up\Gammaup\else\Gammait\fi}%
+  \def\mst@Delta{\ifmst@greek@upper@up\Deltaup\else\Deltait\fi}%
+  \def\mst@Theta{\ifmst@greek@upper@up\Thetaup\else\Thetait\fi}%
+  \def\mst@Lambda{\ifmst@greek@upper@up\Lambdaup\else\Lambdait\fi}%
+  \def\mst@Xi{\ifmst@greek@upper@up\Xiup\else\Xiit\fi}%
+  \def\mst@Pi{\ifmst@greek@upper@up\Piup\else\Piit\fi}%
+  \def\mst@Sigma{\ifmst@greek@upper@up\Sigmaup\else\Sigmait\fi}%
+  \def\mst@Upsilon{\ifmst@greek@upper@up\Upsilonup\else\Upsilonit\fi}%
+  \def\mst@Phi{\ifmst@greek@upper@up\Phiup\else\Phiit\fi}%
+  \def\mst@Psi{\ifmst@greek@upper@up\Psiup\else\Psiit\fi}%
+  \def\mst@Omega{\ifmst@greek@upper@up\Omegaup\else\Omegait\fi}%
+  %
+  \DeclareMathSymbol{\alphaup}{\mathalpha}{mtgreekup}{97}
+  \DeclareMathSymbol{\betaup}{\mathalpha}{mtgreekup}{98}
+  \DeclareMathSymbol{\gammaup}{\mathalpha}{mtgreekup}{103}
+  \DeclareMathSymbol{\deltaup}{\mathalpha}{mtgreekup}{100}
+  \DeclareMathSymbol{\epsilonup}{\mathalpha}{mtgreekup}{101}
+  \DeclareMathSymbol{\zetaup}{\mathalpha}{mtgreekup}{122}
+  \DeclareMathSymbol{\etaup}{\mathalpha}{mtgreekup}{104}
+  \DeclareMathSymbol{\thetaup}{\mathalpha}{mtgreekup}{106}
+  \DeclareMathSymbol{\iotaup}{\mathalpha}{mtgreekup}{105}
+  \DeclareMathSymbol{\kappaup}{\mathalpha}{mtgreekup}{107}
+  \DeclareMathSymbol{\lambdaup}{\mathalpha}{mtgreekup}{108}
+  \DeclareMathSymbol{\muup}{\mathalpha}{mtgreekup}{109}
+  \DeclareMathSymbol{\nuup}{\mathalpha}{mtgreekup}{110}
+  \DeclareMathSymbol{\xiup}{\mathalpha}{mtgreekup}{120}
+  \DeclareMathSymbol{\omicronup}{\mathalpha}{mtgreekup}{111}
+  \DeclareMathSymbol{\piup}{\mathalpha}{mtgreekup}{112}
+  \DeclareMathSymbol{\rhoup}{\mathalpha}{mtgreekup}{114}
+  \DeclareMathSymbol{\sigmaup}{\mathalpha}{mtgreekup}{115}
+  \DeclareMathSymbol{\tauup}{\mathalpha}{mtgreekup}{116}
+  \DeclareMathSymbol{\upsilonup}{\mathalpha}{mtgreekup}{117}
+  \DeclareMathSymbol{\phiup}{\mathalpha}{mtgreekup}{102}
+  \DeclareMathSymbol{\chiup}{\mathalpha}{mtgreekup}{113}
+  \DeclareMathSymbol{\psiup}{\mathalpha}{mtgreekup}{121}
+  \DeclareMathSymbol{\omegaup}{\mathalpha}{mtgreekup}{119}
+  %
+  \DeclareMathSymbol{\digammaup}{\mathalpha}{mtgreekup}{147}
+  \DeclareMathSymbol{\varsigmaup}{\mathalpha}{mtgreekup}{99}
+  %
+  \DeclareMathSymbol{\alphait}{\mathalpha}{mtgreekit}{97}
+  \DeclareMathSymbol{\betait}{\mathalpha}{mtgreekit}{98}
+  \DeclareMathSymbol{\gammait}{\mathalpha}{mtgreekit}{103}
+  \DeclareMathSymbol{\deltait}{\mathalpha}{mtgreekit}{100}
+  \DeclareMathSymbol{\epsilonit}{\mathalpha}{mtgreekit}{101}
+  \DeclareMathSymbol{\zetait}{\mathalpha}{mtgreekit}{122}
+  \DeclareMathSymbol{\etait}{\mathalpha}{mtgreekit}{104}
+  \DeclareMathSymbol{\thetait}{\mathalpha}{mtgreekit}{106}
+  \DeclareMathSymbol{\iotait}{\mathalpha}{mtgreekit}{105}
+  \DeclareMathSymbol{\kappait}{\mathalpha}{mtgreekit}{107}
+  \DeclareMathSymbol{\lambdait}{\mathalpha}{mtgreekit}{108}
+  \DeclareMathSymbol{\muit}{\mathalpha}{mtgreekit}{109}
+  \DeclareMathSymbol{\nuit}{\mathalpha}{mtgreekit}{110}
+  \DeclareMathSymbol{\xiit}{\mathalpha}{mtgreekit}{120}
+  \DeclareMathSymbol{\omicronit}{\mathalpha}{mtgreekit}{111}
+  \DeclareMathSymbol{\piit}{\mathalpha}{mtgreekit}{112}
+  \DeclareMathSymbol{\rhoit}{\mathalpha}{mtgreekit}{114}
+  \DeclareMathSymbol{\sigmait}{\mathalpha}{mtgreekit}{115}
+  \DeclareMathSymbol{\tauit}{\mathalpha}{mtgreekit}{116}
+  \DeclareMathSymbol{\upsilonit}{\mathalpha}{mtgreekit}{117}
+  \DeclareMathSymbol{\phiit}{\mathalpha}{mtgreekit}{102}
+  \DeclareMathSymbol{\chiit}{\mathalpha}{mtgreekit}{113}
+  \DeclareMathSymbol{\psiit}{\mathalpha}{mtgreekit}{121}
+  \DeclareMathSymbol{\omegait}{\mathalpha}{mtgreekit}{119}
+  %
+  \DeclareMathSymbol{\digammait}{\mathalpha}{mtgreekit}{147}
+  \DeclareMathSymbol{\varsigmait}{\mathalpha}{mtgreekit}{99}
+  %
+  \def\mst@alpha{\ifmst@greek@lower@up\alphaup\else\alphait\fi}%
+  \def\mst@beta{\ifmst@greek@lower@up\betaup\else\betait\fi}%
+  \def\mst@gamma{\ifmst@greek@lower@up\gammaup\else\gammait\fi}%
+  \def\mst@delta{\ifmst@greek@lower@up\deltaup\else\deltait\fi}%
+  \def\mst@epsilon{\ifmst@greek@lower@up\epsilonup\else\epsilonit\fi}%
+  \def\mst@zeta{\ifmst@greek@lower@up\zetaup\else\zetait\fi}%
+  \def\mst@eta{\ifmst@greek@lower@up\etaup\else\etait\fi}%
+  \def\mst@theta{\ifmst@greek@lower@up\thetaup\else\thetait\fi}%
+  \def\mst@iota{\ifmst@greek@lower@up\iotaup\else\iotait\fi}%
+  \def\mst@kappa{\ifmst@greek@lower@up\kappaup\else\kappait\fi}%
+  \def\mst@lambda{\ifmst@greek@lower@up\lambdaup\else\lambdait\fi}%
+  \def\mst@mu{\ifmst@greek@lower@up\muup\else\muit\fi}%
+  \def\mst@nu{\ifmst@greek@lower@up\nuup\else\nuit\fi}%
+  \def\mst@xi{\ifmst@greek@lower@up\xiup\else\xiit\fi}%
+  \def\mst@omicron{\ifmst@greek@lower@up\omicronup\else\omicronit\fi}%
+  \def\mst@pi{\ifmst@greek@lower@up\piup\else\piit\fi}%
+  \def\mst@rho{\ifmst@greek@lower@up\rhoup\else\rhoit\fi}%
+  \def\mst@sigma{\ifmst@greek@lower@up\sigmaup\else\sigmait\fi}%
+  \def\mst@tau{\ifmst@greek@lower@up\tauup\else\tauit\fi}%
+  \def\mst@upsilon{\ifmst@greek@lower@up\upsilonup\else\upsilonit\fi}%
+  \def\mst@phi{\ifmst@greek@lower@up\phiup\else\phiit\fi}%
+  \def\mst@chi{\ifmst@greek@lower@up\chiup\else\chiit\fi}%
+  \def\mst@psi{\ifmst@greek@lower@up\psiup\else\psiit\fi}%
+  \def\mst@omega{\ifmst@greek@lower@up\omegaup\else\omegait\fi}%
+    %
+  \def\mst@digamma{\ifmst@greek@lower@up\digammaup\else\digammait\fi}%
+  \def\mst@varsigma{\ifmst@greek@lower@up\varsigmaup\else\varsigmait\fi}%
+\fi
+\newcommand*{\MTstandardgreek}{}
+\newcommand*{\MTcustomgreek}{}
+\newcommand*{\MTrecordstandardgreek}{}
+\ifmst@customgreek
+ \renewcommand*{\MTrecordstandardgreek}{%
+    \let\mst@origAlpha\Alpha
+    \let\mst@origBeta\Beta
+    \let\mst@origGamma\Gamma
+    \let\mst@origDelta\Delta
+    \let\mst@origEpsilon\Epsilon
+    \let\mst@origZeta\Zeta
+    \let\mst@origEta\Eta
+    \let\mst@origTheta\Theta
+    \let\mst@origIota\Iota
+    \let\mst@origKappa\Kappa
+    \let\mst@origLambda\Lambda
+    \let\mst@origMu\Mu
+    \let\mst@origNu\Nu
+    \let\mst@origXi\Xi
+    \let\mst@origOmicron\Omicron
+    \let\mst@origPi\Pi
+    \let\mst@origRho\Rho
+    \let\mst@origSigma\Sigma
+    \let\mst@origTau\Tau
+    \let\mst@origUpsilon\Upsilon
+    \let\mst@origPhi\Phi
+    \let\mst@origChi\Chi
+    \let\mst@origPsi\Psi
+    \let\mst@origOmega\Omega
+    \let\mst@origalpha\alpha
+    \let\mst@origbeta\beta
+    \let\mst@origgamma\gamma
+    \let\mst@origdelta\delta
+    \let\mst@origepsilon\epsilon
+    \let\mst@origvarepsilon\varepsilon
+    \let\mst@origzeta\zeta
+    \let\mst@origeta\eta
+    \let\mst@origtheta\theta
+    \let\mst@origvartheta\vartheta
+    \let\mst@origiota\iota
+    \let\mst@origkappa\kappa
+    \let\mst@origlambda\lambda
+    \let\mst@origmu\mu
+    \let\mst@orignu\nu
+    \let\mst@origxi\xi
+    \let\mst@origomicron\omicron
+    \let\mst@origpi\pi
+    \let\mst@origvarpi\varpi
+    \let\mst@origrho\rho
+    \let\mst@origvarrho\varrho
+    \let\mst@origsigma\sigma
+    \let\mst@origvarsigma\varsigma
+    \let\mst@origtau\tau
+    \let\mst@origupsilon\upsilon
+    \let\mst@origphi\phi
+    \let\mst@origvarphi\varphi
+    \let\mst@origchi\chi
+    \let\mst@origpsi\psi
+    \let\mst@origomega\omega
+    \let\mst@origDigamma\Digamma
+    \let\mst@origdigamma\digamma
+    \let\mst@origpartial\partial
+    \let\mst@origwp\wp
+    \let\mst@origell\ell }% \MTrecordstandardgreek
+\MTrecordstandardgreek
+\renewcommand*{\MTstandardgreek}{%
+    \let\Alpha\mst@origAlpha
+    \let\Beta\mst@origBeta
+    \let\Gamma\mst@origGamma
+    \let\Delta\mst@origDelta
+    \let\Epsilon\mst@origEpsilon
+    \let\Zeta\mst@origZeta
+    \let\Eta\mst@origEta
+    \let\Theta\mst@origTheta
+    \let\Iota\mst@origIota
+    \let\Kappa\mst@origKappa
+    \let\Lambda\mst@origLambda
+    \let\Mu\mst@origMu
+    \let\Nu\mst@origNu
+    \let\Xi\mst@origXi
+    \let\Omicron\mst@origOmicron
+    \let\Pi\mst@origPi
+    \let\Rho\mst@origRho
+    \let\Sigma\mst@origSigma
+    \let\Tau\mst@origTau
+    \let\Upsilon\mst@origUpsilon
+    \let\Phi\mst@origPhi
+    \let\Chi\mst@origChi
+    \let\Psi\mst@origPsi
+    \let\Omega\mst@origOmega
+    \let\alpha\mst@origalpha
+    \let\beta\mst@origbeta
+    \let\gamma\mst@origgamma
+    \let\delta\mst@origdelta
+    \let\epsilon\mst@origepsilon
+    \let\varepsilon\mst@origvarepsilon
+    \let\zeta\mst@origzeta
+    \let\eta\mst@origeta
+    \let\theta\mst@origtheta
+    \let\vartheta\mst@origvartheta
+    \let\iota\mst@origiota
+    \let\kappa\mst@origkappa
+    \let\lambda\mst@origlambda
+    \let\mu\mst@origmu
+    \let\nu\mst@orignu
+    \let\xi\mst@origxi
+    \let\omicron\mst@origomicron
+    \let\pi\mst@origpi
+    \let\varpi\mst@origvarpi
+    \let\rho\mst@origrho
+    \let\varrho\mst@origvarrho
+    \let\sigma\mst@origsigma
+    \let\varsigma\mst@origvarsigma
+    \let\tau\mst@origtau
+    \let\upsilon\mst@origupsilon
+    \let\phi\mst@origphi
+    \let\varphi\mst@origvarphi
+    \let\chi\mst@origchi
+    \let\psi\mst@origpsi
+    \let\omega\mst@origomega
+    \let\Digamma\mst@origDigamma
+    \let\digamma\mst@origdigamma
+    \let\partial\mst@origpartial
+    \let\wp\mst@origwp
+    \let\ell\mst@origell
+}% \MTstandardgreek
+\renewcommand*{\MTcustomgreek}{%
+  \expanded{%
+    \let\noexpand\Alpha\mst@Alpha
+    \let\noexpand\Beta\mst@Beta
+    \let\noexpand\Epsilon\mst@Epsilon
+    \let\noexpand\Zeta\mst@Zeta
+    \let\noexpand\Eta\mst@Eta
+    \let\noexpand\Iota\mst@Iota
+    \let\noexpand\Kappa\mst@Kappa
+    \let\noexpand\Mu\mst@Mu
+    \let\noexpand\Nu\mst@Nu
+    \let\noexpand\Omicron\mst@Omicron
+    \let\noexpand\Rho\mst@Rho
+    \let\noexpand\Tau\mst@Tau
+    \let\noexpand\Chi\mst@Chi
+  }% end of first big \expanded
+    \ifmst@symbolgreek\else
+        \expanded{\let\noexpand\Digamma\mst@Digamma}%
+    \fi
+  \expanded{%
+    \let\noexpand\Gamma\mst@Gamma
+    \let\noexpand\Delta\mst@Delta
+    \let\noexpand\Theta\mst@Theta
+    \let\noexpand\Lambda\mst@Lambda
+    \let\noexpand\Xi\mst@Xi
+    \let\noexpand\Pi\mst@Pi
+    \let\noexpand\Sigma\mst@Sigma
+    \let\noexpand\Upsilon\mst@Upsilon
+    \let\noexpand\Phi\mst@Phi
+    \let\noexpand\Psi\mst@Psi
+    \let\noexpand\Omega\mst@Omega
+  }% end of second big \expanded
+ \ifmst@selfGreek\else
+  \expanded{%
+    \let\noexpand\alpha\mst@alpha
+    \let\noexpand\beta\mst@beta
+    \let\noexpand\gamma\mst@gamma
+    \let\noexpand\delta\mst@delta
+    \let\noexpand\epsilon\mst@epsilon
+    \let\noexpand\zeta\mst@zeta
+    \let\noexpand\eta\mst@eta
+    \let\noexpand\theta\mst@theta
+    \let\noexpand\iota\mst@iota
+    \let\noexpand\kappa\mst@kappa
+    \let\noexpand\lambda\mst@lambda
+    \let\noexpand\mu\mst@mu
+    \let\noexpand\nu\mst@nu
+    \let\noexpand\xi\mst@xi
+    \let\noexpand\omicron\mst@omicron
+    \let\noexpand\pi\mst@pi
+    \let\noexpand\rho\mst@rho
+    \let\noexpand\sigma\mst@sigma
+    \let\noexpand\tau\mst@tau
+    \let\noexpand\upsilon\mst@upsilon
+    \let\noexpand\phi\mst@phi
+    \let\noexpand\chi\mst@chi
+    \let\noexpand\psi\mst@psi
+    \let\noexpand\omega\mst@omega
+    \let\noexpand\varsigma\mst@varsigma
+  }% end of third big \expanded
+    \ifmst@LGRgreek
+        \expanded{\let\noexpand\digamma\mst@digamma}%
+    \fi
+    \ifmst@LGRgreek\else
+      \let\varepsilon\mst@varepsilon
+      \let\vartheta\mst@vartheta
+      \let\varpi\mst@varpi
+      \let\varrho\mst@varrho
+      \let\varphi\mst@varphi
+      \let\partial\mst@partial
+      \let\wp\mst@wp
+      \ifmst@symbolgreek\else\let\ell\mst@ell\fi
+    \fi
+ \fi
+}% \MTcustomgreek
+\fi% end of \ifcustomgreek
+\let\Mathastextstandardgreek\MTstandardgreek
+\let\Mathastextcustomgreek\MTcustomgreek
+\ifmst@subdued\else\MTcustomgreek\fi
+\def\mst@subduedinodot{%
+   \let\inodot\mst@original@imath
+   \let\jnodot\mst@original@jmath
+}%
+\def\mst@nonsubduedinodot{%
+   \expandafter\let\expandafter\inodot
+               \csname mst@inodot@mv\math@version\endcsname
+   \expandafter\let\expandafter\jnodot
+               \csname mst@jnodot@mv\math@version\endcsname
+}%
+\def\mst@dothe@inodotstuff#1#2#3{%
+  \edef\mst@tmp@enc{#3}%
+  \if1\mst@OneifUniEnc
+    % Unicode engine and font
+    \mst@Umathchardef#1="7 \symmtletterfont "0131 \relax
+    \mst@Umathchardef#2="7 \symmtletterfont "0237 \relax
+  \else
+   \DeclareMathSymbol{#1}{\mathalpha}{mtletterfont}
+                     {\csname\mst@tmp@enc\string\i\endcsname}
+   \DeclareMathSymbol{#2}{\mathalpha}{mtletterfont}
+                     {\csname\mst@tmp@enc\string\j\endcsname}
+  \fi}% \mst@dothe@inodotstuff
+\ifmst@defaultimath\else\typeout{** \string\imath\space and \string\jmath\space}
+    \AtEndOfPackage{\AtBeginDocument{%
+        \protected\def\imath{\inodot}%
+        \protected\def\jmath{\jnodot}%
+    }}%
+\fi
+\let\mst@subduedmathaccents\@empty
+\let\mst@nonsubduedmathaccents\@empty
+\ifmst@mathaccents
+\def\mst@subduedmathaccents{%
+  \@tfor\@tempa:={grave}{acute}{check}{breve}{bar}%
+                 {dot}{ddot}{mathring}{hat}{tilde}%
+  \do
+  {\expandafter\let\csname\@tempa\expandafter\endcsname
+                   \csname mst@original@\@tempa\endcsname
+   \expandafter\let\csname\@tempa\space\expandafter\endcsname
+                   \csname mst@original@\@tempa\space\endcsname
+   }%
+}%
+\def\mst@nonsubduedmathaccents{%
+  \@tfor\@tempa:={grave}{acute}{check}{breve}{bar}%
+                 {dot}{ddot}{mathring}{hat}{tilde}%
+  \do
+  {\expandafter\let\csname\@tempa\expandafter\endcsname
+                   \csname mst@\@tempa @mv\math@version\endcsname
+   \expandafter\let\csname\@tempa\space\expandafter\endcsname
+                   \csname mst@\@tempa @mv\math@version\space\endcsname
+}%
+}%
+\def\mst@dothe@mathaccentsstuff#1#2{%
+  \begingroup
+  \edef\mst@tmp@enc{#2}%
+  \def\@text@composite##1\@text@composite##2{##2}%
+  \let\add@accent\@firstoftwo
+  \let\add@unicode@accent\@firstoftwo
+  \if1\mst@OneifUniEnc
+    \ifmst@unimathaccents
+      % \` -> \grave
+      \expandafter\xdef\csname mst@grave@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\`\endcsname{}\relax}%
+      % \' -> \acute
+      \expandafter\xdef\csname mst@acute@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\'\endcsname{}\relax}%
+      % \v -> \check
+      \expandafter\xdef\csname mst@check@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\v\endcsname{}\relax}%
+      % \u -> \breve
+      \expandafter\xdef\csname mst@breve@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\u\endcsname{}\relax}%
+      % \= -> \bar
+      \expandafter\xdef\csname mst@bar@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\=\endcsname{}\relax}%
+      % \. -> \dot
+      \expandafter\xdef\csname mst@dot@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\.\endcsname{}\relax}%
+      % \" -> \ddot
+      \expandafter\xdef\csname mst@ddot@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\"\endcsname{}\relax}%
+      % \r -> \mathring
+      \expandafter\xdef\csname mst@mathring@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\r\endcsname{}\relax}%
+      % \^ -> \hat
+      \expandafter\xdef\csname mst@hat@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\^\endcsname{}\relax}%
+      % \~ -> \tilde
+      \expandafter\xdef\csname mst@tilde@mv#1\mst@robustifyingspace\endcsname
+       {\mst@Umathaccent
+        7
+        \number\symmtoperatorfont\space
+        \csname#2\string\~\endcsname{}\relax}%
+    \else % false branch of ifmst@unimathaccents
+      \AtEndOfPackage{\AtBeginDocument{%
+      \@tfor\@tempa:={grave}{acute}{check}{breve}{bar}%
+                     {dot}{ddot}{mathring}{hat}{tilde}%
+      \do
+      {\expandafter\let
+          \csname mst@\@tempa @mv#1\expandafter\endcsname
+          \csname mst@original@\@tempa\endcsname
+       \expandafter\let
+          \csname mst@\@tempa @mv#1\space\expandafter\endcsname
+          \csname mst@original@\@tempa\space\endcsname}%
+      }}%
+    \fi
+    \ifmst@robust@obsessed@LaTeX@era
+      \@tfor\@tempa:={grave}{acute}{check}{breve}{bar}%
+                     {dot}{ddot}{mathring}{hat}{tilde}%
+      \do
+      {\expandafter\xdef\csname mst@\@tempa @mv#1\endcsname
+         {\noexpand\protect
+          \expandafter\noexpand\csname mst@\@tempa @mv#1 \endcsname}%
+      }%
+    \fi
+  \else % false branch of ifUniEnc
+    % \` -> \grave
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@grave@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\`\endcsname{}}
+    % \' -> \acute
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@acute@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\'\endcsname{}}
+    % \v -> \check
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@check@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\v\endcsname{}}
+    % \u -> \breve
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@breve@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\u\endcsname{}}
+    % \= -> \bar
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@bar@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\=\endcsname{}}
+    % \. -> \dot
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@dot@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\.\endcsname{}}
+    % \" -> \ddot
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@ddot@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\"\endcsname{}}
+    % \r -> \mathring
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@mathring@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\r\endcsname{}}
+    % \^ -> \hat
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@hat@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\^\endcsname{}}
+    % \~ -> \tilde
+    \expandafter\mst@DeclareMathAccent\expandafter
+               {\csname mst@tilde@mv#1\endcsname}{\mathalpha}{mtoperatorfont}%
+               {\csname#2\string\~\endcsname{}}
+  \fi
+  \endgroup
+}%
+\fi % \ifmst@mathaccents
+\newcommand*\MTDeclareVersion[6][]{%
+  \edef\mst@declareversionargs{{#1}{#2}{#3}{#4}{#5}{#6}}%
+  \edef\mst@version{#2}%
+  \if0\ifx\mst@version\mst@normalversionname0\else
+      \ifx\mst@version\mst@boldversionname0\else
+      1\fi\fi
+   \expandafter\expandafter\expandafter
+   \MTDoNotDeclareVersion@\expandafter\@gobblefour
+  \fi
+  \relax\DeclareMathVersion{\mst@version}\MTDeclareVersion@
+}% \MTDeclareVersion
+\newcommand*\MTDoNotDeclareVersion@[1][]{%
+   \PackageWarningNoLine{mathastext}{You asked to declare a version with name
+   `\mst@version'.^^J%
+   \@spaces Sorry but you are not allowed to do that.^^J%
+   \@spaces \ifmst@subdued Anyway the `subdued' option is in force\else
+         Use rather \string\Mathastext\space macro (with no optional argument)\fi
+}}%\MTDoNotDeclareVersion@
+\newcommand*\MTDeclareVersion@[1][]{%
+    \edef\mst@tmp{#1}%
+    \ifx\mst@tmp\empty\else
+      \global\expandafter\let\csname mv@\mst@version\expandafter\endcsname
+                             \csname mv@#1\endcsname
+      \typeout{** Math version `\mst@version\string' inherits from `#1\string'.}%
+    \fi
+    \expandafter\MTDeclareVersion@@\mst@declareversionargs
+}% \MTDeclareVersion@
+\newcommand*\MTDeclareVersion@@[6]{%
+  \expandafter\edef\csname mst@encoding@\mst@version\endcsname{#3}%
+  \expandafter\edef\csname mst@family@\mst@version\endcsname{#4}%
+  \expandafter\edef\csname mst@series@\mst@version\endcsname{#5}%
+  \expandafter\edef\csname mst@shape@\mst@version\endcsname{#6}%
+  \expandafter\edef\csname mst@boldvariant@\mst@version\endcsname{\mst@bold}%
+  \expandafter\edef\csname mst@itdefault@\mst@version\endcsname{\itdefault}%
+  \expandafter\edef\csname mst@rmdefault@\mst@version\endcsname{\rmdefault}%
+  \expandafter\edef\csname mst@sfdefault@\mst@version\endcsname{\sfdefault}%
+  \expandafter\edef\csname mst@ttdefault@\mst@version\endcsname{\ttdefault}%
+  \expandafter\edef\csname mst@exists@skip@\mst@version\endcsname
+        {\mst@exists@skip}%
+  \expandafter\edef\csname mst@forall@skip@\mst@version\endcsname
+        {\mst@forall@skip}%
+  \expandafter\edef\csname mst@prime@skip@\mst@version\endcsname
+        {\mst@prime@skip}%
+  \def\mst@tmp{#1}%
+  \ifx\mst@tmp\empty
+    \ifmst@italic
+      \SetSymbolFont{mtletterfont}{#2}{#3}{#4}{#5}{\mst@ltsh}%
+      \typeout{** Latin letters in math version `#2\string' will use the font
+                  #3/#4/#5/\mst@ltsh^^J%
+               ** Other characters (digits, ...) and \protect\log-like names
+                    will be in `#6\string' shape.}%
+      \expandafter\edef\csname mst@ltshape@\mst@version\endcsname{\mst@ltsh}%
+    \else
+      \SetSymbolFont{mtletterfont}{#2}{#3}{#4}{#5}{#6}%
+       \typeout{** Latin letters in math version `#2\string' will use the fonts
+                   #3/#4/#5(\mst@bold)/#6}%
+      \expandafter\edef\csname mst@ltshape@\mst@version\endcsname{#6}%
+    \fi
+  \else
+    \SetSymbolFont{mtletterfont}{#2}{#3}{#4}{#5}{#1}%
+    \typeout{** Latin letters in math version `#2\string' will use the font
+                #3/#4/#5/#1^^J%
+             ** Other characters (digits, ...) and \protect\log-like
+                names will be in `#6\string' shape.}%
+      \expandafter\edef\csname mst@ltshape@\mst@version\endcsname{#1}%
+  \fi
+  \ifmst@nonormalbold\else
+       \SetMathAlphabet{\mathnormalbold}{#2}{#3}{#4}{\mst@bold}%
+                   {\csname mst@ltshape@\mst@version\endcsname}%
+  \fi
+  \SetSymbolFont{mtoperatorfont}{#2}{#3}{#4}{#5}{#6}%
+  \ifmst@defaultbf\else\SetMathAlphabet{\Mathbf}{#2}{#3}{#4}{\mst@bold}{#6}\fi
+  \ifmst@defaultit\else\SetMathAlphabet{\Mathit}{#2}{#3}{#4}{#5}{\itdefault}\fi
+  \ifmst@defaultsf\else\SetMathAlphabet{\Mathsf}{#2}{#3}{\sfdefault}{#5}{#6}\fi
+  \ifmst@defaulttt\else\SetMathAlphabet{\Mathtt}{#2}{#3}{\ttdefault}{#5}{#6}\fi
+  \ifmst@needeuler
+      \SetMathAlphabet{\MathEulerBold}{#2}{U}{zeur}{\mst@bold}{n}%
+  \fi
+  \def\mst@greek@lsh@loc{\csname mst@ltshape@\mst@version\endcsname}%
+  \def\mst@greek@ush@loc{\csname mst@shape@\mst@version\endcsname}%
+  \mst@greek@lower@uptrue
+      \expandafter\in@\expanded{{\mst@greek@lsh@loc.}}{it.,sl.}%
+      \ifin@\mst@greek@lower@upfalse\fi
+  \mst@greek@upper@uptrue
+      \expandafter\in@\expanded{{\mst@greek@ush@loc.}}{it.,sl.}%
+      \ifin@\mst@greek@upper@upfalse\fi
+  \ifmst@itgreek
+    \def\mst@greek@lsh@loc{\MTgreekitdefault}%
+    \def\mst@greek@ush@loc{\MTgreekitdefault}%
+      \mst@greek@lower@upfalse
+      \mst@greek@upper@upfalse
+  \fi
+  \ifmst@upgreek
+    \def\mst@greek@lsh@loc{\MTgreekupdefault}%
+    \def\mst@greek@ush@loc{\MTgreekupdefault}%
+      \mst@greek@lower@uptrue
+      \mst@greek@upper@uptrue
+  \fi
+  \ifmst@frenchmath
+      \ifmst@itgreek\else
+      \ifmst@upgreek\else
+        \def\mst@greek@lsh@loc{\csname mst@shape@\mst@version\endcsname}%
+        \def\mst@greek@ush@loc{\csname mst@shape@\mst@version\endcsname}%
+        \mst@greek@lower@uptrue
+        \mst@greek@upper@uptrue
+      \fi\fi
+  \fi
+  \ifcase\mst@greek@select
+        \or
+          \def\mst@greek@ush@loc{\MTgreekitdefault}%
+          \mst@greek@upper@upfalse
+        \or
+          \def\mst@greek@ush@loc{\MTgreekupdefault}%
+          \mst@greek@upper@uptrue
+  \fi
+  \ifmst@LGRgreeks
+    \SetSymbolFont{mtgreekup}{#2}{LGR}{#4}{#5}{\MTgreekupdefault}%
+    \SetSymbolFont{mtgreekit}{#2}{LGR}{#4}{#5}{\MTgreekitdefault}%
+    \expandafter\let\csname ifmst@greek@\mst@version @upper@up\expandafter\endcsname
+                    \csname ifmst@greek@upper@up\endcsname
+    \expandafter\let\csname ifmst@greek@\mst@version @lower@up\expandafter\endcsname
+                    \csname ifmst@greek@lower@up\endcsname
+    \typeout{** Greek letters (upper:
+      `\ifmst@greek@upper@up\MTgreekupdefault\else\MTgreekitdefault\fi\string',
+                               lower:
+      `\ifmst@greek@lower@up\MTgreekupdefault\else\MTgreekitdefault\fi\string')
+                will use
+                font family `#4\string' (LGR)^^J**
+                in mathastext math version `\mst@version\string'.}%
+  \else
+   \ifmst@selfGreeks
+      \SetSymbolFont{mtselfGreekfont}{#2}{OT1}{#4}{#5}{\mst@greek@ush@loc}%
+     \typeout{** Capital Greek letters (shape `\mst@greek@ush@loc\string')
+                 will use font family `#4\string' (OT1)^^J**
+                 in mathastext math version `\mst@version\string'.}%
+   \else
+    \ifmst@LGRgreek
+      \SetSymbolFont{mtgreekup}{#2}{LGR}{\mst@greekfont}{#5}{\MTgreekupdefault}%
+      \SetSymbolFont{mtgreekit}{#2}{LGR}{\mst@greekfont}{#5}{\MTgreekitdefault}%
+      \expandafter\let\csname ifmst@greek@\mst@version @upper@up\expandafter\endcsname
+                      \csname ifmst@greek@upper@up\endcsname
+      \expandafter\let\csname ifmst@greek@\mst@version @lower@up\expandafter\endcsname
+                      \csname ifmst@greek@lower@up\endcsname
+      \typeout{** Greek letters (upper:
+      `\ifmst@greek@upper@up\MTgreekupdefault\else\MTgreekitdefault\fi\string',
+                                 lower:
+      `\ifmst@greek@lower@up\MTgreekupdefault\else\MTgreekitdefault\fi\string')
+               will use font family `\mst@greekfont\string' (LGR)^^J**
+               in mathastext math version `\mst@version\string'.}%
+    \else
+     \ifmst@selfGreek
+       \SetSymbolFont{mtselfGreekfont}{#2}{OT1}{\mst@greekfont}{#5}{\mst@greek@ush@loc}%
+       \typeout{** Capital Greek letters
+                   (shape `\mst@greek@ush@loc\string')
+                   will use font family `\mst@greekfont\string' (OT1)^^J**
+                   in mathastext math version `\mst@version\string'.}%
+     \fi
+    \fi
+   \fi
+  \fi
+  \edef\mst@tmp{\expandafter\noexpand\csname mst@hbar@mv#2\endcsname
+                \expandafter\noexpand\csname mst@ltbar@mv#2\endcsname}%
+  \expandafter\mst@dothe@hbarstuff\mst@tmp{#3}%
+  \edef\mst@tmp{\expandafter\noexpand\csname mst@inodot@mv#2\endcsname
+                \expandafter\noexpand\csname mst@jnodot@mv#2\endcsname}%
+  \expandafter\mst@dothe@inodotstuff\mst@tmp{#3}%
+  \ifmst@mathaccents
+    \mst@dothe@mathaccentsstuff{#2}{#3}%
+  \fi
+  \edef\mst@tmp{\expandafter\noexpand\csname mst@minus@mv#2\endcsname
+                \expandafter\noexpand\csname mst@varfam@minus@mv#2\endcsname}%
+  \ifmst@endash
+    \expandafter\mst@dothe@endashstuff\mst@tmp{#3}%
+  \else
+    \ifmst@emdash
+      \expandafter\mst@dothe@emdashstuff\mst@tmp{#3}%
+    \else
+      \expandafter\mst@dothe@hyphenstuff\mst@tmp
+    \fi
+  \fi
+}% \MTDeclareVersion@@
+\let\MathastextDeclareVersion\MTDeclareVersion
+\newcommand*\MTversion {\@ifstar\MTversion@s\MTversion@ }
+\newcommand*\MTversion@s [1]{\mathversion{#1}\MTversion@@ }
+\newcommand*\MTversion@ [2][]{%
+    \mathversion{#2}% defines \math@version as expanded #2
+    \edef\mst@tmpa{#1}%
+    \ifx\mst@tmpa\empty
+        \let\mst@tmp\math@version
+    \else
+        \let\mst@tmp\mst@tmpa
+    \fi
+    \edef\encodingdefault {\csname mst@encoding@\mst@tmp\endcsname}%
+    \edef\familydefault   {\csname mst@family@\mst@tmp\endcsname}%
+    \edef\seriesdefault   {\csname mst@series@\mst@tmp\endcsname}%
+    \edef\shapedefault    {\csname mst@shape@\mst@tmp\endcsname}%
+    \edef\bfdefault {\csname mst@boldvariant@\mst@tmp\endcsname}%
+    \edef\itdefault {\csname mst@itdefault@\mst@tmp\endcsname}%
+    \edef\rmdefault {\csname mst@rmdefault@\mst@tmp\endcsname}%
+    \edef\sfdefault {\csname mst@sfdefault@\mst@tmp\endcsname}%
+    \edef\ttdefault {\csname mst@ttdefault@\mst@tmp\endcsname}%
+    \usefont{\encodingdefault}{\familydefault}{\seriesdefault}{\shapedefault}%
+    \MTversion@@
+}% \MTversion@
+\newcommand*\MTversion@@ {%
+    \MTexistsdoesskip
+    \MTforalldoesskip
+    \MTprimedoesskip
+     \mst@exists@muskip\csname mst@exists@skip@\math@version\endcsname\relax
+     \mst@forall@muskip\csname mst@forall@skip@\math@version\endcsname\relax
+     \mst@prime@muskip\csname mst@prime@skip@\math@version\endcsname\relax
+    \edef\mst@tmpa{\csname mst@ltshape@\math@version\endcsname}%
+    \edef\mst@tmpb{\csname mst@shape@\math@version\endcsname}%
+    \MTmathoperatorsobeymathxx
+    \MTeverymathdefault
+    \MTcustomizenewmcodes
+    \@for\mst@tmpc:=it,sl\do{\ifx\mst@tmpc\mst@tmpa\MTnoicinmath\fi}%
+    \ifmst@frenchmath
+      \def\mst@ITcorr{\ifnum\fam=\m@ne\/\fi}%
+      \@for\mst@tmpc:=it,sl\do{\ifx\mst@tmpc\mst@tmpb\MTnoICinmath\fi}%
+    \fi
+    \ifmst@subdued
+      \ifx\math@version\mst@normalversionname
+        \mst@restorealphabets
+        \MTstandardgreek
+        \MTmathoperatorsdonotobeymathxx
+        \MTnormalexists
+        \MTnormalforall
+        \MTeverymathoff
+        \MTresetnewmcodes
+        \mst@subduedhbar
+        \mst@subduedinodot
+        \mst@subduedmathaccents
+        \mst@subduedminus
+      \else
+        \ifx\math@version\mst@boldversionname
+          \mst@restorealphabets
+          \MTstandardgreek
+          \MTmathoperatorsdonotobeymathxx
+          \MTnormalexists
+          \MTnormalforall
+          \MTeverymathoff
+          \MTresetnewmcodes
+          \mst@subduedhbar
+          \mst@subduedinodot
+          \mst@subduedmathaccents
+          \mst@subduedminus
+        \else
+          \mst@setalphabets
+    \expandafter\let\csname ifmst@greek@upper@up\expandafter\endcsname
+                    \csname ifmst@greek@\math@version @upper@up\endcsname
+    \expandafter\let\csname ifmst@greek@lower@up\expandafter\endcsname
+                    \csname ifmst@greek@\math@version @lower@up\endcsname
+          \MTcustomgreek
+          \mst@nonsubduedhbar
+          \mst@nonsubduedinodot
+          \mst@nonsubduedmathaccents
+          \mst@nonsubduedminus
+        \fi
+      \fi
+    \else
+    \expandafter\let\csname ifmst@greek@upper@up\expandafter\endcsname
+                    \csname ifmst@greek@\math@version @upper@up\endcsname
+    \expandafter\let\csname ifmst@greek@lower@up\expandafter\endcsname
+                    \csname ifmst@greek@\math@version @lower@up\endcsname
+      \MTcustomgreek % new with 1.3d
+      \mst@nonsubduedhbar
+      \mst@nonsubduedinodot
+      \mst@nonsubduedmathaccents
+      \mst@nonsubduedminus
+    \fi
+}% \MTversion@@
+\let\MathastextVersion\MTversion
+\let\Mathastextversion\MTversion
+\let\MTVersion\MTversion
+\let\mathastextversion\MTversion
+\newcommand*\MTWillUse[5][]{
+  \MTencoding{#2}
+  \MTfamily{#3}
+  \MTseries{#4}
+  \MTshape{#5}
+    \ifmst@italic\MTlettershape{\itdefault}\fi % was missing in v 1.14 and prior
+  \edef\mst@tmp{#1}
+  \ifx\mst@tmp\empty\else\MTlettershape{#1}\fi
+  \Mathastext}
+\let\MathastextWillUse\MTWillUse
+\let\Mathastextwilluse\MTWillUse
+\def\Mathastext {\@ifnextchar [\Mathastext@declare\Mathastext@ }
+\def\Mathastext@declare [#1]{%
+  \edef\mst@tmp{#1}%
+  \ifx\mst@tmp\empty
+       \expandafter\@firstoftwo
+  \else\expandafter\@secondoftwo
+  \fi
+  \Mathastext@
+  {\MTDeclareVersion[\mst@ltsh]{#1}{\mst@enc}{\mst@fam}{\mst@ser}{\mst@opsh}}%
+}% \Mathastext@declare
+\def\Mathastext@ {%
+  \mst@update@greeksh
+  \edef\mst@encoding@normal{\mst@enc}%
+  \edef\mst@family@normal{\mst@fam}%
+  \edef\mst@series@normal{\mst@ser}%
+  \edef\mst@shape@normal{\mst@opsh}%
+  \edef\mst@ltshape@normal{\mst@ltsh}%
+  \edef\mst@itdefault@normal{\itdefault}%
+  \edef\mst@rmdefault@normal{\rmdefault}%
+  \edef\mst@sfdefault@normal{\sfdefault}%
+  \edef\mst@ttdefault@normal{\ttdefault}%
+  \edef\mst@boldvariant@normal{\mst@bold}%
+  \edef\mst@exists@skip@normal{\mst@exists@skip}%
+  \edef\mst@forall@skip@normal{\mst@forall@skip}%
+  \edef\mst@prime@skip@normal{\mst@prime@skip}%
+  \edef\mst@encoding@bold{\mst@enc}%
+  \edef\mst@family@bold{\mst@fam}%
+  \edef\mst@series@bold{\mst@bold}%
+  \edef\mst@shape@bold{\mst@opsh}%
+  \edef\mst@ltshape@bold{\mst@ltsh}%
+  \edef\mst@boldvariant@bold{\mst@bold}%
+  \edef\mst@itdefault@bold{\itdefault}%
+  \edef\mst@rmdefault@bold{\rmdefault}%
+  \edef\mst@sfdefault@bold{\sfdefault}%
+  \edef\mst@ttdefault@bold{\ttdefault}%
+  \edef\mst@exists@skip@bold{\mst@exists@skip}%
+  \edef\mst@forall@skip@bold{\mst@forall@skip}%
+  \edef\mst@prime@skip@bold{\mst@prime@skip}%
+  \ifmst@subdued
+    \def\mst@exists@skip@normal{0mu}%
+    \def\mst@forall@skip@normal{0mu}%
+    \def\mst@prime@skip@normal{0mu}%
+    \def\mst@exists@skip@bold{0mu}%
+    \def\mst@forall@skip@bold{0mu}%
+    \def\mst@prime@skip@bold{0mu}%
+  \else % not subdued
+    \ifmst@italic
+      \ifmst@frenchmath
+        \mst@exists@muskip\mst@exists@skip\relax
+        \mst@forall@muskip\mst@forall@skip\relax
+        \mst@prime@muskip\mst@prime@skip\relax
+      \else
+       \def\mst@exists@skip@normal{0mu}%
+       \def\mst@forall@skip@normal{0mu}%
+       \def\mst@prime@skip@normal{0mu}%
+       \def\mst@exists@skip@bold{0mu}%
+       \def\mst@forall@skip@bold{0mu}%
+       \def\mst@prime@skip@bold{0mu}%
+      \fi
+    \else
+        \mst@exists@muskip\mst@exists@skip\relax
+        \mst@forall@muskip\mst@forall@skip\relax
+        \mst@prime@muskip\mst@prime@skip\relax
+    \fi
+  \fi
+%% v1.15f
+  \ifmst@nonormalbold\else
+   \SetMathAlphabet{\mathnormalbold}{normal}{\mst@encoding@normal}%
+                                 {\mst@family@normal}%
+                                 {\mst@boldvariant@normal}%
+                                 {\mst@ltshape@normal}%
+   \SetMathAlphabet{\mathnormalbold}{bold}{\mst@encoding@bold}%
+                                 {\mst@family@bold}%
+                                 {\mst@boldvariant@bold}%
+                                 {\mst@ltshape@bold}%
+  \fi
+%% v1.15f adds \ifmst@default.. checks
+  \ifmst@subdued\else
+   \SetSymbolFont{mtletterfont}{normal}{\mst@encoding@normal}%
+                                       {\mst@family@normal}%
+                                       {\mst@series@normal}%
+                                       {\mst@ltshape@normal}%
+   \SetSymbolFont{mtletterfont}{bold}  {\mst@encoding@bold}%
+                                       {\mst@family@bold}%
+                                       {\mst@series@bold}%
+                                       {\mst@ltshape@bold}%
+   \SetSymbolFont{mtoperatorfont}{normal}{\mst@encoding@normal}%
+                                       {\mst@family@normal}%
+                                       {\mst@series@normal}%
+                                       {\mst@shape@normal}%
+   \SetSymbolFont{mtoperatorfont}{bold} {\mst@encoding@bold}%
+                                       {\mst@family@bold}%
+                                       {\mst@series@bold}%
+                                       {\mst@shape@bold}%
+   \ifmst@defaultbf\else
+    \SetMathAlphabet{\Mathbf}{normal}{\mst@encoding@normal}%
+                                 {\mst@family@normal}%
+                                 {\mst@series@bold}%
+                                 {\mst@shape@normal}%
+    \SetMathAlphabet{\Mathbf}{bold}{\mst@encoding@bold}%
+                                 {\mst@family@bold}%
+                                 {\mst@series@bold}%
+                                 {\mst@shape@bold}%
+   \fi
+   \ifmst@defaultit\else
+    \SetMathAlphabet{\Mathit}{normal}{\mst@encoding@normal}%
+                                 {\mst@family@normal}%
+                                 {\mst@series@normal}%
+                                 {\mst@itdefault@normal}%
+    \SetMathAlphabet{\Mathit}{bold}{\mst@encoding@bold}%
+                                 {\mst@family@bold}%
+                                 {\mst@series@bold}%
+                                 {\mst@itdefault@bold}%
+   \fi
+   \ifmst@defaultsf\else
+    \SetMathAlphabet{\Mathsf}{normal}{\mst@encoding@normal}%
+                                 {\mst@sfdefault@normal}%
+                                 {\mst@series@normal}%
+                                 {\mst@shape@normal}%
+    \SetMathAlphabet{\Mathsf}{bold}{\mst@encoding@bold}%
+                                 {\mst@sfdefault@bold}%
+                                 {\mst@series@bold}%
+                                 {\mst@shape@bold}%
+   \fi
+   \ifmst@defaulttt\else
+    \SetMathAlphabet{\Mathtt}{normal}{\mst@encoding@normal}%
+                                 {\mst@ttdefault@normal}%
+                                 {\mst@series@normal}%
+                                 {\mst@shape@normal}%
+    \SetMathAlphabet{\Mathtt}{bold}{\mst@encoding@bold}%
+                                 {\mst@ttdefault@bold}%
+                                 {\mst@series@bold}%
+                                 {\mst@shape@bold}%
+   \fi
+  \fi % de \ifmst@subdued
+  \ifmst@needeuler
+    \SetSymbolFont{mteulervm}{bold}{U}{zeur}{\mst@boldvariant@normal}{n}%
+    \SetMathAlphabet{\MathEulerBold}{normal}%
+               {U}{zeur}{\mst@boldvariant@normal}{n}%
+    \SetMathAlphabet{\MathEulerBold}{bold}%
+               {U}{zeur}{\mst@boldvariant@normal}{n}%
+  \fi
+  \ifmst@needsymbol\SetSymbolFont{mtpsymbol}{bold}%
+                     {U}{psy}{\mst@boldvariant@normal}{n}%
+  \fi
+  \ifmst@subdued\else
+   \ifmst@LGRgreek
+    \SetSymbolFont{mtgreekup}{normal}{LGR}%
+            {\mst@greekfont}{\mst@series@normal}{\MTgreekupdefault}%
+    \SetSymbolFont{mtgreekup}{bold}{LGR}%
+            {\mst@greekfont}{\mst@boldvariant@normal}{\MTgreekupdefault}%
+    \SetSymbolFont{mtgreekit}{normal}{LGR}%
+            {\mst@greekfont}{\mst@series@normal}{\MTgreekitdefault}%
+    \SetSymbolFont{mtgreekit}{bold}{LGR}%
+            {\mst@greekfont}{\mst@boldvariant@bold}{\MTgreekitdefault}%
+   \else
+    \ifmst@selfGreek
+     \SetSymbolFont{mtselfGreekfont}{normal}{OT1}%
+            {\mst@greekfont}{\mst@series@normal}{\mst@greek@ush}%
+     \SetSymbolFont{mtselfGreekfont}{bold}{OT1}%
+            {\mst@greekfont}{\mst@boldvariant@bold}{\mst@greek@ush}%
+    \fi
+   \fi
+  \fi
+  \ifmst@subdued
+   \typeout{** subdued mode will be activated for the `normal\string' and `bold\string' math versions}%
+  \else
+   \typeout{** Latin letters in the `normal\string' (resp. `bold\string') math versions are now^^J%
+            ** set up to use the fonts
+   \mst@encoding@normal/\mst@family@normal/\mst@series@normal%
+               (\mst@boldvariant@normal)/\mst@ltshape@normal}%
+   \ifmst@LGRgreek\typeout{** Greek letters (upper:
+      `\ifmst@greek@upper@up\MTgreekupdefault\else\MTgreekitdefault\fi\string',
+                                             lower:
+      `\ifmst@greek@lower@up\MTgreekupdefault\else\MTgreekitdefault\fi\string')
+      will use font family `\mst@greekfont\string' (LGR)}%
+   \fi
+   \ifmst@nodigits\else
+     \typeout{** Other characters (digits, ...) and \protect\log-like names will be^^J%
+              ** typeset with the \mst@shape@normal\space shape.}%
+   \fi
+  \fi
+  \ifmst@nohbar\else
+     \typeout{** \string\hbar}%
+     \mst@dothe@hbarstuff
+         \mst@hbar@mvnormal\mst@ltbar@mvnormal\mst@encoding@normal
+     \let\mst@hbar@mvbold\mst@hbar@mvnormal
+  \fi
+  \mst@dothe@inodotstuff\inodot\jnodot\mst@encoding@normal
+  \let\mst@inodot@mvnormal\inodot
+  \let\mst@inodot@mvbold\inodot
+  \let\mst@jnodot@mvnormal\jnodot
+  \let\mst@jnodot@mvbold\jnodot
+  \ifmst@mathaccents
+    \typeout{** math accents}%
+    \mst@dothe@mathaccentsstuff{normal}\mst@encoding@normal
+  \fi
+  \ifmst@nominus\else
+   \typeout{** minus as endash}%
+   \ifmst@endash
+    \mst@dothe@endashstuff\mst@minus@mvnormal\mst@varfam@minus@mvnormal
+                          \mst@encoding@normal
+    \mst@dothe@endashstuff\mst@minus@mvbold\mst@varfam@minus@mvbold
+                          \mst@encoding@normal
+   \else
+    \ifmst@emdash
+      \mst@dothe@emdashstuff\mst@minus@mvnormal\mst@varfam@minus@mvnormal
+                            \mst@encoding@normal
+      \mst@dothe@emdashstuff\mst@minus@mvbold\mst@varfam@minus@mvbold
+                            \mst@encoding@normal
+    \else
+      \mst@dothe@hyphenstuff\mst@minus@mvnormal\mst@varfam@minus@mvnormal
+      \let\mst@minus@mvbold\mst@minus@mvnormal
+      \let\mst@varfam@minus@mvbold\mst@varfam@minus@mvnormal
+    \fi
+   \fi
+  \fi
+}% \Mathastext@
+\let\mathastext\Mathastext
+\Mathastext
+\ifmst@eulergreek
+      \typeout{** Greek letters will use the Euler font. Use \protect\MathastextEulerScale{<factor>} to scale the
+               font.}%
+      \ifmst@subdued{\typeout{** (subdued mode: `normal\string' and `bold\string' math
+          version with default Greek letters.)}}\fi
+\else
+\ifmst@symbolgreek
+       \typeout{** Greek letters will use the PostScript Symbol font. Use^^J%
+                ** \protect\MathastextSymbolScale{<factor>} to scale the font.}%
+      \ifmst@subdued{\typeout{** (subdued mode: `normal\string' and `bold\string' math
+          version with default Greek letters.)}}\fi
+\fi\fi
+\ifmst@defaultsizes\else
+\providecommand\@xxxpt{29.86}
+\providecommand\@xxxvipt{35.83}
+\ifmst@twelve
+  \def\Huge{\@setfontsize\Huge\@xxxpt{36}}
+  \def\HUGE{\@setfontsize\HUGE\@xxxvipt{43}}
+\typeout{** \protect\Huge\space and \protect\HUGE\space have been (re)-defined.}
+\else
+  \def\HUGE{\@setfontsize\HUGE\@xxxpt{36}}
+\typeout{** \protect\HUGE\space has been (re)-defined.}
+\fi
+\def\defaultscriptratio{.8333}
+\def\defaultscriptscriptratio{.7}
+\DeclareMathSizes{9}{9}{7}{5}
+\DeclareMathSizes{\@xpt}{\@xpt}{8}{6}
+\DeclareMathSizes{\@xipt}{\@xipt}{9}{7}
+\DeclareMathSizes{\@xiipt}{\@xiipt}{10}{8}
+\DeclareMathSizes{\@xivpt}{\@xivpt}{\@xiipt}{10}
+\DeclareMathSizes{\@xviipt}{\@xviipt}{\@xivpt}{\@xiipt}
+\DeclareMathSizes{\@xxpt}{\@xxpt}{\@xviipt}{\@xivpt}
+\DeclareMathSizes{\@xxvpt}{\@xxvpt}{\@xxpt}{\@xviipt}
+\DeclareMathSizes{\@xxxpt}{\@xxxpt}{\@xxvpt}{\@xxpt}
+\DeclareMathSizes{\@xxxvipt}{\@xxxvipt}{\@xxxpt}{\@xxvpt}
+\typeout{** mathastext has declared larger sizes for subscripts.^^J%
+** To keep LaTeX defaults, use option `defaultmathsizes\string'.}
+\fi
+\newcommand*\MTeverymathoff {%
+    \MTnormalasterisk
+    \MTnormalprime
+    \MTnonlettersdonotobeymathxx
+    \MTeasynonlettersdonotobeymathxx
+    \MTmathstandardletters
+    \MTdonotfixfonts
+}%
+\AtBeginDocument {%
+   \@ifpackageloaded{hyperref}
+   {\def\Hurl{\begingroup\MTeverymathoff\Url}}
+   {\@ifpackageloaded{url}{\DeclareUrlCommand\url{\MTeverymathoff}}{}}%
+}%
+\newcommand*\MTeverymathdefault {%
+    \MTactiveasterisk
+    \MTprimedoesskip
+    \MTeasynonlettersobeymathxx
+    \MTicinmath
+    \MTfixfonts
+}%
+\AtBeginDocument{%
+  \everymath\expandafter{\the\everymath
+    \mst@the\mst@do@nonletters \let\mst@the\@gobble
+    \mst@theeasy\mst@do@easynonletters  \let\mst@theeasy\@gobble
+    \mst@thef\mst@do@az \let\mst@thef\@gobble
+    \mst@theF\mst@do@AZ \let\mst@theF\@gobble}%
+  \everydisplay\expandafter{\the\everydisplay
+    \mst@the\mst@do@nonletters \let\mst@the\@gobble
+    \mst@theeasy\mst@do@easynonletters  \let\mst@theeasy\@gobble
+    \mst@thef\mst@do@az \let\mst@thef\@gobble
+    \mst@theF\mst@do@AZ \let\mst@theF\@gobble}%
+  \MTcustomizenewmcodes
+  \let\mst@original@hbar\hbar
+  \let\mst@original@imath\imath
+  \let\mst@original@jmath\jmath
+  \@tfor\@tempa:={grave}{acute}{check}{breve}{bar}%
+                 {dot}{ddot}{mathring}{hat}{tilde}%
+  \do
+  {\expandafter\let\csname mst@original@\@tempa\expandafter\endcsname
+                   \csname \@tempa\endcsname
+   \expandafter\let\csname mst@original@\@tempa\space\expandafter\endcsname
+                   \csname \@tempa\space\endcsname
+  }%
+  \ifmst@XeOrLua
+     \edef\mst@subduedminus
+         {\mst@Umathcodenum`\noexpand\-=\the\mst@Umathcodenum`\-\relax}%
+  \else
+     \edef\mst@subduedminus{\mathcode`\noexpand\-=\the\mathcode`\-\relax}%
+  \fi
+  \ifmst@subdued
+    \MTeverymathoff
+    \MTresetnewmcodes
+    \MTnoicinmath
+    \MTmathoperatorsdonotobeymathxx
+    %\mst@subduedhbar
+    \let\inodot\imath
+    \let\jnodot\jmath
+    %\mst@subduedmathaccents
+    \mst@subduedminus
+  \else
+     \mst@nonsubduedhbar
+     % \mst@nonsubduedmathaccents % will get executed later
+     \mst@nonsubduedminus
+     \ifx\mst@itcorr\@undefined
+         \def\mst@itcorr{\ifnum\fam=\m@ne\/\fi}%
+         \@for\mst@tmp:=it,sl\do
+           {\ifx\mst@tmp\mst@ltshape@normal\let\mst@itcorr\@empty\fi }%
+     \fi
+     \ifx\mst@ITcorr\@undefined
+         \let\mst@ITcorr\mst@itcorr
+         \ifmst@frenchmath
+           \def\mst@ITcorr{\ifnum\fam=\m@ne\/\fi}%
+           \@for\mst@tmp:=it,sl\do
+                {\ifx\mst@tmp\mst@shape@normal\let\mst@ITcorr\@empty\fi }%
+         \fi
+     \fi
+  \fi
+}% \AtBeginDocument
+\AtEndOfPackage{\AtBeginDocument{\ifmst@subdued\else\mst@nonsubduedmathaccents\fi}}%
+\ifmst@subdued
+\AtBeginDocument{%
+  \def\mst@reserved#1\getanddefine@fonts\symletters#2#3\@nil{%
+        \def\mst@normalmv@letter{#2}}%
+  \expandafter\mst@reserved\mv@normal\@nil
+  \def\mst@reserved#1\getanddefine@fonts\symletters#2#3\@nil{%
+        \def\mst@boldmv@letter{#2}}%
+  \expandafter\mst@reserved\mv@bold\@nil
+  \def\mst@reserved#1\getanddefine@fonts\symoperators#2#3\@nil{%
+        \def\mst@normalmv@operator{#2}}%
+  \expandafter\mst@reserved\mv@normal\@nil
+  \def\mst@reserved#1\getanddefine@fonts\symoperators#2#3\@nil{%
+        \def\mst@boldmv@operator{#2}}%
+  \expandafter\mst@reserved\mv@bold\@nil
+  \edef\mst@tmp@enc{\mst@encoding@normal}%
+  \def\mst@reserved#1/#2/#3/#4/{\gdef\mst@debut{#1}\gdef\mst@reste{#2/#3/#4}}%
+  \begingroup\escapechar\m@ne
+      \xdef\mst@funnyoti{\expandafter\string\csname OT1\endcsname}%
+      \expandafter\expandafter\expandafter
+          \mst@reserved\expandafter\string\mst@normalmv@operator/%
+  \endgroup
+  \ifx\mst@debut\mst@funnyoti\ifx\mst@tmp@enc\mst@oti\def\mst@tmp@enc{T1}\fi\fi
+  \edef\mst@normalmv@operator{\expandafter\noexpand\csname
+       \if1\mst@OneifUniEnc
+         \ifx\mst@debut\mst@funnyoti T1\else\mst@debut\fi
+       \else
+         \mst@tmp@enc
+       \fi/\mst@reste\endcsname}%
+  \edef\mst@tmp@enc{\mst@encoding@bold}%
+  \begingroup\escapechar\m@ne
+      \expandafter\expandafter\expandafter
+          \mst@reserved\expandafter\string\mst@boldmv@operator/%
+  \endgroup
+  \ifx\mst@debut\mst@funnyoti\ifx\mst@tmp@enc\mst@oti\def\mst@tmp@enc{T1}\fi\fi
+  \edef\mst@boldmv@operator{\expandafter\noexpand\csname
+       \if1\mst@OneifUniEnc
+         \ifx\mst@debut\mst@funnyoti T1\else\mst@debut\fi
+       \else
+         \mst@tmp@enc
+       \fi/\mst@reste\endcsname}%
+  \typeout{** ...entering subdued mode...}%
+  \expandafter\SetSymbolFont@ \expandafter\mv@normal\mst@normalmv@letter\symmtletterfont
+  \expandafter\SetSymbolFont@ \expandafter\mv@bold\mst@boldmv@letter\symmtletterfont
+  \expandafter\SetSymbolFont@ \expandafter\mv@normal\mst@normalmv@operator\symmtoperatorfont
+  \expandafter\SetSymbolFont@ \expandafter\mv@bold\mst@boldmv@operator\symmtoperatorfont
+  \typeout{** ...done.}%
+}% \AtBeginDocument
+\fi % \ifmst@subdued
+\expandafter \gdef \expandafter \@preamblecmds \expandafter {\@preamblecmds
+\do\MTitgreek
+\do\MTupgreek
+\do\MTitGreek
+\do\MTitGreek
+\do\Mathastextitgreek
+\do\Mathastextupgreek
+\do\MathastextitGreek
+\do\MathastextitGreek
+\do\MTgreekfont
+\do\Mathastextgreekfont
+\do\MTgreekupdefault
+\do\MTgreekitdefault
+\do\MTDeclareVersion
+\do\MathastextDeclareVersion
+\do\MTWillUse
+\do\MathastextWillUse
+\do\Mathastextwilluse
+\do\Mathastext
+\do\mathastext
+}
+\endinput
+%%
+%% End of file `mathastext.sty'.
