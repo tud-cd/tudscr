@@ -580,16 +580,23 @@
 % \minisec{Ersetzen von Zeichen}
 %
 % \begin{macro}{\tud@replace@in}
-% \changes{v2.05}{2015/11/01}{neu}^^A
 % \changes{v2.06o}{2022/08/08}{neu}^^A
-% \begin{macro}{\tud@replace@@in}
-% \changes{v2.06o}{2022/08/08}{neu}^^A
-% Ersetzt innerhalb der im ersten Argument als Makro gegebenen Zeichenkette 
+% Es werden innerhalb der im ersten Argument als Makro gegebenen Zeichenkette 
 % alle im zweiten Argument gegebene \meta{Suchzeichen} durch die im dritten 
-% Argument angegebene \meta{Ersatzzeichen} rekursiv.
+% Argument angegebene \meta{Ersatzzeichen} rekursiv ersetzt.
 %    \begin{macrocode}
 \newcommand*\tud@replace@in[3]{%
   \begingroup%
+%    \end{macrocode}
+% Zunächst wird der Inhalt des ersten Argumentes expandiert. Anschließend 
+% wird \cs{tud@res@b} als ein durch \cs{@nil} abgegrenztes Makro mit zwei
+% Argumenten definiert, wobei diese durch das im zweiten Argument gegebene 
+% \meta{Zeichen} voneinander abgegrenzt werden. Dieses Makro wird nun so lange 
+% rekursiv mit dem zweiten Teil aufgerufen, bis dieses leer ist. Dabei wird 
+% der erste, durch das angegebene zu ersetzende Zeichen Teil sukzessive an 
+% \cs{tud@res@c} angehängt und um das im dritten Argument angegebene 
+% Ersatzzeichen vervollständigt.
+%    \begin{macrocode}
     \edef\tud@res@a{\expandonce{#1}}%
     \let\tud@res@c\@empty%
     \def\tud@res@b##1#2##2\@nil{%
@@ -608,6 +615,9 @@
   \tud@res@a%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@replace@in
+% \begin{macro}{\tud@replace@@in}
+% \changes{v2.06o}{2022/08/08}{neu}^^A
 % Diese Variante sorgt dafür, dass die zu ersetzenden Zeichen alle als Strings 
 % behandelt werden. Die zurückgelieferte Zeichenkette enthält demzufolge nur 
 % noch Zeichen mit \val{catcode 12}.
@@ -628,7 +638,6 @@
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@replace@@in
-% \end{macro}^^A \tud@replace@in
 %
 % \subsubsection{Test auf verfügbare Sprachen}
 %
