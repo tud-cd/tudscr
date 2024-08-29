@@ -4569,45 +4569,44 @@
 % \begin{macro}{\TermTable}
 % \begin{macro}{\Term@Table}
 % \begin{macro}{\Term@@Table}
+% \begin{macro}{\Term@@@Table}
 % Für sprachabhängige Bezeichner wird zusätzlich der Befehl \cs{TermTable} 
 % definiert, dem eine kommaseparierte Liste übergeben werden kann. Anhand 
 % dieser Liste werden die enthalten Begriffe für die Sprachen Deutsch und
-% English in einer Tabelle ausgegeben. Die Sternversion dieses Befehls nutzt
-% dafür die \env{tabularx}-Umgebung. Für diese kann ein zweites Argument
-% angegeben werden, welches die gewünschte Breite der Tabelle angibt.
+% English in einer Tabelle ausgegeben. Mit dem optionalen Argument kann
+% die gewünschte Breite der Tabelle angegben werden.
 % \ToDo{replace \cs{selectlanguage} with \env{otherlanguage}}[v2.06]
 %    \begin{macrocode}
 \NewDocumentCommand\TermTable{o m}{%
   \ifhmode\par\fi%
-  \vskip\medskipamount%
+  \vskip\smallskipamount%
   \@afterindentfalse\@afterheading%
-  \begingroup%
-    \IfValueTF{#1}{%
-      \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}{lXX}%
-        \Term@Table{-\ht\strutbox}{#2}%
-      \end{tabularx}%
+  \IfValueTF{#1}{%
+    \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}[b]{lXX}%
+      \Term@@Table{#2}%
+    \end{tabularx}%
   }{%
-      \begin{tabular}{lll}%
-        \Term@Table{\z@}{#2}%
-      \end{tabular}%
+    \begin{tabular}[b]{lll}%
+      \Term@@Table{#2}%
+    \end{tabular}%
   }%
-  \endgroup%
   \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table[2]{%
+\newcommand*\Term@@Table[1]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forcsvlist{\Term@@Table{#1}}{#2}%
+  \forcsvlist{\Term@@@Table}{#1}%
   \bottomrule%
 }
-\newcommand*\Term@@Table[2]{%
-  \Term{#2}'none' & %
-  \tud@if@strempty{\csuse{#2}}{\PName{leer}}{\csuse{#2}} & %
-  \selectlanguage{english}\vspace*{#1}%
-  \tud@if@strempty{\csuse{#2}}{\PName{empty}}{\csuse{#2}}\tabularnewline%
+\newcommand*\Term@@@Table[1]{%
+  \Term*{#1} & %
+  \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
+  \strut\selectlanguage{english}%
+  \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 %    \end{macrocode}
+% \end{macro}^^A \Term@@@Table
 % \end{macro}^^A \Term@@Table
 % \end{macro}^^A \Term@Table
 % \end{macro}^^A \TermTable
