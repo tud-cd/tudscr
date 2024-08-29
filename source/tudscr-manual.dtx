@@ -2307,6 +2307,7 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Package{s d|| d'' d() m}{#5}
 \NewDocumentCommand\Package{s d|| d'' d() m !d<>}{%
+%%  \IfValueT{#6}{\ClassWarning{xxx}{move me \detokenize{#6}}}%
 %<*class>
   \if@tud@changedat%
     \Process@ChangedAt{\Package{#5}}[Paket]%
@@ -2589,6 +2590,7 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{s d|| d'' d() m}{#5}
 \NewDocumentCommand\Application{s d|| d'' d() m !d<>}{%
+%%  \IfValueT{#6}{\ClassWarning{xxx}{move me \detokenize{#6}}}%
   \Markup@SetFormat{\sbifont}%
   \Process@Markup{\Application{#5}}(#4)<#6>'#3'|#2|%
   \Process@Index{#1}[main]{\Application{#5}}[Anwendungssoftware](#4)|#2|%
@@ -2783,14 +2785,89 @@
 % und nicht der generischen Bezeichnung aufrufen zu können. Sollte der letzten 
 % generischen Anker jedoch die Deklaration einer Entität folgen, ist dies nicht 
 % gewünscht, weshalb \cs{\HyperDestRename} hier deaktiviert wird.
+%
+% Die Verwendung von \cs{detokenize} ist notwendig, damit mögliche Unterschiede 
+% bei den catcodes von Labeln ignoriert und nur die Strings selbst verglichen
+% werden.
 %    \begin{macrocode}
-\newcommand*\tud@lbl@@declare[2]{%
+\tud@auxlist@register(\detokenize\expandafter){tud@lbl@alias}
+\NewDocumentCommand\tud@lbl@@declare{s m !d==}{%
   \begingroup
-    \tud@hyperdef{#2}%
-    \let\HyperDestRename\@gobbletwo%
+    \IfBooleanF{#1}{%
+      \tud@hyperdef{#2}%
+      \let\HyperDestRename\@gobbletwo%
+    }%
     \label{#2}%
     \tud@trace@lbl@add{created}{#2}%
+%    \end{macrocode}
+% Nach der Definition des eigentlichen Labels werden noch mögliche Aliaslabel 
+% definiert. Das aktuell erstellte Label ist definitiv kein Alias und wird 
+% dementsprechend aus der Liste zu erstellender Aliaslabel entfernt. Danach 
+% wird das Basislabel aus dem aktuellen in \cs{tud@res@a} extrahiert. In 
+% \cs{tud@res@b} werden alle nachfolgend erstellten Aliaswerte gesichert, um 
+% diese ganz zum Schluss noch zu validieren.
+%    \begin{macrocode}
+    \tud@auxlist@remove{tud@lbl@alias}{#2}%
+    \edef\tud@res@a{#2}%
+    \def\tud@res@c##1=##2\@nil{\def\tud@res@a{##1}}%
+    \expandafter\tud@res@c\tud@res@a==\@nil%
+    \let\tud@res@b\@empty%
+%    \end{macrocode}
+% Für die während der Deklaration in \cs{tud@alias@values} abgelegten Werte 
+% werden Aliaslabel erzeugt.
+%    \begin{macrocode}
+    \ifx\tud@alias@values\@nnil\else%
+      \@for\tud@res@c:=\tud@alias@values\do{%
+        \trim@spaces@in\tud@res@c%
+        \ifx\tud@res@c\@empty\else%
+          \listeadd\tud@res@b{\tud@res@c}%
+          \tudhyper@alias@values{\tud@res@a=\tud@res@c}%
+        \fi%
+      }%
+    \fi%
+%    \end{macrocode}
+% Dies gilt auch für die Deklaration als boolscher Schalter.
+%    \begin{macrocode}
+    \IfValueT{#3}{%
+      \listadd\tud@res@b{#3}%
+      \ifstrequal{\PBoolean}{#3}{%
+        \tudhyper@alias@values{\tud@res@a=true}%
+        \tudhyper@alias@values{\tud@res@a=false}%
+      }{}%
+    }%
+%    \end{macrocode}
+% Zum Schluss wird noch geprüft, ob ein boolscher Werte auch in der gewünschten 
+% Notation angegeben wurden.
+%    \begin{macrocode}
+    \def\tud@res@c##1{%
+      \tud@if@strbool{##1}{\@tud@res@swatrue}{\@tud@res@swatrue}{\@tud@res@swafalse}%
+      \if@tud@res@swa%
+        \ifboolexpr{%
+          (test {\ifstrequal{##1}{true}} or test {\ifstrequal{##1}{false}})%
+        }{\@tud@res@swafalse}{\@tud@res@swatrue}%
+        \if@tud@res@swa%
+          \ClassWarning{tudscrmanual}{%
+            Boolean values should only be referred with\MessageBreak%
+            'true/false' but '##1' was used%
+          }%
+        \fi%
+      \fi%
+    }%
+    \expandafter\forlistloop\expandafter\tud@res@c\expandafter{\tud@res@b}%
   \endgroup
+}
+%    \end{macrocode}
+% Nicht verwirren lassen! Das Aliaslabel wird zunächst der Exportliste 
+% hinzugefügt. Anschließend wird geprüft, ob es in der importierten Liste 
+% enthalten ist.
+%    \begin{macrocode}
+\newcommand*\tudhyper@alias@values[1]{%
+  \tud@auxlist@add{tud@lbl@alias}{#1}%
+  \tud@auxlist@ifin{#1}{tud@lbl@alias}{%
+    \Hy@raisedlink{\tud@hyperdef{#1}}\ignorespaces%
+    \label{#1}%
+    \tud@trace@lbl@add{created}{#1\space(alias)}%
+  }{}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@lbl@@declare
@@ -2808,6 +2885,7 @@
 %    \begin{macrocode}
 %<*class>
 \newrobustcmd*\tud@lbl@ref[2]{\tud@hyperref{#1}{#2}}
+\NewDocumentCommand\entitylabel{o m}{\IfValueT{#1}{\label{#1}}}
 %</class>
 %    \end{macrocode}
 % Mit \cs{tudhyperref} kann in Tutorials auf Labels im Handbuch verwiesen 
@@ -3006,6 +3084,8 @@
   \else%
 %</class>
     \if@tud@index\else%
+      % TODO sinnvoll, die Entität (Prüfen des Labels oder mehr) durchzureichen?
+      \IfValueT{#5}{\addto@hook\tud@toks@{(#5)}}%
       \IfValueT{#6}{%
         \tud@if@strblank{#6}%
           {}%
@@ -3031,17 +3111,6 @@
 % verzichtet werden soll, kann ein leeres Argument \parg{} angegeben werden.
 %    \begin{macrocode}
   \if@tud@index\else%
-    \IfValueT{#5}{%
-      \tud@if@strblank{#5}{}{%
-        \tud@if@strequal{#7}{none}{}{%
-          \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
-            \ClassWarning{tudscrmanual}{%
-              No existing label \tud@lbl@tmp\space for #5%
-            }%
-          }%
-        }%
-      }%
-    }%
   \fi%
 %    \end{macrocode}
 % Nun erfolgt mit \cs{Process@@MarkupDeclare} bzw. \cs{Process@@MarkupInline} 
@@ -3091,7 +3160,7 @@
 % mit \cs{Markup@ClearFormat} zurückgesetzt.
 %    \begin{macrocode}
 %<*class>
-\NewDocumentCommand\Process@@MarkupDeclare{m m d== o}{%
+\NewDocumentCommand\Process@@MarkupDeclare{m m d== o d()}{%
   \Markup@CheckFormat%
   \ifcase\tud@declare@num\relax%
     \tud@lbl@declare{#1}%
@@ -3102,6 +3171,9 @@
     \tud@lbl@declare{#1}%
   \or%
     \tud@lbl@declare*{#1}%
+  \else% TODO wozu?! eher Fehler, oder?
+    \tud@lbl@declare{#1}%
+    \Markup@Output{#2}=#3=[{#4}]%
   \fi%
   \Markup@ClearFormat%
 }
@@ -3120,7 +3192,7 @@
 %   unterbinden? Könnte \cs{tud@declaration@list} genutzt werden?
 % }[v2.07]
 %    \begin{macrocode}
-\NewDocumentCommand\Process@@MarkupInline{m m d== o d<> d''}{%
+\NewDocumentCommand\Process@@MarkupInline{m m d== o d() d<> d''}{%
   \Markup@CheckFormat%
 %    \end{macrocode}
 % Um die aktuelle Definition der temporären Makros nicht zu ändern, erfolgt die
@@ -3148,22 +3220,23 @@
 % Label für das Paket existiert.
 %    \begin{macrocode}
       \let\@tempb\relax%
-      \IfValueT{#6}{%
+      \IfValueT{#7}{%
         \def\@tempb{%
           \ClassWarning{tudscrmanual}{%
             You've used the unknown cross-reference\MessageBreak%
-            shorthand '#6'. Only 'auto', 'page' and 'full'\MessageBreak%
-            as well as 'none' \IfValueT{#5}{or 'url' }are valid%
+            shorthand '#7'. Only 'auto', 'page' and 'full'\MessageBreak%
+            as well as 'none' \IfValueT{#6}{or 'url' }are valid%
           }%
         }%
-        \tud@if@strequal{#6}{auto} {\def\@tempb{ in \autoref{#1}}}{%
-        \tud@if@strequal{#6}{page} {\def\@tempb{ \vpageref{#1}}}{%
-        \tud@if@strequal{#6}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
-        \tud@if@strequal{#6}{full} {\def\@tempb{ in \fullref{#1}}}{%
-        \tud@if@strequal{#6}{none} {\let\@tempa\@tempc\let\@tempb\relax}{}}}}}%
-        \IfValueT{#5}{%
-          \tud@if@strequal{#6}{url}%
-            {\def\@tempa{\href{#5}{\@tempc}}\let\@tempb\relax}%
+        \tud@if@strequal{#7}{auto}{\def\@tempb{ in \autoref{#1}}}{%
+        \tud@if@strequal{#7}{ref}{\def\@tempb{ in \autoref{#1}}}{
+        \tud@if@strequal{#7}{page}{\def\@tempb{ \vpageref{#1}}}{%
+        \tud@if@strequal{#7}{ppage}{\def\@tempb{ \reftextfaraway{#1}}}{%
+        \tud@if@strequal{#7}{full}{\def\@tempb{ in \fullref{#1}}}{%
+        \tud@if@strequal{#7}{none}{\let\@tempa\@tempc\let\@tempb\relax}{}}}}}}%
+        \IfValueT{#6}{%
+          \tud@if@strequal{#7}{url}%
+            {\def\@tempa{\href{#6}{\@tempc}}\let\@tempb\relax}%
             {}%
         }%
       }%
@@ -3175,17 +3248,17 @@
 % Für Pakete wird ein CTAN-Link erzeugt.
 %    \begin{macrocode}
       \let\@tempa\@tempc%
-      \IfValueT{#5}{\def\@tempa{\href{#5}{\@tempc}}}%
+      \IfValueT{#6}{\def\@tempa{\href{#6}{\@tempc}}}%
 %    \end{macrocode}
 % Ein Querverweis kann logischerweise nicht erstellt werden. Wurde dennoch im 
 % letzten optionalen Argument eine |'|\meta{Referenzvariante}|'| für den
 % Querverweis angegeben, wird eine Warnung erzeugt.
 %    \begin{macrocode}
       \let\@tempb\relax%
-      \IfValueT{#6}{%
-        \tud@if@strequal{#6}{none}{\let\@tempa\@tempc}{%
+      \IfValueT{#7}{%
+        \tud@if@strequal{#7}{none}{\let\@tempa\@tempc}{%
 %<*package>
-        \tud@if@strequal{#6}{manual}{\def\@tempa{\tud@lbl@ref{#1}{\@tempc}}}{%
+        \tud@if@strequal{#7}{manual}{\def\@tempa{\tud@lbl@ref{#1}{\@tempc}}}{%
 %</package>
           \def\@tempb{%
 %<*class> 
@@ -3201,7 +3274,7 @@
 %</class>
 %<*package>
               You've used the unknown cross-reference\MessageBreak%
-              shorthand '#6'. Only 'none' and 'manual'\MessageBreak%
+              shorthand '#7'. Only 'none' and 'manual'\MessageBreak%
               are valid%
 %</package>
             }%
@@ -4463,6 +4536,8 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{environment}{Declaration*}
 % \changes{v2.06p}{2022/09/22}{neu}^^A
+% \begin{macro}{\tud@alias@values}
+% \changes{v2.07}{2019/11/08}{neu}^^A
 % Die \env{Declaration}-Umgebung dient zur Deklaration von Optionen, Umgebungen,
 % Befehlen, Parametern, Bezeichnern, Längen, Schriftelementen und Farben. Diese 
 % werden mit den entsprechenden Auszeichnungsbefehlen als obligatorisches 
@@ -4478,8 +4553,12 @@
 % \ToDo{doc überprüfen}[v2.06]
 % \ToDo{alle Umgebungen bzgl noindentafter und \cs{unksip} prüfen}[v2.06]
 %    \begin{macrocode}
-\NewDocumentEnvironment{Declaration}{m d() d<> o}{%
-  \listadd\tud@declaration@list{#1}%
+\newcommand*\tud@alias@values{\@nil}
+\NewDocumentEnvironment{Declaration}{m d() d<> o D''{\noexpand\@nil}}{%
+  \listeadd\tud@declaration@list{%
+    \def\noexpand\tud@alias@values{#5}%
+    \unexpanded{#1}%
+  }%
   \tud@declare@start[{#4}]{#1}(#2){#3}%
 }{%
   \tud@declare@end{#1}%
@@ -4487,9 +4566,9 @@
 \NewDocumentEnvironment{Declaration*}{m d() d<>}{%
   \@tud@obsoletetrue
   \listadd\tud@declaration@list{%
-    \def\tud@declare@num{1}%
+    \tud@declare@num=\@ne\relax%
     #1%
-    \def\tud@declare@num{0}%
+    \tud@declare@num=\z@\relax%
   }%
   \tud@declare@start{#1}(#2){#3}%
   \@tud@obsoletefalse
@@ -4497,6 +4576,7 @@
   \tud@declare@end{\@tud@obsoletetrue#1\@tud@obsoletefalse}%
 }
 %    \end{macrocode}
+% \end{macro}^^A \tud@alias@values
 % \end{environment}^^A Declaration*
 % \end{environment}^^A Declaration
 % \begin{environment}{Cessations}
@@ -4654,7 +4734,7 @@
 % das Markup erfolgen soll. Die möglichen Werte sind bei der Beschreibung von
 % \cs{Process@@MarkupDeclare} zu finden.
 %    \begin{macrocode}
-\newcommand*\tud@declare@num{0}
+\tud@newcount\tud@declare@num
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@num
 % \end{macro}^^A \tud@declaration@list
@@ -4989,17 +5069,16 @@
 % erfolgen, ohne das hierfür die tabellarische Darstellung gewählt wird. 
 % Vielmehr erscheint der Entitätsbefehl in seiner gewöhnlichen Fließtextform, 
 % allerdings werden zusätzlich ein Anker und ein Deklarationsindexeintrag 
-% erstellt.
+% erstellt. Die Sternform erzeugt hierbei einen untergeordneten Indexeintrag. 
+% Das optionale Argument kann für Änderungsnotizen genutzt werden.
 %    \begin{macrocode}
-\NewDocumentCommand\InlineDeclaration{m}{\Inline@Declaration{#1}}
-\NewDocumentCommand\Inline@Declaration{s m}{%
-  \tud@declare@special@start{#2}{2}%
-  \begingroup
-    \let\index\@gobbleopt@one
-    \IfBooleanF{#1}{\let\hyperref\@gobblethree#2}%
-  \endgroup
-  \tud@declare@special@end{#2}%
-  \IfBooleanF{#1}{\null}%
+\NewDocumentCommand\InlineDeclaration{s o m}{%
+  \Inline@Declaration[{#2}]{#3}[\IfBooleanTF{#1}{-2}{-1}]%
+}
+\NewDocumentCommand\Inline@Declaration{o m !O{-1}}{%
+  \tud@declare@special@start[{#1}]{#2}{#3}%
+  \printchangedatlist%
+  \tud@declare@special@end{#2}{#3}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Inline@Declaration
@@ -5013,11 +5092,12 @@
 % Indexeinträge und Links standardmäßig auf die deklarierte Entität verweisen.
 %    \begin{macrocode}
 \NewDocumentEnvironment{DeclareEntity}{m o}{%
-  \tud@declare@special@start[{#2}]{#1}{3}%
+  \tud@declare@special@start*[{#2}]{#1}{3}%
+  \printchangedatlist*%
   \begin{Entity}{#1}%
 }{%
   \end{Entity}%
-  \tud@declare@special@end{#1}%
+  \tud@declare@special@end{#1}{3}%
 }
 %    \end{macrocode}
 % \end{environment}^^A DeclareEntity
@@ -5034,7 +5114,7 @@
 \NewDocumentEnvironment{DeclareEntity*}{m o}{%
   \tud@declare@special@start[{#2}]{#1}{2}%
 }{%
-  \tud@declare@special@end{#1}%
+  \tud@declare@special@end{#1}{2}%
 }
 %    \end{macrocode}
 % \end{environment}^^A DeclareEntity*
@@ -5042,28 +5122,38 @@
 % \changes{v2.05}{2015/11/01}{neu}^^A
 % \begin{macro}{\tud@declare@special@end}
 % \changes{v2.05}{2015/11/01}{neu}^^A
-% Die beiden dienen zur vereinfachten Deklaration. Es wird keine Ausgabe 
-% sondern lediglich Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das 
-% optionale Argument dient einem Änderungseintrag, das erste obligaotrische 
-% gilt der eigentlichen Deklaration, das zweite zur Einstellung des Makros 
-% \cs{tud@declare@num}, mit welchem das Verhalten für das Erzeugen der Labels 
-% gesteuert wird.
+% Die beiden Befehle dienen zur vereinfachten Deklaration. Sollte eine Ausgabe 
+% erfolgen, so erfolgt diese im Fließtext und nicht tabelarisch. In jedem Fall 
+% werden Hyperlink, Indexeintrag und Änderungsnotiz erzeugt. Das optionale
+% Argument dient einem Änderungseintrag, das erste obligaotrische gilt der
+% eigentlichen Deklaration, das zweite zur Anpassung von \cs{tud@declare@num}, 
+% mit welchem das Verhalten für das Erzeugen von Ausgabe und Label gesteuert 
+% wird. Die Sternvariante wird von der Umgebung \env{DeclareEntity} 
+% genutzt, um Einträge in der Änderungsliste in den allgemeinen Teil zu
+% schreiben.
 %    \begin{macrocode}
-\NewDocumentCommand\tud@declare@special@start{o m m}{%
-  \Changed@At@CreateList(#2){#1}%
-  \def\tud@declare@num{#3}%
-  \@tud@declaretrue\@openindextrue#2\@tud@declarefalse%
-  \def\tud@declare@num{0}%
-  \printchangedatlist%
+\NewDocumentCommand\tud@declare@special@start{s r[] m m}{%
+  \tud@declare@num=#4\relax%
+  \@tud@declaretrue%
+  \IfBooleanTF{#1}{%
+    \Changed@At@CreateList(#3){#2}%
+  }{%
+    \Changed@At@CreateList[#3]{#2}%
+  }%
+  \@openindextrue#3%
+  \@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
 }
-\newcommand*\tud@declare@special@end[1]{%
+\newcommand*\tud@declare@special@end[2]{%
   \ifx\tud@changedat@list\relax\else%
     \ClassError{tudscrmanual}{\string\printchangedatlist\space is missing}{%
       \string\tud@changedat@list\space is not empty. Did you\MessageBreak%
       forget to print this list with \string\printchangedatlist?%
     }%
   \fi%
+  \tud@declare@num=#2\relax%
   \@tud@declaretrue\@openindexfalse#1\@tud@declarefalse%
+  \tud@declare@num=\z@\relax%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@declare@special@end
@@ -5082,34 +5172,35 @@
 % angegeben werden, welches die gewünschte Breite der Tabelle angibt.
 % \ToDo{replace \cs{selectlanguage} with \env{otherlanguage}}[v2.06]
 %    \begin{macrocode}
-\NewDocumentCommand\TermTable{s m !g}{%
-  \let\tud@templist\relax%
-  \forcsvlist{\listadd\tud@templist}{#2}%
+\NewDocumentCommand\TermTable{o m}{%
   \ifhmode\par\fi%
   \vskip\medskipamount%
   \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \tud@setdim\@tempdima{\IfValueTF{#3}{#3}{\linewidth}}%
-    \tud@setdim\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\Term@Table\end{tabularx}%
-  }{%
-    \tud@setdim\@tempdimc{\z@}%
-    \begin{tabular}{lll}\Term@Table\end{tabular}%
-  }%
+  \begingroup%
+    \IfValueTF{#1}{%
+      \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}{lXX}%
+        \Term@Table{-\ht\strutbox}{#2}%
+      \end{tabularx}%
+    }{%
+      \begin{tabular}{lll}%
+        \Term@Table{\z@}{#2}%
+      \end{tabular}%
+    }%
+  \endgroup%
   \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table{%
+\newcommand*\Term@Table[2]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forlistloop\Term@@Table{\tud@templist}%
+  \forcsvlist{\Term@@Table{#1}}{#2}%
   \bottomrule%
 }
-\newcommand*\Term@@Table[1]{%
-  \Term'none'{#1} & % 
-  \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
-  \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
+\newcommand*\Term@@Table[2]{%
+  \Term'none'{#2} & %
+  \tud@if@strempty{\csuse{#2}}{\PName{leer}}{\csuse{#2}} & %
+  \selectlanguage{english}\vspace*{#1}%
+  \tud@if@strempty{\csuse{#2}}{\PName{empty}}{\csuse{#2}}\tabularnewline%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Term@@Table
@@ -5670,6 +5761,37 @@
 % sofortige Ausführen des beschriebenen Quelltextauszuges direkt im Tutorial 
 % möglich sein.
 %
+% Dafür werden im Folgenden die Umgebungen \env{Preamble}, \env{Trunk} und
+% \env{Hint} sowie daraus abgeleitet Varianten definiert, womit sich die Angabe
+% und Erläuterung der Quelltexte im Tutorial logisch strukturieren lässt und
+% dennoch die notwendige Ordnung dieser für das Copy"~\&"~Paste"~Beispiel
+% aufrechterhalten werden kann. Hierfür zeichnen die beiden Umgebungen
+% \env{Preamble} und \env{Trunk} und deren Derivate verantwortlich. Die
+% Umgebung \env{Hint} steht für zusätzliche Erläuterungen bereit, welche jedoch
+% nicht in das Copy"~\&"~Paste"~Beispiel übernommen werden.
+%
+% \begin{environment}{Code}
+% Folgend werden Befehle und Umgebungen für die Darstellung von Quelltexten im 
+% Handbuch definiert. Mit dieser Umgebung können kurze Quelltextbeispiele 
+% ausgegeben werden. Sicherlich sinnvoll ist, die \env{Code}-Umgebung innerhalb
+% von \env{Example} oder \env{quoting} zu verwenden, um den Quelltext etwas
+% abzuheben.
+% \ToDo{
+%   \env{quoting} loswerden, automatischer Einzug, an tutorial angleichen
+% }[v2.06]
+%    \begin{macrocode}
+\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
+\NoIndentAfterEnv{Code}
+%    \end{macrocode}
+% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
+% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
+% zurückgesetzt.
+%    \begin{macrocode}
+\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
+\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
+%    \end{macrocode}
+% \end{environment}^^A Code
+%
 % \iffalse
 %<*package>
 % \fi
@@ -5787,7 +5909,7 @@
   \immediate\openout\tud@write@a="\tud@code@temp-preamble.tex"\relax%
   \immediate\openout\tud@write@b="\tud@code@temp-trunk.tex"\relax%
   \immediate\write\tud@write@b{^^J\string\begin{document}^^J}%
-%%% \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
+  \Hy@raisedlink{\hyperdef{\jobname}{tutorials:\jobname}{}}%
   \faculty{}%
   \maketitle%
   \IfArgIsEmpty{#1}{}{%
@@ -5845,7 +5967,6 @@
 % genutzt wird.
 %    \begin{macrocode}
 \newcommand*\tud@code@pre{%
-  \ClassWarning{xxxx}{change me!}%
   \csuse{filecontents*}[nosearch,force,nowarn]{\tud@code@temp.tex}%
 }
 \newcommand*\tud@code@post{%
@@ -6120,6 +6241,13 @@
 \newcommand*\Code@Hook{}
 \let\Code@Hook\relax
 \newcommand*\CodeHook[1]{\gdef\Code@Hook{#1}}
+% TODO \newcommand*\GlobalCodeHook{\AddToHook{env/Code/measuring}}
+% TODO Sternversion für einmalige oder lokale Zuweisung?!
+\NewHook{env/Code/measuring}
+\AddToHook{env/Code/measuring}{%
+  \let\newcommand\renewcommand
+  \let\newlength\@gobble
+}
 %    \end{macrocode}
 % \end{macro}^^A \Code@Hook
 % \end{macro}^^A \CodeHook
@@ -6144,21 +6272,16 @@
 % \ToDo{\cs{@tempa} ist ein sehr merkwürdiges Konstrukt!}[v2.06]
 %    \begin{macrocode}
   \def\@tempa##1##2{%
-    \begingroup%
-      \settoheight\tud@res@glue{\vbox{##1}}%
-    \endgroup%
     ##1%
-%    ##1%
-%    \begingroup%
-%      ##2%
-%      \settoheight\@tempdima{\vbox{##1}}%
-%      \ifdim\@tempdima>\z@\relax%
-%        \ClassWarning{xxxxx}{warning text}%
-%        \endgraf%
-%        \medskip%
-%        \noindent\ignorespaces%
-%      \fi%
-%    \endgroup%
+    \begingroup%
+      ##2%
+      \settoheight\@tempdima{\vbox{##1}}%
+      \ifdim\@tempdima>\z@\relax%
+        \endgraf%
+        \medskip%
+        \noindent\ignorespaces%
+      \fi%
+    \endgroup%
   }%
 %    \end{macrocode}
 % Da aufgrund der Verwendung der \env{filecontents}-Umgebung ein optionales
@@ -6166,9 +6289,9 @@
 % wird \cs{CodePreamble} bereitgestellt, womit der Ausgabe ein erläuternder
 % Text vorangestellt werden kann.
 %    \begin{macrocode}
-  \ifdefvoid\Code@Preamble{}{\Code@Preamble}%
-%  \tud@setdim\@tempdimc{\leftskip}%
-%  \tud@setdim\leftskip{\leftmargin}%
+  \@tempa{\Code@Preamble}{}%
+  \tud@setdim\@tempdimc{\leftskip}%
+  \tud@setdim\leftskip{\leftmargin}%
 %    \end{macrocode}
 % Durch die doppelte Verwendung von \file{\string\tud@code@temp.tex}~-- einmal 
 % direkt und einmal innerhalb einer Box~-- können darin verwendete Befehle wie
@@ -6178,23 +6301,14 @@
 %    \begin{macrocode}
   \@tempa{\InputCode}{\Code@Hook}%
   \global\let\Code@Hook\relax%
-  %\tud@setdim\leftskip{\@tempdimc}%
-  %\noindent\ignorespaces%
+  \tud@setdim\leftskip{\@tempdimc}%
+  \noindent\ignorespaces%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@code@input@tex
 %
-% \begin{macro}{\tud@code@process}
-% \changes{v2.06p}{2022/11/13}{neu}^^A
-% \begin{macro}{\tud@code@type@num}
-% \changes{v2.06p}{2022/11/13}{neu}^^A
-% \begin{macro}{\if@tud@code@nolst}
-% \changes{v2.06p}{2022/11/13}{neu}^^A
-% \begin{macro}{\tud@code@input@num}
-% \changes{v2.06p}{2022/11/13}{neu}^^A
-% Hiermit werden die optionalen Argumente der nachfolgend definierten 
-% \env{Code}-Umgebung verarbeitet.
-%    \begin{macrocode}
+%
+%
 \tud@newcount\tud@code@type@num
 \TUD@key[.code]{type}{%
   \TUD@set@numkey{type}{@tempa}{%
@@ -6204,22 +6318,16 @@
     \tud@code@type@num=\@tempa\relax%
   \fi%
 }
-\tud@newif\if@tud@code@nolst
-\TUD@key[.code]{nolst}[true]{%
-  \TUD@set@ifkey{nolst}{@tud@code@nolst}{#1}%
-}
-\tud@newcount\tud@code@input@num
-\TUD@key[.code]{input}[true]{%
-  \TUD@set@numkey{input}{@tempa}{%
-    \TUD@bool@numkey,{float}{2}%
+\tud@newcount\tud@code@lst@num
+\TUD@key[.code]{lst}[true]{%
+  \TUD@set@numkey{lst}{@tempa}{%
+    \TUD@bool@numkey,{show}{1},{input}{2},{swap}{3},{after}{3}%
   }{#1}%
   \ifx\FamilyKeyState\FamilyKeyStateProcessed%
-    \tud@code@input@num=\@tempa\relax%
+    \tud@code@lst@num=\@tempa\relax%
   \fi%
 }
-\NewDocumentCommand\tud@code@process{m d() O{} m}{%
-  \@tud@code@nolstfalse
-  \tud@code@input@num=\z@\relax
+\NewDocumentCommand\tud@code@process{m d() O{} m}{
   \TUDExecuteOptions[.code]{#3,type=#4}%
   \ifcase\tud@code@type@num\relax% preamble
     \tud@read@to@outputstream{\tud@code@temp.tex}{\tud@write@a}%
@@ -6227,13 +6335,15 @@
     \tud@read@to@outputstream{\tud@code@temp.tex}{\tud@write@b}%
   \fi%
   \let\tud@res@a\@empty%
-  \if@tud@code@nolst\else\def\tud@res@a{\tud@code@input@lst}\fi
-  \ifcase\tud@code@input@num\relax% input=false
-  \or% input=true
+  \ifcase\tud@code@lst@num\relax% false
+  \or% true
+    \appto\tud@res@a{\tud@code@input@lst}%
+  \or% input
+    \appto\tud@res@a{\tud@code@input@lst}%
     \appto\tud@res@a{\tud@code@input@tex}%
-  \or% lst=true, input=first
-%    \appto\tud@res@a{\InputCode}%
-%    \appto\tud@res@a{\tud@code@input@lst}%
+  \or% swap
+    \appto\tud@res@a{\InputCode}%
+    \appto\tud@res@a{\tud@code@input@lst}%
   \fi%
   \IfValueT{#2}{%
     \ifcase\tud@code@type@num\relax
@@ -6249,67 +6359,29 @@
   \appto\tud@res@a{\global\let\Code@Preamble\relax}%
   \expanded{\noexpand\AddToHookNext{env/#1/after}{\expandonce\tud@res@a}}%
 }
-%    \end{macrocode}
-% \end{macro}^^A \tud@code@input@num
-% \end{macro}^^A \if@tud@code@nolst
-% \end{macro}^^A \tud@code@type@num
-% \end{macro}^^A \tud@code@process
-%
-% \iffalse
-%</package>
-% \fi
-%
-% \begin{environment}{Code}
-% Mit dieser Umgebung werden Quelltextauszüge im Handbuch sowie Tutorials 
-% dargestellt und erläutert. Für letztere können so inhaltlich anverwandte 
-% Teile für Präambel und Dokument an einer Stelle beschrieben, jedoch für die 
-% erstellte Beispieldatei \file{\string\jobname-example.tex} separat gehalten 
-% werden.
-% \ToDo{replace \cs{pcolumnfuzz}}
-% \ToDo{listings order}
-% \ToDo{output=...}
-%    \begin{macrocode}
-%<*package>
 \NewDocumentEnvironment{Code}{d() O{} m}{%
-  \filecontents[nosearch,force,nowarn,noheader]{\tud@code@temp.tex}%
+  \filecontents[noheader,nosearch,force,nowarn]{\tud@code@temp.tex}%
 }{%
   \endfilecontents%
-  \tud@code@process{Code}(#1)[#2]{#3}%
+  \tud@code@process{Code}(#1)[lst=true,#2]{#3}%
 }
 \NewDocumentEnvironment{Code*}{d() O{} m}{%
-  \filecontents[nosearch,force,nowarn,noheader]{\tud@code@temp.tex}%
+  \filecontents[noheader,nosearch,force,nowarn]{\tud@code@temp.tex}%
 }{%
   \endfilecontents%
-\ClassWarning{xxx}{change me!}%
-  \tud@code@process{Code*}(#1)[input,#2]{#3}%
+  \tud@code@process{Code*}(#1)[lst=input,#2]{#3}%
 }
-%</package>
-%    \end{macrocode}
-% Quelltexte im Handbuch werden lediglich dargestellt und erläutert. Diese 
-% werden weder ausgeführt noch kompiliert oder gesichert, weshalb eine einfache 
-% \pkg{listings}-Umgebung definiert wird.
-% \ToDo{
-%   \env{quoting} loswerden, automatischer Einzug, an tutorial angleichen
-% }[v2.06]
-%    \begin{macrocode}
-%<*class>
-\lstnewenvironment{Code}[1][]{\lstset{style=tudscr,#1}}{}
-%</class>
-%    \end{macrocode}
-% Innerhalb der Umgebung \env{Code} wird \cs{@currentHref} unerwünschter Weise
-% geändert. Um dies zu vermeiden, wird dieser Befehl gesichert und anschließend
-% zurückgesetzt.
-%    \begin{macrocode}
-\BeforeBeginEnvironment{Code}{\global\let\tud@currentHref\@currentHref}
-\AfterEndEnvironment{Code}{\global\let\@currentHref\tud@currentHref}
-\NoIndentAfterEnv{Code}
-%    \end{macrocode}
-% \end{environment}^^A Code
 %
-% \iffalse
-%<*package>
-% \fi
 %
+%
+% Die nachfolgenden Umgebungen verwenden die beiden, gerade zuvor eingeführten 
+% Hilfsmakros \cs{tud@code@pre} und \cs{tud@code@post}, welche den gegebenen 
+% Inhalt in die temporäre Datei \file{\string\tud@code@temp.tex} schreiben. Die 
+% im Dokument in den Umgebungen gesetzten Quelltextauszüge werden mit dem Makro
+% \cs{tud@code@append}~-- abhängig vom gegebenen Argument~-- zusätzlich für ein 
+% Copy"~\&"~Paste"~Beispiel in \file{\string\tud@code@temp-preamble.tex} oder
+% \file{\string\tud@code@temp-trunk.tex} gespeichert. Die damit gesammelten 
+% Inhalte werden am Ende mit \cs{FinishTutorial} ausgegeben.
 % \begin{environment}{Preamble}
 % \changes{v2.02}{2014/11/02}{neu}^^A
 % \begin{environment}{Preamble*}
@@ -6323,8 +6395,6 @@
 % ausgegeben. Die Sternversion führt den Inhalt zusätzlich im Dokument aus. Die 
 % Pluszeichenversion fügt dem Ausgabestream ihren Inhalt hinzu, ohne das 
 % dieser ausgegeben oder ausgeführt wird.
-% \ToDo{\cs{@tempa} ist ein sehr merkwürdiges Konstrukt!}[v2.06]
-% \ToDo{generalisiertes Konstrukt für alle Umgebungen?!}[v2.06]
 % \ToDo{noindentafter?}[v2.06]
 %    \begin{macrocode}
 \newenvironment{Preamble}{\tud@code@pre}{%
@@ -6433,13 +6503,13 @@
 % \changes{v2.02}{2014/12/09}{neu}^^A
 % \begin{environment}{Hint!}
 % \changes{v2.02}{2014/11/13}{neu}^^A
-% Mit der Umgebung \env{Hint} können Quelltextausschnitte zu weiterführenden 
-% Information angegeben werden. Der Inhalt wird ausgegben und~-- falls die
+% Um Quelltextausschnitte zur weiterführenden Information anzugeben, wird die
+% Umgebung \env{Hint} definiert. Der Inhalt wird ausgegben und~-- falls die
 % Sternversion genutzt wurde~-- auch ausgeführt, allerdings nicht in das 
-% Copy"~\&"~Paste"~Beispiel übernommen. Alle Varianten entsprechen in ihren
-% Eigenschaften den äquivalenten \env{Trunk}-Umgebungen. Die zusätzliche 
-% Fragezeichenversion ist für Quelltextauszüge gedacht, die ungeprüft 
-% \emph{vor} dessen Ausgabe ausgeführt werden sollen.
+% Copy"~\&"~Paste"~Beispiel übernommen. Ansonsten entsprechen alle Umgebungen 
+% in ihren Eigenschaften den äquivalenten \env{Trunk}-Umgebungen. Die Version 
+% mit Fragezeichen ist für Quelltextauszüge gedacht, die ungeprüft \emph{vor}
+% dessen Ausgabe ausgeführt werden sollen. 
 % \ToDo{optionales Argument für \cs{hfuzz}; \cs{pcolumnfuzz} treatise}[v2.06]
 % \ToDo{noindentafter?}[v2.06]
 %    \begin{macrocode}
