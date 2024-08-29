@@ -993,6 +993,119 @@
 % \end{macro}^^A \tud@unique@eadd
 % \end{macro}^^A \tud@unique@add
 %
+% \subsubsection{Externe Hilfslisten}
+%
+% Mit den nachfolgenden Makros werden Hilfslisten für die Verwendung mit der 
+% aux"~Datei definiert.
+%
+% \begin{macro}{\tud@auxlist@register}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Hiermit wird eine Hilfsliste initialisiert und die Befehle ausgeführt, um 
+% diese am Ende des Dokumentes in die aux"~Datei schreiben und im nachfolgenden 
+% Durchlauf wieder einlesen und verarbeiten zu können.
+%
+% Das obligatorische Argument enthält den Namen der Liste. Das vorherige 
+% optionale Argument wird bei der Verarbeitung auf jedes Listenelement 
+% angewendet, bevor es zur Liste hinzugefügt oder mit dieser verglichen wird.
+% Die Sternversion führt nach dem Einlesen der Liste die enthaltenen Elemente 
+% einzeln aus.
+%
+% Dabei werden drei Makros verwendet. Der Befehl |\|\meta{listname}|@auxlist| 
+% enthält die importierte Liste. In |\|\meta{listname}|@auxlist@positive| 
+% werden alle potentiellen Einträge in einer Positivliste vorgehalten, die 
+% exportiert werden sollen. Da im Verlauf des Dokumentes allerdings bestimmte
+% Elemente wieder entfernt werden könnten, wird die Negativliste für diese 
+% genutzt. Dieses Konstrukt dient dazu, dass beim Kompilieren des Dokumentes 
+% möglicherweise Elemente auftreten, die gar nicht exportiert werden sollen, 
+% obwohl diese später der Positivliste hinzugefügt werden könnten.
+%    \begin{macrocode}
+\NewDocumentCommand\tud@auxlist@register{s D(){\@firstofone} m}{%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@positive\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@negative\endcsname{}%
+  \expandafter\newcommand\expandafter*\csname#3@auxlist@handler\endcsname{#2}%
+  \BeforeClosingMainAux{%
+    \forlistcsloop{\listcsremove{#3@auxlist@positive}}{#3@auxlist@negative}%
+    \tud@auxlist@export{#3}%
+  }%
+  \AtBeginDocument{\tud@auxlist@import{#3}{#1}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@register
+% \begin{macro}{\tud@auxlist@export}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@import}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Beim Schreiben in die aux"~Datei wird die \pkg{etoolbox}"~Liste in eine 
+% Token-Liste umgewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@export[1]{%
+  \if@filesw%
+    \let\tud@res@a\@empty%
+    \def\tud@res@b##1{\eappto\tud@res@a{\@percentchar^^J\@spaces{##1}}}%
+    \forlistcsloop\tud@res@b{#1@auxlist@positive}%
+    \immediate\write\@mainaux{%
+      \string\gdef\expandafter\string\csname #1@auxlist\endcsname%
+        {\expandonce\tud@res@a\@percentchar^^J}%
+    }%
+  \fi%
+}
+%    \end{macrocode}
+% Beim Lesen wird die Token-Liste zurück in eine \pkg{etoolbox}"~Liste 
+% gewandelt.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@import[2]{%
+  \begingroup%
+    \edef\tud@res@a{\unexpanded{\@tfor\tud@res@c:=}\csexpandonce{#1@auxlist}}%
+    \letcs\tud@res@b{#1@auxlist@handler}%
+    \global\cslet{#1@auxlist}\@empty%
+    \tud@res@a\do{%
+      \edef\tud@res@c{\tud@res@b{\tud@res@c}}%
+      \listcsxadd{#1@auxlist}{\expandonce\tud@res@c}%
+    }%
+  \endgroup%
+  \IfBooleanT{#2}{\forlistcsloop{\@firstofone}{#1@auxlist}}%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@import
+% \end{macro}^^A \tud@auxlist@export
+% \begin{macro}{\tud@auxlist@add}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@remove}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% \begin{macro}{\tud@auxlist@ifin}
+% \changes{v2.07}{2019/11/08}{neu}^^A
+% Befehle für das Hinzufügen, Entfernen und Prüfen von Elementen in den Listen.
+%    \begin{macrocode}
+\newcommand*\tud@auxlist@add[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@positive}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@remove[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#2}%
+    \edef\tud@res@a{\detokenize\expandafter{\tud@res@a}}%
+    \tud@unique@csxadd{#1@auxlist@negative}{\tud@res@a}%
+  \endgroup%
+}
+\newcommand*\tud@auxlist@ifin[2]{%
+  \begingroup%
+    \protected@edef\tud@res@a{#1}%
+    \letcs\tud@res@b{#2@auxlist@handler}%
+    \edef\tud@res@a{%
+      \endgroup%
+      \noexpand\ifinlistcs{\tud@res@b{\tud@res@a}}{#2@auxlist}%
+    }%
+  \tud@res@a%
+}
+%    \end{macrocode}
+% \end{macro}^^A \tud@auxlist@ifin
+% \end{macro}^^A \tud@auxlist@remove
+% \end{macro}^^A \tud@auxlist@add
+%
 % \subsubsection{Sortieren von Listen}
 %
 % \begin{macro}{\tud@list@sort}

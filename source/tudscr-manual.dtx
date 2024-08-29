@@ -679,18 +679,14 @@
           \let\tud@todo@type@use\relax%
           \ifx\tud@todo@type@pos\relax%
             \def\tud@res@a##1{%
-              \ifinlist{##1}{\tud@todo@type@use}{}{%
-                \ifinlist{##1}{\tud@todo@type@neg}{}{%
-                  \listadd\tud@todo@type@use{##1}%
-                }%
+              \ifinlist{##1}{\tud@todo@type@neg}{}{%
+			    \tud@unique@add\tud@todo@type@use{##1}%
               }%
             }%
           \else%
             \def\tud@res@a##1{%
-              \ifinlist{##1}{\tud@todo@type@use}{}{%
-                \ifinlist{##1}{\tud@todo@type@pos}{%
-                  \listadd\tud@todo@type@use{##1}%
-                }{}%
+              \ifinlist{##1}{\tud@todo@type@pos}{%
+			    \tud@unique@add\tud@todo@type@use{##1}%
               }%
             }%
           \fi%
@@ -1905,13 +1901,10 @@
 %
 % \begin{macro}{\if@tud@index}
 % \changes{v2.05}{2015/11/05}{neu}^^A
-% Dieser Schalter wird zwei unterschiedliche Aufgaben verwendet. Zum einen wird 
-% er bei der Ausgabe von Verzeichnissen auf \val{true} gesetzt, um das Setzen 
-% von Indexeinträgen durch Entitätsbefehle in den Verzeichnissen selbst zu 
-% unterbinden. Weiterhin verhindert der aktivierte Schalter bei der Ausführung 
-% von \cs{Process@Markup} das Erstellen von erweiterten Querverweisen sowie das 
-% Setzen von CTAN-Links bei Paketen (\cs{Package}), was weder in Verzeichnissen 
-% noch im Index erwünscht ist, weshalb vom Makro \cs{@printindex} ebenfalls
+% Dieser Schalter wird genutzt, um bei der Verwendung der Entitätsbefehle zu
+% unterscheiden, ob die Ausgabe im Hauptdokument oder in Inhaltsverzeichnis,
+% Index oder Änderungsliste erfolgt und wird entsprechend zu Beginn dieser 
+% Verzeichnisse gesetzt.
 % \cs{@tud@indextrue} gesetzt wird.
 %    \begin{macrocode}
 \tud@newif\if@tud@index
@@ -2314,7 +2307,6 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Package{s d|| d'' d() m}{#5}
 \NewDocumentCommand\Package{s d|| d'' d() m !d<>}{%
-%%  \IfValueT{#6}{\ClassWarning{xxx}{move me \detokenize{#6}}}%
 %<*class>
   \if@tud@changedat%
     \Process@ChangedAt{\Package{#5}}[Paket]%
@@ -2597,7 +2589,6 @@
 %    \begin{macrocode}
 \NewExpandableDocumentCommand\@Application{s d|| d'' d() m}{#5}
 \NewDocumentCommand\Application{s d|| d'' d() m !d<>}{%
-%%  \IfValueT{#6}{\ClassWarning{xxx}{move me \detokenize{#6}}}%
   \Markup@SetFormat{\sbifont}%
   \Process@Markup{\Application{#5}}(#4)<#6>'#3'|#2|%
   \Process@Index{#1}[main]{\Application{#5}}[Anwendungssoftware](#4)|#2|%
@@ -3946,7 +3937,7 @@
 % \changes{v2.06}{2018/09/03}{optionale Angabe der Entität}^^A
 % \begin{macro}{\@ChangedAt}
 % \changes{v2.06}{2019/06/24}{neu}^^A
-% \begin{length}{\changedatskip}
+% \begin{length}{\tud@dim@changedatvskip}
 % \changes{v2.04}{2015/06/08}{neu}^^A
 % Der Befehl \cs{ChangedAt} kann im Fließtext für das Erstellen einer freien 
 % Änderungsnotiz genutzt werden. Das obligatorische Argument sollt wie kurz 
@@ -3967,13 +3958,9 @@
 % ein vertikaler Versatz dieser angegeben werden. Die Sternversion des Befehls 
 % unterdrückt die Ausgabe der Randnotiz. 
 %    \begin{macrocode}
-\tud@newdim\changedatskip
-\NewDocumentCommand\ChangedAt{s o d() m !O{\changedatskip}}{%
-  \IfValueTF{#2}{%
-    \Changed@At@CreateList[#2](#3){#4}%
-  }{%
-    \Changed@At@CreateList(#3){#4}%
-  }%
+\tud@newdim\tud@dim@changedatvskip
+\NewDocumentCommand\ChangedAt{s o d() m !O{\tud@dim@changedatvskip}}{%
+  \Changed@At@CreateList[#2](#3){#4}%
 %    \end{macrocode}
 % Nach dem Erstellen der Liste wird diese abgearbeitet und ggf. die Randnotiz 
 % ausgegeben.
@@ -3991,7 +3978,7 @@
 }
 \tud@addtocontents@initialize*{\let\ChangedAt\@ChangedAt}
 %    \end{macrocode}
-% \end{length}^^A \changedatskip
+% \end{length}^^A \tud@dim@changedatvskip
 % \end{macro}^^A \@ChangedAt
 % \end{macro}^^A \ChangedAt
 %
@@ -4016,16 +4003,15 @@
 %
 % Der Befehl \cs{Changed@At@CreateList} kann vor dem obligatorischen Argument 
 % mit einem ordinären optionalen Argument verwendet werden, in welchem ein 
-% Makro, eine Umgebung, eine Option etc. angegeben wird. Ist dies der Fall, so 
-% wird der Eintrag in die Änderungsliste für dieses Element generiert, sonst 
-% wird eine allgemeiner Eintrag erzeugt. Das optionale Argument in runden 
-% Klammern wird lediglich verwendet, wenn für eine der beiden Spezialumgebungen 
-% \env{DeclareEntity} bzw. \env{DeclareEntity*} eine Änderungsnotiz erstellt 
-% wird, um diese für das jeweilige \TUDScript-Bundle-Element in den 
-% entsprechenden Abschnitt der Änderungsliste einzutragen. Das Hauptargument 
-% verarbeitet eine semikolongetrennte Liste und reicht jeden Bestandteil 
-% zusammen mit den beiden optionalen Argumenten an \cs{Changed@At@@CreateList} 
-% weiter. 
+% Entitätsbefehl angegeben wird. In diesem Fall wird der Eintrag in der
+% Änderungsliste im Implemetierungsteil für das angegebene Element generiert, 
+% sonst wird eine allgemeiner Eintrag erzeugt. Soll dies nicht im Hauptteil, 
+% sondern für ein spezifisches \TUDScript-Bundle-Element erfolgen, muss dieses
+% im optionale Argument in runden Klammern angegeben werden. Dies kann direkt
+% via \cs{ChangedAt} angegeben werden. Außerdem wird dies implizit durch die 
+% Spezialumgebungen \env{DeclareEntity} bzw. \env{DeclareEntity*} genutzt. 
+% Das Hauptargument reicht jeden Bestandteil einer semikolongetrennte Liste 
+% zusammen mit den optionalen Argumenten an \cs{Changed@At@@CreateList} weiter.
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateList{o d() m}{%
   \IfValueT{#3}{\forssvlist{\Changed@At@@CreateList[{#1}](#2)}{#3}}%
@@ -4227,11 +4213,11 @@
 % \changes{v2.02}{2014/09/02}{neu}^^A
 % \begin{macro}{\Changed@At@@CreateEntry}
 % \changes{v2.02}{2014/09/02}{neu}^^A
-% Der Befehl \cs{Changed@At@CreateEntry} wird durch \cs{@printchangedatlist} 
-% aufgerufen und teilt die gegebene Liste am Delimiter Ausrufezeichen |!| in
-% fünf Argumente auf und reicht sie an \cs{Changed@At@@CreateEntry} weiter.
-% Sind weniger als vier Ausrufezeichen vorhanden, so werden die ungenutzten
-% Argumente mit dem~-- durch das Paket \pkg{xparse} definierten~-- leeren Wert
+% Mit diesen Makros erfolgt das eigentliche Eintragen der Änderungen aus der 
+% Liste \cs{tud@changedat@list} in den Index~\val{changelog}. Jeder Eintrag 
+% aus dieser Liste wird am Trennzeichen~|!| in fünf Argumente aufgeteilt und 
+% an \cs{Changed@At@@CreateEntry} weitergereicht. Sind weniger als vier 
+% Trennzeichen vorhanden, werden die ungenutzten Argumente mit dem leeren Wert
 % \val{-NoValue-} an den Befehl \cs{Changed@At@@CreateEntry} übergeben.
 %    \begin{macrocode}
 \NewDocumentCommand\Changed@At@CreateEntry{>{\SplitArgument{4}{!}}m}{%
@@ -4338,11 +4324,6 @@
       \index[changes-#1]{#2!\tud@idx@fmt}%
     }%
   }%
-%    \end{macrocode}
-% Außerdem wird der Liste \cs{tud@templist} die aktuelle Version einmalig 
-% hinzugefügt, um alle Versionsangaben in einer Randnotiz ausgeben zu können.
-%    \begin{macrocode}
-  \ifinlist{#1}{\tud@templist}{}{\listadd\tud@templist{#1}}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \Changed@At@@CreateEntry
@@ -4408,38 +4389,60 @@
 % \changes{v2.02}{2014/10/09}{neu}^^A
 % Die Einträge in der Liste der Änderungen \cs{tud@changedat@list} werden mit 
 % dem Makro \cs{Changed@At@CreateList} abgearbeitet, sortiert und erstellt. Das 
-% zweite obligatorische Argument von \cs{@printchangedatlist} steuert den 
+% zweite obligatorische Argument von \cs{print@changedatlist} steuert den 
 % vertikalen Versatz der Randnotiz. Wird im ersten Argument das boolesche Flag 
 % zu \cs{BooleanTrue} gesetzt, wird die Randnotiz unterdrückt.
 %    \begin{macrocode}
-\NewDocumentCommand\print@changedatlist{mm}{%
+\newcommand*\print@changedatlist[2]{%
   \ifx\tud@changedat@list\relax\else%
-    \let\tud@templist\relax%
-    \forlistloop\Changed@At@CreateEntry{\tud@changedat@list}%
-    \global\let\tud@changedat@list\relax%
+    \begingroup%
 %    \end{macrocode}
-% Nach der Verarbeitung der Einräge sind in \cs{tud@templist} alle angegebenen
+% In \cs{tud@res@a} wird eine Liste aller angegebenen Versionsnummern 
+% gespeichert, die nach dem Setzen der Änderungseinträge sortiert als Randnotiz 
+% ausgegeben wird. Um diese zu erhalten, wird diese von jedem Eintrag aus 
+% \cs{tud@changedat@list} extrahiert.
+%    \begin{macrocode}
+      \let\tud@res@a\@empty%
+      \def\tud@res@b##1!##2\@nil{%
+        \tud@unique@add\tud@res@a{##1}%
+        \Changed@At@CreateEntry{##1!##2}%
+      }%
+      \def\tud@res@c##1{%
+        \in@{!}{##1}%
+        \ifin@
+          \tud@res@b##1\@nil%
+        \else
+          \tud@res@b##1!\@nil%
+        \fi
+      }%
+      \forlistloop\tud@res@c{\tud@changedat@list}%
+      \global\let\tud@changedat@list\relax%
+%    \end{macrocode}
+% Nach der Verarbeitung der Einräge sind in \cs{tud@res@a} alle angegebenen
 % Versionsnummern genau einmal enthalten. Mit \cs{tud@list@sort} werden diese 
 % in die richtige Reihenfolge sortiert und anschließend als Randnotiz in einer
-% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde.
+% Tabelle ausgegeben, falls nicht die Sternversion verwendet wurde. Hierfür 
+% wird für jede Versionsnummer ein Tabellenzeileneintrag generiert, der einen 
+% Link auf den entsprechenden Abschnitt in der Änderungsliste enthält.
 %    \begin{macrocode}
-    \IfBooleanF{#1}{%
-      \tud@list@sort\tud@templist%
-      \strut%
-      \marginnote{%
-        \def\@tempa####1{%
+      \IfBooleanF{#1}{%
+        \tud@list@sort\tud@res@a%
+        \def\do##1{%
           \ignorespaces%
-          \hyperref[idx:changes-####1]{####1}%
+          \hyperref[idx:changes-##1]{##1}%
           \tabularnewline%
         }%
-        \begin{tabular}{|l|}%
-          \hline%
-          \forlistloop\@tempa{\tud@templist}%
-          \hline%
-        \end{tabular}%
-      }[{#2}]%
-      \ignorespaces%
-    }%
+        \strut%
+        \marginnote{%
+          \begin{tabular}{|l|}%
+            \hline%
+            \dolistloop{\tud@res@a}%
+            \hline%
+          \end{tabular}%
+        }[{#2}]%
+        \aftergroup\ignorespaces%
+      }%
+    \endgroup%
   \fi%
 }
 %    \end{macrocode}
@@ -4491,9 +4494,7 @@
   \tud@declare@start{#1}(#2){#3}%
   \@tud@obsoletefalse
 }{%
-  \@tud@obsoletetrue
-  \tud@declare@end{#1}%
-  \@tud@obsoletefalse
+  \tud@declare@end{\@tud@obsoletetrue#1\@tud@obsoletefalse}%
 }
 %    \end{macrocode}
 % \end{environment}^^A Declaration*
@@ -4619,9 +4620,7 @@
     \@tud@obsoletefalse%
   }%
 }{%
-  \@tud@obsoletetrue%
-  \tud@declare@end{#2}%
-  \@tud@obsoletefalse%
+  \tud@declare@end{\@tud@obsoletetrue#2\@tud@obsoletefalse}%
 }
 %    \end{macrocode}
 % \end{macro}^^A \tud@cessations@version
@@ -4638,9 +4637,12 @@
 % Deklarationen, Index und Änderungsliste, welche bei den nächsten Befehlen und 
 % Umgebungen genutzt werden. Mit \cs{if@tud@declare} wird festgelegt, ob die 
 % Befehle für das Markup in der Ausgabe als Deklaration oder anderweitig 
-% erfolgt. Der Schalter \cs{if@openindex} wird zu Beginn einer Deklaration auf 
-% \val{true} gesetzt und vor dem Beenden auf \val{false}. Damit wird bestimmt, 
-% ob ein öffnender oder ein schließender Indexeintrag erzeugt werden soll.
+% erfolgt. Zusätzlich wird mit \cs{tud@declare@num} definiert, wie genau das 
+% Markup sich darstellen soll. Die möglichen Werte sind bei der Beschreibung 
+% von \cs{Process@@MarkupDeclare} zu finden. Der Schalter \cs{if@openindex} 
+% wird zu Beginn einer Deklaration auf \val{true} gesetzt und vor dem Beenden 
+% auf \val{false}. Damit wird bestimmt, ob ein öffnender oder ein schließender 
+% Indexeintrag erzeugt werden soll.
 %    \begin{macrocode}
 \tud@newif\if@tud@declare
 \tud@newif\if@tud@obsolete
@@ -5172,7 +5174,7 @@
 \newcommand*\tud@val@before{%
   \let\itemval\tud@val@item%
   \let\NR@gettitle\@gobble%
-  \tud@setdim\changedatskip{-1\baselineskip}%
+  \tud@setdim\tud@dim@changedatvskip{-1\baselineskip}%
 }
 \tud@list@create[before=\tud@val@before]{Declare@Values}{description}{1}
 %    \end{macrocode}
@@ -5601,8 +5603,6 @@
 % \begin{macro}{\tabularm@box}
 % \begin{macro}{\tabularm@num}
 % \begin{length}{\tabularm@wd}
-% \begin{length}{\tempdim}
-% \changes{v2.02}{2014/08/16}{neu}^^A
 % Die Umgebung \env{tabularm} ist eine Erweiterung der \env{tabular}-Umgebung.
 % In dieser wird die Breite der zu setzenden Tabelle mit Hilfe der Box 
 % \cs{tabularm@box} in \cs{tabularm@wd} gespeichert. Anschließend kann mit dem
@@ -5610,7 +5610,6 @@
 % werden. Dabei ist das zu übergebende Argument die Anzahl der zu erzeugenden, 
 % linksbündigen Spalten.
 %    \begin{macrocode}
-\tud@newglue\tempdim
 \newsavebox\tabularm@box
 \tud@newdim\tabularm@wd
 \newcommand*\tabularm@num{1}
@@ -5628,7 +5627,6 @@
   \multicolumn{\tabularm@num}{@{}p{\tabularm@wd}@{}}{#1}%
 }
 %    \end{macrocode}
-% \end{length}^^A \tempdim
 % \end{length}^^A \tabularm@wd
 % \end{macro}^^A \tabularm@box
 % \end{macro}^^A \tabularm@num
@@ -5837,23 +5835,6 @@
 % \end{macro}^^A \FinishTutorial
 % \end{macro}^^A \StartTutorial
 %
-% \begin{macro}{\filec@ntents@silent}
-% \changes{v2.06e}{2019/10/10}{neu}^^A
-% Die Umgebungen \env{Preamble}, \env{Trunk} und \env{Hint} sowie deren
-% Varianten nutzen die Umgebung \env{filecontents}, um ihren Inhalt in eine
-% temporäre Datei zu schreiben und diese direkt mit dem Paket \pkg{listings}
-% darzustellen sowie ggf. den Quelltext auszuführen. Beim Überschreiben einer
-% Datei wird für gewöhnlich eine Warnung erzeugt. Dies wird mit dem eigens 
-% definierten Parameter \prm{silent} unterbunden.
-% \ToDo{silent on nowarn}
-%    \begin{macrocode}
-\providecommand*\filec@ntents@silent{%
-  \let\@latex@warning@no@line\@latex@note@no@line%
-  \let\@latex@warning@no@line\@gobble%
-}
-%    \end{macrocode}
-% \end{macro}^^A \filec@ntents@silent
-%
 % \begin{macro}{\tud@code@pre}
 % \changes{v2.02}{2014/08/19}{neu}^^A
 % \begin{macro}{\tud@code@post}
@@ -5865,7 +5846,7 @@
 %    \begin{macrocode}
 \newcommand*\tud@code@pre{%
   \ClassWarning{xxxx}{change me!}%
-  \csuse{filecontents*}[nosearch,force,silent]{\tud@code@temp.tex}%
+  \csuse{filecontents*}[nosearch,force,nowarn]{\tud@code@temp.tex}%
 }
 \newcommand*\tud@code@post{%
   \csuse{endfilecontents*}%
@@ -6139,13 +6120,6 @@
 \newcommand*\Code@Hook{}
 \let\Code@Hook\relax
 \newcommand*\CodeHook[1]{\gdef\Code@Hook{#1}}
-% TODO \newcommand*\GlobalCodeHook{\AddToHook{env/Code/measuring}}
-% TODO Sternversion für einmalige oder lokale Zuweisung?!
-\NewHook{env/Code/measuring}
-\AddToHook{env/Code/measuring}{%
-  \let\newcommand\renewcommand
-  \let\newlength\@gobble
-}
 %    \end{macrocode}
 % \end{macro}^^A \Code@Hook
 % \end{macro}^^A \CodeHook
@@ -6297,13 +6271,13 @@
 %    \begin{macrocode}
 %<*package>
 \NewDocumentEnvironment{Code}{d() O{} m}{%
-  \filecontents[noheader,nosearch,force,silent]{\tud@code@temp.tex}%
+  \filecontents[nosearch,force,nowarn,noheader]{\tud@code@temp.tex}%
 }{%
   \endfilecontents%
   \tud@code@process{Code}(#1)[#2]{#3}%
 }
 \NewDocumentEnvironment{Code*}{d() O{} m}{%
-  \filecontents[noheader,nosearch,force,silent]{\tud@code@temp.tex}%
+  \filecontents[nosearch,force,nowarn,noheader]{\tud@code@temp.tex}%
 }{%
   \endfilecontents%
 \ClassWarning{xxx}{change me!}%
@@ -6400,11 +6374,11 @@
 % ausgegeben. Die Sternversion der Umgebung führt ihren Inhalt zusätzlich im
 % Dokument aus. Die Pluszeichenversion fügt dem Ausgabestream ihren Inhalt 
 % hinzu, ohne diesen auszugeben oder auszuführen. Die Ausrufezeichenversion 
-% fügt den Quelltext im Dokument ein und führt diesen zusätzlich in einer 
-% separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine 
+% fügt den Quelltext im Dokument ein und führt diesen zusätzlich in einer
+% separaten Datei mit einem minimalen Dokumentkörper aus, um daraus eine
 % PDF"~Datei zu erzeugen, welche im Nachhinein mit \cs{IncludeStandalone} als 
-% Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht, 
-% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt 
+% Grafik eingebunden werden kann. Dies ist für Quelltextabschnitte gedacht,
+% deren Ausgabe zu groß ist, um diese direkt anzuzeigen und dennoch dargestellt
 % werden sollen.
 % \ToDo{noindentafter?}[v2.06]
 %    \begin{macrocode}
