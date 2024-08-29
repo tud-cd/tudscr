@@ -2168,9 +2168,9 @@
       \tud@if@strblank{#5}{}{%
         \tud@if@strequal{#7}{none}{}{%
           \tud@if@lbl@exists{\tud@lbl@tmp}{}{%
-            \ClassWarning{tudscrmanual}{%
-              No existing label \tud@lbl@tmp\space for #5%
-            }%
+%            \ClassWarning{tudscrmanual}{%
+%              No existing label \tud@lbl@tmp\space for #5%
+%            }%
           }%
         }%
       }%
@@ -2756,7 +2756,7 @@
       \marginnote{%
         \def\@tempa####1{%
           \ignorespaces%
-          \hyperref[idx:changes-####1]{####1}%
+           ####1%\hyperref[idx:changes-####1]{####1}%
           \tabularnewline%
         }%
         \begin{tabular}{|l|}%
@@ -2769,9 +2769,9 @@
     }%
   \fi%
 }
-\NewDocumentEnvironment{Declaration}{m d() d<> o}{%
+\NewDocumentEnvironment{Declaration}{m d== d() d<> o}{% TODO evaluate #2
   \listadd\tud@declaration@list{#1}%
-  \tud@declare@start[{#4}]{#1}(#2){#3}%
+  \tud@declare@start[{#5}]{#1}(#3){#4}%
 }{%
   \tud@declare@end{#1}%
 }
@@ -2832,6 +2832,7 @@
     \tud@res@a%
   }%
 }{}
+% TODO #1 verschieben, das macht dort keinen Sinn; Angleich an Declaration
 \NewDocumentEnvironment{Cessation}{o m d() d<> d''}{%
   \ifundef\tud@cessations@version{%
     \ClassError{tudscrmanual}{Missing environment `Cessations'}{%
@@ -3103,46 +3104,45 @@
   \fi%
   \@tud@declaretrue\@openindexfalse#1\@tud@declarefalse%
 }
-\NewDocumentCommand\TermTable{s m !g}{%
-  \let\tud@templist\relax%
-  \forcsvlist{\listadd\tud@templist}{#2}%
+\NewDocumentCommand\TermTable{o m}{%
   \ifhmode\par\fi%
-  \vskip\medskipamount%
+  \vskip\smallskipamount%
   \@afterindentfalse\@afterheading%
-  \IfBooleanTF{#1}{%
-    \tud@setdim\@tempdima{\IfValueTF{#3}{#3}{\linewidth}}%
-    \tud@setdim\@tempdimc{-.7\baselineskip}%
-    \begin{tabularx}{\@tempdima}{lXX}\Term@Table\end{tabularx}%
+  \IfValueTF{#1}{%
+    \begin{tabularx}{\dimexpr\glueexpr#1\relax\relax}[b]{lXX}%
+      \Term@@Table{#2}%
+    \end{tabularx}%
   }{%
-    \tud@setdim\@tempdimc{\z@}%
-    \begin{tabular}{lll}\Term@Table\end{tabular}%
+    \begin{tabular}[b]{lll}%
+      \Term@@Table{#2}%
+    \end{tabular}%
   }%
   \par\addvspace{\medskipamount}%
 }
-\newcommand*\Term@Table{%
+\newcommand*\Term@@Table[1]{%
   \toprule%
   \textbf{Bezeichner} & \textbf{Deutsch} & \textbf{Englisch}\tabularnewline%
   \midrule%
-  \forlistloop\Term@@Table{\tud@templist}%
+  \forcsvlist{\Term@@@Table}{#1}%
   \bottomrule%
 }
-\newcommand*\Term@@Table[1]{%
-  \Term'none'{#1} & %
+\newcommand*\Term@@@Table[1]{%
+  \Term*{#1} & %
   \tud@if@strempty{\csuse{#1}}{\PName{leer}}{\csuse{#1}} & %
-  \selectlanguage{english}\vspace*{\@tempdimc}%
+  \strut\selectlanguage{english}%
   \tud@if@strempty{\csuse{#1}}{\PName{empty}}{\csuse{#1}}\tabularnewline%
 }
 \newcommand*\tud@val@index{}
 \AddToHook{shipout/after}{\tud@val@index}
 \newcommand*\tud@val@declare{}
-\NewDocumentEnvironment{DeclareValues}{o m}{%
+\NewDocumentEnvironment{DeclareValues}{o}{%
   \begin{Declare@Values}%
   \let\tud@val@index\@empty
   \IfValueT{#1}{%
     \tud@index@csv\tud@val@index{#1}%
     \tud@val@index%
   }%
-  \def\tud@val@declare{#2}%
+  %\def\tud@val@declare{#2}%
 }{%
   \ifvmode\removelastskip\else\@killglue\fi
   \tud@val@index%
@@ -3157,7 +3157,7 @@
   \tud@setdim\changedatskip{-1\baselineskip}%
 }
 \tud@list@create[before=\tud@val@before]{Declare@Values}{description}{1}
-\NewDocumentCommand\tud@val@item{s m d() d<>}{%
+\NewDocumentCommand\tud@val@item{s m d() d<> o}{% TODO evaluate #5 for changes
   \begingroup
     \tud@val@format\tud@val@main\tud@val@addon{#1}{#2}%
     \let\tud@res@d\@empty%
@@ -3167,15 +3167,20 @@
       \IfBooleanT{#1}{\appto\tud@res@d{\suffix{S\"aumniswert}}}%
     }%
     \IfValueT{#4}{\appto\tud@res@d{\suffix{#4}}}%
-    \tud@lbl@@get\tud@lbl@tmp{{\tud@val@declare}=\tud@val@main=(\tud@ety@crnt)}%
-    \Markup@Inner@Get\tud@res@a{\tud@val@declare}%
-    \edef\tud@res@b{\IfBooleanTF{#1}{\emph}{\@firstofone}{\tud@val@main}}%
-    \Markup@Replace\tud@res@a=\tud@res@b='none'|!|{\tud@res@a}%
-    \Markup@Outer@Get\tud@res@a{\tud@res@a}%
+	% TODO resolve \tud@val@declare from Declaration
+%    \tud@lbl@@get\tud@lbl@tmp{{\tud@val@declare}=\tud@val@main=(\tud@ety@crnt)}%
+%    \Markup@Inner@Get\tud@res@a{\tud@val@declare}%
+%    \edef\tud@res@b{\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\tud@val@main}}%
+%    \Markup@Replace\tud@res@a=\tud@res@b='none'|!|{\tud@res@a}%
+%    \Markup@Outer@Get\tud@res@a{\tud@res@a}%
+	% TEMP START
+    \let\tud@res@a\@empty
+    \edef\tud@res@b{\IfBooleanTF{#1}{\noexpand\emph}{\@firstofone}{\tud@val@main}}%
+	% TEMP END
     \edef\tud@res@a{%
       \endgroup
       \noexpand\item[{%
-        \noexpand\tud@lbl@declare{\tud@lbl@tmp}%
+%        \noexpand\tud@lbl@declare{\tud@lbl@tmp}% TODO use it
         \expandonce\tud@res@a\expandonce\tud@val@addon\expandonce\tud@res@d%
       }]%
     }%
